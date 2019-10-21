@@ -31,6 +31,8 @@
 #ifndef SCRIPT_LANGUAGE_H
 #define SCRIPT_LANGUAGE_H
 
+#include <vector>
+
 #include "core/io/multiplayer_api.h"
 #include "core/map.h"
 #include "core/pair.h"
@@ -332,7 +334,7 @@ public:
 		int line;
 	};
 
-	virtual Vector<StackInfo> debug_get_current_stack_info() { return Vector<StackInfo>(); }
+	virtual std::vector<StackInfo> debug_get_current_stack_info() { return std::vector<StackInfo>(); }
 
 	virtual void reload_all_scripts() = 0;
 	virtual void reload_tool_script(const Ref<Script> &p_script, bool p_soft_reload) = 0;
@@ -475,7 +477,7 @@ public:
 	ScriptLanguage *get_break_language() const;
 
 	virtual void send_message(const String &p_message, const Array &p_args) = 0;
-	virtual void send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const Vector<ScriptLanguage::StackInfo> &p_stack_info) = 0;
+	virtual void send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const std::vector<ScriptLanguage::StackInfo> &p_stack_info) = 0;
 
 	virtual bool is_remote() const { return false; }
 	virtual void request_quit() {}

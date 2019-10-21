@@ -31,20 +31,20 @@
 #ifndef STRING_BUILDER_H
 #define STRING_BUILDER_H
 
-#include "core/ustring.h"
+#include <vector>
 
-#include "core/vector.h"
+#include "core/ustring.h"
 
 class StringBuilder {
 
 	uint32_t string_length;
 
-	Vector<String> strings;
-	Vector<const char *> c_strings;
+	std::vector<String> strings;
+	std::vector<const char *> c_strings;
 
 	// -1 means it's a Godot String
 	// a natural number means C string.
-	Vector<int32_t> appended_strings;
+	std::vector<int32_t> appended_strings;
 
 public:
 	StringBuilder &append(const String &p_string);

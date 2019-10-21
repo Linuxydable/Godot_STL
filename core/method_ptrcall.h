@@ -176,13 +176,13 @@ struct PtrToArg<const T *> {
 	struct PtrToArg<std::vector<m_type> > {                                                           \
 		_FORCE_INLINE_ static std::vector<m_type> convert(const void *p_ptr) {                        \
 			const PoolVector<m_type> *dvs = reinterpret_cast<const PoolVector<m_type> *>(p_ptr); \
-			std::vector<m_type> ret;                                                                  \
+			std::vector<m_type> ret; \
 			int len = dvs->size();                                                               \
-			ret.resize(len);                                                                     \
+			ret.resize(len); \
 			{                                                                                    \
 				PoolVector<m_type>::Read r = dvs->read();                                        \
 				for (int i = 0; i < len; i++) {                                                  \
-					ret.write[i] = r[i];                                                         \
+					ret[i] = r[i]; \
 				}                                                                                \
 			}                                                                                    \
 			return ret;                                                                          \
@@ -209,7 +209,7 @@ struct PtrToArg<const T *> {
 			{                                                                                    \
 				PoolVector<m_type>::Read r = dvs->read();                                        \
 				for (int i = 0; i < len; i++) {                                                  \
-					ret.write[i] = r[i];                                                         \
+					ret[i] = r[i];                                                         \
 				}                                                                                \
 			}                                                                                    \
 			return ret;                                                                          \
@@ -227,7 +227,7 @@ struct PtrToArg<const T *> {
 			{                                                                                    \
 				PoolVector<m_type>::Read r = dvs->read();                                        \
 				for (int i = 0; i < len; i++) {                                                  \
-					ret.write[i] = r[i];                                                         \
+					ret[i] = r[i];                                                         \
 				}                                                                                \
 			}                                                                                    \
 			return ret;                                                                          \
@@ -254,7 +254,7 @@ struct PtrToArg<const T *> {
 			{                                                                                    \
 				PoolVector<m_type>::Read r = dvs->read();                                        \
 				for (int i = 0; i < len; i++) {                                                  \
-					ret.write[i] = r[i];                                                         \
+					ret[i] = r[i];                                                         \
 				}                                                                                \
 			}                                                                                    \
 			return ret;                                                                          \
@@ -279,7 +279,7 @@ MAKE_VECARG_ALT(String, StringName);
 			int len = arr->size();                                             \
 			ret.resize(len);                                                   \
 			for (int i = 0; i < len; i++) {                                    \
-				ret.write[i] = (*arr)[i];                                      \
+				ret[i] = (*arr)[i];                                      \
 			}                                                                  \
 			return ret;                                                        \
 		}                                                                      \
@@ -300,7 +300,7 @@ MAKE_VECARG_ALT(String, StringName);
 			int len = arr->size();                                             \
 			ret.resize(len);                                                   \
 			for (int i = 0; i < len; i++) {                                    \
-				ret.write[i] = (*arr)[i];                                      \
+				ret[i] = (*arr)[i];                                      \
 			}                                                                  \
 			return ret;                                                        \
 		}                                                                      \
