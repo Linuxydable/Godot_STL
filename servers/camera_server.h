@@ -31,6 +31,8 @@
 #ifndef CAMERA_SERVER_H
 #define CAMERA_SERVER_H
 
+#include <vector>
+
 #include "core/object.h"
 #include "core/os/thread_safe.h"
 #include "core/reference.h"
@@ -61,7 +63,7 @@ public:
 
 private:
 protected:
-	Vector<Ref<CameraFeed> > feeds;
+	std::vector<Ref<CameraFeed> > feeds;
 
 	static CameraServer *singleton;
 

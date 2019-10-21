@@ -31,6 +31,8 @@
 #ifndef GRADIENT_H
 #define GRADIENT_H
 
+#include <vector>
+
 #include "core/resource.h"
 
 class Gradient : public Resource {
@@ -48,7 +50,7 @@ public:
 	};
 
 private:
-	Vector<Point> points;
+	std::vector<Point> points;
 	bool is_sorted;
 
 protected:
@@ -61,8 +63,8 @@ public:
 	void add_point(float p_offset, const Color &p_color);
 	void remove_point(int p_index);
 
-	void set_points(Vector<Point> &p_points);
-	Vector<Point> &get_points();
+	void set_points(std::vector<Point> &p_points);
+	std::vector<Point> &get_points();
 
 	void set_offset(int pos, const float offset);
 	float get_offset(int pos) const;
@@ -70,11 +72,11 @@ public:
 	void set_color(int pos, const Color &color);
 	Color get_color(int pos) const;
 
-	void set_offsets(const Vector<float> &p_offsets);
-	Vector<float> get_offsets() const;
+	void set_offsets(const std::vector<float> &p_offsets);
+	std::vector<float> get_offsets() const;
 
-	void set_colors(const Vector<Color> &p_colors);
-	Vector<Color> get_colors() const;
+	void set_colors(const std::vector<Color> &p_colors);
+	std::vector<Color> get_colors() const;
 
 	_FORCE_INLINE_ Color get_color_at_offset(float p_offset) {
 

@@ -31,6 +31,8 @@
 #ifndef AUDIO_SERVER_H
 #define AUDIO_SERVER_H
 
+#include <vector>
+
 #include "core/math/audio_frame.h"
 #include "core/object.h"
 #include "core/os/os.h"
@@ -199,8 +201,8 @@ private:
 			bool used;
 			bool active;
 			AudioFrame peak_volume;
-			Vector<AudioFrame> buffer;
-			Vector<Ref<AudioEffectInstance> > effect_instances;
+			std::vector<AudioFrame> buffer;
+			std::vector<Ref<AudioEffectInstance> > effect_instances;
 			uint64_t last_mix_with_audio;
 			Channel() {
 				last_mix_with_audio = 0;
@@ -210,7 +212,7 @@ private:
 			}
 		};
 
-		Vector<Channel> channels;
+		std::vector<Channel> channels;
 
 		struct Effect {
 			Ref<AudioEffect> effect;
@@ -220,14 +222,14 @@ private:
 #endif
 		};
 
-		Vector<Effect> effects;
+		std::vector<Effect> effects;
 		float volume_db;
 		StringName send;
 		int index_cache;
 	};
 
-	Vector<Vector<AudioFrame> > temp_buffer; //temp_buffer for each level
-	Vector<Bus *> buses;
+	std::vector<std::vector<AudioFrame> > temp_buffer; //temp_buffer for each level
+	std::vector<Bus *> buses;
 	Map<StringName, Bus *> bus_map;
 
 	void _update_bus_effects(int p_bus);
@@ -258,7 +260,7 @@ private:
 	};
 
 	Map<StringName, AudioInBlock *> audio_in_block_map;
-	Vector<AudioInBlock *> audio_in_blocks;
+	std::vector<AudioInBlock *> audio_in_blocks;
 #endif
 
 	struct CallbackItem {
@@ -421,7 +423,7 @@ class AudioBusLayout : public Resource {
 			bool enabled;
 		};
 
-		Vector<Effect> effects;
+		std::vector<Effect> effects;
 
 		float volume_db;
 		StringName send;
@@ -434,7 +436,7 @@ class AudioBusLayout : public Resource {
 		}
 	};
 
-	Vector<Bus> buses;
+	std::vector<Bus> buses;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);

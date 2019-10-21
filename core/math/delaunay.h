@@ -31,6 +31,8 @@
 #ifndef DELAUNAY_H
 #define DELAUNAY_H
 
+#include <vector>
+
 #include "core/math/rect2.h"
 
 class Delaunay2D {
@@ -59,7 +61,7 @@ public:
 		}
 	};
 
-	static bool circum_circle_contains(const Vector<Vector2> &p_vertices, const Triangle &p_triangle, int p_vertex) {
+	static bool circum_circle_contains(const std::vector<Vector2> &p_vertices, const Triangle &p_triangle, int p_vertex) {
 
 		Vector2 p1 = p_vertices[p_triangle.points[0]];
 		Vector2 p2 = p_vertices[p_triangle.points[1]];
@@ -79,7 +81,7 @@ public:
 		return d <= r;
 	}
 
-	static bool edge_compare(const Vector<Vector2> &p_vertices, const Edge &p_a, const Edge &p_b) {
+	static bool edge_compare(const std::vector<Vector2> &p_vertices, const Edge &p_a, const Edge &p_b) {
 		if (p_vertices[p_a.edge[0]] == p_vertices[p_b.edge[0]] && p_vertices[p_a.edge[1]] == p_vertices[p_b.edge[1]]) {
 			return true;
 		}
@@ -91,18 +93,21 @@ public:
 		return false;
 	}
 
-	static Vector<Triangle> triangulate(const Vector<Vector2> &p_points) {
+	static std::vector<Triangle> triangulate(const std::vector<Vector2> &p_points) {
 
-		Vector<Vector2> points = p_points;
-		Vector<Triangle> triangles;
+		std::vector<Vector2> points = p_points;
+		std::vector<Triangle> triangles;
 
 		Rect2 rect;
-		for (int i = 0; i < p_points.size(); i++) {
-			if (i == 0) {
-				rect.position = p_points[i];
-			} else {
-				rect.expand_to(p_points[i]);
-			}
+
+		auto it = p_points.begin();
+
+		rect.position = *it;
+
+		it++;
+
+		for (; it != p_points.end(); it++) {
+			rect.expand_to(*it);
 		}
 
 		float delta_max = MAX(rect.size.width, rect.size.height);
@@ -114,18 +119,18 @@ public:
 
 		triangles.push_back(Triangle(p_points.size() + 0, p_points.size() + 1, p_points.size() + 2));
 
-		for (int i = 0; i < p_points.size(); i++) {
+		for (std::vector<Vector2>::size_type i = 0; i < p_points.size(); i++) {
 			//std::cout << "Traitement du point " << *p << std::endl;
 			//std::cout << "_triangles contains " << _triangles.size() << " elements" << std::endl;
 
-			Vector<Edge> polygon;
+			std::vector<Edge> polygon;
 
-			for (int j = 0; j < triangles.size(); j++) {
-				if (circum_circle_contains(points, triangles[j], i)) {
-					triangles.write[j].bad = true;
-					polygon.push_back(Edge(triangles[j].points[0], triangles[j].points[1]));
-					polygon.push_back(Edge(triangles[j].points[1], triangles[j].points[2]));
-					polygon.push_back(Edge(triangles[j].points[2], triangles[j].points[0]));
+			for (auto triangle : triangles) {
+				if (circum_circle_contains(points, triangle, i)) {
+					triangle.write[j].bad = true;
+					polygon.push_back(Edge(triangle.points[0], triangle.points[1]));
+					polygon.push_back(Edge(triangle.points[1], triangle.points[2]));
+					polygon.push_back(Edge(triangle.points[2], triangle.points[0]));
 				}
 			}
 

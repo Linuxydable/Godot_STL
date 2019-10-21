@@ -31,6 +31,8 @@
 #ifndef CURVE_H
 #define CURVE_H
 
+#include <vector>
+
 #include "core/resource.h"
 
 // y(x) curve
@@ -137,9 +139,9 @@ protected:
 private:
 	void mark_dirty();
 
-	Vector<Point> _points;
+	std::vector<Point> _points;
 	bool _baked_cache_dirty;
-	Vector<real_t> _baked_cache;
+	std::vector<real_t> _baked_cache;
 	int _bake_resolution;
 	float _min_value;
 	float _max_value;
@@ -159,7 +161,7 @@ class Curve2D : public Resource {
 		Vector2 pos;
 	};
 
-	Vector<Point> points;
+	std::vector<Point> points;
 
 	struct BakedPoint {
 
@@ -225,7 +227,7 @@ class Curve3D : public Resource {
 		Point() { tilt = 0; }
 	};
 
-	Vector<Point> points;
+	std::vector<Point> points;
 
 	struct BakedPoint {
 

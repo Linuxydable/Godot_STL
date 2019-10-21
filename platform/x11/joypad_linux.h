@@ -33,6 +33,9 @@
 #define JOYPAD_LINUX_H
 
 #ifdef JOYDEV_ENABLED
+
+#include <vector>
+
 #include "core/os/mutex.h"
 #include "core/os/thread.h"
 #include "main/input_default.h"
@@ -76,7 +79,7 @@ private:
 	Thread *joy_thread;
 	InputDefault *input;
 	Joypad joypads[JOYPADS_MAX];
-	Vector<String> attached_devices;
+	std::vector<String> attached_devices;
 
 	static void joy_thread_func(void *p_user);
 
