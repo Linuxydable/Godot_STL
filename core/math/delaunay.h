@@ -32,6 +32,7 @@
 #define DELAUNAY_H
 
 #include <vector>
+#include <algorithm>
 
 #include "core/math/rect2.h"
 
@@ -100,14 +101,16 @@ public:
 
 		Rect2 rect;
 
-		auto it = p_points.begin();
+		{
+			auto it = p_points.begin();
 
-		rect.position = *it;
+			rect.position = *it;
 
-		it++;
+			it++;
 
-		for (; it != p_points.end(); it++) {
-			rect.expand_to(*it);
+			for (; it != p_points.end(); it++) {
+				rect.expand_to(*it);
+			}
 		}
 
 		float delta_max = MAX(rect.size.width, rect.size.height);
@@ -123,55 +126,50 @@ public:
 			//std::cout << "Traitement du point " << *p << std::endl;
 			//std::cout << "_triangles contains " << _triangles.size() << " elements" << std::endl;
 
-			std::vector<Edge> polygon;
+			std::vector<Edge> polygons;
 
-			for (auto triangle : triangles) {
-				if (circum_circle_contains(points, triangle, i)) {
-					triangle.write[j].bad = true;
-					polygon.push_back(Edge(triangle.points[0], triangle.points[1]));
-					polygon.push_back(Edge(triangle.points[1], triangle.points[2]));
-					polygon.push_back(Edge(triangle.points[2], triangle.points[0]));
-				}
-			}
+			triangles.erase(
+				std::remove_if(triangles.begin(), triangles.end(),
+					[&](Triangle const& triangle){
+						if (circum_circle_contains(points, triangle, i)) {
+							polygons.push_back(Edge(triangle.points[0], triangle.points[1]));
+							polygons.push_back(Edge(triangle.points[1], triangle.points[2]));
+							polygons.push_back(Edge(triangle.points[2], triangle.points[0]));
+							return true;
+						}
+						return false;
+					}
+				)
+			, triangles.end() );
 
-			for (int j = 0; j < triangles.size(); j++) {
-				if (triangles[j].bad) {
-					triangles.remove(j);
-					j--;
-				}
-			}
-
-			for (int j = 0; j < polygon.size(); j++) {
-				for (int k = j + 1; k < polygon.size(); k++) {
-					if (edge_compare(points, polygon[j], polygon[k])) {
-						polygon.write[j].bad = true;
-						polygon.write[k].bad = true;
+			for (auto it0 = polygons.begin(); it0 != polygons.end()-1; it0++) {
+				for (auto it1 = it0+1; it1 != polygons.end(); it1++) {
+					if ( edge_compare(points, *it0, *it1) ) {
+						(*it0).bad = true;
+						(*it1).bad = true;
 					}
 				}
 			}
 
-			for (int j = 0; j < polygon.size(); j++) {
-
-				if (polygon[j].bad) {
-					continue;
+			for (auto polygon : polygons) {
+				if (!polygon.bad){
+					triangles.push_back(Triangle(polygon.edge[0], polygon.edge[1], i));
 				}
-				triangles.push_back(Triangle(polygon[j].edge[0], polygon[j].edge[1], i));
 			}
 		}
 
-		for (int i = 0; i < triangles.size(); i++) {
-			bool invalid = false;
-			for (int j = 0; j < 3; j++) {
-				if (triangles[i].points[j] >= p_points.size()) {
-					invalid = true;
-					break;
+		triangles.erase(
+			std::remove_if(triangles.begin(), triangles.end(),
+				[&](Triangle const& triangle){
+					for (unsigned point : triangle.points) {
+						if (point >= p_points.size()) {
+							return true;
+						}
+					}
+					return false;
 				}
-			}
-			if (invalid) {
-				triangles.remove(i);
-				i--;
-			}
-		}
+			)
+		, triangles.end() );
 
 		return triangles;
 	}

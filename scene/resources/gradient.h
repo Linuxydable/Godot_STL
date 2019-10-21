@@ -32,6 +32,7 @@
 #define GRADIENT_H
 
 #include <vector>
+#include <algorithm>
 
 #include "core/resource.h"
 
@@ -41,7 +42,6 @@ class Gradient : public Resource {
 
 public:
 	struct Point {
-
 		float offset;
 		Color color;
 		bool operator<(const Point &p_ponit) const {
@@ -84,7 +84,7 @@ public:
 			return Color(0, 0, 0, 1);
 
 		if (!is_sorted) {
-			points.sort();
+			std::sort(points.begin(), points.end());
 			is_sorted = true;
 		}
 
@@ -115,7 +115,7 @@ public:
 			middle--;
 		}
 		int first = middle;
-		int second = middle + 1;
+		unsigned second = middle + 1;
 		if (second >= points.size())
 			return points[points.size() - 1].color;
 		if (first < 0)
