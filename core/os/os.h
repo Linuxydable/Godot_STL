@@ -31,13 +31,14 @@
 #ifndef OS_H
 #define OS_H
 
+#include <vector>
+
 #include "core/engine.h"
 #include "core/image.h"
 #include "core/io/logger.h"
 #include "core/list.h"
 #include "core/os/main_loop.h"
 #include "core/ustring.h"
-#include "core/vector.h"
 
 #include <stdarg.h>
 
@@ -476,7 +477,7 @@ public:
 
 	virtual bool can_use_threads() const;
 
-	virtual Error dialog_show(String p_title, String p_description, Vector<String> p_buttons, Object *p_obj, String p_callback);
+	virtual Error dialog_show(String p_title, String p_description, std::vector<String> p_buttons, Object *p_obj, String p_callback);
 	virtual Error dialog_input_text(String p_title, String p_description, String p_partial, Object *p_obj, String p_callback);
 
 	enum LatinKeyboardVariant {
