@@ -31,6 +31,8 @@
 #ifndef GDSCRIPT_FUNCTION_H
 #define GDSCRIPT_FUNCTION_H
 
+#include <vector>
+
 #include "core/os/thread.h"
 #include "core/pair.h"
 #include "core/reference.h"
@@ -241,18 +243,18 @@ private:
 	GDScript *_script;
 
 	StringName name;
-	Vector<Variant> constants;
-	Vector<StringName> global_names;
+	std::vector<Variant> constants;
+	std::vector<StringName> global_names;
 #ifdef TOOLS_ENABLED
-	Vector<StringName> named_globals;
+	std::vector<StringName> named_globals;
 #endif
-	Vector<int> default_arguments;
-	Vector<int> code;
-	Vector<GDScriptDataType> argument_types;
+	std::vector<int> default_arguments;
+	std::vector<int> code;
+	std::vector<GDScriptDataType> argument_types;
 	GDScriptDataType return_type;
 
 #ifdef TOOLS_ENABLED
-	Vector<StringName> arg_names;
+	std::vector<StringName> arg_names;
 #endif
 
 	List<StackDebug> stack_debug;
@@ -287,7 +289,7 @@ public:
 
 		ObjectID instance_id;
 		GDScriptInstance *instance;
-		Vector<uint8_t> stack;
+		std::vector<uint8_t> stack;
 		int stack_size;
 		Variant self;
 		uint32_t alloca_size;
@@ -318,7 +320,7 @@ public:
 	_FORCE_INLINE_ bool is_empty() const { return _code_size == 0; }
 
 	int get_argument_count() const { return _argument_count; }
-	StringName get_argument_name(int p_idx) const {
+	StringName get_argument_name(unsigned p_idx) const {
 #ifdef TOOLS_ENABLED
 		ERR_FAIL_INDEX_V(p_idx, arg_names.size(), StringName());
 		return arg_names[p_idx];
@@ -326,7 +328,7 @@ public:
 		return StringName();
 #endif
 	}
-	Variant get_default_argument(int p_idx) const {
+	Variant get_default_argument(unsigned p_idx) const {
 		ERR_FAIL_INDEX_V(p_idx, default_arguments.size(), Variant());
 		return default_arguments[p_idx];
 	}

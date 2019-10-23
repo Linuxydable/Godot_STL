@@ -31,6 +31,8 @@
 #ifndef SHADER_LANGUAGE_H
 #define SHADER_LANGUAGE_H
 
+#include <vector>
+
 #include "core/list.h"
 #include "core/map.h"
 #include "core/script_language.h"
@@ -319,7 +321,7 @@ public:
 		DataType return_cache;
 		DataPrecision return_precision_cache;
 		Operator op;
-		Vector<Node *> arguments;
+		std::vector<Node *> arguments;
 		virtual DataType get_datatype() const { return return_cache; }
 
 		OperatorNode() :
@@ -351,7 +353,7 @@ public:
 			Node *initializer;
 		};
 
-		Vector<Declaration> declarations;
+		std::vector<Declaration> declarations;
 		virtual DataType get_datatype() const { return datatype; }
 
 		VariableDeclarationNode() :
@@ -386,10 +388,10 @@ public:
 		struct Declaration {
 			StringName name;
 			uint32_t size;
-			Vector<Node *> initializer;
+			std::vector<Node *> initializer;
 		};
 
-		Vector<Declaration> declarations;
+		std::vector<Declaration> declarations;
 		virtual DataType get_datatype() const { return datatype; }
 
 		ArrayDeclarationNode() :
@@ -409,7 +411,7 @@ public:
 			uint32_t uint;
 		};
 
-		Vector<Value> values;
+		std::vector<Value> values;
 		virtual DataType get_datatype() const { return datatype; }
 
 		ConstantNode() :
@@ -454,8 +456,8 @@ public:
 
 	struct ControlFlowNode : public Node {
 		FlowOperation flow_op;
-		Vector<Node *> expressions;
-		Vector<BlockNode *> blocks;
+		std::vector<Node *> expressions;
+		std::vector<BlockNode *> blocks;
 
 		ControlFlowNode() :
 				Node(TYPE_CONTROL_FLOW),
@@ -488,7 +490,7 @@ public:
 		StringName name;
 		DataType return_type;
 		DataPrecision return_precision;
-		Vector<Argument> arguments;
+		std::vector<Argument> arguments;
 		BlockNode *body;
 		bool can_discard;
 
@@ -546,7 +548,7 @@ public:
 			int texture_order;
 			DataType type;
 			DataPrecision precision;
-			Vector<ConstantNode::Value> default_value;
+			std::vector<ConstantNode::Value> default_value;
 			Hint hint;
 			float hint_range[3];
 
@@ -565,9 +567,9 @@ public:
 		Map<StringName, Constant> constants;
 		Map<StringName, Varying> varyings;
 		Map<StringName, Uniform> uniforms;
-		Vector<StringName> render_modes;
+		std::vector<StringName> render_modes;
 
-		Vector<Function> functions;
+		std::vector<Function> functions;
 
 		ShaderNode() :
 				Node(TYPE_SHADER) {}
@@ -623,7 +625,7 @@ public:
 	static int get_cardinality(DataType p_type);
 	static bool is_scalar_type(DataType p_type);
 	static bool is_sampler_type(DataType p_type);
-	static Variant constant_value_to_variant(const Vector<ShaderLanguage::ConstantNode::Value> &p_value, DataType p_type, ShaderLanguage::ShaderNode::Uniform::Hint p_hint = ShaderLanguage::ShaderNode::Uniform::HINT_NONE);
+	static Variant constant_value_to_variant(const std::vector<ShaderLanguage::ConstantNode::Value> &p_value, DataType p_type, ShaderLanguage::ShaderNode::Uniform::Hint p_hint = ShaderLanguage::ShaderNode::Uniform::HINT_NONE);
 
 	static void get_keyword_list(List<String> *r_keywords);
 	static void get_builtin_funcs(List<String> *r_keywords);
@@ -750,7 +752,7 @@ private:
 
 	Node *_parse_and_reduce_expression(BlockNode *p_block, const Map<StringName, BuiltInInfo> &p_builtin_types);
 	Error _parse_block(BlockNode *p_block, const Map<StringName, BuiltInInfo> &p_builtin_types, bool p_just_one = false, bool p_can_break = false, bool p_can_continue = false);
-	Error _parse_shader(const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types);
+	Error _parse_shader(const Map<StringName, FunctionInfo> &p_functions, const std::vector<StringName> &p_render_modes, const Set<String> &p_shader_types);
 
 	Error _find_last_flow_op_in_block(BlockNode *p_block, FlowOperation p_op);
 	Error _find_last_flow_op_in_op(ControlFlowNode *p_flow, FlowOperation p_op);
@@ -761,8 +763,8 @@ public:
 	void clear();
 
 	static String get_shader_type(const String &p_code);
-	Error compile(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types);
-	Error complete(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types, List<ScriptCodeCompletionOption> *r_options, String &r_call_hint);
+	Error compile(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const std::vector<StringName> &p_render_modes, const Set<String> &p_shader_types);
+	Error complete(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const std::vector<StringName> &p_render_modes, const Set<String> &p_shader_types, List<ScriptCodeCompletionOption> *r_options, String &r_call_hint);
 
 	String get_error_text();
 	int get_error_line();

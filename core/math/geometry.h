@@ -32,6 +32,7 @@
 #define GEOMETRY_H
 
 #include <vector>
+#include <algorithm>
 
 #include "core/math/delaunay.h"
 #include "core/math/face3.h"
@@ -712,7 +713,7 @@ public:
 		int inside_count = 0;
 		int outside_count = 0;
 
-		for (int a = 0; a < polygon.size(); a++) {
+		for (unsigned a = 0; a < polygon.size(); a++) {
 			real_t dist = p_plane.distance_to(polygon[a]);
 			if (dist < -CMP_POINT_IN_PLANE_EPSILON) {
 				location_cache[a] = LOC_INSIDE;
@@ -739,7 +740,7 @@ public:
 		long previous = polygon.size() - 1;
 		std::vector<Vector3> clipped;
 
-		for (int index = 0; index < polygon.size(); index++) {
+		for (unsigned index = 0; index < polygon.size(); index++) {
 			int loc = location_cache[index];
 			if (loc == LOC_OUTSIDE) {
 				if (location_cache[previous] == LOC_INSIDE) {
@@ -838,7 +839,7 @@ public:
 		std::vector<Delaunay2D::Triangle> tr = Delaunay2D::triangulate(p_points);
 		std::vector<int> triangles;
 
-		for (int i = 0; i < tr.size(); i++) {
+		for (unsigned i = 0; i < tr.size(); i++) {
 			triangles.push_back(tr[i].points[0]);
 			triangles.push_back(tr[i].points[1]);
 			triangles.push_back(tr[i].points[2]);
@@ -864,14 +865,15 @@ public:
 	}
 
 	static bool is_polygon_clockwise(const std::vector<Vector2> &p_polygon) {
-		int c = p_polygon.size();
+		unsigned c = p_polygon.size();
 		if (c < 3)
 			return false;
-		const Vector2 *p = p_polygon.ptr();
+
 		real_t sum = 0;
-		for (int i = 0; i < c; i++) {
-			const Vector2 &v1 = p[i];
-			const Vector2 &v2 = p[(i + 1) % c];
+
+		for (unsigned i = 0; i < c; i++) {
+			const Vector2 &v1 = p_polygon[i];
+			const Vector2 &v2 = p_polygon[(i + 1) % c];
 			sum += (v2.x - v1.x) * (v2.y + v1.y);
 		}
 
@@ -880,27 +882,27 @@ public:
 
 	// Alternate implementation that should be faster.
 	static bool is_point_in_polygon(const Vector2 &p_point, const std::vector<Vector2> &p_polygon) {
-		int c = p_polygon.size();
+		unsigned c = p_polygon.size();
 		if (c < 3)
 			return false;
-		const Vector2 *p = p_polygon.ptr();
+
 		Vector2 further_away(-1e20, -1e20);
 		Vector2 further_away_opposite(1e20, 1e20);
 
-		for (int i = 0; i < c; i++) {
-			further_away.x = MAX(p[i].x, further_away.x);
-			further_away.y = MAX(p[i].y, further_away.y);
-			further_away_opposite.x = MIN(p[i].x, further_away_opposite.x);
-			further_away_opposite.y = MIN(p[i].y, further_away_opposite.y);
+		for (unsigned i = 0; i < c; i++) {
+			further_away.x = MAX(p_polygon[i].x, further_away.x);
+			further_away.y = MAX(p_polygon[i].y, further_away.y);
+			further_away_opposite.x = MIN(p_polygon[i].x, further_away_opposite.x);
+			further_away_opposite.y = MIN(p_polygon[i].y, further_away_opposite.y);
 		}
 
 		// Make point outside that won't intersect with points in segment from p_point.
 		further_away += (further_away - further_away_opposite) * Vector2(1.221313, 1.512312);
 
-		int intersections = 0;
-		for (int i = 0; i < c; i++) {
-			const Vector2 &v1 = p[i];
-			const Vector2 &v2 = p[(i + 1) % c];
+		unsigned intersections = 0;
+		for (unsigned i = 0; i < c; i++) {
+			const Vector2 &v1 = p_polygon[i];
+			const Vector2 &v2 = p_polygon[(i + 1) % c];
 			if (segment_intersects_segment_2d(v1, v2, p_point, further_away, NULL)) {
 				intersections++;
 			}
@@ -989,30 +991,35 @@ public:
 
 	// Returns a list of points on the convex hull in counter-clockwise order.
 	// Note: the last point in the returned list is the same as the first one.
-	static std::vector<Point2> convex_hull_2d(std::vector<Point2> P) {
-		int n = P.size(), k = 0;
-		std::vector<Point2> H;
-		H.resize(2 * n);
+	static std::vector<Point2> convex_hull_2d(std::vector<Point2> points) {
+		unsigned n = points.size();
+
+		int k = 0;
+
+		std::vector<Point2> hull_points(2 * n);
 
 		// Sort points lexicographically.
-		P.sort();
+		std::sort(points.begin(), points.end() );
 
 		// Build lower hull.
-		for (int i = 0; i < n; ++i) {
-			while (k >= 2 && vec2_cross(H[k - 2], H[k - 1], P[i]) <= 0)
+		for (unsigned i = 0; i < n; ++i) {
+			while (k >= 2 && vec2_cross(hull_points[k - 2], hull_points[k - 1], points[i]) <= 0)
 				k--;
-			H.write[k++] = P[i];
+
+			hull_points[k++] = points[i];
 		}
 
 		// Build upper hull.
 		for (int i = n - 2, t = k + 1; i >= 0; i--) {
-			while (k >= t && vec2_cross(H[k - 2], H[k - 1], P[i]) <= 0)
+			while (k >= t && vec2_cross(hull_points[k - 2], hull_points[k - 1], points[i]) <= 0)
 				k--;
-			H.write[k++] = P[i];
+
+			hull_points[k++] = points[i];
 		}
 
-		H.resize(k);
-		return H;
+		hull_points.resize(k);
+
+		return hull_points;
 	}
 	static std::vector<std::vector<Vector2> > decompose_polygon_in_convex(std::vector<Point2> polygon);
 

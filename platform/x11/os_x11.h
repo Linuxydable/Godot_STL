@@ -31,6 +31,8 @@
 #ifndef OS_X11_H
 #define OS_X11_H
 
+#include <vector>
+
 #include "context_gl_x11.h"
 #include "core/os/input.h"
 #include "crash_handler_x11.h"
@@ -129,7 +131,7 @@ class OS_X11 : public OS_Unix {
 
 	struct {
 		int opcode;
-		Vector<int> touch_devices;
+		std::vector<int> touch_devices;
 		Map<int, Vector2> absolute_devices;
 		XIEventMask all_event_mask;
 		XIEventMask all_master_event_mask;
@@ -167,7 +169,7 @@ class OS_X11 : public OS_Unix {
 	Cursor cursors[CURSOR_MAX];
 	Cursor null_cursor;
 	CursorShape current_cursor;
-	Map<CursorShape, Vector<Variant> > cursors_cache;
+	Map<CursorShape, std::vector<Variant> > cursors_cache;
 
 	InputDefault *input;
 

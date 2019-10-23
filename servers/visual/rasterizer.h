@@ -31,6 +31,8 @@
 #ifndef RASTERIZER_H
 #define RASTERIZER_H
 
+#include <vector>
+
 #include "core/math/camera_matrix.h"
 #include "servers/visual_server.h"
 
@@ -97,12 +99,12 @@ public:
 
 		//RID sampled_light;
 
-		Vector<RID> materials;
-		Vector<RID> light_instances;
-		Vector<RID> reflection_probe_instances;
-		Vector<RID> gi_probe_instances;
+		std::vector<RID> materials;
+		std::vector<RID> light_instances;
+		std::vector<RID> reflection_probe_instances;
+		std::vector<RID> gi_probe_instances;
 
-		Vector<float> blend_values;
+		std::vector<float> blend_values;
 
 		VS::ShadowCastingSetting cast_shadows;
 
@@ -119,7 +121,7 @@ public:
 
 		InstanceBase *lightmap_capture;
 		RID lightmap;
-		Vector<Color> lightmap_capture_data; //in a array (12 values) to avoid wasting space if unused. Alpha is unused, but needed to send to shader
+		std::vector<Color> lightmap_capture_data; //in a array (12 values) to avoid wasting space if unused. Alpha is unused, but needed to send to shader
 
 		virtual void base_removed() = 0;
 		virtual void base_changed(bool p_aabb, bool p_materials) = 0;
@@ -268,7 +270,7 @@ public:
 
 	virtual RID mesh_create() = 0;
 
-	virtual void mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const Vector<PoolVector<uint8_t> > &p_blend_shapes = Vector<PoolVector<uint8_t> >(), const Vector<AABB> &p_bone_aabbs = Vector<AABB>()) = 0;
+	virtual void mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const std::vector<PoolVector<uint8_t> > &p_blend_shapes = std::vector<PoolVector<uint8_t> >(), const std::vector<AABB> &p_bone_aabbs = std::vector<AABB>()) = 0;
 
 	virtual void mesh_set_blend_shape_count(RID p_mesh, int p_amount) = 0;
 	virtual int mesh_get_blend_shape_count(RID p_mesh) const = 0;
@@ -291,8 +293,8 @@ public:
 	virtual VS::PrimitiveType mesh_surface_get_primitive_type(RID p_mesh, int p_surface) const = 0;
 
 	virtual AABB mesh_surface_get_aabb(RID p_mesh, int p_surface) const = 0;
-	virtual Vector<PoolVector<uint8_t> > mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const = 0;
-	virtual Vector<AABB> mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const = 0;
+	virtual std::vector<PoolVector<uint8_t> > mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const = 0;
+	virtual std::vector<AABB> mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const = 0;
 
 	virtual void mesh_remove_surface(RID p_mesh, int p_index) = 0;
 	virtual int mesh_get_surface_count(RID p_mesh) const = 0;
@@ -712,10 +714,10 @@ public:
 
 			bool antialiased;
 			bool multiline;
-			Vector<Point2> triangles;
-			Vector<Color> triangle_colors;
-			Vector<Point2> lines;
-			Vector<Color> line_colors;
+			std::vector<Point2> triangles;
+			std::vector<Color> triangle_colors;
+			std::vector<Point2> lines;
+			std::vector<Color> line_colors;
 			CommandPolyLine() {
 				type = TYPE_POLYLINE;
 				antialiased = false;
@@ -757,9 +759,9 @@ public:
 
 		struct CommandPrimitive : public Command {
 
-			Vector<Point2> points;
-			Vector<Point2> uvs;
-			Vector<Color> colors;
+			std::vector<Point2> points;
+			std::vector<Point2> uvs;
+			std::vector<Color> colors;
 			RID texture;
 			RID normal_map;
 			float width;
@@ -772,12 +774,12 @@ public:
 
 		struct CommandPolygon : public Command {
 
-			Vector<int> indices;
-			Vector<Point2> points;
-			Vector<Point2> uvs;
-			Vector<Color> colors;
-			Vector<int> bones;
-			Vector<float> weights;
+			std::vector<int> indices;
+			std::vector<Point2> points;
+			std::vector<Point2> uvs;
+			std::vector<Color> colors;
+			std::vector<int> bones;
+			std::vector<float> weights;
 			RID texture;
 			RID normal_map;
 			int count;
@@ -851,7 +853,7 @@ public:
 		bool update_when_visible;
 		//VS::MaterialBlendMode blend_mode;
 		int light_mask;
-		Vector<Command *> commands;
+		std::vector<Command *> commands;
 		mutable bool custom_rect;
 		mutable bool rect_dirty;
 		mutable Rect2 rect;
@@ -877,6 +879,18 @@ public:
 		bool light_masked;
 
 		Rect2 global_rect_cache;
+
+		void get_rect_position_expand_to(const std::vector<Point2>& points, Rect2* rect) const{
+			auto it = points.begin();
+
+			(*rect).position = *it;
+
+			it++;
+
+			for(; it != points.end(); it++){
+				(*rect).expand_to(*it);
+			}
+		}
 
 		const Rect2 &get_rect() const {
 			if (custom_rect || (!rect_dirty && !update_when_visible))
@@ -910,29 +924,13 @@ public:
 						r.expand_to(line->to);
 					} break;
 					case Item::Command::TYPE_POLYLINE: {
-
 						const Item::CommandPolyLine *pline = static_cast<const Item::CommandPolyLine *>(c);
-						if (pline->triangles.size()) {
-							for (int j = 0; j < pline->triangles.size(); j++) {
 
-								if (j == 0) {
-									r.position = pline->triangles[j];
-								} else {
-									r.expand_to(pline->triangles[j]);
-								}
-							}
+						if (!pline->triangles.empty() ){
+							get_rect_position_expand_to(pline->triangles, &r);
 						} else {
-
-							for (int j = 0; j < pline->lines.size(); j++) {
-
-								if (j == 0) {
-									r.position = pline->lines[j];
-								} else {
-									r.expand_to(pline->lines[j]);
-								}
-							}
+							get_rect_position_expand_to(pline->lines, &r);
 						}
-
 					} break;
 					case Item::Command::TYPE_RECT: {
 
@@ -946,12 +944,9 @@ public:
 						r = style->rect;
 					} break;
 					case Item::Command::TYPE_PRIMITIVE: {
-
 						const Item::CommandPrimitive *primitive = static_cast<const Item::CommandPrimitive *>(c);
-						r.position = primitive->points[0];
-						for (int j = 1; j < primitive->points.size(); j++) {
-							r.expand_to(primitive->points[j]);
-						}
+
+						get_rect_position_expand_to(primitive->points, &r);
 					} break;
 					case Item::Command::TYPE_POLYGON: {
 
@@ -1024,9 +1019,11 @@ public:
 		}
 
 		void clear() {
-			for (int i = 0; i < commands.size(); i++)
-				memdelete(commands[i]);
+			for(auto command : commands){
+				delete command;
+			}
 			commands.clear();
+
 			clip = false;
 			rect_dirty = true;
 			final_clip_owner = NULL;
