@@ -31,6 +31,8 @@
 #ifndef RESOURCE_LOADER_H
 #define RESOURCE_LOADER_H
 
+#include <vector>
+
 #include "core/os/thread.h"
 #include "core/resource.h"
 
@@ -104,7 +106,7 @@ class ResourceLoader {
 	static void *dep_err_notify_ud;
 	static DependencyErrorNotify dep_err_notify;
 	static bool abort_on_missing_resource;
-	static HashMap<String, Vector<String> > translation_remaps;
+	static HashMap<String, std::vector<String> > translation_remaps;
 	static HashMap<String, String> path_remaps;
 
 	static String _path_remap(const String &p_path, bool *r_translation_remapped = NULL);

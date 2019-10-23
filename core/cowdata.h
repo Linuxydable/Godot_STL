@@ -37,8 +37,6 @@
 #include "core/os/memory.h"
 #include "core/safe_refcount.h"
 
-template <class T>
-class Vector;
 class String;
 class CharString;
 template <class T, class V>
@@ -46,8 +44,6 @@ class VMap;
 
 template <class T>
 class CowData {
-	template <class TV>
-	friend class Vector;
 	friend class String;
 	friend class CharString;
 	template <class TV, class VV>

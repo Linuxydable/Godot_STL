@@ -31,6 +31,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
+#include <vector>
+
 #include "core/io/resource_loader.h"
 #include "core/math/rect2.h"
 #include "core/os/mutex.h"
@@ -344,7 +346,7 @@ protected:
 		Ref<Texture> texture;
 	};
 
-	Vector<Piece> pieces;
+	std::vector<Piece> pieces;
 	Size2i size;
 
 	Array _get_data() const;

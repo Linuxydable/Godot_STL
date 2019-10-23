@@ -33,6 +33,8 @@
 #ifndef FILE_ACCESS_ZIP_H
 #define FILE_ACCESS_ZIP_H
 
+#include <vector>
+
 #include "core/io/file_access_pack.h"
 #include "core/map.h"
 
@@ -58,7 +60,7 @@ private:
 		String filename;
 		unzFile zfile;
 	};
-	Vector<Package> packages;
+	std::vector<Package> packages;
 
 	Map<String, File> files;
 

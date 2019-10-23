@@ -30,6 +30,8 @@
 
 #include "input_default.h"
 
+#include <vector>
+
 #include "core/input_map.h"
 #include "core/os/os.h"
 #include "main/default_controller_mappings.h"
@@ -207,7 +209,7 @@ void InputDefault::joy_connection_changed(int p_idx, bool p_connected, String p_
 		js.uid = uidname;
 		js.connected = true;
 		int mapping = fallback_mapping;
-		for (int i = 0; i < map_db.size(); i++) {
+		for (unsigned i = 0; i < map_db.size(); i++) {
 			if (js.uid == map_db[i].uid) {
 				mapping = i;
 				js.name = map_db[i].name;
@@ -730,7 +732,7 @@ InputDefault::InputDefault() {
 	String env_mapping = OS::get_singleton()->get_environment("SDL_GAMECONTROLLERCONFIG");
 	if (env_mapping != "") {
 
-		Vector<String> entries = env_mapping.split("\n");
+		std::vector<String> entries = env_mapping.split("\n");
 		for (int i = 0; i < entries.size(); i++) {
 			if (entries[i] == "")
 				continue;
@@ -998,7 +1000,7 @@ void InputDefault::parse_mapping(String p_mapping) {
 	for (int i = 0; i < HAT_MAX; ++i)
 		mapping.hat[i].index = 1024 + i;
 
-	Vector<String> entry = p_mapping.split(",");
+	std::vector<String> entry = p_mapping.split(",");
 	if (entry.size() < 2) {
 		return;
 	}
@@ -1059,7 +1061,7 @@ void InputDefault::parse_mapping(String p_mapping) {
 void InputDefault::add_joy_mapping(String p_mapping, bool p_update_existing) {
 	parse_mapping(p_mapping);
 	if (p_update_existing) {
-		Vector<String> entry = p_mapping.split(",");
+		std::vector<String> entry = p_mapping.split(",");
 		String uid = entry[0];
 		for (int i = 0; i < joy_names.size(); i++) {
 			if (uid == joy_names[i].uid) {

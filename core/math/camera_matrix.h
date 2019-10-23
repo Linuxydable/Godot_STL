@@ -31,6 +31,8 @@
 #ifndef CAMERA_MATRIX_H
 #define CAMERA_MATRIX_H
 
+#include <vector>
+
 #include "core/math/rect2.h"
 #include "core/math/transform.h"
 
@@ -70,7 +72,7 @@ struct CameraMatrix {
 	real_t get_fov() const;
 	bool is_orthogonal() const;
 
-	Vector<Plane> get_projection_planes(const Transform &p_transform) const;
+	std::vector<Plane> get_projection_planes(const Transform &p_transform) const;
 
 	bool get_endpoints(const Transform &p_transform, Vector3 *p_8points) const;
 	void get_viewport_size(real_t &r_width, real_t &r_height) const;

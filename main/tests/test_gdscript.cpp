@@ -54,20 +54,24 @@ static void _print_indent(int p_ident, const String &p_text) {
 }
 
 static String _parser_extends(const GDScriptParser::ClassNode *p_class) {
-
 	String txt = "extends ";
+
 	if (String(p_class->extends_file) != "") {
 		txt += "\"" + p_class->extends_file + "\"";
-		if (p_class->extends_class.size())
+		if (!p_class->extends_class.empty())
 			txt += ".";
 	}
 
-	for (int i = 0; i < p_class->extends_class.size(); i++) {
+	{
+		auto it = p_class->extends_class.begin();
 
-		if (i != 0)
-			txt += ".";
+		txt += *it;
 
-		txt += p_class->extends_class[i];
+		it++;
+
+		for(; it != p_class->extends_class.end(); it++){
+			txt += "."+*it;
+		}
 	}
 
 	return txt;
@@ -96,28 +100,40 @@ static String _parser_expr(const GDScriptParser::Node *p_expr) {
 		} break;
 		case GDScriptParser::Node::TYPE_ARRAY: {
 			const GDScriptParser::ArrayNode *arr_node = static_cast<const GDScriptParser::ArrayNode *>(p_expr);
-			txt += "[";
-			for (int i = 0; i < arr_node->elements.size(); i++) {
 
-				if (i > 0)
-					txt += ", ";
-				txt += _parser_expr(arr_node->elements[i]);
+			txt += "[";
+
+			{
+				auto it = arr_node->elements.begin();
+
+				txt += _parser_expr(*it);
+
+				it++;
+
+				for(; it != arr_node->elements.end(); it++){
+					txt += ", "+_parser_expr(*it);
+				}
 			}
+
 			txt += "]";
 		} break;
 		case GDScriptParser::Node::TYPE_DICTIONARY: {
 			const GDScriptParser::DictionaryNode *dict_node = static_cast<const GDScriptParser::DictionaryNode *>(p_expr);
+
 			txt += "{";
-			for (int i = 0; i < dict_node->elements.size(); i++) {
 
-				if (i > 0)
-					txt += ", ";
+			{
+				auto it = dict_node->elements.begin();
 
-				const GDScriptParser::DictionaryNode::Pair &p = dict_node->elements[i];
-				txt += _parser_expr(p.key);
-				txt += ":";
-				txt += _parser_expr(p.value);
+				txt += _parser_expr( (*it).key ) +":"+ _parser_expr( (*it).value );
+
+				it++;
+
+				for(; it != dict_node->elements.end(); it++){
+					txt += ", "+_parser_expr( (*it).key ) +":"+ _parser_expr( (*it).value );
+				}
 			}
+
 			txt += "}";
 		} break;
 		case GDScriptParser::Node::TYPE_OPERATOR: {
@@ -159,12 +175,18 @@ static String _parser_expr(const GDScriptParser::Node *p_expr) {
 
 					txt += func_name + "(";
 
-					for (int i = arg_ofs; i < c_node->arguments.size(); i++) {
+					{
+						auto it = c_node->arguments.begin();
 
-						const GDScriptParser::Node *arg = c_node->arguments[i];
-						if (i > arg_ofs)
-							txt += ", ";
-						txt += _parser_expr(arg);
+						it+=arg_ofs;
+
+						txt += _parser_expr(*it);
+
+						it++;
+
+						for(; it != c_node->arguments.end(); it++){
+							txt += ", "+_parser_expr(*it);
+						}
 					}
 
 					txt += ")";
