@@ -480,16 +480,16 @@ static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_i
 	}
 
 	for(auto subclass : p_class->subclasses){
-		String line = "class " + subclass.name;
+		String line = "class " + subclass->name;
 
-		if (String(subclass.extends_file) != "" || subclass.extends_class.size())
-			line += " " + _parser_extends(&subclass);
+		if (String(subclass->extends_file) != "" || subclass->extends_class.size())
+			line += " " + _parser_extends(subclass);
 
 		line += ":";
 
 		_print_indent(p_indent, line);
 
-		_parser_show_class(&subclass, p_indent + 1, p_code);
+		_parser_show_class(subclass, p_indent + 1, p_code);
 
 		print_line("\n");
 	}
@@ -511,7 +511,7 @@ static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_i
 	}
 
 	for(auto _function : p_class->functions){
-		if (String(_function.name) == "_init") {
+		if (String(_function->name) == "_init") {
 			_parser_show_function(_function, p_indent, p_class->initializer);
 		} else
 			_parser_show_function(_function, p_indent);
@@ -922,7 +922,7 @@ static void _disassemble_class(const Ref<GDScript> &p_class, const std::vector<S
 				} break;
 				case GDScriptFunction::OPCODE_LINE: {
 					unsigned line = code[ip + 1] - 1;
-					
+
 					if (line < p_code.size())
 						txt = "\n" + itos(line + 1) + ": " + p_code[line] + "\n";
 					else
@@ -975,8 +975,8 @@ MainLoop *test(TestType p_type) {
 	std::vector<uint8_t> buf;
 	int flen = fa->get_len();
 	buf.resize(fa->get_len() + 1);
-	fa->get_buffer(buf.ptrw(), flen);
-	buf.write[flen] = 0;
+	fa->get_buffer(buf, flen);
+	buf[flen] = 0;
 
 	String code;
 	code.parse_utf8((const char *)&buf[0]);
@@ -1025,8 +1025,8 @@ MainLoop *test(TestType p_type) {
 				line = tk.get_token_line();
 
 				for (int i = from; i <= line; i++) {
-					int l = i - 1;
-					if (l >= 0 && l < lines.size()) {
+					unsigned l = i - 1;
+					if (l < lines.size()) {
 						print_line("\n" + itos(i) + ": " + lines[l] + "\n");
 					}
 				}
@@ -1090,7 +1090,7 @@ MainLoop *test(TestType p_type) {
 		std::vector<uint8_t> buf2 = GDScriptTokenizerBuffer::parse_code_string(code);
 		String dst = test.get_basename() + ".gdc";
 		FileAccess *fw = FileAccess::open(dst, FileAccess::WRITE);
-		fw->store_buffer(buf2.ptr(), buf2.size());
+		fw->store_buffer(buf2, buf2.size());
 		memdelete(fw);
 	}
 

@@ -31,6 +31,8 @@
 #ifndef SHADERCOMPILERGLES2_H
 #define SHADERCOMPILERGLES2_H
 
+#include <vector>
+
 #include "core/pair.h"
 #include "core/string_builder.h"
 #include "servers/visual/shader_language.h"
@@ -51,10 +53,10 @@ public:
 
 	struct GeneratedCode {
 
-		Vector<CharString> custom_defines;
-		Vector<StringName> uniforms;
-		Vector<StringName> texture_uniforms;
-		Vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
+		std::vector<CharString> custom_defines;
+		std::vector<StringName> uniforms;
+		std::vector<StringName> texture_uniforms;
+		std::vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
 
 		String vertex_global;
 		String vertex;

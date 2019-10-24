@@ -31,6 +31,8 @@
 #ifndef TRANSLATION_H
 #define TRANSLATION_H
 
+#include <vector>
+
 #include "core/resource.h"
 
 class Translation : public Resource {
@@ -101,8 +103,8 @@ public:
 
 	StringName translate(const StringName &p_message) const;
 
-	static Vector<String> get_all_locales();
-	static Vector<String> get_all_locale_names();
+	static std::vector<String> get_all_locales();
+	static std::vector<String> get_all_locale_names();
 	static bool is_locale_valid(const String &p_locale);
 	static String standardize_locale(const String &p_locale);
 

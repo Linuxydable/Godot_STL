@@ -735,7 +735,7 @@ InputDefault::InputDefault() {
 		std::vector<String> entries = env_mapping.split("\n");
 
 		for(auto entrie : entries){
-			(entrie != "") ? parse_mapping(entrie) : continue;
+			(entrie != "") ? parse_mapping(entrie);
 		}
 	}
 
@@ -1065,14 +1065,20 @@ void InputDefault::add_joy_mapping(String p_mapping, bool p_update_existing) {
 }
 
 void InputDefault::remove_joy_mapping(String p_guid) {
-	for (int i = map_db.size() - 1; i >= 0; i--) {
-		if (p_guid == map_db[i].uid) {
-			map_db.remove(i);
-		}
-	}
-	for (int i = 0; i < joy_names.size(); i++) {
-		if (joy_names[i].uid == p_guid) {
-			joy_names[i].mapping = -1;
+	map_db.erase(
+		std::remove_if(map_db.begin(), map_db.end(),
+			[&](const JoyDeviceMapping& jdm){
+				if(jdm.uid == p_guid){
+					return true;
+				}
+				return false;
+			}
+		)
+	, map_db.end() );
+
+	for(auto&& joy_name : joy_names){
+		if (joy_name.uid == p_guid) {
+			joy_name.mapping = -1;
 		}
 	}
 }

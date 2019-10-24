@@ -30,6 +30,8 @@
 
 #include "main.h"
 
+#include <vector>
+
 #include "core/crypto/crypto.h"
 #include "core/input_map.h"
 #include "core/io/file_access_network.h"
@@ -394,7 +396,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	String remotefs;
 	String remotefs_pass;
 
-	Vector<String> breakpoints;
+	std::vector<String> breakpoints;
 	bool use_custom_res = true;
 	bool force_res = false;
 #ifdef TOOLS_ENABLED
