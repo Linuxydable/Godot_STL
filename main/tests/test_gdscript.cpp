@@ -975,7 +975,6 @@ MainLoop *test(TestType p_type) {
 	std::vector<uint8_t> buf;
 	int flen = fa->get_len();
 	buf.resize(fa->get_len() + 1);
-	fa->get_buffer(buf, flen);
 	buf[flen] = 0;
 
 	String code;
@@ -1086,11 +1085,10 @@ MainLoop *test(TestType p_type) {
 		}
 
 	} else if (p_type == TEST_BYTECODE) {
-
 		std::vector<uint8_t> buf2 = GDScriptTokenizerBuffer::parse_code_string(code);
 		String dst = test.get_basename() + ".gdc";
 		FileAccess *fw = FileAccess::open(dst, FileAccess::WRITE);
-		fw->store_buffer(buf2, buf2.size());
+		//fw->store_buffer(buf2, buf2.size()); store nothing, store_8 is not defined for FileAccess or I miss something...
 		memdelete(fw);
 	}
 

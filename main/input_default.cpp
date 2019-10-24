@@ -735,7 +735,8 @@ InputDefault::InputDefault() {
 		std::vector<String> entries = env_mapping.split("\n");
 
 		for(auto entrie : entries){
-			(entrie != "") ? parse_mapping(entrie);
+			if(entrie != "")
+				parse_mapping(entrie); 
 		}
 	}
 
@@ -1076,18 +1077,17 @@ void InputDefault::remove_joy_mapping(String p_guid) {
 		)
 	, map_db.end() );
 
-	for(auto&& joy_name : joy_names){
-		if (joy_name.uid == p_guid) {
-			joy_name.mapping = -1;
+	for (int i = 0; i < joy_names.size(); i++) {
+		if (joy_names[i].uid == p_guid) {
+			joy_names[i].mapping = -1;
 		}
 	}
 }
 
 void InputDefault::set_fallback_mapping(String p_guid) {
-
-	for (int i = 0; i < map_db.size(); i++) {
-		if (map_db[i].uid == p_guid) {
-			fallback_mapping = i;
+	for(auto it = map_db.begin(); it != map_db.end(); it++){
+		if( (*it).uid == p_guid ){
+			fallback_mapping = std::distance(map_db.begin(), it);
 			return;
 		}
 	}

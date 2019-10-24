@@ -31,6 +31,8 @@
 #ifndef SHADER_GLES3_H
 #define SHADER_GLES3_H
 
+#include <vector>
+
 #include "core/hash_map.h"
 #include "core/map.h"
 #include "core/math/camera_matrix.h"
@@ -111,8 +113,8 @@ private:
 		String light;
 		String uniforms;
 		uint32_t version;
-		Vector<StringName> texture_uniforms;
-		Vector<CharString> custom_defines;
+		std::vector<StringName> texture_uniforms;
+		std::vector<CharString> custom_defines;
 		Set<uint32_t> versions;
 	};
 
@@ -122,7 +124,7 @@ private:
 		GLuint vert_id;
 		GLuint frag_id;
 		GLint *uniform_location;
-		Vector<GLint> texture_uniform_locations;
+		std::vector<GLint> texture_uniform_locations;
 		uint32_t code_version;
 		bool ok;
 		Version() :
@@ -182,7 +184,7 @@ private:
 	CharString vertex_code2;
 	CharString vertex_code3;
 
-	Vector<CharString> custom_defines;
+	std::vector<CharString> custom_defines;
 
 	int base_material_tex_index;
 
@@ -320,7 +322,7 @@ public:
 	void clear_caches();
 
 	uint32_t create_custom_shader();
-	void set_custom_shader_code(uint32_t p_code_id, const String &p_vertex, const String &p_vertex_globals, const String &p_fragment, const String &p_light, const String &p_fragment_globals, const String &p_uniforms, const Vector<StringName> &p_texture_uniforms, const Vector<CharString> &p_custom_defines);
+	void set_custom_shader_code(uint32_t p_code_id, const String &p_vertex, const String &p_vertex_globals, const String &p_fragment, const String &p_light, const String &p_fragment_globals, const String &p_uniforms, const std::vector<StringName> &p_texture_uniforms, const std::vector<CharString> &p_custom_defines);
 	void set_custom_shader(uint32_t p_code_id);
 	void free_custom_shader(uint32_t p_code_id);
 
