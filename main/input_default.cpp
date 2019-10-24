@@ -31,6 +31,7 @@
 #include "input_default.h"
 
 #include <vector>
+#include <algorithm>
 
 #include "core/input_map.h"
 #include "core/os/os.h"
@@ -731,18 +732,15 @@ InputDefault::InputDefault() {
 
 	String env_mapping = OS::get_singleton()->get_environment("SDL_GAMECONTROLLERCONFIG");
 	if (env_mapping != "") {
-
 		std::vector<String> entries = env_mapping.split("\n");
-		for (int i = 0; i < entries.size(); i++) {
-			if (entries[i] == "")
-				continue;
-			parse_mapping(entries[i]);
+
+		for(auto entrie : entries){
+			(entrie != "") ? parse_mapping(entrie) : continue;
 		}
 	}
 
 	int i = 0;
 	while (DefaultControllerMappings::mappings[i]) {
-
 		parse_mapping(DefaultControllerMappings::mappings[i++]);
 	}
 }
@@ -1011,49 +1009,44 @@ void InputDefault::parse_mapping(String p_mapping) {
 	mapping.uid = entry[0];
 	mapping.name = entry[1];
 
-	int idx = 1;
-	while (++idx < entry.size()) {
+	for(auto it = entry.begin() + 2; it != entry.end(); it++){
+		if (*it != ""){
+			String from = (*it).get_slice(":", 1).replace(" ", "");
+			String to = (*it).get_slice(":", 0).replace(" ", "");
 
-		if (entry[idx] == "")
-			continue;
+			JoyEvent to_event = _find_to_event(to);
 
-		String from = entry[idx].get_slice(":", 1).replace(" ", "");
-		String to = entry[idx].get_slice(":", 0).replace(" ", "");
+			if (to_event.type != -1){
+				String etype = from.substr(0, 1);
 
-		JoyEvent to_event = _find_to_event(to);
-		if (to_event.type == -1)
-			continue;
+				if(etype == "a"){
+					unsigned aid = from.substr(1, from.length() - 1).to_int();
+					mapping.axis[aid] = to_event;
+				}else if(etype == "b"){
+					unsigned bid = from.substr(1, from.length() - 1).to_int();
+					mapping.buttons[bid] = to_event;
+				}else if(etype == "h"){
+					unsigned hat_value = from.get_slice(".", 1).to_int();
 
-		String etype = from.substr(0, 1);
-		if (etype == "a") {
+					switch (hat_value){
+						case 1:
+							mapping.hat[HAT_UP] = to_event;
+							break;
+						case 2:
+							mapping.hat[HAT_RIGHT] = to_event;
+							break;
+						case 4:
+							mapping.hat[HAT_DOWN] = to_event;
+							break;
+						case 8:
+							mapping.hat[HAT_LEFT] = to_event;
+							break;
+					};
+				}
+			}
+		}
+	}
 
-			int aid = from.substr(1, from.length() - 1).to_int();
-			mapping.axis[aid] = to_event;
-
-		} else if (etype == "b") {
-
-			int bid = from.substr(1, from.length() - 1).to_int();
-			mapping.buttons[bid] = to_event;
-
-		} else if (etype == "h") {
-
-			int hat_value = from.get_slice(".", 1).to_int();
-			switch (hat_value) {
-				case 1:
-					mapping.hat[HAT_UP] = to_event;
-					break;
-				case 2:
-					mapping.hat[HAT_RIGHT] = to_event;
-					break;
-				case 4:
-					mapping.hat[HAT_DOWN] = to_event;
-					break;
-				case 8:
-					mapping.hat[HAT_LEFT] = to_event;
-					break;
-			};
-		};
-	};
 	map_db.push_back(mapping);
 	//printf("added mapping with uuid %ls\n", mapping.uid.c_str());
 };

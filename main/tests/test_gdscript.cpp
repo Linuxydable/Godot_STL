@@ -30,6 +30,8 @@
 
 #include "test_gdscript.h"
 
+#include <vector>
+
 #include "core/os/file_access.h"
 #include "core/os/main_loop.h"
 #include "core/os/os.h"
@@ -420,24 +422,40 @@ static void _parser_show_block(const GDScriptParser::BlockNode *p_block, int p_i
 static void _parser_show_function(const GDScriptParser::FunctionNode *p_func, int p_indent, GDScriptParser::BlockNode *p_initializer = NULL) {
 
 	String txt;
+
 	if (p_func->_static)
 		txt = "static ";
+
 	txt += "func ";
+
 	if (p_func->name == "") // initializer
 		txt += "[built-in-initializer]";
 	else
 		txt += String(p_func->name);
+
 	txt += "(";
 
-	for (int i = 0; i < p_func->arguments.size(); i++) {
+	{
+		unsigned i = 0;
 
-		if (i != 0)
-			txt += ", ";
 		txt += "var " + String(p_func->arguments[i]);
+
 		if (i >= (p_func->arguments.size() - p_func->default_values.size())) {
-			int defarg = i - (p_func->arguments.size() - p_func->default_values.size());
+			unsigned defarg = i - (p_func->arguments.size() - p_func->default_values.size());
 			txt += "=";
 			txt += _parser_expr(p_func->default_values[defarg]);
+		}
+
+		for (i = 1; i < p_func->arguments.size(); i++) {
+			txt += ", ";
+
+			txt += "var " + String(p_func->arguments[i]);
+
+			if (i >= (p_func->arguments.size() - p_func->default_values.size())) {
+				int defarg = i - (p_func->arguments.size() - p_func->default_values.size());
+				txt += "=";
+				txt += _parser_expr(p_func->default_values[defarg]);
+			}
 		}
 	}
 
@@ -453,7 +471,7 @@ static void _parser_show_function(const GDScriptParser::FunctionNode *p_func, in
 	_parser_show_block(p_func->body, p_indent + 1);
 }
 
-static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_indent, const Vector<String> &p_code) {
+static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_indent, const std::vector<String> &p_code) {
 
 	if (p_indent == 0 && (String(p_class->extends_file) != "" || p_class->extends_class.size())) {
 
@@ -461,15 +479,18 @@ static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_i
 		print_line("\n");
 	}
 
-	for (int i = 0; i < p_class->subclasses.size(); i++) {
+	for(auto subclass : p_class->subclasses){
+		String line = "class " + subclass.name;
 
-		const GDScriptParser::ClassNode *subclass = p_class->subclasses[i];
-		String line = "class " + subclass->name;
-		if (String(subclass->extends_file) != "" || subclass->extends_class.size())
-			line += " " + _parser_extends(subclass);
+		if (String(subclass.extends_file) != "" || subclass.extends_class.size())
+			line += " " + _parser_extends(&subclass);
+
 		line += ":";
+
 		_print_indent(p_indent, line);
-		_parser_show_class(subclass, p_indent + 1, p_code);
+
+		_parser_show_class(&subclass, p_indent + 1, p_code);
+
 		print_line("\n");
 	}
 
@@ -478,27 +499,22 @@ static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_i
 		_print_indent(p_indent, "const " + String(E->key()) + "=" + _parser_expr(constant.expression));
 	}
 
-	for (int i = 0; i < p_class->variables.size(); i++) {
-
-		const GDScriptParser::ClassNode::Member &m = p_class->variables[i];
-
-		_print_indent(p_indent, "var " + String(m.identifier));
+	for(auto variable : p_class->variables){
+		_print_indent(p_indent, "var " + String(variable.identifier));
 	}
 
 	print_line("\n");
 
-	for (int i = 0; i < p_class->static_functions.size(); i++) {
-
-		_parser_show_function(p_class->static_functions[i], p_indent);
+	for(auto static_function : p_class->static_functions){
+		_parser_show_function(static_function, p_indent);
 		print_line("\n");
 	}
 
-	for (int i = 0; i < p_class->functions.size(); i++) {
-
-		if (String(p_class->functions[i]->name) == "_init") {
-			_parser_show_function(p_class->functions[i], p_indent, p_class->initializer);
+	for(auto _function : p_class->functions){
+		if (String(_function.name) == "_init") {
+			_parser_show_function(_function, p_indent, p_class->initializer);
 		} else
-			_parser_show_function(p_class->functions[i], p_indent);
+			_parser_show_function(_function, p_indent);
 		print_line("\n");
 	}
 	//_parser_show_function(p_class->initializer,p_indent);
@@ -555,7 +571,7 @@ static String _disassemble_addr(const Ref<GDScript> &p_script, const GDScriptFun
 	return "<err>";
 }
 
-static void _disassemble_class(const Ref<GDScript> &p_class, const Vector<String> &p_code) {
+static void _disassemble_class(const Ref<GDScript> &p_class, const std::vector<String> &p_code) {
 
 	const Map<StringName, GDScriptFunction *> &mf = p_class->debug_get_member_functions();
 
@@ -905,9 +921,9 @@ static void _disassemble_class(const Ref<GDScript> &p_class, const Vector<String
 
 				} break;
 				case GDScriptFunction::OPCODE_LINE: {
-
-					int line = code[ip + 1] - 1;
-					if (line >= 0 && line < p_code.size())
+					unsigned line = code[ip + 1] - 1;
+					
+					if (line < p_code.size())
 						txt = "\n" + itos(line + 1) + ": " + p_code[line] + "\n";
 					else
 						txt = "";
@@ -956,7 +972,7 @@ MainLoop *test(TestType p_type) {
 	FileAccess *fa = FileAccess::open(test, FileAccess::READ);
 	ERR_FAIL_COND_V_MSG(!fa, NULL, "Could not open file: " + test);
 
-	Vector<uint8_t> buf;
+	std::vector<uint8_t> buf;
 	int flen = fa->get_len();
 	buf.resize(fa->get_len() + 1);
 	fa->get_buffer(buf.ptrw(), flen);
@@ -965,7 +981,7 @@ MainLoop *test(TestType p_type) {
 	String code;
 	code.parse_utf8((const char *)&buf[0]);
 
-	Vector<String> lines;
+	std::vector<String> lines;
 	int last = 0;
 
 	for (int i = 0; i <= code.length(); i++) {
@@ -1071,7 +1087,7 @@ MainLoop *test(TestType p_type) {
 
 	} else if (p_type == TEST_BYTECODE) {
 
-		Vector<uint8_t> buf2 = GDScriptTokenizerBuffer::parse_code_string(code);
+		std::vector<uint8_t> buf2 = GDScriptTokenizerBuffer::parse_code_string(code);
 		String dst = test.get_basename() + ".gdc";
 		FileAccess *fw = FileAccess::open(dst, FileAccess::WRITE);
 		fw->store_buffer(buf2.ptr(), buf2.size());
