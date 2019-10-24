@@ -145,24 +145,29 @@ static String dump_node_code(SL::Node *p_node, int p_level) {
 
 				code += vcode + "\n";
 			}
-			for (int i = 0; i < pnode->functions.size(); i++) {
 
-				SL::FunctionNode *fnode = pnode->functions[i].function;
+			for(auto _function : pnode->functions){
+				SL::FunctionNode *fnode = _function.function;
 
 				String header;
 				header = _typestr(fnode->return_type) + " " + fnode->name + "(";
-				for (int j = 0; j < fnode->arguments.size(); j++) {
 
-					if (j > 0)
-						header += ", ";
-					header += _prestr(fnode->arguments[j].precision) + _typestr(fnode->arguments[j].type) + " " + fnode->arguments[j].name;
+				{
+					auto it = fnode->arguments.begin();
+
+					header += _prestr( (*it).precision ) + _typestr( (*it).type ) + " " + (*it).name;
+
+					it++;
+
+					for(; it != fnode->arguments.end(); it++){
+						header += ", " + _prestr( (*it).precision ) + _typestr( (*it).type ) + " " + (*it).name;
+					}
 				}
 
 				header += ")\n";
 				code += header;
 				code += dump_node_code(fnode->body, p_level + 1);
 			}
-
 			//code+=dump_node_code(pnode->body,p_level);
 		} break;
 		case SL::Node::TYPE_FUNCTION: {
@@ -243,13 +248,22 @@ static String dump_node_code(SL::Node *p_node, int p_level) {
 				case SL::OP_CALL:
 				case SL::OP_CONSTRUCT:
 					code = dump_node_code(onode->arguments[0], p_level) + "(";
-					for (int i = 1; i < onode->arguments.size(); i++) {
-						if (i > 1)
-							code += ", ";
-						code += dump_node_code(onode->arguments[i], p_level);
+
+					{
+						auto it = onode->arguments.begin();
+
+						code += dump_node_code(*it, p_level);
+
+						it++;
+
+						for(; it != onode->arguments.end(); it++){
+							code += ", " + dump_node_code(*it, p_level);
+						}
 					}
+
 					code += ")";
-					break;
+				break;
+
 				default: {
 
 					code = "(" + dump_node_code(onode->arguments[0], p_level) + _opstr(onode->op) + dump_node_code(onode->arguments[1], p_level) + ")";

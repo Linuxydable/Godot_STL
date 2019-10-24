@@ -31,6 +31,8 @@
 #ifndef EDITOR_SCENE_IMPORTER_ASSIMP_H
 #define EDITOR_SCENE_IMPORTER_ASSIMP_H
 
+#include <vector>
+
 #ifdef TOOLS_ENABLED
 #include "core/bind/core_bind.h"
 #include "core/io/resource_importer.h"
@@ -98,7 +100,7 @@ private:
 	void _calc_tangent_from_mesh(const aiMesh *ai_mesh, int i, int tri_index, int index, PoolColorArray::Write &w);
 	void _set_texture_mapping_mode(aiTextureMapMode *map_mode, Ref<Texture> texture);
 
-	Ref<Mesh> _generate_mesh_from_surface_indices(ImportState &state, const Vector<int> &p_surface_indices, const aiNode *assimp_node, Skeleton *p_skeleton = NULL);
+	Ref<Mesh> _generate_mesh_from_surface_indices(ImportState &state, const std::vector<int> &p_surface_indices, const aiNode *assimp_node, Skeleton *p_skeleton = NULL);
 
 	// utility for node creation
 	void attach_new_node(ImportState &state, Spatial *new_node, const aiNode *node, Node *parent_node, String Name, Transform &transform);
@@ -123,11 +125,11 @@ private:
 	String _assimp_raw_string_to_string(const aiString &p_string) const;
 	float _get_fbx_fps(int32_t time_mode, const aiScene *p_scene);
 	template <class T>
-	T _interpolate_track(const Vector<float> &p_times, const Vector<T> &p_values, float p_time, AssetImportAnimation::Interpolation p_interp);
-	void _register_project_setting_import(const String generic, const String import_setting_string, const Vector<String> &exts, List<String> *r_extensions, const bool p_enabled) const;
+	T _interpolate_track(const std::vector<float> &p_times, const std::vector<T> &p_values, float p_time, AssetImportAnimation::Interpolation p_interp);
+	void _register_project_setting_import(const String generic, const String import_setting_string, const std::vector<String> &exts, List<String> *r_extensions, const bool p_enabled) const;
 
 	struct ImportFormat {
-		Vector<String> extensions;
+		std::vector<String> extensions;
 		bool is_default;
 	};
 
