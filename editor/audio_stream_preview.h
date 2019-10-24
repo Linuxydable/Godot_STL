@@ -31,6 +31,8 @@
 #ifndef AUDIO_STREAM_PREVIEW_H
 #define AUDIO_STREAM_PREVIEW_H
 
+#include <vector>
+
 #include "core/os/thread.h"
 #include "scene/main/node.h"
 #include "servers/audio/audio_stream.h"
@@ -38,7 +40,7 @@
 class AudioStreamPreview : public Reference {
 	GDCLASS(AudioStreamPreview, Reference);
 	friend class AudioStream;
-	Vector<uint8_t> preview;
+	std::vector<uint8_t> preview;
 	float length;
 
 	friend class AudioStreamPreviewGenerator;

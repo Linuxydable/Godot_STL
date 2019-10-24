@@ -31,6 +31,8 @@
 #ifndef CONFIG_FILE_H
 #define CONFIG_FILE_H
 
+#include <vector>
+
 #include "core/ordered_hash_map.h"
 #include "core/os/file_access.h"
 #include "core/reference.h"
@@ -65,10 +67,10 @@ public:
 	Error save(const String &p_path);
 	Error load(const String &p_path);
 
-	Error load_encrypted(const String &p_path, const Vector<uint8_t> &p_key);
+	Error load_encrypted(const String &p_path, const std::vector<uint8_t> &p_key);
 	Error load_encrypted_pass(const String &p_path, const String &p_pass);
 
-	Error save_encrypted(const String &p_path, const Vector<uint8_t> &p_key);
+	Error save_encrypted(const String &p_path, const std::vector<uint8_t> &p_key);
 	Error save_encrypted_pass(const String &p_path, const String &p_pass);
 
 	ConfigFile();

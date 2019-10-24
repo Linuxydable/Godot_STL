@@ -347,15 +347,13 @@ public:
 		uniforms_dirty = true;
 	};
 
-	_FORCE_INLINE_ void set_texture_uniform(int p_idx, const Variant &p_value) {
-
+	_FORCE_INLINE_ void set_texture_uniform(unsigned p_idx, const Variant &p_value) {
 		ERR_FAIL_COND(!version);
 		ERR_FAIL_INDEX(p_idx, version->texture_uniform_locations.size());
 		_set_uniform_variant(version->texture_uniform_locations[p_idx], p_value);
 	}
 
-	_FORCE_INLINE_ GLint get_texture_uniform_location(int p_idx) {
-
+	_FORCE_INLINE_ GLint get_texture_uniform_location(unsigned p_idx) {
 		ERR_FAIL_COND_V(!version, -1);
 		ERR_FAIL_INDEX_V(p_idx, version->texture_uniform_locations.size(), -1);
 		return version->texture_uniform_locations[p_idx];

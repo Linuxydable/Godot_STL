@@ -31,6 +31,8 @@
 #ifndef OCTREE_H
 #define OCTREE_H
 
+#include <vector>
+
 #include "core/list.h"
 #include "core/map.h"
 #include "core/math/aabb.h"
@@ -376,7 +378,7 @@ public:
 	T *get(OctreeElementID p_id) const;
 	int get_subindex(OctreeElementID p_id) const;
 
-	int cull_convex(const Vector<Plane> &p_convex, T **p_result_array, int p_result_max, uint32_t p_mask = 0xFFFFFFFF);
+	int cull_convex(const std::vector<Plane> &p_convex, T **p_result_array, int p_result_max, uint32_t p_mask = 0xFFFFFFFF);
 	int cull_aabb(const AABB &p_aabb, T **p_result_array, int p_result_max, int *p_subindex_array = NULL, uint32_t p_mask = 0xFFFFFFFF);
 	int cull_segment(const Vector3 &p_from, const Vector3 &p_to, T **p_result_array, int p_result_max, int *p_subindex_array = NULL, uint32_t p_mask = 0xFFFFFFFF);
 
@@ -1286,7 +1288,7 @@ void Octree<T, use_pairs, AL>::_cull_point(Octant *p_octant, const Vector3 &p_po
 }
 
 template <class T, bool use_pairs, class AL>
-int Octree<T, use_pairs, AL>::cull_convex(const Vector<Plane> &p_convex, T **p_result_array, int p_result_max, uint32_t p_mask) {
+int Octree<T, use_pairs, AL>::cull_convex(const std::vector<Plane> &p_convex, T **p_result_array, int p_result_max, uint32_t p_mask) {
 
 	if (!root)
 		return 0;

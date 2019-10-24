@@ -31,6 +31,8 @@
 #ifndef QUICK_HULL_H
 #define QUICK_HULL_H
 
+#include <vector>
+
 #include "core/list.h"
 #include "core/math/aabb.h"
 #include "core/math/geometry.h"
@@ -65,7 +67,7 @@ public:
 
 		Plane plane;
 		uint32_t vertices[3];
-		Vector<int> points_over;
+		std::vector<int> points_over;
 
 		bool operator<(const Face &p_face) const {
 
@@ -91,7 +93,7 @@ private:
 
 public:
 	static uint32_t debug_stop_after;
-	static Error build(const Vector<Vector3> &p_points, Geometry::MeshData &r_mesh);
+	static Error build(const std::vector<Vector3> &p_points, Geometry::MeshData &r_mesh);
 };
 
 #endif // QUICK_HULL_H

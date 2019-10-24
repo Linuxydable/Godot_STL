@@ -31,6 +31,8 @@
 #ifndef TAB_CONTAINER_H
 #define TAB_CONTAINER_H
 
+#include <vector>
+
 #include "scene/gui/container.h"
 #include "scene/gui/popup.h"
 class TabContainer : public Container {
@@ -63,7 +65,7 @@ private:
 	bool use_hidden_tabs_for_min_size;
 	int tabs_rearrange_group;
 
-	Vector<Control *> _get_tabs() const;
+	std::vector<Control *> _get_tabs() const;
 	int _get_tab_width(int p_index) const;
 	void _on_theme_changed();
 	void _on_mouse_exited();

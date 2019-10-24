@@ -31,6 +31,8 @@
 #ifndef RASTERIZERSCENEGLES3_H
 #define RASTERIZERSCENEGLES3_H
 
+#include <vector>
+
 /* Must come before shaders or the Windows build fails... */
 #include "rasterizer_storage_gles3.h"
 
@@ -89,7 +91,7 @@ public:
 
 	RasterizerStorageGLES3 *storage;
 
-	Vector<RasterizerStorageGLES3::RenderTarget::Exposure> exposure_shrink;
+	std::vector<RasterizerStorageGLES3::RenderTarget::Exposure> exposure_shrink;
 	int exposure_shrink_size;
 
 	struct State {
@@ -239,7 +241,7 @@ public:
 				}
 			};
 
-			Vector<Shadow> shadows;
+			std::vector<Shadow> shadows;
 
 			Quadrant() {
 				subdivision = 0; //not in use
@@ -265,7 +267,7 @@ public:
 		uint32_t size;
 	};
 
-	Vector<ShadowCubeMap> shadow_cubemaps;
+	std::vector<ShadowCubeMap> shadow_cubemaps;
 
 	RID_Owner<ShadowAtlas> shadow_atlas_owner;
 
@@ -301,7 +303,7 @@ public:
 		GLuint fbo[6];
 		GLuint color;
 
-		Vector<Reflection> reflections;
+		std::vector<Reflection> reflections;
 	};
 
 	mutable RID_Owner<ReflectionAtlas> reflection_atlas_owner;
@@ -320,7 +322,7 @@ public:
 		int size;
 	};
 
-	Vector<ReflectionCubeMap> reflection_cubemaps;
+	std::vector<ReflectionCubeMap> reflection_cubemaps;
 
 	/* REFLECTION PROBE INSTANCE */
 

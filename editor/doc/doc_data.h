@@ -31,6 +31,8 @@
 #ifndef DOC_DATA_H
 #define DOC_DATA_H
 
+#include <vector>
+
 #include "core/io/xml_parser.h"
 #include "core/map.h"
 #include "core/variant.h"
@@ -52,7 +54,7 @@ public:
 		String return_enum;
 		String qualifiers;
 		String description;
-		Vector<ArgumentDoc> arguments;
+		std::vector<ArgumentDoc> arguments;
 		bool operator<(const MethodDoc &p_md) const {
 			return name < p_md.name;
 		}
@@ -87,12 +89,12 @@ public:
 		String category;
 		String brief_description;
 		String description;
-		Vector<String> tutorials;
-		Vector<MethodDoc> methods;
-		Vector<MethodDoc> signals;
-		Vector<ConstantDoc> constants;
-		Vector<PropertyDoc> properties;
-		Vector<PropertyDoc> theme_properties;
+		std::vector<String> tutorials;
+		std::vector<MethodDoc> methods;
+		std::vector<MethodDoc> signals;
+		std::vector<ConstantDoc> constants;
+		std::vector<PropertyDoc> properties;
+		std::vector<PropertyDoc> theme_properties;
 	};
 
 	String version;

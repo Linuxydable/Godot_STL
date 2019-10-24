@@ -98,7 +98,7 @@ public:
 	}
 
 	~FontDrawer() {
-		for (int i = 0; i < pending_draws.size(); ++i) {
+		for (unsigned i = 0; i < pending_draws.size(); ++i) {
 			const PendingDraw &draw = pending_draws[i];
 			font->draw_char(draw.canvas_item, draw.pos, draw.chr, draw.next, draw.modulate, false);
 		}

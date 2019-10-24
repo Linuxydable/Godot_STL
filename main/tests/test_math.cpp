@@ -30,6 +30,8 @@
 
 #include "test_math.h"
 
+#include <vector>
+
 #include "core/math/basis.h"
 #include "core/math/camera_matrix.h"
 #include "core/math/math_funcs.h"
@@ -496,11 +498,11 @@ MainLoop *test() {
 	FileAccess *fa = FileAccess::open(test, FileAccess::READ);
 	ERR_FAIL_COND_V_MSG(!fa, NULL, "Could not open file: " + test);
 
-	Vector<uint8_t> buf;
-	int flen = fa->get_len();
-	buf.resize(fa->get_len() + 1);
-	fa->get_buffer(buf.ptrw(), flen);
-	buf.write[flen] = 0;
+	std::vector<uint8_t> buf;
+	unsigned flen = fa->get_len();
+	buf.resize(flen + 1);
+	fa->get_buffer(&buf[0], flen);
+	buf[flen] = 0;
 
 	String code;
 	code.parse_utf8((const char *)&buf[0]);
@@ -514,13 +516,13 @@ MainLoop *test() {
 
 	{
 
-		Vector<int> hashes;
+		std::vector<int> hashes;
 		List<StringName> tl;
 		ClassDB::get_class_list(&tl);
 
 		for (List<StringName>::Element *E = tl.front(); E; E = E->next()) {
 
-			Vector<uint8_t> m5b = E->get().operator String().md5_buffer();
+			std::vector<uint8_t> m5b = E->get().operator String().md5_buffer();
 			hashes.push_back(hashes.size());
 		}
 
@@ -531,7 +533,7 @@ MainLoop *test() {
 				Set<uint32_t> existing;
 				success = true;
 
-				for (int j = 0; j < hashes.size(); j++) {
+				for (unsigned j = 0; j < hashes.size(); j++) {
 
 					uint32_t eh = ihash2(ihash3(hashes[j] + ihash(s) + s)) & ((1 << i) - 1);
 					if (existing.has(eh)) {

@@ -31,6 +31,8 @@
 #ifndef SCRIPT_CREATE_DIALOG_H
 #define SCRIPT_CREATE_DIALOG_H
 
+#include <vector>
+
 #include "editor/editor_file_dialog.h"
 #include "editor/editor_settings.h"
 #include "scene/gui/check_box.h"
@@ -92,8 +94,8 @@ class ScriptCreateDialog : public ConfirmationDialog {
 	};
 
 	String script_template;
-	Vector<ScriptTemplateInfo> template_list;
-	Map<String, Vector<int> > template_overrides; // name : indices
+	std::vector<ScriptTemplateInfo> template_list;
+	Map<String, std::vector<int> > template_overrides; // name : indices
 
 	void _update_script_templates(const String &p_extension);
 

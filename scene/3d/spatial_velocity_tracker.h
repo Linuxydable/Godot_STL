@@ -31,6 +31,8 @@
 #ifndef SPATIAL_VELOCITY_TRACKER_H
 #define SPATIAL_VELOCITY_TRACKER_H
 
+#include <vector>
+
 #include "scene/3d/spatial.h"
 
 class SpatialVelocityTracker : public Reference {
@@ -42,7 +44,7 @@ class SpatialVelocityTracker : public Reference {
 	};
 
 	bool physics_step;
-	Vector<PositionHistory> position_history;
+	std::vector<PositionHistory> position_history;
 	int position_history_len;
 
 protected:

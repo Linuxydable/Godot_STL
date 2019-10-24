@@ -31,6 +31,8 @@
 #ifndef UNDO_REDO_H
 #define UNDO_REDO_H
 
+#include <vector>
+
 #include "core/object.h"
 #include "core/resource.h"
 
@@ -76,7 +78,7 @@ private:
 		uint64_t last_tick;
 	};
 
-	Vector<Action> actions;
+	std::vector<Action> actions;
 	int current_action;
 	int action_level;
 	MergeMode merge_mode;

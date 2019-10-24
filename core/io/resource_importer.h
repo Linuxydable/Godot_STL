@@ -31,6 +31,8 @@
 #ifndef RESOURCE_IMPORTER_H
 #define RESOURCE_IMPORTER_H
 
+#include <vector>
+
 #include "core/io/resource_loader.h"
 
 class ResourceImporter;
@@ -54,7 +56,7 @@ class ResourceFormatImporter : public ResourceFormatLoader {
 		bool operator()(const Ref<ResourceImporter> &p_a, const Ref<ResourceImporter> &p_b) const;
 	};
 
-	Vector<Ref<ResourceImporter> > importers;
+	std::vector<Ref<ResourceImporter> > importers;
 
 public:
 	static ResourceFormatImporter *get_singleton() { return singleton; }
