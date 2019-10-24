@@ -30,6 +30,8 @@
 
 #include "test_render.h"
 
+#include <vector>
+
 #include "core/math/math_funcs.h"
 #include "core/math/quick_hull.h"
 #include "core/os/keyboard.h"
@@ -78,7 +80,7 @@ public:
 		test_cube = vs->get_test_cube();
 		scenario = vs->scenario_create();
 
-		Vector<Vector3> vts;
+		std::vector<Vector3> vts;
 
 		/*
 		PoolVector<Plane> sp = Geometry::build_sphere_planes(2,5,5);

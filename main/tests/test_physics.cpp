@@ -196,7 +196,7 @@ protected:
 		ps->shape_set_data(trimesh_shape, p_faces);
 		p_faces = ps->shape_get_data(trimesh_shape); // optimized one
 		std::vector<Vector3> normals; // for drawing
-		for (int i = 0; i < p_faces.size() / 3; i++) {
+		for (unsigned i = 0; i < p_faces.size() / 3; i++) {
 
 			Plane p(p_faces[i * 3 + 0], p_faces[i * 3 + 1], p_faces[i * 3 + 2]);
 			normals.push_back(p.normal);
@@ -224,17 +224,17 @@ protected:
 
 	void make_grid(int p_width, int p_height, float p_cellsize, float p_cellheight, const Transform &p_xform = Transform()) {
 
-		std::vector<std::vector<float> > grid;
+		std::vector<std::vector<float>> grid;
 
 		grid.resize(p_width);
 
 		for (int i = 0; i < p_width; i++) {
 
-			grid.write[i].resize(p_height);
+			grid[i].resize(p_height);
 
 			for (int j = 0; j < p_height; j++) {
 
-				grid.write[i].write[j] = 1.0 + Math::random(-p_cellheight, p_cellheight);
+				grid[i][j] = 1.0 + Math::random(-p_cellheight, p_cellheight);
 			}
 		}
 

@@ -30,6 +30,8 @@
 
 #include "test_physics_2d.h"
 
+#include <vector>
+
 #include "core/map.h"
 #include "core/os/main_loop.h"
 #include "core/os/os.h"
@@ -287,7 +289,7 @@ protected:
 		ps->body_add_shape(plane_body, plane);
 	}
 
-	void _add_concave(const Vector<Vector2> &p_points, const Transform2D &p_xform = Transform2D()) {
+	void _add_concave(const std::vector<Vector2> &p_points, const Transform2D &p_xform = Transform2D()) {
 
 		Physics2DServer *ps = Physics2DServer::get_singleton();
 		VisualServer *vs = VisualServer::get_singleton();
@@ -303,8 +305,9 @@ protected:
 		RID sprite = vs->canvas_item_create();
 		vs->canvas_item_set_parent(sprite, canvas);
 		vs->canvas_item_set_transform(sprite, p_xform);
-		for (int i = 0; i < p_points.size(); i += 2) {
-			vs->canvas_item_add_line(sprite, p_points[i], p_points[i + 1], Color(0, 0, 0), 2);
+
+		for(auto it = p_points.begin(); it < p_points.end(); it+=2){
+			vs->canvas_item_add_line(sprite, *it, *(it+1), Color(0, 0, 0), 2);
 		}
 	}
 
@@ -399,7 +402,7 @@ public:
 
 		Point2 prev;
 
-		Vector<Point2> parr;
+		std::vector<Point2> parr;
 		for (int i = 0; i < 30; i++) {
 
 			Point2 p(i * 60, Math::randf() * 70 + 340);
