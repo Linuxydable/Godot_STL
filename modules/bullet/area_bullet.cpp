@@ -70,35 +70,36 @@ AreaBullet::AreaBullet() :
 
 AreaBullet::~AreaBullet() {
 	// signal are handled by godot, so just clear without notify
-	for (int i = overlappingObjects.size() - 1; 0 <= i; --i)
-		overlappingObjects[i].object->on_exit_area(this);
+	for(auto&& overlappingObject : overlappingObjects){
+		overlappingObject.object->on_exit_area(this);
+	}
 }
 
 void AreaBullet::dispatch_callbacks() {
 	if (!isScratched)
 		return;
+
 	isScratched = false;
 
-	// Reverse order because I've to remove EXIT objects
-	for (int i = overlappingObjects.size() - 1; 0 <= i; --i) {
-		OverlappingObjectData &otherObj = overlappingObjects.write[i];
+	overlappingObjects.erase(std::remove_if(overlappingObjects.begin(), overlappingObjects.end(),
+		[&](OverlappingObjectData&& overlappingObject){
+			switch(overlappingObject.state){
+				case OVERLAP_STATE_ENTER:
+					overlappingObject.state = OVERLAP_STATE_INSIDE;
+					call_event(overlappingObject.object, PhysicsServer::AREA_BODY_ADDED);
+					overlappingObject.object->on_enter_area(this);
 
-		switch (otherObj.state) {
-			case OVERLAP_STATE_ENTER:
-				otherObj.state = OVERLAP_STATE_INSIDE;
-				call_event(otherObj.object, PhysicsServer::AREA_BODY_ADDED);
-				otherObj.object->on_enter_area(this);
-				break;
-			case OVERLAP_STATE_EXIT:
-				call_event(otherObj.object, PhysicsServer::AREA_BODY_REMOVED);
-				otherObj.object->on_exit_area(this);
-				overlappingObjects.remove(i); // Remove after callback
-				break;
-			case OVERLAP_STATE_DIRTY:
-			case OVERLAP_STATE_INSIDE:
-				break;
+				case OVERLAP_STATE_DIRTY:
+				case OVERLAP_STATE_INSIDE:
+				return false;
+
+				case OVERLAP_STATE_EXIT:
+					call_event(overlappingObject.object, PhysicsServer::AREA_BODY_REMOVED);
+					overlappingObject.object->on_exit_area(this);
+				return true;
+			}
 		}
-	}
+	), overlappingObjects.end() );
 }
 
 void AreaBullet::call_event(CollisionObjectBullet *p_otherObject, PhysicsServer::AreaBodyStatus p_status) {

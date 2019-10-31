@@ -31,8 +31,9 @@
 #ifndef AREABULLET_H
 #define AREABULLET_H
 
+#include <vector>
+
 #include "collision_object_bullet.h"
-#include "core/vector.h"
 #include "servers/physics_server.h"
 #include "space_bullet.h"
 
@@ -86,7 +87,7 @@ private:
 	Variant *call_event_res_ptr[5];
 
 	btGhostObject *btGhost;
-	Vector<OverlappingObjectData> overlappingObjects;
+	std::vector<OverlappingObjectData> overlappingObjects;
 	bool monitorable;
 
 	PhysicsServer::AreaSpaceOverrideMode spOv_mode;

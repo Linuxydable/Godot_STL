@@ -28,6 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include <set>
+
 #include "editor_feature_profile.h"
 #include "core/io/json.h"
 #include "core/os/dir_access.h"
@@ -324,44 +326,43 @@ void EditorFeatureProfileManager::_update_profile_list(const String &p_select_pr
 		selected_profile = p_select_profile;
 	}
 
-	Vector<String> profiles;
+	std::set<String> profiles;
+
 	DirAccessRef d = DirAccess::open(EditorSettings::get_singleton()->get_feature_profiles_dir());
+
 	ERR_FAIL_COND_MSG(!d, "Cannot open directory '" + EditorSettings::get_singleton()->get_feature_profiles_dir() + "'.");
 
 	d->list_dir_begin();
+
 	while (true) {
 		String f = d->get_next();
+
 		if (f == String()) {
 			break;
 		}
 
 		if (!d->current_is_dir()) {
 			int last_pos = f.find_last(".profile");
+
 			if (last_pos != -1) {
-				profiles.push_back(f.substr(0, last_pos));
+				profiles.insert(f.substr(0, last_pos));
 			}
 		}
 	}
 
-	profiles.sort();
-
 	profile_list->clear();
 
-	for (int i = 0; i < profiles.size(); i++) {
-		String name = profiles[i];
+	if(selected_profile.empty() ){
+		selected_profile = *(profiles.begin() );
+	}
 
-		if (i == 0 && selected_profile == String()) {
-			selected_profile = name;
-		}
+	for(auto&& profile : profiles){
+		profile_list->set_item_metadata(profile_list->get_item_count() - 1, profile);
 
-		if (name == current_profile) {
-			name += " (current)";
-		}
-		profile_list->add_item(name);
-		int index = profile_list->get_item_count() - 1;
-		profile_list->set_item_metadata(index, profiles[i]);
-		if (profiles[i] == selected_profile) {
-			profile_list->select(index);
+		profile_list->add_item( (profile == current_profile) ? (profile + " (current)") : profile );
+
+		if (profile == selected_profile) {
+			profile_list->select(profile_list->get_item_count() - 1);
 		}
 	}
 
@@ -711,35 +712,24 @@ void EditorFeatureProfileManager::_update_selected_profile() {
 	_class_list_item_selected();
 }
 
-void EditorFeatureProfileManager::_import_profiles(const Vector<String> &p_paths) {
-
-	//test it first
-	for (int i = 0; i < p_paths.size(); i++) {
-		Ref<EditorFeatureProfile> profile;
-		profile.instance();
-		Error err = profile->load_from_file(p_paths[i]);
-		String basefile = p_paths[i].get_file();
-		if (err != OK) {
-			EditorNode::get_singleton()->show_warning(vformat(TTR("File '%s' format is invalid, import aborted."), basefile));
-			return;
-		}
-
-		String dst_file = EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(basefile);
+void EditorFeatureProfileManager::_import_profiles(const std::vector<String> &p_paths) {
+	for(auto&& p_path : p_paths){
+		String dst_file = EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(p_path.get_file());
 
 		if (FileAccess::exists(dst_file)) {
-			EditorNode::get_singleton()->show_warning(vformat(TTR("Profile '%s' already exists. Remove it first before importing, import aborted."), basefile.get_basename()));
+			EditorNode::get_singleton()->show_warning(vformat(TTR("Profile '%s' already exists. Remove it first before importing, import aborted."), p_path.get_file().get_basename()));
 			return;
 		}
-	}
 
-	//do it second
-	for (int i = 0; i < p_paths.size(); i++) {
 		Ref<EditorFeatureProfile> profile;
+
 		profile.instance();
-		Error err = profile->load_from_file(p_paths[i]);
-		ERR_CONTINUE(err != OK);
-		String basefile = p_paths[i].get_file();
-		String dst_file = EditorSettings::get_singleton()->get_feature_profiles_dir().plus_file(basefile);
+
+		if (profile->load_from_file(p_path) != OK) {
+			EditorNode::get_singleton()->show_warning(vformat(TTR("File '%s' format is invalid, import aborted."), p_path.get_file()));
+			return;
+		}
+
 		profile->save_to_file(dst_file);
 	}
 

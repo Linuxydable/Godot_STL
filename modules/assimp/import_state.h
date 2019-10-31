@@ -33,7 +33,6 @@
 
 #include "core/bind/core_bind.h"
 #include "core/io/resource_importer.h"
-#include "core/vector.h"
 #include "editor/import/resource_importer_scene.h"
 #include "editor/project_settings_editor.h"
 #include "scene/3d/mesh_instance.h"
@@ -65,7 +64,6 @@ struct ImportState {
 	Map<int, Ref<Material> > material_cache;
 	Map<String, int> light_cache;
 	Map<String, int> camera_cache;
-	//Vector<Skeleton *> skeletons;
 	Map<Skeleton *, const Spatial *> armature_skeletons; // maps skeletons based on their armature nodes.
 	Map<const aiBone *, Skeleton *> bone_to_skeleton_lookup; // maps bones back into their skeleton
 	// very useful for when you need to ask assimp for the bone mesh
