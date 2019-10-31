@@ -28,6 +28,8 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                */
 /*************************************************************************/
 
+#include <algorithm>
+
 #include "import_dock.h"
 #include "editor_node.h"
 
@@ -178,6 +180,26 @@ void ImportDock::_update_options(const Ref<ConfigFile> &p_config) {
 	}
 }
 
+void ImportDock::set_edit_multiple_paths0(const Ref<ConfigFile>& config, const Map<String, Dictionary>& value_frequency){
+	List<String> keys;
+
+	config->get_section_keys("params", &keys);
+
+	for (List<String>::Element *E = keys.front(); E; E = E->next()) {
+		if (!value_frequency.has(E->get())) {
+			value_frequency[E->get()] = Dictionary();
+		}
+
+		Variant value = config->get_value("params", E->get());
+
+		if (value_frequency[E->get()].has(value)) {
+			value_frequency[E->get()][value] = int(value_frequency[E->get()][value]) + 1;
+		} else {
+			value_frequency[E->get()][value] = 1;
+		}
+	}
+}
+
 void ImportDock::set_edit_multiple_paths(const std::vector<String> &p_paths) {
 
 	clear();
@@ -185,37 +207,40 @@ void ImportDock::set_edit_multiple_paths(const std::vector<String> &p_paths) {
 	//use the value that is repeated the mot
 	Map<String, Dictionary> value_frequency;
 
-	for (int i = 0; i < p_paths.size(); i++) {
-
+	{
 		Ref<ConfigFile> config;
-		config.instance();
-		Error err = config->load(p_paths[i] + ".import");
-		ERR_CONTINUE(err != OK);
 
-		if (i == 0) {
+		auto it = p_paths.begin();
+
+		config.instance();
+
+		Error err = config->load(*it + ".import");
+
+		if(err == OK){
 			params->importer = ResourceFormatImporter::get_singleton()->get_importer_by_name(config->get_value("remap", "importer"));
+
 			if (params->importer.is_null()) {
 				clear();
 				return;
 			}
+
+			set_edit_multiple_paths0(config, value_frequency);
+		}else{
+			// need_update : maybe error can be handle better
+			WARN_PRINT("Condition ' " _STR(err != OK) " ' is true. Continuing..:")
 		}
 
-		List<String> keys;
-		config->get_section_keys("params", &keys);
+		it++;
 
-		for (List<String>::Element *E = keys.front(); E; E = E->next()) {
+		for(; it!=p_paths.end(); it++){
+			// need_update : maybe a bug or memory leak when creating new instance...
+			config.instance();
 
-			if (!value_frequency.has(E->get())) {
-				value_frequency[E->get()] = Dictionary();
-			}
+			err = config->load(*it + ".import");
 
-			Variant value = config->get_value("params", E->get());
+			ERR_CONTINUE(err != OK);
 
-			if (value_frequency[E->get()].has(value)) {
-				value_frequency[E->get()][value] = int(value_frequency[E->get()][value]) + 1;
-			} else {
-				value_frequency[E->get()][value] = 1;
-			}
+			set_edit_multiple_paths0(config, value_frequency);
 		}
 	}
 
@@ -389,9 +414,9 @@ static bool _find_owners(EditorFileSystemDirectory *efsd, const String &p_path) 
 	}
 
 	for (int i = 0; i < efsd->get_file_count(); i++) {
-
 		std::vector<String> deps = efsd->get_file_deps(i);
-		if (deps.find(p_path) != -1)
+
+		if(std::find(deps.begin(), deps.end(), p_path) != deps.end() )
 			return true;
 	}
 

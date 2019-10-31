@@ -70,6 +70,8 @@ class ImportDock : public VBoxContainer {
 	void _reimport_and_restart();
 	void _reimport();
 
+	void set_edit_multiple_paths0(const Ref<ConfigFile>&);
+
 	enum {
 		ITEM_SET_AS_DEFAULT = 100,
 		ITEM_LOAD_DEFAULT,
@@ -82,7 +84,7 @@ protected:
 
 public:
 	void set_edit_path(const String &p_path);
-	void set_edit_multiple_paths(const Vector<String> &p_paths);
+	void set_edit_multiple_paths(const std::vector<String> &p_paths);
 	void initialize_import_options() const;
 	void clear();
 
