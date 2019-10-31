@@ -31,6 +31,8 @@
 #ifndef CREATE_DIALOG_H
 #define CREATE_DIALOG_H
 
+#include <vector>
+
 #include "editor_help.h"
 #include "scene/gui/button.h"
 #include "scene/gui/dialogs.h"
@@ -43,7 +45,7 @@ class CreateDialog : public ConfirmationDialog {
 
 	GDCLASS(CreateDialog, ConfirmationDialog);
 
-	Vector<String> favorite_list;
+	std::vector<String> favorite_list;
 	Tree *favorites;
 	Tree *recent;
 

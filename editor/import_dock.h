@@ -31,6 +31,8 @@
 #ifndef IMPORTDOCK_H
 #define IMPORTDOCK_H
 
+#include <vector>
+
 #include "core/io/config_file.h"
 #include "core/io/resource_importer.h"
 #include "editor/editor_file_system.h"

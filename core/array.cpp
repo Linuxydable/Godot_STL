@@ -42,7 +42,6 @@ public:
 };
 
 void Array::_ref(const Array &p_from) const {
-
 	ArrayPrivate *_fp = p_from._p;
 
 	ERR_FAIL_COND(!_fp); // should NOT happen.
@@ -60,7 +59,6 @@ void Array::_ref(const Array &p_from) const {
 }
 
 void Array::_unref() const {
-
 	if (!_p)
 		return;
 

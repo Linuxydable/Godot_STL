@@ -35,6 +35,8 @@
 #ifndef CONNECTIONS_DIALOG_H
 #define CONNECTIONS_DIALOG_H
 
+#include <vector>
+
 #include "core/undo_redo.h"
 #include "editor/editor_inspector.h"
 #include "editor/scene_tree_editor.h"
@@ -91,7 +93,7 @@ public:
 	void set_dst_node(Node *p_node);
 	StringName get_dst_method_name() const;
 	void set_dst_method(const StringName &p_method);
-	Vector<Variant> get_binds() const;
+	std::vector<Variant> get_binds() const;
 
 	bool get_deferred() const;
 	bool get_oneshot() const;

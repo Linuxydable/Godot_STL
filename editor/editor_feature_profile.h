@@ -31,6 +31,8 @@
 #ifndef EDITOR_FEATURE_PROFILE_H
 #define EDITOR_FEATURE_PROFILE_H
 
+#include <vector>
+
 #include "core/os/file_access.h"
 #include "core/reference.h"
 #include "editor/editor_file_dialog.h"

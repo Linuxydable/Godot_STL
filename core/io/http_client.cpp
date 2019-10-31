@@ -108,7 +108,7 @@ Ref<StreamPeer> HTTPClient::get_connection() const {
 	return connection;
 }
 
-Error HTTPClient::request_raw(Method p_method, const String &p_url, const Vector<String> &p_headers, const PoolVector<uint8_t> &p_body) {
+Error HTTPClient::request_raw(Method p_method, const String &p_url, const std::vector<String> &p_headers, const PoolVector<uint8_t> &p_body) {
 
 	ERR_FAIL_INDEX_V(p_method, METHOD_MAX, ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V(!p_url.begins_with("/"), ERR_INVALID_PARAMETER);
@@ -175,7 +175,7 @@ Error HTTPClient::request_raw(Method p_method, const String &p_url, const Vector
 	return OK;
 }
 
-Error HTTPClient::request(Method p_method, const String &p_url, const Vector<String> &p_headers, const String &p_body) {
+Error HTTPClient::request(Method p_method, const String &p_url, const std::vector<String> &p_headers, const String &p_body) {
 
 	ERR_FAIL_INDEX_V(p_method, METHOD_MAX, ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V(!p_url.begins_with("/"), ERR_INVALID_PARAMETER);
@@ -423,7 +423,7 @@ Error HTTPClient::poll() {
 					response_str.push_back(0);
 					String response;
 					response.parse_utf8((const char *)response_str.ptr());
-					Vector<String> responses = response.split("\n");
+					std::vector<String> responses = response.split("\n");
 					body_size = -1;
 					chunked = false;
 					body_left = 0;

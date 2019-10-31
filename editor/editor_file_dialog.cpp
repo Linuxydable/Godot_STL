@@ -187,9 +187,9 @@ void EditorFileDialog::set_enable_multiple_selection(bool p_enable) {
 	item_list->set_select_mode(p_enable ? ItemList::SELECT_MULTI : ItemList::SELECT_SINGLE);
 };
 
-Vector<String> EditorFileDialog::get_selected_files() const {
+std::vector<String> EditorFileDialog::get_selected_files() const {
 
-	Vector<String> list;
+	std::vector<String> list;
 	for (int i = 0; i < item_list->get_item_count(); i++) {
 		if (item_list->is_selected(i))
 			list.push_back(item_list->get_item_text(i));
@@ -262,7 +262,7 @@ void EditorFileDialog::_post_popup() {
 		recent->clear();
 
 		bool res = access == ACCESS_RESOURCES;
-		Vector<String> recentd = EditorSettings::get_singleton()->get_recent_dirs();
+		std::vector<String> recentd = EditorSettings::get_singleton()->get_recent_dirs();
 		for (int i = 0; i < recentd.size(); i++) {
 			bool cres = recentd[i].begins_with("res://");
 			if (cres != res)
@@ -661,7 +661,7 @@ bool EditorFileDialog::_is_open_should_be_disabled() {
 	if (mode == MODE_OPEN_ANY || mode == MODE_SAVE_FILE)
 		return false;
 
-	Vector<int> items = item_list->get_selected_items();
+	std::vector<int> items = item_list->get_selected_items();
 	if (items.size() == 0)
 		return mode != MODE_OPEN_DIR; // In "Open folder" mode, having nothing selected picks the current folder.
 
@@ -683,7 +683,7 @@ void EditorFileDialog::update_file_name() {
 		String filter_str = filters[idx];
 		String file_str = file->get_text();
 		String base_name = file_str.get_basename();
-		Vector<String> filter_substr = filter_str.split(";");
+		std::vector<String> filter_substr = filter_str.split(";");
 		if (filter_substr.size() >= 2) {
 			file_str = base_name + "." + filter_substr[1].strip_edges().to_lower();
 		} else {
@@ -1102,8 +1102,8 @@ void EditorFileDialog::_make_dir() {
 void EditorFileDialog::_delete_items() {
 
 	// Collect the selected folders and files to delete and check them in the deletion dependency dialog.
-	Vector<String> folders;
-	Vector<String> files;
+	std::vector<String> folders;
+	std::vector<String> files;
 	for (int i = 0; i < item_list->get_item_count(); i++) {
 		if (!item_list->is_selected(i)) {
 			continue;
@@ -1163,7 +1163,7 @@ void EditorFileDialog::_favorite_move_up() {
 	int current = favorites->get_current();
 
 	if (current > 0 && current < favorites->get_item_count()) {
-		Vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
+		std::vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
 
 		int a_idx = favorited.find(String(favorites->get_item_metadata(current - 1)));
 		int b_idx = favorited.find(String(favorites->get_item_metadata(current)));
@@ -1183,7 +1183,7 @@ void EditorFileDialog::_favorite_move_down() {
 	int current = favorites->get_current();
 
 	if (current >= 0 && current < favorites->get_item_count() - 1) {
-		Vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
+		std::vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
 
 		int a_idx = favorited.find(String(favorites->get_item_metadata(current + 1)));
 		int b_idx = favorited.find(String(favorites->get_item_metadata(current)));
@@ -1210,7 +1210,7 @@ void EditorFileDialog::_update_favorites() {
 
 	favorite->set_pressed(false);
 
-	Vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
+	std::vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
 	for (int i = 0; i < favorited.size(); i++) {
 		bool cres = favorited[i].begins_with("res://");
 		if (cres != res)
@@ -1253,7 +1253,7 @@ void EditorFileDialog::_favorite_pressed() {
 	if (!cd.ends_with("/"))
 		cd += "/";
 
-	Vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
+	std::vector<String> favorited = EditorSettings::get_singleton()->get_favorites();
 
 	bool found = false;
 	for (int i = 0; i < favorited.size(); i++) {
@@ -1279,7 +1279,7 @@ void EditorFileDialog::_favorite_pressed() {
 
 void EditorFileDialog::_recent_selected(int p_idx) {
 
-	Vector<String> recentd = EditorSettings::get_singleton()->get_recent_dirs();
+	std::vector<String> recentd = EditorSettings::get_singleton()->get_recent_dirs();
 	ERR_FAIL_INDEX(p_idx, recentd.size());
 
 	dir_access->change_dir(recent->get_item_metadata(p_idx));
@@ -1455,7 +1455,7 @@ void EditorFileDialog::set_default_display_mode(DisplayMode p_mode) {
 void EditorFileDialog::_save_to_recent() {
 
 	String dir = get_current_dir();
-	Vector<String> recent = EditorSettings::get_singleton()->get_recent_dirs();
+	std::vector<String> recent = EditorSettings::get_singleton()->get_recent_dirs();
 
 	const int max = 20;
 	int count = 0;

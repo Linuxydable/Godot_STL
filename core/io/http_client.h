@@ -31,6 +31,8 @@
 #ifndef HTTP_CLIENT_H
 #define HTTP_CLIENT_H
 
+#include <vector>
+
 #include "core/io/ip.h"
 #include "core/io/stream_peer.h"
 #include "core/io/stream_peer_tcp.h"
@@ -167,10 +169,10 @@ private:
 	bool blocking;
 	bool handshaking;
 
-	Vector<uint8_t> response_str;
+	std::vector<uint8_t> response_str;
 
 	bool chunked;
-	Vector<uint8_t> chunk;
+	std::vector<uint8_t> chunk;
 	int chunk_left;
 	bool chunk_trailer_part;
 	int body_size;
@@ -181,7 +183,7 @@ private:
 	Ref<StreamPeer> connection;
 
 	int response_num;
-	Vector<String> response_headers;
+	std::vector<String> response_headers;
 	int read_chunk_size;
 
 	Error _get_http_data(uint8_t *p_buffer, int p_bytes, int &r_received);
@@ -201,8 +203,8 @@ public:
 	void set_connection(const Ref<StreamPeer> &p_connection);
 	Ref<StreamPeer> get_connection() const;
 
-	Error request_raw(Method p_method, const String &p_url, const Vector<String> &p_headers, const PoolVector<uint8_t> &p_body);
-	Error request(Method p_method, const String &p_url, const Vector<String> &p_headers, const String &p_body = String());
+	Error request_raw(Method p_method, const String &p_url, const std::vector<String> &p_headers, const PoolVector<uint8_t> &p_body);
+	Error request(Method p_method, const String &p_url, const std::vector<String> &p_headers, const String &p_body = String());
 
 	void close();
 

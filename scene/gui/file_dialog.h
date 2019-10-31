@@ -31,6 +31,8 @@
 #ifndef FILE_DIALOG_H
 #define FILE_DIALOG_H
 
+#include <vector>
+
 #include "box_container.h"
 #include "core/os/dir_access.h"
 #include "scene/gui/dialogs.h"
@@ -90,7 +92,7 @@ private:
 	ToolButton *refresh;
 	ToolButton *show_hidden;
 
-	Vector<String> filters;
+	std::vector<String> filters;
 
 	bool mode_overrides_title;
 
@@ -134,11 +136,11 @@ protected:
 public:
 	void clear_filters();
 	void add_filter(const String &p_filter);
-	void set_filters(const Vector<String> &p_filters);
-	Vector<String> get_filters() const;
+	void set_filters(const std::vector<String> &p_filters);
+	std::vector<String> get_filters() const;
 
 	void set_enable_multiple_selection(bool p_enable);
-	Vector<String> get_selected_files() const;
+	std::vector<String> get_selected_files() const;
 
 	String get_current_dir() const;
 	String get_current_file() const;

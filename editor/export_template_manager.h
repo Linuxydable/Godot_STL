@@ -31,6 +31,8 @@
 #ifndef EXPORT_TEMPLATE_MANAGER_H
 #define EXPORT_TEMPLATE_MANAGER_H
 
+#include <vector>
+
 #include "editor/editor_settings.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/file_dialog.h"
@@ -59,7 +61,7 @@ class ExportTemplateManager : public ConfirmationDialog {
 	HTTPRequest *request_mirror;
 	HTTPRequest *download_templates;
 
-	Vector<uint8_t> download_data;
+	std::vector<uint8_t> download_data;
 
 	float update_countdown;
 

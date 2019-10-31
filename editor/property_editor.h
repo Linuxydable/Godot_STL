@@ -31,6 +31,8 @@
 #ifndef PROPERTY_EDITOR_H
 #define PROPERTY_EDITOR_H
 
+#include <vector>
+
 #include "editor/editor_file_dialog.h"
 #include "editor/scene_tree_editor.h"
 #include "scene/gui/button.h"
@@ -107,7 +109,7 @@ class CustomPropertyEditor : public Popup {
 	HScrollBar *scroll[4];
 	Button *action_buttons[MAX_ACTION_BUTTONS];
 	MenuButton *type_button;
-	Vector<String> inheritors_array;
+	std::vector<String> inheritors_array;
 	TextureRect *texture_preview;
 	ColorPicker *color_picker;
 	TextEdit *text_edit;

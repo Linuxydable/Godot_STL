@@ -103,7 +103,7 @@ ImageFormatLoader *ImageLoader::recognize(const String &p_extension) {
 	return NULL;
 }
 
-Vector<ImageFormatLoader *> ImageLoader::loader;
+std::vector<ImageFormatLoader *> ImageLoader::loader;
 
 void ImageLoader::add_image_format_loader(ImageFormatLoader *p_loader) {
 
@@ -115,7 +115,7 @@ void ImageLoader::remove_image_format_loader(ImageFormatLoader *p_loader) {
 	loader.erase(p_loader);
 }
 
-const Vector<ImageFormatLoader *> &ImageLoader::get_image_format_loaders() {
+const std::vector<ImageFormatLoader *> &ImageLoader::get_image_format_loaders() {
 
 	return loader;
 }

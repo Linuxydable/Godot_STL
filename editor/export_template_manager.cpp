@@ -164,7 +164,7 @@ void ExportTemplateManager::_uninstall_template_confirm() {
 
 	ERR_FAIL_COND(err != OK);
 
-	Vector<String> files;
+	std::vector<String> files;
 	d->list_dir_begin();
 	String c = d->get_next();
 	while (c != String()) {
@@ -212,7 +212,7 @@ bool ExportTemplateManager::_install_from_file(const String &p_file, bool p_use_
 
 		if (file.ends_with("version.txt")) {
 
-			Vector<uint8_t> data;
+			std::vector<uint8_t> data;
 			data.resize(info.uncompressed_size);
 
 			//read
@@ -286,7 +286,7 @@ bool ExportTemplateManager::_install_from_file(const String &p_file, bool p_use_
 			continue;
 		}
 
-		Vector<uint8_t> data;
+		std::vector<uint8_t> data;
 		data.resize(info.uncompressed_size);
 
 		//read
@@ -624,7 +624,7 @@ Error ExportTemplateManager::install_android_template() {
 		String base_dir = path.get_base_dir();
 
 		if (!path.ends_with("/")) {
-			Vector<uint8_t> data;
+			std::vector<uint8_t> data;
 			data.resize(info.uncompressed_size);
 
 			// Read.

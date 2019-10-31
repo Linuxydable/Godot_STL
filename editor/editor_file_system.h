@@ -31,11 +31,14 @@
 #ifndef EDITOR_FILE_SYSTEM_H
 #define EDITOR_FILE_SYSTEM_H
 
+#include <vector>
+
 #include "core/os/dir_access.h"
 #include "core/os/thread.h"
 #include "core/os/thread_safe.h"
 #include "core/set.h"
 #include "scene/main/node.h"
+
 class FileAccess;
 
 struct EditorProgressBG;
@@ -48,7 +51,7 @@ class EditorFileSystemDirectory : public Object {
 	bool verified; //used for checking changes
 
 	EditorFileSystemDirectory *parent;
-	Vector<EditorFileSystemDirectory *> subdirs;
+	std::vector<EditorFileSystemDirectory *> subdirs;
 
 	struct FileInfo {
 		String file;
@@ -57,7 +60,7 @@ class EditorFileSystemDirectory : public Object {
 		uint64_t import_modified_time;
 		bool import_valid;
 		String import_group_file;
-		Vector<String> deps;
+		std::vector<String> deps;
 		bool verified; //used for checking changes
 		String script_class_name;
 		String script_class_extends;
@@ -72,7 +75,7 @@ class EditorFileSystemDirectory : public Object {
 
 	void sort_files();
 
-	Vector<FileInfo *> files;
+	std::vector<FileInfo *> files;
 
 	static void _bind_methods();
 
@@ -88,7 +91,7 @@ public:
 	String get_file(int p_idx) const;
 	String get_file_path(int p_idx) const;
 	StringName get_file_type(int p_idx) const;
-	Vector<String> get_file_deps(int p_idx) const;
+	std::vector<String> get_file_deps(int p_idx) const;
 	bool get_file_import_is_valid(int p_idx) const;
 	String get_file_script_class_name(int p_idx) const; //used for scripts
 	String get_file_script_class_extends(int p_idx) const; //used for scripts
@@ -166,7 +169,7 @@ class EditorFileSystem : public Node {
 		String type;
 		uint64_t modification_time;
 		uint64_t import_modification_time;
-		Vector<String> deps;
+		std::vector<String> deps;
 		bool import_valid;
 		String import_group_file;
 		String script_class_name;
@@ -213,13 +216,13 @@ class EditorFileSystem : public Node {
 	void _update_extensions();
 
 	void _reimport_file(const String &p_file);
-	Error _reimport_group(const String &p_group_file, const Vector<String> &p_files);
+	Error _reimport_group(const String &p_group_file, const std::vector<String> &p_files);
 
 	bool _test_for_reimport(const String &p_path, bool p_only_imported_files);
 
 	bool reimport_on_missing_imported_files;
 
-	Vector<String> _get_dependencies(const String &p_path);
+	std::vector<String> _get_dependencies(const String &p_path);
 
 	struct ImportFile {
 		String path;
@@ -239,7 +242,7 @@ class EditorFileSystem : public Node {
 
 	bool using_fat32_or_exfat; // Workaround for projects in FAT32 or exFAT filesystem (pendrives, most of the time)
 
-	void _find_group_files(EditorFileSystemDirectory *efd, Map<String, Vector<String> > &group_files, Set<String> &groups_to_reimport);
+	void _find_group_files(EditorFileSystemDirectory *efd, Map<String, std::vector<String> > &group_files, Set<String> &groups_to_reimport);
 
 	void _move_group_files(EditorFileSystemDirectory *efd, const String &p_group_file, const String &p_new_location);
 
@@ -265,7 +268,7 @@ public:
 	String get_file_type(const String &p_file) const;
 	EditorFileSystemDirectory *find_file(const String &p_file, int *r_index) const;
 
-	void reimport_files(const Vector<String> &p_files);
+	void reimport_files(const std::vector<String> &p_files);
 
 	void update_script_classes();
 

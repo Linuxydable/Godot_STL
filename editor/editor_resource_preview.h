@@ -31,6 +31,8 @@
 #ifndef EDITORRESOURCEPREVIEW_H
 #define EDITORRESOURCEPREVIEW_H
 
+#include <vector>
+
 #include "core/os/semaphore.h"
 #include "core/os/thread.h"
 #include "scene/main/node.h"
@@ -94,7 +96,7 @@ class EditorResourcePreview : public Node {
 	static void _thread_func(void *ud);
 	void _thread();
 
-	Vector<Ref<EditorResourcePreviewGenerator> > preview_generators;
+	std::vector<Ref<EditorResourcePreviewGenerator> > preview_generators;
 
 protected:
 	static void _bind_methods();
