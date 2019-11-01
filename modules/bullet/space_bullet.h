@@ -168,7 +168,9 @@ public:
 		contactDebugCount = 0;
 	}
 	_FORCE_INLINE_ void add_debug_contact(const Vector3 &p_contact) {
-		if (contactDebugCount < contactDebug.size()) contactDebug.write[contactDebugCount++] = p_contact;
+		// warning_update : maybe contactDebugCount can be an unsigned
+		if (static_cast<unsigned>(contactDebugCount) < contactDebug.size())
+			contactDebug[contactDebugCount++] = p_contact;
 	}
 	_FORCE_INLINE_ std::vector<Vector3> get_debug_contacts() { return contactDebug; }
 	_FORCE_INLINE_ int get_debug_contact_count() { return contactDebugCount; }

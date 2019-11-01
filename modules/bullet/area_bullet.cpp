@@ -30,6 +30,8 @@
 
 #include "area_bullet.h"
 
+#include <algorithm>
+
 #include "bullet_physics_server.h"
 #include "bullet_types_converter.h"
 #include "bullet_utilities.h"
@@ -129,32 +131,48 @@ void AreaBullet::scratch() {
 }
 
 void AreaBullet::clear_overlaps(bool p_notify) {
-	for (int i = overlappingObjects.size() - 1; 0 <= i; --i) {
+	for(auto it = overlappingObjects.rbegin(); it != overlappingObjects.rend(); ++it){
 		if (p_notify)
-			call_event(overlappingObjects[i].object, PhysicsServer::AREA_BODY_REMOVED);
-		overlappingObjects[i].object->on_exit_area(this);
+			call_event((*it).object, PhysicsServer::AREA_BODY_REMOVED);
+
+		(*it).object->on_exit_area(this);
 	}
+
 	overlappingObjects.clear();
 }
 
 void AreaBullet::remove_overlap(CollisionObjectBullet *p_object, bool p_notify) {
-	for (int i = overlappingObjects.size() - 1; 0 <= i; --i) {
-		if (overlappingObjects[i].object == p_object) {
-			if (p_notify)
-				call_event(overlappingObjects[i].object, PhysicsServer::AREA_BODY_REMOVED);
-			overlappingObjects[i].object->on_exit_area(this);
-			overlappingObjects.remove(i);
-			break;
+	auto it = std::find_if(overlappingObjects.begin(), overlappingObjects.end(),
+		[&](const OverlappingObjectData& overlappingObject){
+			if (overlappingObject.object == p_object) {
+				if (p_notify)
+					call_event(overlappingObject.object, PhysicsServer::AREA_BODY_REMOVED);
+
+				overlappingObject.object->on_exit_area(this);
+
+				return true;
+			}
+			return false;
 		}
+	);
+
+	if(it != overlappingObjects.end() ){
+		overlappingObjects.erase(it);
 	}
 }
 
 int AreaBullet::find_overlapping_object(CollisionObjectBullet *p_colObj) {
-	const int size = overlappingObjects.size();
-	for (int i = 0; i < size; ++i) {
-		if (overlappingObjects[i].object == p_colObj) {
-			return i;
+	auto it = std::find_if(overlappingObjects.begin(), overlappingObjects.end(),
+		[&](const OverlappingObjectData& overlappingObject){
+			if (overlappingObject.object == p_colObj) {
+				return true;
+			}
+			return false;
 		}
+	);
+
+	if(it != overlappingObjects.end() ){
+		return std::distance(overlappingObjects.begin(), it);
 	}
 	return -1;
 }
@@ -209,13 +227,13 @@ void AreaBullet::add_overlap(CollisionObjectBullet *p_otherObject) {
 
 void AreaBullet::put_overlap_as_exit(int p_index) {
 	scratch();
-	overlappingObjects.write[p_index].state = OVERLAP_STATE_EXIT;
+	overlappingObjects[p_index].state = OVERLAP_STATE_EXIT;
 }
 
 void AreaBullet::put_overlap_as_inside(int p_index) {
 	// This check is required to be sure this body was inside
 	if (OVERLAP_STATE_DIRTY == overlappingObjects[p_index].state) {
-		overlappingObjects.write[p_index].state = OVERLAP_STATE_INSIDE;
+		overlappingObjects[p_index].state = OVERLAP_STATE_INSIDE;
 	}
 }
 

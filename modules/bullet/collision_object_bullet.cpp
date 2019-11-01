@@ -30,6 +30,8 @@
 
 #include "collision_object_bullet.h"
 
+#include <algorithm>
+
 #include "area_bullet.h"
 #include "bullet_physics_server.h"
 #include "bullet_types_converter.h"
@@ -104,8 +106,8 @@ CollisionObjectBullet::CollisionObjectBullet(Type p_type) :
 
 CollisionObjectBullet::~CollisionObjectBullet() {
 	// Remove all overlapping, notify is not required since godot take care of it
-	for (int i = areasOverlapped.size() - 1; 0 <= i; --i) {
-		areasOverlapped[i]->remove_overlap(this, /*Notify*/ false);
+	for(auto it = areasOverlapped.rbegin(); it != areasOverlapped.rend(); ++it ){
+		(*it)->remove_overlap(this, /*Notify*/ false);
 	}
 
 	destroyBulletCollisionObject();
@@ -183,7 +185,11 @@ void CollisionObjectBullet::notify_new_overlap(AreaBullet *p_area) {
 }
 
 void CollisionObjectBullet::on_exit_area(AreaBullet *p_area) {
-	areasOverlapped.erase(p_area);
+	auto it = std::find(areasOverlapped.begin(), areasOverlapped.end(), p_area);
+
+	if(it != areasOverlapped.end()){
+		areasOverlapped.erase(it);
+	}
 }
 
 void CollisionObjectBullet::set_godot_object_flags(int flags) {

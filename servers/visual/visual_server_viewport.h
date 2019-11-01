@@ -31,6 +31,8 @@
 #ifndef VISUALSERVERVIEWPORT_H
 #define VISUALSERVERVIEWPORT_H
 
+#include <vector>
+
 #include "core/self_list.h"
 #include "rasterizer.h"
 #include "servers/arvr/arvr_interface.h"
@@ -129,7 +131,7 @@ public:
 
 	mutable RID_Owner<Viewport> viewport_owner;
 
-	struct ViewportSort {
+	struct{
 		_FORCE_INLINE_ bool operator()(const Viewport *p_left, const Viewport *p_right) const {
 
 			bool left_to_screen = p_left->viewport_to_screen_rect.size != Size2();
@@ -141,9 +143,9 @@ public:
 			}
 			return right_to_screen;
 		}
-	};
+	}ViewportSort;
 
-	Vector<Viewport *> active_viewports;
+	std::vector<Viewport *> active_viewports;
 
 private:
 	Color clear_color;

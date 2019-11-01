@@ -30,6 +30,8 @@
 
 #include "visual_server_viewport.h"
 
+#include <algorithm>
+
 #include "core/project_settings.h"
 #include "visual_server_canvas.h"
 #include "visual_server_globals.h"
@@ -279,20 +281,17 @@ void VisualServerViewport::draw_viewports() {
 		clear_color = GLOBAL_GET("rendering/environment/default_clear_color");
 	}
 
-	//sort viewports
-	active_viewports.sort_custom<ViewportSort>();
+	std::sort(active_viewports.begin(), active_viewports.end(), ViewportSort);
 
 	//draw viewports
-	for (int i = 0; i < active_viewports.size(); i++) {
-
-		Viewport *vp = active_viewports[i];
-
+	for (Viewport *vp : active_viewports) {
 		if (vp->update_mode == VS::VIEWPORT_UPDATE_DISABLED)
 			continue;
 
 		ERR_CONTINUE(!vp->render_target.is_valid());
 
 		bool visible = vp->viewport_to_screen_rect != Rect2() || vp->update_mode == VS::VIEWPORT_UPDATE_ALWAYS || vp->update_mode == VS::VIEWPORT_UPDATE_ONCE || (vp->update_mode == VS::VIEWPORT_UPDATE_WHEN_VISIBLE && VSG::storage->render_target_was_used(vp->render_target));
+		
 		visible = visible && vp->size.x > 1 && vp->size.y > 1;
 
 		if (!visible)
@@ -403,10 +402,17 @@ void VisualServerViewport::viewport_set_active(RID p_viewport, bool p_active) {
 	Viewport *viewport = viewport_owner.getornull(p_viewport);
 	ERR_FAIL_COND(!viewport);
 
+	auto it = std::find(active_viewports.begin(), active_viewports.end(), viewport);
+
 	if (p_active) {
-		ERR_FAIL_COND(active_viewports.find(viewport) != -1); //already active
+		// need_update : warning is better than error
+		ERR_FAIL_COND( it != active_viewports.end() ); //already active
+
 		active_viewports.push_back(viewport);
 	} else {
+		// need_update : warning is better than error
+		ERR_FAIL_COND( it == active_viewports.end() ); //not exist
+
 		active_viewports.erase(viewport);
 	}
 }
@@ -729,7 +735,12 @@ bool VisualServerViewport::free(RID p_rid) {
 		}
 
 		viewport_set_scenario(p_rid, RID());
-		active_viewports.erase(viewport);
+
+		auto it = std::find(active_viewports.begin(), active_viewports.end(), viewport);
+
+		if(it != active_viewports.end() ){
+			active_viewports.erase(it);
+		}
 
 		viewport_owner.free(p_rid);
 		memdelete(viewport);
