@@ -31,6 +31,8 @@
 #ifndef ANIMATION_CACHE_H
 #define ANIMATION_CACHE_H
 
+#include <vector>
+
 #include "scene/3d/skeleton.h"
 #include "scene/resources/animation.h"
 
@@ -47,7 +49,7 @@ class AnimationCache : public Object {
 		Spatial *spatial;
 
 		int bone_idx;
-		Vector<StringName> subpath;
+		std::vector<StringName> subpath;
 		bool valid;
 		Path() {
 			object = NULL;
@@ -60,7 +62,7 @@ class AnimationCache : public Object {
 	};
 
 	Set<Node *> connected_nodes;
-	Vector<Path> path_cache;
+	std::vector<Path> path_cache;
 
 	Node *root;
 	Ref<Animation> animation;

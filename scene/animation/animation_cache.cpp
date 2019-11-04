@@ -129,7 +129,7 @@ void AnimationCache::_update_cache() {
 			if (np.get_subname_count() > 0) {
 
 				RES res2;
-				Vector<StringName> leftover_subpath;
+				std::vector<StringName> leftover_subpath;
 
 				// We don't want to cache the last resource unless it is a method call
 				bool is_method = animation->track_get_type(i) == Animation::TYPE_METHOD;
@@ -281,7 +281,7 @@ void AnimationCache::set_all(float p_time, float p_delta) {
 
 				for (List<int>::Element *E = indices.front(); E; E = E->next()) {
 
-					Vector<Variant> args = animation->method_track_get_params(i, E->get());
+					std::vector<Variant> args = animation->method_track_get_params(i, E->get());
 					StringName name = animation->method_track_get_name(i, E->get());
 					Variant::CallError err;
 
@@ -290,7 +290,7 @@ void AnimationCache::set_all(float p_time, float p_delta) {
 						call_track(i, name, NULL, 0, err);
 					} else {
 
-						Vector<const Variant *> argptrs;
+						std::vector<const Variant *> argptrs;
 						argptrs.resize(args.size());
 						for (int j = 0; j < args.size(); j++) {
 

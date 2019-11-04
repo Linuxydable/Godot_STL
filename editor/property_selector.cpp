@@ -536,7 +536,7 @@ void PropertySelector::select_property_from_instance(Object *p_instance, const S
 	_update_search();
 }
 
-void PropertySelector::set_type_filter(const Vector<Variant::Type> &p_type_filter) {
+void PropertySelector::set_type_filter(const std::vector<Variant::Type> &p_type_filter) {
 	type_filter = p_type_filter;
 }
 
