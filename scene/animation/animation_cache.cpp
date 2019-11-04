@@ -31,19 +31,18 @@
 #include "animation_cache.h"
 
 void AnimationCache::_node_exit_tree(Node *p_node) {
-
 	//it is one shot, so it disconnects upon arrival
 
 	ERR_FAIL_COND(!connected_nodes.has(p_node));
 
 	connected_nodes.erase(p_node);
 
-	for (int i = 0; i < path_cache.size(); i++) {
-
-		if (path_cache[i].node != p_node)
+	for(auto&& path : path_cache){
+		if (path.node != p_node)
 			continue;
 
-		path_cache.write[i].valid = false; //invalidate path cache
+		//invalidate path cache
+		path.valid = false; 
 	}
 }
 
@@ -160,11 +159,11 @@ void AnimationCache::_update_cache() {
 			}
 
 		} else if (animation->track_get_type(i) == Animation::TYPE_METHOD) {
-
-			if (path.subpath.size() != 0) { // Trying to call a method of a non-resource
-
+			// Trying to call a method of a non-resource
+			if( !path.subpath.empty() ){
 				path_cache.push_back(Path());
-				ERR_CONTINUE_MSG(path.subpath.size() != 0, "Method Track has property: " + np + ".");
+
+				ERR_CONTINUE_MSG(!path.subpath.empty(), "Method Track has property: " + np + ".");
 			}
 		}
 
@@ -182,18 +181,21 @@ void AnimationCache::_update_cache() {
 	cache_valid = true;
 }
 
-void AnimationCache::set_track_transform(int p_idx, const Transform &p_transform) {
-
+void AnimationCache::set_track_transform(unsigned p_idx, const Transform &p_transform) {
 	if (cache_dirty)
 		_update_cache();
 
 	ERR_FAIL_COND(!cache_valid);
+
 	ERR_FAIL_INDEX(p_idx, path_cache.size());
-	Path &p = path_cache.write[p_idx];
+
+	Path &p = path_cache[p_idx];
+
 	if (!p.valid)
 		return;
 
 	ERR_FAIL_COND(!p.node);
+
 	ERR_FAIL_COND(!p.spatial);
 
 	if (p.skeleton) {
@@ -203,33 +205,40 @@ void AnimationCache::set_track_transform(int p_idx, const Transform &p_transform
 	}
 }
 
-void AnimationCache::set_track_value(int p_idx, const Variant &p_value) {
-
+void AnimationCache::set_track_value(unsigned p_idx, const Variant &p_value) {
 	if (cache_dirty)
 		_update_cache();
 
 	ERR_FAIL_COND(!cache_valid);
+
 	ERR_FAIL_INDEX(p_idx, path_cache.size());
-	Path &p = path_cache.write[p_idx];
+
+	Path &p = path_cache[p_idx];
+
 	if (!p.valid)
 		return;
 
 	ERR_FAIL_COND(!p.object);
+
 	p.object->set_indexed(p.subpath, p_value);
 }
 
-void AnimationCache::call_track(int p_idx, const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
-
+// need_update : p_args can be a simple pointer
+void AnimationCache::call_track(unsigned p_idx, const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error) {
 	if (cache_dirty)
 		_update_cache();
 
 	ERR_FAIL_COND(!cache_valid);
+
 	ERR_FAIL_INDEX(p_idx, path_cache.size());
-	Path &p = path_cache.write[p_idx];
+
+	Path &p = path_cache[p_idx];
+
 	if (!p.valid)
 		return;
 
 	ERR_FAIL_COND(!p.object);
+	
 	p.object->call(p_method, p_args, p_argcount, r_error);
 }
 
@@ -275,32 +284,31 @@ void AnimationCache::set_all(float p_time, float p_delta) {
 
 			} break;
 			case Animation::TYPE_METHOD: {
-
 				List<int> indices;
+
 				animation->method_track_get_key_indices(i, p_time, p_delta, &indices);
 
 				for (List<int>::Element *E = indices.front(); E; E = E->next()) {
-
 					std::vector<Variant> args = animation->method_track_get_params(i, E->get());
+
 					StringName name = animation->method_track_get_name(i, E->get());
+
 					Variant::CallError err;
 
-					if (!args.size()) {
-
+					if( !args.empty() ) {
 						call_track(i, name, NULL, 0, err);
-					} else {
-
+					}else{
 						std::vector<const Variant *> argptrs;
-						argptrs.resize(args.size());
-						for (int j = 0; j < args.size(); j++) {
 
-							argptrs.write[j] = &args.write[j];
+						argptrs.resize(args.size());
+
+						for (unsigned j = 0; j < args.size(); j++) {
+							argptrs[j] = &args[j];
 						}
 
 						call_track(i, name, (const Variant **)&argptrs[0], args.size(), err);
 					}
 				}
-
 			} break;
 			default: {
 			}

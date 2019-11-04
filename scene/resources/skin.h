@@ -31,6 +31,8 @@
 #ifndef SKIN_H
 #define SKIN_H
 
+#include <vector>
+
 #include "core/resource.h"
 
 class Skin : public Resource {
@@ -41,10 +43,7 @@ class Skin : public Resource {
 		Transform pose;
 	};
 
-	Vector<Bind> binds;
-
-	Bind *binds_ptr;
-	int bind_count;
+	std::vector<Bind> binds;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
@@ -55,25 +54,25 @@ protected:
 
 public:
 	void set_bind_count(int p_size);
-	inline int get_bind_count() const { return bind_count; }
+	inline int get_bind_count() const { return binds.size(); }
 
 	void add_bind(int p_bone, const Transform &p_pose);
 
-	void set_bind_bone(int p_index, int p_bone);
-	void set_bind_pose(int p_index, const Transform &p_pose);
+	void set_bind_bone(unsigned p_index, int p_bone);
+	void set_bind_pose(unsigned p_index, const Transform &p_pose);
 
-	inline int get_bind_bone(int p_index) const {
+	inline int get_bind_bone(unsigned p_index) const {
 #ifdef DEBUG_ENABLED
-		ERR_FAIL_INDEX_V(p_index, bind_count, -1);
+		ERR_FAIL_INDEX_V(p_index, binds.size(), -1);
 #endif
-		return binds_ptr[p_index].bone;
+		return binds[p_index].bone;
 	}
 
-	inline Transform get_bind_pose(int p_index) const {
+	inline Transform get_bind_pose(unsigned p_index) const {
 #ifdef DEBUG_ENABLED
-		ERR_FAIL_INDEX_V(p_index, bind_count, Transform());
+		ERR_FAIL_INDEX_V(p_index, binds.size(), Transform());
 #endif
-		return binds_ptr[p_index].pose;
+		return binds[p_index].pose;
 	}
 
 	void clear_binds();

@@ -30,37 +30,44 @@
 
 #include "skin.h"
 
+// warning_update : p_size can be only positiv
 void Skin::set_bind_count(int p_size) {
 	ERR_FAIL_COND(p_size < 0);
+
 	binds.resize(p_size);
-	binds_ptr = binds.ptrw();
-	bind_count = p_size;
+
 	emit_changed();
 }
 
 void Skin::add_bind(int p_bone, const Transform &p_pose) {
-	uint32_t index = bind_count;
-	set_bind_count(bind_count + 1);
+	unsigned index = binds.size();
+
+	set_bind_count(index + 1);
+
 	set_bind_bone(index, p_bone);
+
 	set_bind_pose(index, p_pose);
 }
 
-void Skin::set_bind_bone(int p_index, int p_bone) {
-	ERR_FAIL_INDEX(p_index, bind_count);
-	binds_ptr[p_index].bone = p_bone;
+void Skin::set_bind_bone(unsigned p_index, int p_bone) {
+	ERR_FAIL_INDEX(p_index, binds.size());
+
+	binds[p_index].bone = p_bone;
+
 	emit_changed();
 }
 
-void Skin::set_bind_pose(int p_index, const Transform &p_pose) {
-	ERR_FAIL_INDEX(p_index, bind_count);
-	binds_ptr[p_index].pose = p_pose;
+void Skin::set_bind_pose(unsigned p_index, const Transform &p_pose) {
+	ERR_FAIL_INDEX(p_index, binds.size());
+
+	binds[p_index].pose = p_pose;
+
 	emit_changed();
 }
 
 void Skin::clear_binds() {
 	binds.clear();
-	binds_ptr = nullptr;
-	bind_count = 0;
+
 	emit_changed();
 }
 
@@ -127,6 +134,4 @@ void Skin::_bind_methods() {
 }
 
 Skin::Skin() {
-	bind_count = 0;
-	binds_ptr = nullptr;
 }

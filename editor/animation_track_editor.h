@@ -31,6 +31,8 @@
 #ifndef ANIMATION_TRACK_EDITOR_H
 #define ANIMATION_TRACK_EDITOR_H
 
+#include <vector>
+
 #include "editor/editor_data.h"
 #include "editor/editor_spin_slider.h"
 #include "editor/property_editor.h"
@@ -192,6 +194,7 @@ protected:
 
 	virtual void _gui_input(const Ref<InputEvent> &p_event);
 
+	void extract_args_from_dictionnary(const Dictionary&, String*);
 public:
 	virtual Variant get_drag_data(const Point2 &p_point);
 	virtual bool can_drop_data(const Point2 &p_point, const Variant &p_data) const;
@@ -263,6 +266,9 @@ protected:
 	static void _bind_methods();
 	void _notification(int p_what);
 
+	void update_track_edits();
+	void update_groups();
+
 public:
 	void set_type_and_name(const Ref<Texture> &p_type, const String &p_name, const NodePath &p_node);
 	virtual Size2 get_minimum_size() const;
@@ -317,8 +323,8 @@ class AnimationTrackEditor : public VBoxContainer {
 	void _show_imported_anim_warning() const;
 
 	void _snap_mode_changed(int p_mode);
-	Vector<AnimationTrackEdit *> track_edits;
-	Vector<AnimationTrackEditGroup *> groups;
+	std::vector<AnimationTrackEdit *> track_edits;
+	std::vector<AnimationTrackEditGroup *> groups;
 
 	bool animation_changing_awaiting_update;
 	void _animation_update();
@@ -430,7 +436,7 @@ class AnimationTrackEditor : public VBoxContainer {
 	Rect2 box_select_rect;
 	void _scroll_input(const Ref<InputEvent> &p_event);
 
-	Vector<Ref<AnimationTrackEditPlugin> > track_edit_plugins;
+	std::vector<Ref<AnimationTrackEditPlugin> > track_edit_plugins;
 
 	void _cancel_bezier_edit();
 	void _bezier_edit(int p_for_track);
@@ -485,10 +491,10 @@ class AnimationTrackEditor : public VBoxContainer {
 			float transition;
 			Variant value;
 		};
-		Vector<Key> keys;
+		std::vector<Key> keys;
 	};
 
-	Vector<TrackClipboard> track_clipboard;
+	std::vector<TrackClipboard> track_clipboard;
 
 	void _insert_animation_key(NodePath p_path, const Variant &p_value);
 
