@@ -252,18 +252,20 @@ public:
 	virtual void on_collision_checker_start();
 	virtual void on_collision_checker_end();
 
-	void set_max_collisions_detection(unsigned p_maxCollisionsDetection) {
-
+	void set_max_collisions_detection(int p_maxCollisionsDetection) {
 		ERR_FAIL_COND(0 > p_maxCollisionsDetection);
 
 		maxCollisionsDetection = p_maxCollisionsDetection;
 
 		collisions.resize(p_maxCollisionsDetection);
+
 		collision_traces_1.resize(p_maxCollisionsDetection);
+
 		collision_traces_2.resize(p_maxCollisionsDetection);
 
 		collisionsCount = 0;
-		prev_collision_count = std::min(prev_collision_count, p_maxCollisionsDetection);
+
+		prev_collision_count = std::min(prev_collision_count, static_cast<unsigned>(p_maxCollisionsDetection) );
 	}
 	int get_max_collisions_detection() {
 		return maxCollisionsDetection;
