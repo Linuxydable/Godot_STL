@@ -121,8 +121,7 @@ void EditorPath::update_path() {
 	}
 }
 
-void EditorPath::_id_pressed(int p_idx) {
-
+void EditorPath::_id_pressed(unsigned p_idx) {
 	ERR_FAIL_INDEX(p_idx, objects.size());
 
 	Object *obj = ObjectDB::get_instance(objects[p_idx]);

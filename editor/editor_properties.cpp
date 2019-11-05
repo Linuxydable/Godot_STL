@@ -30,6 +30,8 @@
 
 #include "editor_properties.h"
 
+#include <algorithm>
+
 #include "editor/editor_resource_preview.h"
 #include "editor_node.h"
 #include "editor_properties_array_dict.h"
@@ -185,8 +187,8 @@ void EditorPropertyTextEnum::update_property() {
 	}
 }
 
-void EditorPropertyTextEnum::setup(const Vector<String> &p_options) {
-	for (int i = 0; i < p_options.size(); i++) {
+void EditorPropertyTextEnum::setup(const std::vector<String> &p_options) {
+	for (unsigned i = 0; i < p_options.size(); i++) {
 		options->add_item(p_options[i], i);
 	}
 }
@@ -236,12 +238,15 @@ void EditorPropertyPath::_path_pressed() {
 		dialog->set_current_dir(full_path);
 	} else {
 		dialog->set_mode(save_mode ? EditorFileDialog::MODE_SAVE_FILE : EditorFileDialog::MODE_OPEN_FILE);
-		for (int i = 0; i < extensions.size(); i++) {
-			String e = extensions[i].strip_edges();
-			if (e != String()) {
-				dialog->add_filter(extensions[i].strip_edges());
+
+		for(auto&& extension : extensions){
+			String e = extension.strip_edges();
+
+			if(!e.empty() ){
+				dialog->add_filter(e);
 			}
 		}
+
 		dialog->set_current_path(full_path);
 	}
 
@@ -255,7 +260,7 @@ void EditorPropertyPath::update_property() {
 	path->set_tooltip(full_path);
 }
 
-void EditorPropertyPath::setup(const Vector<String> &p_extensions, bool p_folder, bool p_global) {
+void EditorPropertyPath::setup(const std::vector<String> &p_extensions, bool p_folder, bool p_global) {
 
 	extensions = p_extensions;
 	folder = p_folder;
@@ -501,15 +506,19 @@ void EditorPropertyEnum::update_property() {
 	}
 }
 
-void EditorPropertyEnum::setup(const Vector<String> &p_options) {
-
+void EditorPropertyEnum::setup(const std::vector<String> &p_options) {
 	int64_t current_val = 0;
-	for (int i = 0; i < p_options.size(); i++) {
-		Vector<String> text_split = p_options[i].split(":");
+
+	for(unsigned i = 0; i < p_options.size(); i++){
+		std::vector<String> text_split = p_options[i].split(":");
+
 		if (text_split.size() != 1)
 			current_val = text_split[1].to_int64();
+
 		options->add_item(text_split[0]);
+
 		options->set_item_metadata(i, current_val);
+
 		current_val += 1;
 	}
 }
@@ -535,12 +544,14 @@ EditorPropertyEnum::EditorPropertyEnum() {
 ///////////////////// FLAGS /////////////////////////
 
 void EditorPropertyFlags::_flag_toggled() {
-
 	uint32_t value = 0;
-	for (int i = 0; i < flags.size(); i++) {
+
+	for (unsigned i = 0; i < flags.size(); i++) {
 		if (flags[i]->is_pressed()) {
 			uint32_t val = 1;
+
 			val <<= flag_indices[i];
+
 			value |= val;
 		}
 	}
@@ -549,14 +560,14 @@ void EditorPropertyFlags::_flag_toggled() {
 }
 
 void EditorPropertyFlags::update_property() {
-
 	uint32_t value = get_edited_object()->get(get_edited_property());
 
-	for (int i = 0; i < flags.size(); i++) {
+	for (unsigned i = 0; i < flags.size(); i++) {
 		uint32_t val = 1;
-		val <<= flag_indices[i];
-		if (value & val) {
 
+		val <<= flag_indices[i];
+
+		if (value & val) {
 			flags[i]->set_pressed(true);
 		} else {
 			flags[i]->set_pressed(false);
@@ -564,25 +575,48 @@ void EditorPropertyFlags::update_property() {
 	}
 }
 
-void EditorPropertyFlags::setup(const Vector<String> &p_options) {
+CheckBox* EditorPropertyFlags::setup_add_checkbox(String p_option){
+	p_option = p_option.strip_edges();
+
+	if(p_option.empty() ){
+		return nullptr;
+	}
+
+	CheckBox *cb = memnew(CheckBox);
+
+	cb->set_text(p_option);
+	cb->set_clip_text(true);
+	cb->connect("pressed", this, "_flag_toggled");
+
+	add_focusable(cb);
+
+	vbox->add_child(cb);
+
+	flags.push_back(cb);
+
+	return cb;
+}
+
+void EditorPropertyFlags::setup(const std::vector<String> &p_options) {
 	ERR_FAIL_COND(flags.size());
 
-	bool first = true;
-	for (int i = 0; i < p_options.size(); i++) {
-		String option = p_options[i].strip_edges();
-		if (option != "") {
-			CheckBox *cb = memnew(CheckBox);
-			cb->set_text(option);
-			cb->set_clip_text(true);
-			cb->connect("pressed", this, "_flag_toggled");
-			add_focusable(cb);
-			vbox->add_child(cb);
-			flags.push_back(cb);
-			flag_indices.push_back(i);
-			if (first) {
-				set_label_reference(cb);
-				first = false;
-			}
+	{
+		auto it = p_options.begin();
+
+		CheckBox *cb = setup_add_checkbox(*it);
+
+		flag_indices.push_back(0);
+
+		if(cb){
+			set_label_reference(cb);
+		}
+
+		++it;
+
+		for(;it != p_options.end(); ++it){
+			setup_add_checkbox(*it);
+
+			flag_indices.push_back( std::distance(p_options.begin(), it) );
 		}
 	}
 }
@@ -605,9 +639,9 @@ class EditorPropertyLayersGrid : public Control {
 
 public:
 	uint32_t value;
-	Vector<Rect2> flag_rects;
-	Vector<String> names;
-	Vector<String> tooltips;
+	std::vector<Rect2> flag_rects;
+	std::vector<String> names;
+	std::vector<String> tooltips;
 
 	virtual Size2 get_minimum_size() const {
 		Ref<Font> font = get_font("font", "Label");
@@ -615,25 +649,31 @@ public:
 	}
 
 	virtual String get_tooltip(const Point2 &p_pos) const {
-		for (int i = 0; i < flag_rects.size(); i++) {
-			if (i < tooltips.size() && flag_rects[i].has_point(p_pos)) {
+		unsigned m_size = std::min(flag_rects.size(), tooltips.size() );
+
+		for (unsigned i = 0; i < m_size; i++) {
+			if (flag_rects[i].has_point(p_pos)) {
 				return tooltips[i];
 			}
 		}
+
 		return String();
 	}
 	void _gui_input(const Ref<InputEvent> &p_ev) {
 		Ref<InputEventMouseButton> mb = p_ev;
+
 		if (mb.is_valid() && mb->get_button_index() == BUTTON_LEFT && mb->is_pressed()) {
-			for (int i = 0; i < flag_rects.size(); i++) {
-				if (flag_rects[i].has_point(mb->get_position())) {
+			for (unsigned i = 0; i < flag_rects.size(); i++) {
+				if ( flag_rects[i].has_point( mb->get_position() ) ) {
 					//toggle
 					if (value & (1 << i)) {
 						value &= ~(1 << i);
 					} else {
 						value |= (1 << i);
 					}
+
 					emit_signal("flag_changed", value);
+
 					update();
 				}
 			}
@@ -722,24 +762,28 @@ void EditorPropertyLayers::setup(LayerType p_layer_type) {
 			break;
 	}
 
-	Vector<String> names;
-	Vector<String> tooltips;
-	for (int i = 0; i < 20; i++) {
+	std::vector<String> names;
+
+	std::vector<String> tooltips;
+
+	for (unsigned i = 0; i < 20; i++) {
 		String name;
 
 		if (ProjectSettings::get_singleton()->has_setting(basename + "/layer_" + itos(i + 1))) {
 			name = ProjectSettings::get_singleton()->get(basename + "/layer_" + itos(i + 1));
 		}
 
-		if (name == "") {
+		if (!name.empty() ) {
 			name = TTR("Layer") + " " + itos(i + 1);
 		}
 
 		names.push_back(name);
+
 		tooltips.push_back(name + "\n" + vformat(TTR("Bit %d, value %d"), i, 1 << i));
 	}
 
 	grid->names = names;
+
 	grid->tooltips = tooltips;
 }
 
@@ -982,7 +1026,7 @@ void EditorPropertyEasing::_draw_easing() {
 	Rect2 r(Point2(), s);
 	r = r.grow(3);
 
-	const int points = 48;
+	const unsigned points = 48;
 
 	float prev = 1.0;
 	const float exp = get_edited_object()->get(get_edited_property());
@@ -996,10 +1040,11 @@ void EditorPropertyEasing::_draw_easing() {
 		line_color = get_color("font_color", "Label") * Color(1, 1, 1, 0.9);
 	}
 
-	Vector<Point2> lines;
-	for (int i = 1; i <= points; i++) {
+	std::vector<Point2> lines;
 
+	for (unsigned i = 1; i <= points; i++) {
 		float ifl = i / float(points);
+
 		float iflp = (i - 1) / float(points);
 
 		const float h = 1.0 - Math::ease(ifl, exp);
@@ -1011,6 +1056,7 @@ void EditorPropertyEasing::_draw_easing() {
 
 		lines.push_back(Point2(ifl * s.width, h * s.height));
 		lines.push_back(Point2(iflp * s.width, prev * s.height));
+
 		prev = h;
 	}
 
@@ -1996,7 +2042,7 @@ void EditorPropertyNodePath::update_property() {
 	assign->set_icon(EditorNode::get_singleton()->get_object_icon(target_node, "Node"));
 }
 
-void EditorPropertyNodePath::setup(const NodePath &p_base_hint, Vector<StringName> p_valid_types, bool p_use_path_from_scene_root) {
+void EditorPropertyNodePath::setup(const NodePath &p_base_hint, std::vector<StringName> p_valid_types, bool p_use_path_from_scene_root) {
 
 	base_hint = p_base_hint;
 	valid_types = p_valid_types;
@@ -2058,13 +2104,14 @@ EditorPropertyRID::EditorPropertyRID() {
 ////////////// RESOURCE //////////////////////
 
 void EditorPropertyResource::_file_selected(const String &p_path) {
-
 	RES res = ResourceLoader::load(p_path);
 
 	ERR_FAIL_COND_MSG(res.is_null(), "Cannot load resource from path '" + p_path + "'.");
 
 	List<PropertyInfo> prop_list;
+
 	get_edited_object()->get_property_list(&prop_list);
+
 	String property_types;
 
 	for (List<PropertyInfo>::Element *E = prop_list.front(); E; E = E->next()) {
@@ -2072,21 +2119,25 @@ void EditorPropertyResource::_file_selected(const String &p_path) {
 			property_types = E->get().hint_string;
 		}
 	}
-	if (!property_types.empty()) {
-		bool any_type_matches = false;
-		const Vector<String> split_property_types = property_types.split(",");
-		for (int i = 0; i < split_property_types.size(); ++i) {
-			if (res->is_class(split_property_types[i])) {
-				any_type_matches = true;
-				break;
-			}
-		}
 
-		if (!any_type_matches)
+	if (!property_types.empty()) {
+		const std::vector<String> split_property_types = property_types.split(",");
+
+		auto it = std::find_if(split_property_types.begin(), split_property_types.end(),
+			[&](const String& s){
+				if (res->is_class(s) ) {
+					return true;
+				}
+				return false;
+			}
+		);
+
+		if (it == split_property_types.end() )
 			EditorNode::get_singleton()->show_warning(vformat(TTR("The selected resource (%s) does not match any type expected for this property (%s)."), res->get_class(), property_types));
 	}
 
 	emit_changed(get_edited_property(), res);
+
 	update_property();
 }
 
@@ -2223,19 +2274,21 @@ void EditorPropertyResource::_menu_option(int p_which) {
 			RES res = get_edited_object()->get(get_edited_property());
 
 			if (p_which >= CONVERT_BASE_ID) {
+				unsigned to_type = p_which - CONVERT_BASE_ID;
 
-				int to_type = p_which - CONVERT_BASE_ID;
-
-				Vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
+				std::vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
 
 				ERR_FAIL_INDEX(to_type, conversions.size());
 
 				Ref<Resource> new_res = conversions[to_type]->convert(res);
 
 				emit_changed(get_edited_property(), new_res);
+
 				update_property();
+
 				break;
 			}
+
 			ERR_FAIL_COND(inheritors_array.empty());
 
 			String intype = inheritors_array[p_which - TYPE_BASE_ID];
@@ -2255,7 +2308,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 
 				if (!scene_tree) {
 					scene_tree = memnew(SceneTreeDialog);
-					Vector<StringName> valid_types;
+					std::vector<StringName> valid_types;
 					valid_types.push_back("Viewport");
 					scene_tree->get_scene_tree()->set_valid_types(valid_types);
 					scene_tree->get_scene_tree()->set_show_enabled_subscene(true);
@@ -2343,7 +2396,7 @@ void EditorPropertyResource::_update_menu_items() {
 	} else if (base_type != "") {
 		int idx = 0;
 
-		Vector<EditorData::CustomType> custom_resources;
+		std::vector<EditorData::CustomType> custom_resources;
 
 		if (EditorNode::get_editor_data().get_custom_types().has("Resource")) {
 			custom_resources = EditorNode::get_editor_data().get_custom_types()["Resource"];
@@ -2358,8 +2411,8 @@ void EditorPropertyResource::_update_menu_items() {
 			List<StringName> inheritors;
 			ClassDB::get_inheriters_from_class(base.strip_edges(), &inheritors);
 
-			for (int j = 0; j < custom_resources.size(); j++) {
-				inheritors.push_back(custom_resources[j].name);
+			for(auto&& custom_resource : custom_resources){
+				inheritors.push_back(custom_resource.name);
 			}
 
 			List<StringName>::Element *E = inheritors.front();
@@ -2381,20 +2434,21 @@ void EditorPropertyResource::_update_menu_items() {
 			for (Set<String>::Element *F = valid_inheritors.front(); F; F = F->next()) {
 				const String &t = F->get();
 
-				bool is_custom_resource = false;
 				Ref<Texture> icon;
-				if (!custom_resources.empty()) {
-					for (int j = 0; j < custom_resources.size(); j++) {
-						if (custom_resources[j].name == t) {
-							is_custom_resource = true;
-							if (custom_resources[j].icon.is_valid())
-								icon = custom_resources[j].icon;
-							break;
-						}
-					}
-				}
 
-				if (!is_custom_resource && !(ScriptServer::is_global_class(t) || ClassDB::can_instance(t)))
+				auto it = std::find_if(custom_resources.begin(), custom_resources.end(),
+					[&](const EditorData::CustomType& custom_resource){
+						if(custom_resource.name == t){
+							if (custom_resource.icon.is_valid() )
+								icon = custom_resource.icon;
+
+							return true;
+						}
+						return false;
+					}
+				);
+
+				if (it == custom_resources.end() && !(ScriptServer::is_global_class(t) || ClassDB::can_instance(t)))
 					continue;
 
 				inheritors_array.push_back(t);
@@ -2464,19 +2518,20 @@ void EditorPropertyResource::_update_menu_items() {
 	}
 
 	if (!res.is_null()) {
+		std::vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
 
-		Vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
-		if (conversions.size()) {
+		if(!conversions.empty() ){
 			menu->add_separator();
 		}
-		for (int i = 0; i < conversions.size(); i++) {
-			String what = conversions[i]->converts_to();
-			Ref<Texture> icon;
-			if (has_icon(what, "EditorIcons")) {
 
+		for (unsigned i = 0; i < conversions.size(); i++) {
+			String what = conversions[i]->converts_to();
+
+			Ref<Texture> icon;
+
+			if (has_icon(what, "EditorIcons")) {
 				icon = get_icon(what, "EditorIcons");
 			} else {
-
 				icon = get_icon(what, "Resource");
 			}
 
@@ -2787,7 +2842,7 @@ bool EditorPropertyResource::_is_drop_valid(const Dictionary &p_drag_data) const
 
 	if (drag_data.has("type") && String(drag_data["type"]) == "files") {
 
-		Vector<String> files = drag_data["files"];
+		std::vector<String> files = drag_data["files"];
 
 		if (files.size() == 1) {
 			String file = files[0];
@@ -2828,7 +2883,7 @@ void EditorPropertyResource::drop_data_fw(const Point2 &p_point, const Variant &
 
 	if (drag_data.has("type") && String(drag_data["type"]) == "files") {
 
-		Vector<String> files = drag_data["files"];
+		std::vector<String> files = drag_data["files"];
 
 		if (files.size() == 1) {
 			String file = files[0];
@@ -2942,13 +2997,13 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 
 			if (p_hint == PROPERTY_HINT_ENUM) {
 				EditorPropertyEnum *editor = memnew(EditorPropertyEnum);
-				Vector<String> options = p_hint_text.split(",");
+				std::vector<String> options = p_hint_text.split(",");
 				editor->setup(options);
 				add_property_editor(p_path, editor);
 
 			} else if (p_hint == PROPERTY_HINT_FLAGS) {
 				EditorPropertyFlags *editor = memnew(EditorPropertyFlags);
-				Vector<String> options = p_hint_text.split(",");
+				std::vector<String> options = p_hint_text.split(",");
 				editor->setup(options);
 				add_property_editor(p_path, editor);
 
@@ -3015,15 +3070,20 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 
 			if (p_hint == PROPERTY_HINT_EXP_EASING) {
 				EditorPropertyEasing *editor = memnew(EditorPropertyEasing);
+
 				bool full = true;
+
 				bool flip = false;
-				Vector<String> hints = p_hint_text.split(",");
-				for (int i = 0; i < hints.size(); i++) {
-					String h = hints[i].strip_edges();
-					if (h == "attenuation") {
+
+				std::vector<String> hints = p_hint_text.split(",");
+
+				for(auto&& hint : hints){
+					String h = hint.strip_edges();
+
+					if(h == "attenuation"){
 						flip = true;
-					}
-					if (h == "inout") {
+						continue;
+					}else if(h == "inout"){
 						full = true;
 					}
 				}
@@ -3068,7 +3128,7 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 
 			if (p_hint == PROPERTY_HINT_ENUM) {
 				EditorPropertyTextEnum *editor = memnew(EditorPropertyTextEnum);
-				Vector<String> options = p_hint_text.split(",");
+				std::vector<String> options = p_hint_text.split(",");
 				editor->setup(options);
 				add_property_editor(p_path, editor);
 			} else if (p_hint == PROPERTY_HINT_MULTILINE_TEXT) {
@@ -3080,7 +3140,7 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 				add_property_editor(p_path, editor);
 			} else if (p_hint == PROPERTY_HINT_DIR || p_hint == PROPERTY_HINT_FILE || p_hint == PROPERTY_HINT_SAVE_FILE || p_hint == PROPERTY_HINT_GLOBAL_DIR || p_hint == PROPERTY_HINT_GLOBAL_FILE) {
 
-				Vector<String> extensions = p_hint_text.split(",");
+				std::vector<String> extensions = p_hint_text.split(",");
 				bool global = p_hint == PROPERTY_HINT_GLOBAL_DIR || p_hint == PROPERTY_HINT_GLOBAL_FILE;
 				bool folder = p_hint == PROPERTY_HINT_DIR || p_hint == PROPERTY_HINT_GLOBAL_DIR;
 				bool save = p_hint == PROPERTY_HINT_SAVE_FILE;
@@ -3296,11 +3356,11 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 
 			EditorPropertyNodePath *editor = memnew(EditorPropertyNodePath);
 			if (p_hint == PROPERTY_HINT_NODE_PATH_TO_EDITED_NODE && p_hint_text != String()) {
-				editor->setup(p_hint_text, Vector<StringName>(), (p_usage & PROPERTY_USAGE_NODE_PATH_FROM_SCENE_ROOT));
+				editor->setup(p_hint_text, std::vector<StringName>(), (p_usage & PROPERTY_USAGE_NODE_PATH_FROM_SCENE_ROOT));
 			}
 			if (p_hint == PROPERTY_HINT_NODE_PATH_VALID_TYPES && p_hint_text != String()) {
-				Vector<String> types = p_hint_text.split(",", false);
-				Vector<StringName> sn = Variant(types); //convert via variant
+				std::vector<String> types = p_hint_text.split(",", false);
+				std::vector<StringName> sn = Variant(types); //convert via variant
 				editor->setup(NodePath(), sn, (p_usage & PROPERTY_USAGE_NODE_PATH_FROM_SCENE_ROOT));
 			}
 			add_property_editor(p_path, editor);

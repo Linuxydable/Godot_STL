@@ -31,6 +31,8 @@
 #ifndef EDITOR_PROPERTIES_H
 #define EDITOR_PROPERTIES_H
 
+#include <vector>
+
 #include "editor/create_dialog.h"
 #include "editor/editor_inspector.h"
 #include "editor/editor_spin_slider.h"
@@ -96,14 +98,14 @@ protected:
 	static void _bind_methods();
 
 public:
-	void setup(const Vector<String> &p_options);
+	void setup(const std::vector<String> &p_options);
 	virtual void update_property();
 	EditorPropertyTextEnum();
 };
 
 class EditorPropertyPath : public EditorProperty {
 	GDCLASS(EditorPropertyPath, EditorProperty);
-	Vector<String> extensions;
+	std::vector<String> extensions;
 	bool folder;
 	bool global;
 	bool save_mode;
@@ -120,7 +122,7 @@ protected:
 	void _notification(int p_what);
 
 public:
-	void setup(const Vector<String> &p_extensions, bool p_folder, bool p_global);
+	void setup(const std::vector<String> &p_extensions, bool p_folder, bool p_global);
 	void set_save_mode();
 	virtual void update_property();
 	EditorPropertyPath();
@@ -204,7 +206,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void setup(const Vector<String> &p_options);
+	void setup(const std::vector<String> &p_options);
 	virtual void update_property();
 	void set_option_button_clip(bool p_enable);
 	EditorPropertyEnum();
@@ -213,16 +215,17 @@ public:
 class EditorPropertyFlags : public EditorProperty {
 	GDCLASS(EditorPropertyFlags, EditorProperty);
 	VBoxContainer *vbox;
-	Vector<CheckBox *> flags;
-	Vector<int> flag_indices;
+	std::vector<CheckBox *> flags;
+	std::vector<int> flag_indices;
 
 	void _flag_toggled();
 
 protected:
 	static void _bind_methods();
+	CheckBox* setup_add_checkbox(String p_option);
 
 public:
-	void setup(const Vector<String> &p_options);
+	void setup(const std::vector<String> &p_options);
 	virtual void update_property();
 	EditorPropertyFlags();
 };
@@ -345,8 +348,8 @@ public:
 	EditorPropertyEasing();
 };
 
-class EditorPropertyVector2 : public EditorProperty {
-	GDCLASS(EditorPropertyVector2, EditorProperty);
+class EditorPropertystd::vector2 : public EditorProperty {
+	GDCLASS(EditorPropertystd::vector2, EditorProperty);
 	EditorSpinSlider *spin[2];
 	bool setting;
 	void _value_changed(double p_val, const String &p_name);
@@ -358,7 +361,7 @@ protected:
 public:
 	virtual void update_property();
 	void setup(double p_min, double p_max, double p_step, bool p_no_slider);
-	EditorPropertyVector2();
+	EditorPropertystd::vector2();
 };
 
 class EditorPropertyRect2 : public EditorProperty {
@@ -377,8 +380,8 @@ public:
 	EditorPropertyRect2();
 };
 
-class EditorPropertyVector3 : public EditorProperty {
-	GDCLASS(EditorPropertyVector3, EditorProperty);
+class EditorPropertystd::vector3 : public EditorProperty {
+	GDCLASS(EditorPropertystd::vector3, EditorProperty);
 	EditorSpinSlider *spin[3];
 	bool setting;
 	void _value_changed(double p_val, const String &p_name);
@@ -390,7 +393,7 @@ protected:
 public:
 	virtual void update_property();
 	void setup(double p_min, double p_max, double p_step, bool p_no_slider);
-	EditorPropertyVector3();
+	EditorPropertystd::vector3();
 };
 
 class EditorPropertyPlane : public EditorProperty {
@@ -513,7 +516,7 @@ class EditorPropertyNodePath : public EditorProperty {
 	NodePath base_hint;
 	bool use_path_from_scene_root;
 
-	Vector<StringName> valid_types;
+	std::vector<StringName> valid_types;
 	void _node_selected(const NodePath &p_path);
 	void _node_assign();
 	void _node_clear();
@@ -524,7 +527,7 @@ protected:
 
 public:
 	virtual void update_property();
-	void setup(const NodePath &p_base_hint, Vector<StringName> p_valid_types, bool p_use_path_from_scene_root = true);
+	void setup(const NodePath &p_base_hint, std::vector<StringName> p_valid_types, bool p_use_path_from_scene_root = true);
 	EditorPropertyNodePath();
 };
 
@@ -561,7 +564,7 @@ class EditorPropertyResource : public EditorProperty {
 	Button *edit;
 	PopupMenu *menu;
 	EditorFileDialog *file;
-	Vector<String> inheritors_array;
+	std::vector<String> inheritors_array;
 	EditorInspector *sub_inspector;
 	VBoxContainer *sub_inspector_vbox;
 

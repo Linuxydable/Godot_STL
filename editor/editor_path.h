@@ -31,6 +31,8 @@
 #ifndef EDITOR_PATH_H
 #define EDITOR_PATH_H
 
+#include <vector>
+
 #include "editor_data.h"
 #include "scene/gui/menu_button.h"
 
@@ -40,10 +42,10 @@ class EditorPath : public MenuButton {
 
 	EditorHistory *history;
 
-	Vector<ObjectID> objects;
+	std::vector<ObjectID> objects;
 	EditorPath();
 
-	void _id_pressed(int p_idx);
+	void _id_pressed(unsigned p_idx);
 	void _about_to_show();
 	void _add_children_to_popup(Object *p_obj, int p_depth = 0);
 
