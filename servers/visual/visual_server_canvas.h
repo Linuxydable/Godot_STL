@@ -32,6 +32,7 @@
 #define VISUALSERVERCANVAS_H
 
 #include <vector>
+#include <algorithm>
 
 #include "rasterizer.h"
 #include "visual_server_viewport.h"
@@ -73,15 +74,15 @@ public:
 		}
 	};
 
-	struct ItemIndexSort {
+	struct{
 
 		_FORCE_INLINE_ bool operator()(const Item *p_left, const Item *p_right) const {
 
 			return p_left->index < p_right->index;
 		}
-	};
+	}ItemIndexSort;
 
-	struct ItemPtrSort {
+	struct{
 
 		_FORCE_INLINE_ bool operator()(const Item *p_left, const Item *p_right) const {
 
@@ -90,7 +91,7 @@ public:
 
 			return p_left->ysort_pos.y < p_right->ysort_pos.y;
 		}
-	};
+	}ItemPtrSort;
 
 	struct LightOccluderPolygon : RID_Data {
 
@@ -132,17 +133,31 @@ public:
 		RID parent;
 		float parent_scale;
 
+		// need_update : return iterator instead of int
 		int find_item(Item *p_item) {
-			for (int i = 0; i < child_items.size(); i++) {
-				if (child_items[i].item == p_item)
-					return i;
+			auto it = std::find_if(child_items.begin(), child_items.end(),
+				[&](const ChildItem& child_item){
+					if(child_item.item == p_item){
+						return true;
+					}
+					return false;
+				}
+			);
+
+			if(it != child_items.end()){
+				return std::distance(child_items.begin(), it);
 			}
 			return -1;
 		}
+
 		void erase_item(Item *p_item) {
 			int idx = find_item(p_item);
-			if (idx >= 0)
-				child_items.remove(idx);
+
+			if(idx >= 0){
+				auto it = child_items.begin() + idx;
+
+				child_items.erase(it);
+			}
 		}
 
 		Canvas() {

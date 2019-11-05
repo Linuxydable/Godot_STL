@@ -319,17 +319,17 @@ void ConvexPolygonShapeBullet::set_data(const Variant &p_data) {
 	setup(p_data);
 }
 
-void ConvexPolygonShapeBullet::get_vertices(Vector<Vector3> &out_vertices) {
+void ConvexPolygonShapeBullet::get_vertices(std::vector<Vector3> &out_vertices) {
 	const int n_of_vertices = vertices.size();
 	out_vertices.resize(n_of_vertices);
 	for (int i = n_of_vertices - 1; 0 <= i; --i) {
-		B_TO_G(vertices[i], out_vertices.write[i]);
+		B_TO_G(vertices[i], out_vertices[i]);
 	}
 }
 
 Variant ConvexPolygonShapeBullet::get_data() const {
 	ConvexPolygonShapeBullet *variable_self = const_cast<ConvexPolygonShapeBullet *>(this);
-	Vector<Vector3> out_vertices;
+	std::vector<Vector3> out_vertices;
 	variable_self->get_vertices(out_vertices);
 	return out_vertices;
 }
@@ -338,7 +338,7 @@ PhysicsServer::ShapeType ConvexPolygonShapeBullet::get_type() const {
 	return PhysicsServer::SHAPE_CONVEX_POLYGON;
 }
 
-void ConvexPolygonShapeBullet::setup(const Vector<Vector3> &p_vertices) {
+void ConvexPolygonShapeBullet::setup(const std::vector<Vector3> &p_vertices) {
 	// Make a copy of vertices
 	const int n_of_vertices = p_vertices.size();
 	vertices.resize(n_of_vertices);

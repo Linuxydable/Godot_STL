@@ -31,6 +31,8 @@
 #ifndef SHAPE_BULLET_H
 #define SHAPE_BULLET_H
 
+#include <vector>
+
 #include "core/math/geometry.h"
 #include "core/variant.h"
 #include "rid_bullet.h"
@@ -190,13 +192,13 @@ public:
 	ConvexPolygonShapeBullet();
 
 	virtual void set_data(const Variant &p_data);
-	void get_vertices(Vector<Vector3> &out_vertices);
+	void get_vertices(std::vector<Vector3> &out_vertices);
 	virtual Variant get_data() const;
 	virtual PhysicsServer::ShapeType get_type() const;
 	virtual btCollisionShape *create_bt_shape(const btVector3 &p_implicit_scale, real_t p_extra_edge = 0);
 
 private:
-	void setup(const Vector<Vector3> &p_vertices);
+	void setup(const std::vector<Vector3> &p_vertices);
 };
 
 class ConcavePolygonShapeBullet : public ShapeBullet {
