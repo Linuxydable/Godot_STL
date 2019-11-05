@@ -183,7 +183,7 @@ int BulletPhysicsDirectBodyState::get_contact_collider_shape(int p_contact_idx) 
 }
 
 Vector3 BulletPhysicsDirectBodyState::get_contact_collider_velocity_at_position(int p_contact_idx) const {
-	RigidBodyBullet::CollisionData &colDat = body->collisions.write[p_contact_idx];
+	RigidBodyBullet::CollisionData &colDat = body->collisions[p_contact_idx];
 
 	btVector3 hitLocation;
 	G_TO_B(colDat.hitLocalLocation, hitLocation);
@@ -213,7 +213,7 @@ void RigidBodyBullet::KinematicUtilities::setSafeMargin(btScalar p_margin) {
 }
 
 void RigidBodyBullet::KinematicUtilities::copyAllOwnerShapes() {
-	const Vector<CollisionObjectBullet::ShapeWrapper> &shapes_wrappers(owner->get_shapes_wrappers());
+	const std::vector<CollisionObjectBullet::ShapeWrapper> &shapes_wrappers(owner->get_shapes_wrappers());
 	const int shapes_count = shapes_wrappers.size();
 
 	just_delete_shapes(shapes_count);
@@ -228,8 +228,8 @@ void RigidBodyBullet::KinematicUtilities::copyAllOwnerShapes() {
 			continue;
 		}
 
-		shapes.write[i].transform = shape_wrapper->transform;
-		shapes.write[i].transform.getOrigin() *= owner_scale;
+		shapes[i].transform = shape_wrapper->transform;
+		shapes[i].transform.getOrigin() *= owner_scale;
 		switch (shape_wrapper->shape->get_type()) {
 			case PhysicsServer::SHAPE_SPHERE:
 			case PhysicsServer::SHAPE_BOX:
@@ -237,21 +237,22 @@ void RigidBodyBullet::KinematicUtilities::copyAllOwnerShapes() {
 			case PhysicsServer::SHAPE_CYLINDER:
 			case PhysicsServer::SHAPE_CONVEX_POLYGON:
 			case PhysicsServer::SHAPE_RAY: {
-				shapes.write[i].shape = static_cast<btConvexShape *>(shape_wrapper->shape->create_bt_shape(owner_scale * shape_wrapper->scale, safe_margin));
+				shapes[i].shape = static_cast<btConvexShape *>(shape_wrapper->shape->create_bt_shape(owner_scale * shape_wrapper->scale, safe_margin));
 			} break;
 			default:
 				WARN_PRINT("This shape is not supported to be kinematic!");
-				shapes.write[i].shape = NULL;
+				shapes[i].shape = NULL;
 		}
 	}
 }
 
 void RigidBodyBullet::KinematicUtilities::just_delete_shapes(int new_size) {
-	for (int i = shapes.size() - 1; 0 <= i; --i) {
-		if (shapes[i].shape) {
-			bulletdelete(shapes.write[i].shape);
+	for(auto it = shapes.rbegin(); it != shapes.rend(); ++it){
+		if( (*it).shape ){
+			bulletdelete( (*it).shape );
 		}
 	}
+
 	shapes.resize(new_size);
 }
 
@@ -421,7 +422,7 @@ void RigidBodyBullet::on_collision_checker_start() {
 	collisionsCount = 0;
 
 	// Swap array
-	Vector<RigidBodyBullet *> *s = prev_collision_traces;
+	std::vector<RigidBodyBullet *> *s = prev_collision_traces;
 	prev_collision_traces = curr_collision_traces;
 	curr_collision_traces = s;
 }
@@ -437,7 +438,7 @@ bool RigidBodyBullet::add_collision_object(RigidBodyBullet *p_otherObject, const
 		return false;
 	}
 
-	CollisionData &cd = collisions.write[collisionsCount];
+	CollisionData &cd = collisions[collisionsCount];
 	cd.hitLocalLocation = p_hitLocalLocation;
 	cd.otherObject = p_otherObject;
 	cd.hitWorldLocation = p_hitWorldLocation;
@@ -453,9 +454,19 @@ bool RigidBodyBullet::add_collision_object(RigidBodyBullet *p_otherObject, const
 }
 
 bool RigidBodyBullet::was_colliding(RigidBodyBullet *p_other_object) {
-	for (int i = prev_collision_count - 1; 0 <= i; --i) {
-		if ((*prev_collision_traces)[i] == p_other_object)
-			return true;
+	auto m_rbegin = prev_collision_traces.rbegin() + (prev_collision_traces.size() - prev_collision_count);
+
+	auto it = std::find_if(m_rbegin, prev_collision_traces.rend(),
+		[&](RigidBodyBullet* rbb){
+			if(rbb == p_other_object){
+				return true;
+			}
+			return false;
+		}
+	);
+
+	if(it!=prev_collision_traces.end()){
+		return true;
 	}
 	return false;
 }
