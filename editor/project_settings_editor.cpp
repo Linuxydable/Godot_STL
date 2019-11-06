@@ -30,6 +30,8 @@
 
 #include "project_settings_editor.h"
 
+#include <algorithm>
+
 #include "core/global_constants.h"
 #include "core/input_map.h"
 #include "core/os/keyboard.h"
@@ -1048,12 +1050,11 @@ void ProjectSettingsEditor::_copy_to_platform_about_to_show() {
 			presets.insert(E->get());
 		}
 
-		String custom = EditorExport::get_singleton()->get_export_preset(i)->get_custom_features();
-		Vector<String> custom_list = custom.split(",");
-		for (int j = 0; j < custom_list.size(); j++) {
-			String f = custom_list[j].strip_edges();
-			if (f != String()) {
-				presets.insert(f);
+		for(String s : EditorExport::get_singleton()->get_export_preset(i)->get_custom_features().split(",") ){
+			s = s.strip_edges();
+
+			if(!s.empty() ){
+				presets.insert(s);
 			}
 		}
 	}
@@ -1320,9 +1321,9 @@ void ProjectSettingsEditor::_translation_res_option_changed() {
 	String key = k->get_metadata(0);
 	int idx = ed->get_metadata(0);
 	String path = ed->get_metadata(1);
-	int which = ed->get_range(1);
+	unsigned which = ed->get_range(1);
 
-	Vector<String> langs = TranslationServer::get_all_locales();
+	std::vector<String> langs = TranslationServer::get_all_locales();
 
 	ERR_FAIL_INDEX(which, langs.size());
 
@@ -1517,8 +1518,8 @@ void ProjectSettingsEditor::_update_translations() {
 		}
 	}
 
-	Vector<String> langs = TranslationServer::get_all_locales();
-	Vector<String> names = TranslationServer::get_all_locale_names();
+	std::vector<String> langs = TranslationServer::get_all_locales();
+	std::vector<String> names = TranslationServer::get_all_locale_names();
 
 	//update filter tab
 	Array l_filter_all;
@@ -1562,7 +1563,7 @@ void ProjectSettingsEditor::_update_translations() {
 			t->set_editable(0, true);
 			t->set_tooltip(0, l);
 			t->set_checked(0, l_filter.has(l));
-			translation_filter_treeitems.write[i] = t;
+			translation_filter_treeitems[i] = t;
 		}
 	} else {
 		for (int i = 0; i < s; i++) {
@@ -1589,7 +1590,7 @@ void ProjectSettingsEditor::_update_translations() {
 
 	translation_locales_idxs_remap.clear();
 	translation_locales_idxs_remap.resize(l_filter.size());
-	int fl_idx_count = translation_locales_idxs_remap.size();
+	unsigned fl_idx_count = translation_locales_idxs_remap.size();
 
 	String langnames = "";
 	int l_idx = 0;
@@ -1602,7 +1603,7 @@ void ProjectSettingsEditor::_update_translations() {
 					if (langnames.length() > 0)
 						langnames += ",";
 					langnames += names[i];
-					translation_locales_idxs_remap.write[l_idx] = i;
+					translation_locales_idxs_remap[l_idx] = i;
 					l_idx++;
 				}
 			}
@@ -1618,33 +1619,43 @@ void ProjectSettingsEditor::_update_translations() {
 		Dictionary remaps = ProjectSettings::get_singleton()->get("locale/translation_remaps");
 		List<Variant> rk;
 		remaps.get_key_list(&rk);
-		Vector<String> keys;
+
+		// need_update : maybe keys can be a set
+		std::vector<String> keys;
+
 		for (List<Variant>::Element *E = rk.front(); E; E = E->next()) {
 			keys.push_back(E->get());
 		}
-		keys.sort();
 
-		for (int i = 0; i < keys.size(); i++) {
+		std::sort(keys.begin(), keys.end() );
 
+		for (auto&& key : keys) {
 			TreeItem *t = translation_remap->create_item(root);
+
 			t->set_editable(0, false);
-			t->set_text(0, keys[i].replace_first("res://", ""));
-			t->set_tooltip(0, keys[i]);
-			t->set_metadata(0, keys[i]);
+			t->set_text(0, key.replace_first("res://", ""));
+			t->set_tooltip(0, key);
+			t->set_metadata(0, key);
 			t->add_button(0, get_icon("Remove", "EditorIcons"), 0, false, TTR("Remove"));
-			if (keys[i] == remap_selected) {
+
+			if (key == remap_selected) {
 				t->select(0);
+
 				translation_res_option_add_button->set_disabled(false);
 
-				PoolStringArray selected = remaps[keys[i]];
-				for (int j = 0; j < selected.size(); j++) {
+				PoolStringArray selected = remaps[key];
 
+				for (int j = 0; j < selected.size(); j++) {
 					String s2 = selected[j];
+
 					int qp = s2.find_last(":");
+
 					String path = s2.substr(0, qp);
+
 					String locale = s2.substr(qp + 1, s2.length());
 
 					TreeItem *t2 = translation_remap_options->create_item(root2);
+
 					t2->set_editable(0, false);
 					t2->set_text(0, path.replace_first("res://", ""));
 					t2->set_tooltip(0, path);
@@ -1654,16 +1665,17 @@ void ProjectSettingsEditor::_update_translations() {
 					t2->set_text(1, langnames);
 					t2->set_editable(1, true);
 					t2->set_metadata(1, path);
+
 					int idx = langs.find(locale);
+
 					if (idx < 0)
 						idx = 0;
 
-					int f_idx = translation_locales_idxs_remap.find(idx);
-					if (f_idx != -1 && fl_idx_count > 0 && filter_mode == SHOW_ONLY_SELECTED_LOCALES) {
+					auto it = std::find(translation_locales_idxs_remap.begin(), translation_locales_idxs_remap.end(), idx);
 
-						t2->set_range(1, f_idx);
-					} else {
-
+					if(it != translation_locales_idxs_remap.end() && fl_idx_count > 0 && filter_mode == SHOW_ONLY_SELECTED_LOCALES){
+						t2->set_range(1, std::distance(translation_locales_idxs_remap.begin(), it) );
+					}else{
 						t2->set_range(1, idx);
 					}
 				}
@@ -2014,7 +2026,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 	translations->set_name(TTR("Localization"));
 	tab_container->add_child(translations);
 	//remap for properly select language in popup
-	translation_locales_idxs_remap = Vector<int>();
+	translation_locales_idxs_remap = std::vector<int>();
 	translation_locales_list_created = false;
 
 	{

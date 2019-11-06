@@ -31,6 +31,8 @@
 #ifndef PROJECT_SETTINGS_H
 #define PROJECT_SETTINGS_H
 
+#include <vector>
+
 #include "core/undo_redo.h"
 #include "editor/editor_autoload_settings.h"
 #include "editor/editor_data.h"
@@ -104,8 +106,8 @@ class ProjectSettingsEditor : public AcceptDialog {
 	Tree *translation_filter;
 	bool translation_locales_list_created;
 	OptionButton *translation_locale_filter_mode;
-	Vector<TreeItem *> translation_filter_treeitems;
-	Vector<int> translation_locales_idxs_remap;
+	std::vector<TreeItem *> translation_filter_treeitems;
+	std::vector<int> translation_locales_idxs_remap;
 
 	EditorAutoloadSettings *autoload_settings;
 

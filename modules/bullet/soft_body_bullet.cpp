@@ -30,6 +30,8 @@
 
 #include "soft_body_bullet.h"
 
+#include <algorithm>
+
 #include "bullet_types_converter.h"
 #include "bullet_utilities.h"
 #include "scene/3d/soft_body.h"
@@ -84,7 +86,6 @@ void SoftBodyBullet::update_visual_server(SoftBodyVisualServerHandler *p_visual_
 	const btSoftBody::tNodeArray &nodes(bt_soft_body->m_nodes);
 	const int nodes_count = nodes.size();
 
-	const Vector<int> *vs_indices;
 	const void *vertex_position;
 	const void *vertex_normal;
 
@@ -92,12 +93,10 @@ void SoftBodyBullet::update_visual_server(SoftBodyVisualServerHandler *p_visual_
 		vertex_position = reinterpret_cast<const void *>(&nodes[vertex_index].m_x);
 		vertex_normal = reinterpret_cast<const void *>(&nodes[vertex_index].m_n);
 
-		vs_indices = &indices_table[vertex_index];
+		for(auto&& vs_indices : indices_table[vertex_index]){
+			p_visual_server_handler->set_vertex(vs_indices, vertex_position);
 
-		const int vs_indices_size(vs_indices->size());
-		for (int x = 0; x < vs_indices_size; ++x) {
-			p_visual_server_handler->set_vertex((*vs_indices)[x], vertex_position);
-			p_visual_server_handler->set_normal((*vs_indices)[x], vertex_normal);
+			p_visual_server_handler->set_normal(vs_indices, vertex_normal);
 		}
 	}
 
@@ -217,8 +216,8 @@ btScalar SoftBodyBullet::get_node_mass(int node_index) const {
 
 void SoftBodyBullet::reset_all_node_mass() {
 	if (bt_soft_body) {
-		for (int i = pinned_nodes.size() - 1; 0 <= i; --i) {
-			bt_soft_body->setMass(pinned_nodes[i], 1);
+		for(auto it = pinned_nodes.rbegin(); it != pinned_nodes.rend(); ++it){
+			bt_soft_body->setMass(*it, 1);
 		}
 	}
 	pinned_nodes.resize(0);
@@ -328,7 +327,7 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 
 	{
 		/// This is the map of visual server indices to physics indices (So it's the inverse of idices_map), Thanks to it I don't need make a heavy search in the indices_map
-		Vector<int> vs_indices_to_physics_table;
+		std::vector<int> vs_indices_to_physics_table;
 
 		{ // Map vertices
 			indices_table.resize(0);
@@ -350,17 +349,17 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 				} else {
 					// Create new one
 					unique_vertices[p_vertices_read[vs_vertex_index]] = vertex_id = index++;
-					indices_table.push_back(Vector<int>());
+					indices_table.push_back(std::vector<int>());
 				}
 
-				indices_table.write[vertex_id].push_back(vs_vertex_index);
+				indices_table[vertex_id].push_back(vs_vertex_index);
 				vs_indices_to_physics_table.push_back(vertex_id);
 			}
 		}
 
 		const int indices_map_size(indices_table.size());
 
-		Vector<btScalar> bt_vertices;
+		std::vector<btScalar> bt_vertices;
 
 		{ // Parse vertices to bullet
 
@@ -374,7 +373,7 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 			}
 		}
 
-		Vector<int> bt_triangles;
+		std::vector<int> bt_triangles;
 		const int triangles_size(p_indices.size() / 3);
 
 		{ // Parse indices
@@ -384,14 +383,14 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 			PoolVector<int>::Read p_indices_read = p_indices.read();
 
 			for (int i = 0; i < triangles_size; ++i) {
-				bt_triangles.write[3 * i + 0] = vs_indices_to_physics_table[p_indices_read[3 * i + 2]];
-				bt_triangles.write[3 * i + 1] = vs_indices_to_physics_table[p_indices_read[3 * i + 1]];
-				bt_triangles.write[3 * i + 2] = vs_indices_to_physics_table[p_indices_read[3 * i + 0]];
+				bt_triangles[3 * i + 0] = vs_indices_to_physics_table[p_indices_read[3 * i + 2]];
+				bt_triangles[3 * i + 1] = vs_indices_to_physics_table[p_indices_read[3 * i + 1]];
+				bt_triangles[3 * i + 2] = vs_indices_to_physics_table[p_indices_read[3 * i + 0]];
 			}
 		}
 
 		btSoftBodyWorldInfo fake_world_info;
-		bt_soft_body = btSoftBodyHelpers::CreateFromTriMesh(fake_world_info, &bt_vertices[0], &bt_triangles[0], triangles_size, false);
+		bt_soft_body = btSoftBodyHelpers::CreateFromTriMesh(fake_world_info, &bt_vertices[0], &bt_triangles, triangles_size, false);
 		setup_soft_body();
 	}
 }
@@ -446,29 +445,38 @@ void SoftBodyBullet::setup_soft_body() {
 	bt_soft_body->updateBounds();
 
 	// Set pinned nodes
-	for (int i = pinned_nodes.size() - 1; 0 <= i; --i) {
-		bt_soft_body->setMass(pinned_nodes[i], 0);
+	for(auto it = pinned_nodes.rbegin(); it != pinned_nodes.rend(); ++it){
+		bt_soft_body->setMass(*it, 0);
 	}
 }
 
+// need_update : maybe pinned_nodes can be a set
 void SoftBodyBullet::pin_node(int p_node_index) {
-	if (-1 == search_node_pinned(p_node_index)) {
+	if (search_node_pinned(p_node_index) == -1) {
 		pinned_nodes.push_back(p_node_index);
 	}
 }
 
 void SoftBodyBullet::unpin_node(int p_node_index) {
 	const int id = search_node_pinned(p_node_index);
-	if (-1 != id) {
-		pinned_nodes.remove(id);
+
+	if(id != -1){
+		pinned_nodes.erase( pinned_nodes.begin()+id );
 	}
 }
 
 int SoftBodyBullet::search_node_pinned(int p_node_index) const {
-	for (int i = pinned_nodes.size() - 1; 0 <= i; --i) {
-		if (p_node_index == pinned_nodes[i]) {
-			return i;
+	auto it = std::find_if(pinned_nodes.begin(), pinned_nodes.end(),
+		[&](const int& pinned_node){
+			if (pinned_node == p_node_index) {
+				return true;
+			}
+			return false;
 		}
+	);
+
+	if(it != pinned_nodes.end() ){
+		return std::distance(pinned_nodes.begin(), it);
 	}
 	return -1;
 }
