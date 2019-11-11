@@ -30,6 +30,8 @@
 
 #include "bullet_physics_server.h"
 
+#include <algorithm>
+
 #include "bullet_utilities.h"
 #include "cone_twist_joint_bullet.h"
 #include "core/class_db.h"
@@ -186,12 +188,18 @@ void BulletPhysicsServer::space_set_active(RID p_space, bool p_active) {
 		return;
 	}
 
+	// need_update : active_spaces_count is useless
 	if (p_active) {
 		++active_spaces_count;
 		active_spaces.push_back(space);
 	} else {
 		--active_spaces_count;
-		active_spaces.erase(space);
+
+		auto it = std::find(active_spaces.begin(), active_spaces.end(), space);
+
+		if(it != active_spaces.end() ){
+			active_spaces.erase(it);
+		}
 	}
 }
 
@@ -199,7 +207,12 @@ bool BulletPhysicsServer::space_is_active(RID p_space) const {
 	SpaceBullet *space = space_owner.get(p_space);
 	ERR_FAIL_COND_V(!space, false);
 
-	return -1 != active_spaces.find(space);
+	auto it = std::find(active_spaces.begin(), active_spaces.end(), space);
+
+	if(it != active_spaces.end() ){
+		return std::distance(active_spaces.begin(), it);
+	}
+	return -1;
 }
 
 void BulletPhysicsServer::space_set_param(RID p_space, SpaceParameter p_param, real_t p_value) {
@@ -228,9 +241,9 @@ void BulletPhysicsServer::space_set_debug_contacts(RID p_space, int p_max_contac
 	space->set_debug_contacts(p_max_contacts);
 }
 
-Vector<Vector3> BulletPhysicsServer::space_get_contacts(RID p_space) const {
+std::vector<Vector3> BulletPhysicsServer::space_get_contacts(RID p_space) const {
 	SpaceBullet *space = space_owner.get(p_space);
-	ERR_FAIL_COND_V(!space, Vector<Vector3>());
+	ERR_FAIL_COND_V(!space, std::vector<Vector3>());
 
 	return space->get_debug_contacts();
 }
