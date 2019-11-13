@@ -219,7 +219,7 @@ public:
 };
 
 class RigidCollisionObjectBullet : public CollisionObjectBullet, public ShapeOwnerBullet {
-	void internal_shape_destroy_0(const ShapeWrapper&, const bool& = false);
+	void internal_shape_destroy_0(ShapeWrapper*, const bool& = false);
 
 protected:
 	btCollisionShape *mainShape;

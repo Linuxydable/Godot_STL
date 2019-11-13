@@ -285,34 +285,38 @@ int RigidCollisionObjectBullet::find_shape(ShapeBullet *p_shape) const {
 	return -1;
 }
 
-void RigidCollisionObjectBullet::internal_shape_destroy_0(const ShapeWrapper& shapeW, const bool& p_permanentlyFromThisBody){
-	shapeW.shape->remove_owner(this, p_permanentlyFromThisBody);
+void RigidCollisionObjectBullet::internal_shape_destroy_0(ShapeWrapper* shapeW, const bool& p_permanentlyFromThisBody){
+	shapeW->shape->remove_owner(this, p_permanentlyFromThisBody);
 
-	if (shapeW.bt_shape == mainShape) {
+	if (shapeW->bt_shape == mainShape) {
 		mainShape = nullptr;
 	}
 
-	bulletdelete(shapeW.bt_shape);
+	delete shapeW->bt_shape;
+
+	shapeW->bt_shape = nullptr;
 }
 
 void RigidCollisionObjectBullet::remove_shape_full(ShapeBullet *p_shape) {
 	// Remove the shape, all the times it appears
 	// Reverse order required for delete.
-	shapes.erase(std::remove_if(shapes.begin(), shapes.end(),
-		[&](const ShapeWrapper& shapeW){
-			if(shapeW.shape == p_shape){
-				internal_shape_destroy_0(shapeW);
-				return true;
+	shapes.erase(
+		std::remove_if(shapes.begin(), shapes.end(),
+			[&](ShapeWrapper* shapeW){
+				if(shapeW->shape == p_shape){
+					internal_shape_destroy_0(shapeW);
+					return true;
+				}
+				return false;
 			}
-			return false;
-		}
-	, shapes.end() );
+		)
+	,shapes.end() );
 
 	reload_shapes();
 }
 
 void RigidCollisionObjectBullet::internal_shape_destroy(int p_index, bool p_permanentlyFromThisBody){
-	internal_shape_destroy_0(shapes[p_index], p_permanentlyFromThisBody);
+	internal_shape_destroy_0(&shapes[p_index], p_permanentlyFromThisBody);
 }
 
 void RigidCollisionObjectBullet::remove_shape_full(int p_index) {
