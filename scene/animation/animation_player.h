@@ -31,6 +31,8 @@
 #ifndef ANIMATION_PLAYER_H
 #define ANIMATION_PLAYER_H
 
+#include <vector>
+
 #include "scene/2d/node_2d.h"
 #include "scene/3d/skeleton.h"
 #include "scene/3d/spatial.h"
@@ -41,11 +43,11 @@
 class AnimatedValuesBackup {
 	struct Entry {
 		Object *object;
-		Vector<StringName> subpath; // Unused if bone
+		std::vector<StringName> subpath; // Unused if bone
 		int bone_idx; // -1 if not a bone
 		Variant value;
 	};
-	Vector<Entry> entries;
+	std::vector<Entry> entries;
 
 	friend class AnimationPlayer;
 
@@ -111,7 +113,7 @@ private:
 
 			TrackNodeCache *owner;
 			SpecialProperty special; //small optimization
-			Vector<StringName> subpath;
+			std::vector<StringName> subpath;
 			Object *object;
 			Variant value_accum;
 			uint64_t accum_pass;
@@ -128,7 +130,7 @@ private:
 
 		struct BezierAnim {
 
-			Vector<StringName> bezier_property;
+			std::vector<StringName> bezier_property;
 			TrackNodeCache *owner;
 			float bezier_accum;
 			Object *object;
@@ -190,7 +192,7 @@ private:
 	struct AnimationData {
 		String name;
 		StringName next;
-		Vector<TrackNodeCache *> node_cache;
+		std::vector<TrackNodeCache *> node_cache;
 		Ref<Animation> animation;
 	};
 

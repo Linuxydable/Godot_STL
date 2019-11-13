@@ -30,6 +30,10 @@
 
 #include "animation_player.h"
 
+#include <vector>
+
+#include "core/set.h"
+
 #include "core/engine.h"
 #include "core/message_queue.h"
 #include "scene/scene_string_names.h"
@@ -40,13 +44,12 @@
 #include "scene/2d/skeleton_2d.h"
 
 void AnimatedValuesBackup::update_skeletons() {
-
-	for (int i = 0; i < entries.size(); i++) {
-		if (entries[i].bone_idx != -1) {
+	for (const Entry& c_entry : entries) {
+		if (c_entry.bone_idx != -1) {
 			// 3D bone
-			Object::cast_to<Skeleton>(entries[i].object)->notification(Skeleton::NOTIFICATION_UPDATE_SKELETON);
+			Object::cast_to<Skeleton>(c_entry.object)->notification(Skeleton::NOTIFICATION_UPDATE_SKELETON);
 		} else {
-			Bone2D *bone = Object::cast_to<Bone2D>(entries[i].object);
+			Bone2D *bone = Object::cast_to<Bone2D>(c_entry.object);
 			if (bone && bone->skeleton) {
 				// 2D bone
 				bone->skeleton->_update_transform();
@@ -115,19 +118,21 @@ bool AnimationPlayer::_get(const StringName &p_name, Variant &r_ret) const {
 		r_ret = animation_get_next(which);
 
 	} else if (name == "blend_times") {
+		// need_update : use std::set here
+		std::vector<BlendKey> keys;
 
-		Vector<BlendKey> keys;
 		for (Map<BlendKey, float>::Element *E = blend_times.front(); E; E = E->next()) {
-
-			keys.ordered_insert(E->key());
+			keys.push_back(E->key() );
 		}
 
-		Array array;
-		for (int i = 0; i < keys.size(); i++) {
+		std::sort(keys.begin(), keys.end() );
 
-			array.push_back(keys[i].from);
-			array.push_back(keys[i].to);
-			array.push_back(blend_times[keys[i]]);
+		std::vector<BlendKey> keys0;
+
+		for(const BlendKey& key : keys){
+			keys0.push_back(key.from);
+			keys0.push_back(key.to);
+			keys0.push_back(blend_times[key]);
 		}
 
 		r_ret = array;
@@ -246,7 +251,7 @@ void AnimationPlayer::_ensure_node_caches(AnimationData *p_anim) {
 
 		p_anim->node_cache.write[i] = NULL;
 		RES resource;
-		Vector<StringName> leftover_path;
+		std::vector<StringName> leftover_path;
 		Node *child = parent->get_node_and_resource(a->track_get_path(i), resource, leftover_path);
 		ERR_CONTINUE_MSG(!child, "On Animation: '" + p_anim->name + "', couldn't resolve track:  '" + String(a->track_get_path(i)) + "'."); // couldn't find the child node
 		uint32_t id = resource.is_valid() ? resource->get_instance_id() : child->get_instance_id();
@@ -546,7 +551,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, float 
 				for (List<int>::Element *E = indices.front(); E; E = E->next()) {
 
 					StringName method = a->method_track_get_name(i, E->get());
-					Vector<Variant> params = a->method_track_get_params(i, E->get());
+					std::vector<Variant> params = a->method_track_get_params(i, E->get());
 
 					int s = params.size();
 
@@ -1604,15 +1609,12 @@ AnimatedValuesBackup AnimationPlayer::backup_animated_values() {
 	return backup;
 }
 
-void AnimationPlayer::restore_animated_values(const AnimatedValuesBackup &p_backup) {
-
-	for (int i = 0; i < p_backup.entries.size(); i++) {
-
-		const AnimatedValuesBackup::Entry *entry = &p_backup.entries[i];
-		if (entry->bone_idx == -1) {
-			entry->object->set_indexed(entry->subpath, entry->value);
-		} else {
-			Object::cast_to<Skeleton>(entry->object)->set_bone_pose(entry->bone_idx, entry->value);
+void AnimationPlayer::restore_animated_values(const AnimatedValuesBackup &p_backup){
+	for(const Entry& c_entry : entries){
+		if(c_entry.bone_idx == -1){
+			c_entry.object->set_indexed(c_entry.subpath, c_entry.value);
+		}else{
+			Object::cast_to<Skeleton>(c_entry.object)->set_bone_pose(c_entry.bone_idx, c_entry.value);
 		}
 	}
 }
