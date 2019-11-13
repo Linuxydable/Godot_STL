@@ -53,8 +53,9 @@ bool MeshInstance::_set(const StringName &p_name, const Variant &p_value) {
 	}
 
 	if (p_name.operator String().begins_with("material/")) {
-		int idx = p_name.operator String().get_slicec('/', 1).to_int();
-		if (idx >= materials.size() || idx < 0)
+		size_type idx = p_name.operator String().get_slicec('/', 1).to_int();
+
+		if(idx >= materials.size())
 			return false;
 
 		set_surface_material(idx, p_value);
@@ -76,9 +77,11 @@ bool MeshInstance::_get(const StringName &p_name, Variant &r_ret) const {
 	}
 
 	if (p_name.operator String().begins_with("material/")) {
-		int idx = p_name.operator String().get_slicec('/', 1).to_int();
-		if (idx >= materials.size() || idx < 0)
+		size_type idx = p_name.operator String().get_slicec('/', 1).to_int();
+
+		if(idx >= materials.size())
 			return false;
+
 		r_ret = materials[idx];
 		return true;
 	}
@@ -281,8 +284,7 @@ void MeshInstance::_notification(int p_what) {
 	}
 }
 
-int MeshInstance::get_surface_material_count() const {
-
+size_type MeshInstance::get_surface_material_count() const {
 	return materials.size();
 }
 
@@ -290,7 +292,7 @@ void MeshInstance::set_surface_material(int p_surface, const Ref<Material> &p_ma
 
 	ERR_FAIL_INDEX(p_surface, materials.size());
 
-	materials.write[p_surface] = p_material;
+	materials[p_surface] = p_material;
 
 	if (materials[p_surface].is_valid())
 		VS::get_singleton()->instance_set_surface_material(get_instance(), p_surface, materials[p_surface]->get_rid());
@@ -311,9 +313,9 @@ void MeshInstance::_mesh_changed() {
 }
 
 void MeshInstance::create_debug_tangents() {
+	std::vector<Vector3> lines;
 
-	Vector<Vector3> lines;
-	Vector<Color> colors;
+	std::vector<Color> colors;
 
 	Ref<Mesh> mesh = get_mesh();
 	if (!mesh.is_valid())
@@ -321,39 +323,53 @@ void MeshInstance::create_debug_tangents() {
 
 	for (int i = 0; i < mesh->get_surface_count(); i++) {
 		Array arrays = mesh->surface_get_arrays(i);
-		Vector<Vector3> verts = arrays[Mesh::ARRAY_VERTEX];
-		Vector<Vector3> norms = arrays[Mesh::ARRAY_NORMAL];
-		if (norms.size() == 0)
-			continue;
-		Vector<float> tangents = arrays[Mesh::ARRAY_TANGENT];
-		if (tangents.size() == 0)
+
+		std::vector<Vector3> verts = arrays[Mesh::ARRAY_VERTEX];
+
+		std::vector<Vector3> norms = arrays[Mesh::ARRAY_NORMAL];
+
+		if(norms.empty() )
 			continue;
 
-		for (int j = 0; j < verts.size(); j++) {
-			Vector3 v = verts[j];
-			Vector3 n = norms[j];
+		std::vector<float> tangents = arrays[Mesh::ARRAY_TANGENT];
+
+		if(tangents.empty() )
+			continue;
+
+		for (auto j = 0; j < verts.size(); j++) {
 			Vector3 t = Vector3(tangents[j * 4 + 0], tangents[j * 4 + 1], tangents[j * 4 + 2]);
-			Vector3 b = (n.cross(t)).normalized() * tangents[j * 4 + 3];
 
-			lines.push_back(v); //normal
+			Vector3 b = (norms[j].cross(t)).normalized() * tangents[j * 4 + 3];
+
+			lines.push_back(verts[j]); //normal
+
 			colors.push_back(Color(0, 0, 1)); //color
-			lines.push_back(v + n * 0.04); //normal
+
+			lines.push_back(verts[j] + norms[j] * 0.04); //normal
+
 			colors.push_back(Color(0, 0, 1)); //color
 
-			lines.push_back(v); //tangent
-			colors.push_back(Color(1, 0, 0)); //color
-			lines.push_back(v + t * 0.04); //tangent
+
+			lines.push_back(verts[j]); //tangent
+
 			colors.push_back(Color(1, 0, 0)); //color
 
-			lines.push_back(v); //binormal
+			lines.push_back(verts[j] + t * 0.04); //tangent
+
+			colors.push_back(Color(1, 0, 0)); //color
+
+
+			lines.push_back(verts[j]); //binormal
+
 			colors.push_back(Color(0, 1, 0)); //color
-			lines.push_back(v + b * 0.04); //binormal
+
+			lines.push_back(verts[j] + b * 0.04); //binormal
+
 			colors.push_back(Color(0, 1, 0)); //color
 		}
 	}
 
-	if (lines.size()) {
-
+	if(!lines.empty() ){
 		Ref<SpatialMaterial> sm;
 		sm.instance();
 

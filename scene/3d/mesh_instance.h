@@ -31,6 +31,8 @@
 #ifndef MESH_INSTANCE_H
 #define MESH_INSTANCE_H
 
+#include <vector>
+
 #include "scene/3d/skeleton.h"
 #include "scene/3d/visual_instance.h"
 #include "scene/resources/mesh.h"
@@ -57,7 +59,7 @@ protected:
 	};
 
 	Map<StringName, BlendShapeTrack> blend_shape_tracks;
-	Vector<Ref<Material> > materials;
+	std::vector<Ref<Material> > materials;
 
 	void _mesh_changed();
 	void _resolve_skeleton_path();
