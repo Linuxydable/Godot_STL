@@ -348,8 +348,8 @@ public:
 	EditorPropertyEasing();
 };
 
-class EditorPropertystd::vector2 : public EditorProperty {
-	GDCLASS(EditorPropertystd::vector2, EditorProperty);
+class EditorPropertyVector2 : public EditorProperty {
+	GDCLASS(EditorPropertyVector2, EditorProperty);
 	EditorSpinSlider *spin[2];
 	bool setting;
 	void _value_changed(double p_val, const String &p_name);
@@ -361,7 +361,7 @@ protected:
 public:
 	virtual void update_property();
 	void setup(double p_min, double p_max, double p_step, bool p_no_slider);
-	EditorPropertystd::vector2();
+	EditorPropertyVector2();
 };
 
 class EditorPropertyRect2 : public EditorProperty {
@@ -380,8 +380,8 @@ public:
 	EditorPropertyRect2();
 };
 
-class EditorPropertystd::vector3 : public EditorProperty {
-	GDCLASS(EditorPropertystd::vector3, EditorProperty);
+class EditorPropertyVector3 : public EditorProperty {
+	GDCLASS(EditorPropertyVector3, EditorProperty);
 	EditorSpinSlider *spin[3];
 	bool setting;
 	void _value_changed(double p_val, const String &p_name);
@@ -393,7 +393,7 @@ protected:
 public:
 	virtual void update_property();
 	void setup(double p_min, double p_max, double p_step, bool p_no_slider);
-	EditorPropertystd::vector3();
+	EditorPropertyVector3();
 };
 
 class EditorPropertyPlane : public EditorProperty {
