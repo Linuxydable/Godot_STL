@@ -37,19 +37,21 @@
 
 template <class T>
 class VSet {
-
 	std::vector<T> _data;
 
-	_FORCE_INLINE_ int _find(const T &p_val, bool &r_exact) const {
-
+	_FORCE_INLINE_ typename std::vector<T>::size_type _find(const T &p_val, bool &r_exact) const {
 		r_exact = false;
-		if (_data.empty())
+
+		if(_data.empty() )
 			return 0;
 
-		int low = 0;
-		int high = _data.size() - 1;
+		typename std::vector<T>::size_type low = 0;
+
+		auto high = _data.size() - 1;
+
 		const T *a = &_data[0];
-		int middle = 0;
+
+		typename std::vector<T>::size_type middle = 0;
 
 #ifdef DEBUG_ENABLED
 		if (low > high)
@@ -76,13 +78,15 @@ class VSet {
 	}
 
 	_FORCE_INLINE_ int _find_exact(const T &p_val) const {
-
-		if (_data.empty())
+		if(_data.empty() )
 			return -1;
 
-		int low = 0;
-		int high = _data.size() - 1;
-		int middle;
+		typename std::vector<T>::size_type low = 0;
+
+		auto high = _data.size() - 1;
+
+		typename std::vector<T>::size_type middle;
+
 		const T *a = &_data[0];
 
 		while (low <= high) {
@@ -102,12 +106,14 @@ class VSet {
 
 public:
 	void insert(const T &p_val) {
-
 		bool exact;
-		int pos = _find(p_val, exact);
+
+		typename std::vector<T>::size_type pos = _find(p_val, exact);
+
 		if (exact)
 			return;
-		_data.insert(pos, p_val);
+
+		_data.insert( _data.begin()+pos , p_val);
 	}
 
 	bool has(const T &p_val) const {
@@ -116,11 +122,12 @@ public:
 	}
 
 	void erase(const T &p_val) {
-
 		int pos = _find_exact(p_val);
+
 		if (pos < 0)
 			return;
-		_data.remove(pos);
+
+		_data.erase( _data.begin()+pos );
 	}
 
 	int find(const T &p_val) const {
@@ -134,7 +141,7 @@ public:
 
 	inline T &operator[](int p_index) {
 
-		return _data.write[p_index];
+		return _data[p_index];
 	}
 
 	inline const T &operator[](int p_index) const {
