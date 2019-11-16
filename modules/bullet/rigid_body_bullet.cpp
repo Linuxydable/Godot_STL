@@ -213,35 +213,32 @@ void RigidBodyBullet::KinematicUtilities::setSafeMargin(btScalar p_margin) {
 }
 
 void RigidBodyBullet::KinematicUtilities::copyAllOwnerShapes() {
-	const std::vector<CollisionObjectBullet::ShapeWrapper> &shapes_wrappers(owner->get_shapes_wrappers());
-	const int shapes_count = shapes_wrappers.size();
+	const std::vector<CollisionObjectBullet::ShapeWrapper>& shapes_wrappers(owner->get_shapes_wrappers());
 
-	just_delete_shapes(shapes_count);
+	just_delete_shapes(shapes_wrappers.size() );
 
-	const CollisionObjectBullet::ShapeWrapper *shape_wrapper;
+	const btVector3 owner_scale(owner->get_bt_body_scale());
 
-	btVector3 owner_scale(owner->get_bt_body_scale());
+	auto it0 = shapes.rbegin();
 
-	for (int i = shapes_count - 1; 0 <= i; --i) {
-		shape_wrapper = &shapes_wrappers[i];
-		if (!shape_wrapper->active) {
+	auto it1 = shapes_wrappers.rbegin();
+
+	for(; it1 != shapes_wrappers.rend(); ++it0, ++it1 ){
+		if (!(*it1).active) {
 			continue;
 		}
 
-		shapes[i].transform = shape_wrapper->transform;
-		shapes[i].transform.getOrigin() *= owner_scale;
-		switch (shape_wrapper->shape->get_type()) {
-			case PhysicsServer::SHAPE_SPHERE:
-			case PhysicsServer::SHAPE_BOX:
-			case PhysicsServer::SHAPE_CAPSULE:
-			case PhysicsServer::SHAPE_CYLINDER:
-			case PhysicsServer::SHAPE_CONVEX_POLYGON:
-			case PhysicsServer::SHAPE_RAY: {
-				shapes[i].shape = static_cast<btConvexShape *>(shape_wrapper->shape->create_bt_shape(owner_scale * shape_wrapper->scale, safe_margin));
-			} break;
-			default:
-				WARN_PRINT("This shape is not supported to be kinematic!");
-				shapes[i].shape = NULL;
+		(*it0).transform = (*it1).transform;
+
+		(*it0).transform.getOrigin() *= owner_scale;
+
+		if( (*it1).shape->get_type() & (PhysicsServer::SHAPE_SPHERE | PhysicsServer::SHAPE_BOX | PhysicsServer::SHAPE_CAPSULE
+			| PhysicsServer::SHAPE_CYLINDER | PhysicsServer::SHAPE_CONVEX_POLYGON | PhysicsServer::SHAPE_RAY) )
+			{
+			(*it0).shape = static_cast<btConvexShape *>( (*it1).shape->create_bt_shape(owner_scale * (*it1).scale, safe_margin));
+		}else{
+			WARN_PRINT("This shape is not supported to be kinematic!");
+			(*it0).shape = NULL;
 		}
 	}
 }
@@ -291,9 +288,11 @@ RigidBodyBullet::RigidBodyBullet() :
 	reload_axis_lock();
 
 	areasWhereIam.resize(maxAreasWhereIam);
-	for (int i = areasWhereIam.size() - 1; 0 <= i; --i) {
-		areasWhereIam.write[i] = NULL;
+
+	for(auto&& c_areasWhereIam : areasWhereIam){
+		c_areasWhereIam = NULL;
 	}
+
 	btBody->setSleepingThresholds(0.2, 0.2);
 
 	prev_collision_traces = &collision_traces_1;
@@ -447,16 +446,16 @@ bool RigidBodyBullet::add_collision_object(RigidBodyBullet *p_otherObject, const
 	cd.other_object_shape = p_other_shape_index;
 	cd.local_shape = p_local_shape_index;
 
-	curr_collision_traces->write[collisionsCount] = p_otherObject;
+	(*curr_collision_traces)[collisionsCount] = p_otherObject;
 
 	++collisionsCount;
 	return true;
 }
 
 bool RigidBodyBullet::was_colliding(RigidBodyBullet *p_other_object) {
-	auto m_rbegin = prev_collision_traces.rbegin() + (prev_collision_traces.size() - prev_collision_count);
+	auto m_rbegin = prev_collision_traces->rbegin() + ( prev_collision_traces->size() - prev_collision_count);
 
-	auto it = std::find_if(m_rbegin, prev_collision_traces.rend(),
+	auto it = std::find_if(m_rbegin, prev_collision_traces->rend(),
 		[&](RigidBodyBullet* rbb){
 			if(rbb == p_other_object){
 				return true;
@@ -465,7 +464,7 @@ bool RigidBodyBullet::was_colliding(RigidBodyBullet *p_other_object) {
 		}
 	);
 
-	if(it!=prev_collision_traces.end()){
+	if(it != prev_collision_traces->rend() ){
 		return true;
 	}
 	return false;
@@ -852,60 +851,71 @@ void RigidBodyBullet::reload_shapes() {
 void RigidBodyBullet::on_enter_area(AreaBullet *p_area) {
 	/// Add this area to the array in an ordered way
 	++areaWhereIamCount;
+
 	if (areaWhereIamCount >= maxAreasWhereIam) {
 		--areaWhereIamCount;
 		return;
 	}
-	for (int i = 0; i < areaWhereIamCount; ++i) {
 
-		if (NULL == areasWhereIam[i]) {
+	// need_update : if areaWhereIamCount is equal to areasWhereIam.size()
+	for(int i = 0; i < areaWhereIamCount; ++i){
+		if(areasWhereIam[i] == NULL) {
 			// This area has the highest priority
-			areasWhereIam.write[i] = p_area;
+			areasWhereIam[i] = p_area;
 			break;
-		} else {
-			if (areasWhereIam[i]->get_spOv_priority() > p_area->get_spOv_priority()) {
-				// The position was found, just shift all elements
-				for (int j = i; j < areaWhereIamCount; ++j) {
-					areasWhereIam.write[j + 1] = areasWhereIam[j];
-				}
-				areasWhereIam.write[i] = p_area;
-				break;
+		}else if(areasWhereIam[i]->get_spOv_priority() > p_area->get_spOv_priority() ){
+			// The position was found, just shift all elements
+			for(int j = i; j < areaWhereIamCount; ++j) {
+				areasWhereIam[j + 1] = areasWhereIam[j];
 			}
+
+			areasWhereIam[i] = p_area;
+			break;
 		}
 	}
+
 	if (PhysicsServer::AREA_SPACE_OVERRIDE_DISABLED != p_area->get_spOv_mode()) {
 		scratch_space_override_modificator();
 	}
 
 	if (p_area->is_spOv_gravityPoint()) {
 		++countGravityPointSpaces;
+
 		ERR_FAIL_COND(countGravityPointSpaces <= 0);
 	}
 }
 
 void RigidBodyBullet::on_exit_area(AreaBullet *p_area) {
 	RigidCollisionObjectBullet::on_exit_area(p_area);
+
 	/// Remove this area and keep the order
 	/// N.B. Since I don't want resize the array I can't use the "erase" function
 	bool wasTheAreaFound = false;
-	for (int i = 0; i < areaWhereIamCount; ++i) {
-		if (p_area == areasWhereIam[i]) {
+
+	// need_update : if areaWhereIamCount is equal to areasWhereIam.size()
+	for(int i = 0; i < areaWhereIamCount; ++i){
+		if (areasWhereIam[i] == p_area) {
 			// The area was found, just shift down all elements
 			for (int j = i; j < areaWhereIamCount; ++j) {
-				areasWhereIam.write[j] = areasWhereIam[j + 1];
+				areasWhereIam[j] = areasWhereIam[j + 1];
 			}
+
 			wasTheAreaFound = true;
 			break;
 		}
 	}
+
 	if (wasTheAreaFound) {
 		if (p_area->is_spOv_gravityPoint()) {
 			--countGravityPointSpaces;
+
 			ERR_FAIL_COND(countGravityPointSpaces < 0);
 		}
 
 		--areaWhereIamCount;
-		areasWhereIam.write[areaWhereIamCount] = NULL; // Even if this is not required, I clear the last element to be safe
+
+		areasWhereIam[areaWhereIamCount] = NULL; // Even if this is not required, I clear the last element to be safe
+
 		if (PhysicsServer::AREA_SPACE_OVERRIDE_DISABLED != p_area->get_spOv_mode()) {
 			scratch_space_override_modificator();
 		}
