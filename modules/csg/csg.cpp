@@ -29,6 +29,9 @@
 /*************************************************************************/
 
 #include "csg.h"
+
+#include <algorithm>
+
 #include "core/math/face3.h"
 #include "core/math/geometry.h"
 #include "core/os/os.h"
@@ -40,7 +43,6 @@ void CSGBrush::clear() {
 }
 
 void CSGBrush::build_from_faces(const PoolVector<Vector3> &p_vertices, const PoolVector<Vector2> &p_uvs, const PoolVector<bool> &p_smooth, const PoolVector<Ref<Material> > &p_materials, const PoolVector<bool> &p_invert_faces) {
-
 	clear();
 
 	int vc = p_vertices.size();
@@ -48,84 +50,95 @@ void CSGBrush::build_from_faces(const PoolVector<Vector3> &p_vertices, const Poo
 	ERR_FAIL_COND((vc % 3) != 0);
 
 	PoolVector<Vector3>::Read rv = p_vertices.read();
+
 	int uvc = p_uvs.size();
+
 	PoolVector<Vector2>::Read ruv = p_uvs.read();
+
 	int sc = p_smooth.size();
+
 	PoolVector<bool>::Read rs = p_smooth.read();
+
 	int mc = p_materials.size();
+
 	PoolVector<Ref<Material> >::Read rm = p_materials.read();
+
 	int ic = p_invert_faces.size();
+
 	PoolVector<bool>::Read ri = p_invert_faces.read();
 
 	Map<Ref<Material>, int> material_map;
 
 	faces.resize(p_vertices.size() / 3);
 
-	for (int i = 0; i < faces.size(); i++) {
-		Face &f = faces.write[i];
-		f.vertices[0] = rv[i * 3 + 0];
-		f.vertices[1] = rv[i * 3 + 1];
-		f.vertices[2] = rv[i * 3 + 2];
-		if (uvc == vc) {
-			f.uvs[0] = ruv[i * 3 + 0];
-			f.uvs[1] = ruv[i * 3 + 1];
-			f.uvs[2] = ruv[i * 3 + 2];
-		}
-		if (sc == vc / 3) {
-			f.smooth = rs[i];
-		} else {
-			f.smooth = false;
+	for(std::vector<Face>::size_type i = 0; i < faces.size(); i++){
+		faces[i].vertices[0] = rv[i * 3 + 0];
+		faces[i].vertices[1] = rv[i * 3 + 1];
+		faces[i].vertices[2] = rv[i * 3 + 2];
+
+		if(uvc == vc){
+			faces[i].uvs[0] = ruv[i * 3 + 0];
+			faces[i].uvs[1] = ruv[i * 3 + 1];
+			faces[i].uvs[2] = ruv[i * 3 + 2];
 		}
 
-		if (ic == vc / 3) {
-			f.invert = ri[i];
-		} else {
-			f.invert = false;
+		if(sc == vc / 3){
+			faces[i].smooth = rs[i];
+		}else{
+			faces[i].smooth = false;
 		}
 
-		if (mc == vc / 3) {
+		if(ic == vc / 3){
+			faces[i].invert = ri[i];
+		}else{
+			faces[i].invert = false;
+		}
+
+		if(mc == vc / 3){
 			Ref<Material> mat = rm[i];
-			if (mat.is_valid()) {
+
+			if(mat.is_valid()){
 				const Map<Ref<Material>, int>::Element *E = material_map.find(mat);
-				if (E) {
-					f.material = E->get();
-				} else {
-					f.material = material_map.size();
-					material_map[mat] = f.material;
+
+				if(E){
+					faces[i].material = E->get();
+				}else{
+					faces[i].material = material_map.size();
+
+					material_map[mat] = faces[i].material;
 				}
-			} else {
-				f.material = -1;
+			}else{
+				faces[i].material = -1;
 			}
 		}
 	}
 
 	materials.resize(material_map.size());
+
 	for (Map<Ref<Material>, int>::Element *E = material_map.front(); E; E = E->next()) {
-		materials.write[E->get()] = E->key();
+		materials[E->get()] = E->key();
 	}
 
 	_regen_face_aabbs();
 }
 
-void CSGBrush::_regen_face_aabbs() {
-
-	for (int i = 0; i < faces.size(); i++) {
-
-		faces.write[i].aabb.position = faces[i].vertices[0];
-		faces.write[i].aabb.expand_to(faces[i].vertices[1]);
-		faces.write[i].aabb.expand_to(faces[i].vertices[2]);
-		faces.write[i].aabb.grow_by(faces[i].aabb.get_longest_axis_size() * 0.001); //make it a tad bigger to avoid num precision errors
+void CSGBrush::_regen_face_aabbs(){
+	for(auto&& face : faces){
+		face.aabb.position = face.vertices[0];
+		face.aabb.expand_to(face.vertices[1]);
+		face.aabb.expand_to(face.vertices[2]);
+		face.aabb.grow_by(face.aabb.get_longest_axis_size() * 0.001); //make it a tad bigger to avoid num precision errors
 	}
 }
 
-void CSGBrush::copy_from(const CSGBrush &p_brush, const Transform &p_xform) {
-
+void CSGBrush::copy_from(const CSGBrush &p_brush, const Transform &p_xform){
 	faces = p_brush.faces;
+
 	materials = p_brush.materials;
 
-	for (int i = 0; i < faces.size(); i++) {
-		for (int j = 0; j < 3; j++) {
-			faces.write[i].vertices[j] = p_xform.xform(p_brush.faces[i].vertices[j]);
+	for(std::vector<Face>::size_type i = 0; i < faces.size(); i++){
+		for(unsigned j = 0; j < 3; j++){
+			faces[i].vertices[j] = p_xform.xform(p_brush.faces[i].vertices[j]);
 		}
 	}
 
@@ -234,15 +247,15 @@ static Vector2 interpolate_triangle_uv(const Vector2 &p_pos, const Vector2 *p_vt
 void CSGBrushOperation::BuildPoly::_clip_segment(const CSGBrush *p_brush, int p_face, const Vector2 *segment, MeshMerge &mesh_merge, bool p_for_B) {
 
 	//keep track of what was inserted
-	Vector<int> inserted_points;
+	std::vector<int> inserted_points;
 
 	//keep track of point indices for what was inserted, allowing reuse of points.
 	int segment_idx[2] = { -1, -1 };
 
 	//check if edge and poly share a vertex, of so, assign it to segment_idx
-	for (int i = 0; i < points.size(); i++) {
-		for (int j = 0; j < 2; j++) {
-			if (segment[j] == points[i].point) {
+	for(decltype(points.size() ) i = 0; i < points.size(); i++){
+		for(unsigned j = 0; j < 2; j++){
+			if(segment[j] == points[i].point){
 				segment_idx[j] = i;
 				inserted_points.push_back(i);
 				break;
@@ -251,47 +264,39 @@ void CSGBrushOperation::BuildPoly::_clip_segment(const CSGBrush *p_brush, int p_
 	}
 
 	//check if both segment points are shared with other vertices
-	if (segment_idx[0] != -1 && segment_idx[1] != -1) {
-
-		if (segment_idx[0] == segment_idx[1]) {
-			return; //segment was too tiny, both mapped to same point
-		}
-
-		bool found = false;
-
+	if(segment_idx[0] != -1 && segment_idx[1] != -1 && segment_idx[0] != segment_idx[1]){
 		//check if the segment already exists
-		for (int i = 0; i < edges.size(); i++) {
+		std::find_if(edges.begin(), edges.end(),
+			[&](const Edge& edge){
+				if( (edge.points[0] == segment_idx[0] && edge.points[1] == segment_idx[1])
+					|| (edge.points[0] == segment_idx[1] && edge.points[1] == segment_idx[0])
+					){
 
-			if (
-					(edges[i].points[0] == segment_idx[0] && edges[i].points[1] == segment_idx[1]) ||
-					(edges[i].points[0] == segment_idx[1] && edges[i].points[1] == segment_idx[0])) {
-				found = true;
-				break;
+					//directly add the new segment
+					Edge new_edge;
+
+					new_edge.points[0] = segment_idx[0];
+					new_edge.points[1] = segment_idx[1];
+
+					edges.push_back(new_edge);
+
+					return true;
+				}
+				return false;
 			}
-		}
-
-		if (found) {
-			//it does already exist, do nothing
-			return;
-		}
-
-		//directly add the new segment
-		Edge new_edge;
-		new_edge.points[0] = segment_idx[0];
-		new_edge.points[1] = segment_idx[1];
-		edges.push_back(new_edge);
-		return;
+		);
 	}
 
 	//check edge by edge against the segment points to see if intersects
 
-	for (int i = 0; i < base_edges; i++) {
-
+	for(auto it_edges = edges.begin(); it_edges != edges.begin() + base_edges; ++it_edges){
 		//if a point is shared with one of the edge points, then this edge must not be tested, as it will result in a numerical precision error.
 		bool edge_valid = true;
-		for (int j = 0; j < 2; j++) {
 
-			if (edges[i].points[0] == segment_idx[0] || edges[i].points[1] == segment_idx[1] || edges[i].points[0] == segment_idx[1] || edges[i].points[1] == segment_idx[0]) {
+		for(unsigned j = 0; j < 2; j++){
+			if((*it_edges).points[0] == segment_idx[0] || (*it_edges).points[1] == segment_idx[1]
+				|| (*it_edges).points[0] == segment_idx[1] || (*it_edges).points[1] == segment_idx[0]
+				){
 				edge_valid = false; //segment has this point, can't check against this
 				break;
 			}
@@ -302,54 +307,65 @@ void CSGBrushOperation::BuildPoly::_clip_segment(const CSGBrush *p_brush, int p_
 
 		//see if either points are within the edge isntead of crossing it
 		Vector2 res;
+
 		bool found = false;
+
 		int assign_segment_id = -1;
 
-		for (int j = 0; j < 2; j++) {
+		for(int j = 0; j < 2; j++){
+			Vector2 edgeseg[2] = { points[(*it_edges).points[0]].point, points[(*it_edges).points[1]].point };
 
-			Vector2 edgeseg[2] = { points[edges[i].points[0]].point, points[edges[i].points[1]].point };
 			Vector2 closest = Geometry::get_closest_point_to_segment_2d(segment[j], edgeseg);
 
 			if (closest == segment[j]) {
 				//point rest of this edge
 				res = closest;
+
 				found = true;
+
 				assign_segment_id = j;
 			}
 		}
 
 		//test if the point crosses the edge
-		if (!found && Geometry::segment_intersects_segment_2d(segment[0], segment[1], points[edges[i].points[0]].point, points[edges[i].points[1]].point, &res)) {
+		if (!found
+			&& Geometry::segment_intersects_segment_2d(segment[0], segment[1], points[(*it_edges).points[0]].point, points[(*it_edges).points[1]].point, &res)) {
 			//point does cross the edge
 			found = true;
 		}
 
 		//check whether an intersection against the segment happened
 		if (found) {
-
 			//It did! so first, must slice the segment
 			Point new_point;
-			new_point.point = res;
-			//make sure to interpolate UV too
-			new_point.uv = interpolate_uv(points[edges[i].points[0]].point, new_point.point, points[edges[i].points[1]].point, points[edges[i].points[0]].uv, points[edges[i].points[1]].uv);
 
-			int point_idx = points.size();
+			new_point.point = res;
+
+			//make sure to interpolate UV too
+			new_point.uv = interpolate_uv(points[(*it_edges).points[0]].point, new_point.point, points[(*it_edges).points[1]].point, points[(*it_edges).points[0]].uv, points[(*it_edges).points[1]].uv);
+
 			points.push_back(new_point);
 
 			//split the edge in 2
 			Edge new_edge;
-			new_edge.points[0] = edges[i].points[0];
-			new_edge.points[1] = point_idx;
-			new_edge.outer = edges[i].outer;
-			edges.write[i].points[0] = point_idx;
-			edges.insert(i, new_edge);
-			i++; //skip newly inserted edge
+			new_edge.points[0] = (*it_edges).points[0];
+			new_edge.points[1] = points.size();
+			new_edge.outer = (*it_edges).outer;
+
+			(*it_edges).points[0] = points.size();
+
+			edges.insert(it_edges, new_edge);
+
+			++it_edges; //skip newly inserted edge
+
 			base_edges++; //will need an extra one in the base triangle
+
 			if (assign_segment_id >= 0) {
 				//point did split a segment, so make sure to remember this
-				segment_idx[assign_segment_id] = point_idx;
+				segment_idx[assign_segment_id] = points.size();
 			}
-			inserted_points.push_back(point_idx);
+
+			inserted_points.push_back(points.size());
 		}
 	}
 
@@ -602,11 +618,12 @@ void CSGBrushOperation::_collision_callback(const CSGBrush *A, int p_face_a, Map
 	poly_b->clip(A, p_face_a, mesh_merge, true);
 }
 
-void CSGBrushOperation::_add_poly_points(const BuildPoly &p_poly, int p_edge, int p_from_point, int p_to_point, const Vector<Vector<int> > &vertex_process, Vector<bool> &edge_process, Vector<PolyPoints> &r_poly) {
+void CSGBrushOperation::_add_poly_points(const BuildPoly &p_poly, int p_edge, int p_from_point, int p_to_point, const std::vector<std::vector<int> > &vertex_process, std::vector<bool> &edge_process, std::vector<PolyPoints> &r_poly) {
 
 	//this function follows the polygon points counter clockwise and adds them. It creates lists of unique polygons
 	//every time an unused edge is found, it's pushed to a stack and continues from there.
 
+	// need_update : use std::stack
 	List<EdgeSort> edge_stack;
 
 	{
@@ -630,14 +647,14 @@ void CSGBrushOperation::_add_poly_points(const BuildPoly &p_poly, int p_edge, in
 			continue;
 		}
 
-		Vector<int> points;
+		std::vector<int> points;
 		points.push_back(e.prev_point);
 
 		int prev_point = e.prev_point;
 		int to_point = e.edge_point;
 		int current_edge = e.edge;
 
-		edge_process.write[e.edge] = true; //mark as processed
+		edge_process[e.edge] = true; //mark as processed
 
 		int limit = p_poly.points.size() * 4; //avoid infinite recursion
 
@@ -657,43 +674,49 @@ void CSGBrushOperation::_add_poly_points(const BuildPoly &p_poly, int p_edge, in
 			t2d.affine_invert();
 
 			//push all edges found here, they will be sorted by minimum angle later.
-			Vector<EdgeSort> next_edges;
+			std::vector<EdgeSort> next_edges;
 
-			for (int i = 0; i < vertex_process[to_point].size(); i++) {
-
-				int edge = vertex_process[to_point][i];
-				int opposite_point = p_poly.edges[edge].points[0] == to_point ? p_poly.edges[edge].points[1] : p_poly.edges[edge].points[0];
-				if (opposite_point == prev_point)
-					continue; //not going back
+			{
+				int opposite_point;
 
 				EdgeSort e2;
-				Vector2 local_vec = t2d.xform(p_poly.points[opposite_point].point);
-				e2.angle = -local_vec.angle(); //negate so we can sort by minimum angle
-				e2.edge = edge;
-				e2.edge_point = opposite_point;
-				e2.prev_point = to_point;
 
-				next_edges.push_back(e2);
+				Vector2 local_vec;
+
+				for(auto&& edge : vertex_process[to_point]){
+					opposite_point = p_poly.edges[edge].points[0] == to_point ? p_poly.edges[edge].points[1] : p_poly.edges[edge].points[0];
+					
+					if (opposite_point == prev_point)
+						continue; //not going back
+
+					local_vec = t2d.xform(p_poly.points[opposite_point].point);
+
+					e2.angle = -local_vec.angle(); //negate so we can sort by minimum angle
+					e2.edge = edge;
+					e2.edge_point = opposite_point;
+					e2.prev_point = to_point;
+
+					next_edges.push_back(e2);
+				}
 			}
 
 			//finally, sort by minimum angle
-			next_edges.sort();
+			std::sort(next_edges.begin(), next_edges.end() );
 
-			int next_point = -1;
-			int next_edge = -1;
+			auto next_point = -1;
+			auto next_edge = -1;
 
-			for (int i = 0; i < next_edges.size(); i++) {
+			{
+				auto it = next_edges.begin();
 
-				if (i == 0) {
-					//minimum angle found is the next point
-					next_point = next_edges[i].edge_point;
-					next_edge = next_edges[i].edge;
+				next_point = (*it).edge_point;
 
-				} else {
-					//the rest are pushed to the stack IF they were not processed yet.
-					if (!edge_process[next_edges[i].edge]) {
-						edge_stack.push_back(next_edges[i]);
-					}
+				next_edge = (*it).edge;
+
+				++it;
+
+				for(; it != next_edges.end() && !edge_process[(*it).edge] ; ++it){
+					edge_stack.push_back(*it);
 				}
 			}
 
@@ -701,14 +724,18 @@ void CSGBrushOperation::_add_poly_points(const BuildPoly &p_poly, int p_edge, in
 				//did not find anything, may be a dead-end edge (this should normally not happen)
 				//just flip the direction and go back
 				next_point = prev_point;
+
 				next_edge = current_edge;
 			}
 
 			points.push_back(to_point);
 
 			prev_point = to_point;
+
 			to_point = next_point;
-			edge_process.write[next_edge] = true; //mark this edge as processed
+
+			edge_process[next_edge] = true; //mark this edge as processed
+
 			current_edge = next_edge;
 
 			limit--;
@@ -723,7 +750,7 @@ void CSGBrushOperation::_add_poly_points(const BuildPoly &p_poly, int p_edge, in
 	}
 }
 
-void CSGBrushOperation::_add_poly_outline(const BuildPoly &p_poly, int p_from_point, int p_to_point, const Vector<Vector<int> > &vertex_process, Vector<int> &r_outline) {
+void CSGBrushOperation::_add_poly_outline(const BuildPoly &p_poly, int p_from_point, int p_to_point, const std::vector<std::vector<int> > &vertex_process, std::vector<int> &r_outline) {
 
 	//this is the opposite of the function above. It adds polygon outlines instead.
 	//this is used for triangulating holes.
@@ -753,17 +780,24 @@ void CSGBrushOperation::_add_poly_outline(const BuildPoly &p_poly, int p_from_po
 		float max_angle = 0;
 		int next_point_angle = -1;
 
-		for (int i = 0; i < vertex_process[to_point].size(); i++) {
+		{
+			int opposite_point;
 
-			int edge = vertex_process[to_point][i];
-			int opposite_point = p_poly.edges[edge].points[0] == to_point ? p_poly.edges[edge].points[1] : p_poly.edges[edge].points[0];
-			if (opposite_point == prev_point)
-				continue; //not going back
+			float angle;
 
-			float angle = -t2d.xform(p_poly.points[opposite_point].point).angle();
-			if (next_point_angle == -1 || angle > max_angle) { //same as before but use greater to check.
-				max_angle = angle;
-				next_point_angle = opposite_point;
+			for(auto&& edge : vertex_process[to_point]){
+				opposite_point = p_poly.edges[edge].points[0] == to_point ? p_poly.edges[edge].points[1] : p_poly.edges[edge].points[0];
+				
+				if(opposite_point == prev_point)
+					continue; //not going back
+
+				angle = -t2d.xform(p_poly.points[opposite_point].point).angle();
+
+				if (next_point_angle == -1 || angle > max_angle) { //same as before but use greater to check.
+					max_angle = angle;
+
+					next_point_angle = opposite_point;
+				}
 			}
 		}
 
@@ -781,30 +815,31 @@ void CSGBrushOperation::_add_poly_outline(const BuildPoly &p_poly, int p_from_po
 }
 
 void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const BuildPoly &p_poly, bool p_from_b) {
-
 	//finally, merge the 2D polygon back to 3D
+	std::vector<std::vector<int> > vertex_process;
 
-	Vector<Vector<int> > vertex_process;
-	Vector<bool> edge_process;
+	std::vector<bool> edge_process;
 
 	vertex_process.resize(p_poly.points.size());
+
 	edge_process.resize(p_poly.edges.size());
 
 	//none processed by default
-	for (int i = 0; i < edge_process.size(); i++) {
-		edge_process.write[i] = false;
+	for(auto&& edge : edge_process){
+		edge = false;
 	}
 
 	//put edges in points, so points can go through them
-	for (int i = 0; i < p_poly.edges.size(); i++) {
-		vertex_process.write[p_poly.edges[i].points[0]].push_back(i);
-		vertex_process.write[p_poly.edges[i].points[1]].push_back(i);
+	for(decltype(p_poly.edges.size() ) i = 0; i < p_poly.edges.size(); i++) {
+		vertex_process[p_poly.edges[i].points[0]].push_back(i);
+
+		vertex_process[p_poly.edges[i].points[1]].push_back(i);
 	}
 
-	Vector<PolyPoints> polys;
+	std::vector<PolyPoints> polys;
 
 	//process points that were not processed
-	for (int i = 0; i < edge_process.size(); i++) {
+	for(decltype(edge_process.size() ) i = 0; i < edge_process.size(); i++){
 		if (edge_process[i])
 			continue; //already processed
 
@@ -814,15 +849,16 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 			//this is disconnected, so it's clearly a hole. lets find where it belongs
 			Vector2 ref_point = p_poly.points[p_poly.edges[i].points[0]].point;
 
-			for (int j = 0; j < polys.size(); j++) {
+			for(decltype(polys.size() ) j = 0; j < polys.size(); j++){
 
 				//find a point outside poly
 				Vector2 out_point(-1e20, -1e20);
 
 				const PolyPoints &pp = polys[j];
 
-				for (int k = 0; k < pp.points.size(); k++) {
+				for(decltype(pp.points.size() ) k = 0; k < pp.points.size(); k++){
 					Vector2 p = p_poly.points[pp.points[k]].point;
+
 					out_point.x = MAX(out_point.x, p.x);
 					out_point.y = MAX(out_point.y, p.y);
 				}
@@ -831,8 +867,9 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 
 				int intersections = 0;
 
-				for (int k = 0; k < pp.points.size(); k++) {
+				for(decltype(pp.points.size() ) k = 0; k < pp.points.size(); k++){
 					Vector2 p1 = p_poly.points[pp.points[k]].point;
+
 					Vector2 p2 = p_poly.points[pp.points[(k + 1) % pp.points.size()]].point;
 
 					if (Geometry::segment_intersects_segment_2d(ref_point, out_point, p1, p2, NULL)) {
@@ -850,39 +887,38 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 
 		if (intersect_poly != -1) {
 			//must add this as a hole
-			Vector<int> outline;
+			std::vector<int> outline;
 			_add_poly_outline(p_poly, p_poly.edges[i].points[0], p_poly.edges[i].points[1], vertex_process, outline);
 
 			if (outline.size() > 1) {
-				polys.write[intersect_poly].holes.push_back(outline);
+				polys[intersect_poly].holes.push_back(outline);
 			}
 		}
 		_add_poly_points(p_poly, i, p_poly.edges[i].points[0], p_poly.edges[i].points[1], vertex_process, edge_process, polys);
 	}
 
 	//get rid of holes, not the most optiomal way, but also not a common case at all to be inoptimal
-	for (int i = 0; i < polys.size(); i++) {
-
-		if (!polys[i].holes.size())
+	for(auto&& poly : polys){
+		if(poly.holes.empty() )
 			continue;
 
 		//repeat until no more holes are left to be merged
-		while (polys[i].holes.size()) {
+		while(poly.holes.size() ){
 
 			//try to merge a hole with the outline
 			bool added_hole = false;
 
-			for (int j = 0; j < polys[i].holes.size(); j++) {
-
+			for(decltype(poly.holes.size() ) j = 0; j < poly.holes.size(); j++){
 				//try hole vertices
-				int with_outline_vertex = -1;
-				int from_hole_vertex = -1;
+				decltype(poly.points.size() ) with_outline_vertex;
+
+				decltype(poly.holes[j].size() ) from_hole_vertex;
 
 				bool found = false;
 
-				for (int k = 0; k < polys[i].holes[j].size(); k++) {
+				for(decltype(poly.holes[j].size() ) k = 0; k < poly.holes[j].size(); k++){
+					int from_idx = poly.holes[j][k];
 
-					int from_idx = polys[i].holes[j][k];
 					Vector2 from = p_poly.points[from_idx].point;
 
 					//try a segment from hole vertex to outline vertices
@@ -890,23 +926,24 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 
 					bool valid = true;
 
-					for (int l = 0; l < polys[i].points.size(); l++) {
+					for(decltype(poly.points.size() ) l = 0; l < poly.points.size(); l++){
+						int to_idx = poly.points[l];
 
-						int to_idx = polys[i].points[l];
 						Vector2 to = p_poly.points[to_idx].point;
+
 						with_outline_vertex = l;
 
 						//try against outline (other points) first
 
 						valid = true;
 
-						for (int m = 0; m < polys[i].points.size(); m++) {
+						for(decltype(poly.points.size() ) m = 0; m < poly.points.size(); m++){
+							decltype(poly.points.size() ) m_next = (m + 1) % poly.points.size();
 
-							int m_next = (m + 1) % polys[i].points.size();
 							if (m == with_outline_vertex || m_next == with_outline_vertex) //do not test with edges that share this point
 								continue;
 
-							if (Geometry::segment_intersects_segment_2d(from, to, p_poly.points[polys[i].points[m]].point, p_poly.points[polys[i].points[m_next]].point, NULL)) {
+							if (Geometry::segment_intersects_segment_2d(from, to, p_poly.points[poly.points[m]].point, p_poly.points[poly.points[m_next]].point, NULL)) {
 								valid = false;
 								break;
 							}
@@ -917,15 +954,14 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 
 						//try against all holes including self
 
-						for (int m = 0; m < polys[i].holes.size(); m++) {
+						for(decltype(poly.holes.size() ) m = 0; m < poly.holes.size(); m++){
+							for(decltype(poly.holes[m].size() ) n = 0; n < poly.holes[m].size(); n++){
+								decltype(poly.holes[m].size() ) n_next = (n + 1) % poly.holes[m].size();
 
-							for (int n = 0; n < polys[i].holes[m].size(); n++) {
-
-								int n_next = (n + 1) % polys[i].holes[m].size();
 								if (m == j && (n == from_hole_vertex || n_next == from_hole_vertex)) //contains vertex being tested from current hole, skip
 									continue;
 
-								if (Geometry::segment_intersects_segment_2d(from, to, p_poly.points[polys[i].holes[m][n]].point, p_poly.points[polys[i].holes[m][n_next]].point, NULL)) {
+								if (Geometry::segment_intersects_segment_2d(from, to, p_poly.points[poly.holes[m][n]].point, p_poly.points[poly.holes[m][n_next]].point, NULL)) {
 									valid = false;
 									break;
 								}
@@ -952,21 +988,23 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 					//hook this hole with outline, and remove from list of holes
 
 					//duplicate point
-					int insert_at = with_outline_vertex;
-					int point = polys[i].points[insert_at];
-					polys.write[i].points.insert(insert_at, point);
+					auto insert_at = poly.points.begin() + with_outline_vertex;
+
+					poly.points.insert(insert_at, *insert_at);
+
 					insert_at++;
+
 					//insert all others, outline should be backwards (must check)
-					int holesize = polys[i].holes[j].size();
-					for (int k = 0; k <= holesize; k++) {
-						int idx = (from_hole_vertex + k) % holesize;
-						int point2 = polys[i].holes[j][idx];
-						polys.write[i].points.insert(insert_at, point2);
-						insert_at++;
+					for(decltype(poly.holes[j].size() ) k = 0; k <= poly.holes[j].size(); k++, ++insert_at) {
+						int point2 = poly.holes[j][(from_hole_vertex + k) % poly.holes[j].size()];
+
+						poly.points.insert(insert_at, point2);
 					}
 
 					added_hole = true;
-					polys.write[i].holes.remove(j);
+
+					poly.holes.erase( poly.holes.begin() + j );
+					
 					break; //got rid of hole, break and continue
 				}
 			}
@@ -976,32 +1014,36 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 	}
 
 	//triangulate polygons
+	// need_update : can be merge in last loop ?
+	for(auto&& poly : polys){
+		// need_update : use std::array
+		std::vector<Vector2> vertices;
 
-	for (int i = 0; i < polys.size(); i++) {
+		vertices.resize(poly.points.size());
 
-		Vector<Vector2> vertices;
-		vertices.resize(polys[i].points.size());
-		for (int j = 0; j < vertices.size(); j++) {
-			vertices.write[j] = p_poly.points[polys[i].points[j]].point;
+		for(decltype(vertices.size() ) j = 0; j < vertices.size(); j++){
+			vertices[j] = p_poly.points[poly.points[j]].point;
 		}
 
-		Vector<int> indices = Geometry::triangulate_polygon(vertices);
+		std::vector<int> indices = Geometry::triangulate_polygon(vertices);
 
-		for (int j = 0; j < indices.size(); j += 3) {
-
+		for(decltype(indices.size() ) j = 0; j < indices.size(); j += 3){
 			//obtain the vertex
-
 			Vector3 face[3];
+
 			Vector2 uv[3];
-			float cp = Geometry::vec2_cross(p_poly.points[polys[i].points[indices[j + 0]]].point, p_poly.points[polys[i].points[indices[j + 1]]].point, p_poly.points[polys[i].points[indices[j + 2]]].point);
+
+			float cp = Geometry::vec2_cross(p_poly.points[poly.points[indices[j + 0]]].point, p_poly.points[poly.points[indices[j + 1]]].point, p_poly.points[poly.points[indices[j + 2]]].point);
+
 			if (Math::abs(cp) < CMP_EPSILON)
 				continue;
 
-			for (int k = 0; k < 3; k++) {
+			for(unsigned k = 0; k < 3; k++){
+				Vector2 p = p_poly.points[poly.points[indices[j + k]]].point;
 
-				Vector2 p = p_poly.points[polys[i].points[indices[j + k]]].point;
 				face[k] = p_poly.to_world.xform(Vector3(p.x, p.y, 0));
-				uv[k] = p_poly.points[polys[i].points[indices[j + k]]].uv;
+
+				uv[k] = p_poly.points[poly.points[indices[j + k]]].uv;
 			}
 
 			mesh.add_face(face[0], face[1], face[2], uv[0], uv[1], uv[2], p_poly.smooth, p_poly.invert, p_poly.material, p_from_b);
@@ -1200,9 +1242,9 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 
 	float max_distance = aabb.size.length() * 1.2;
 
-	Vector<BVH> bvhvec;
+	std::vector<BVH> bvhvec;
+
 	bvhvec.resize(faces.size() * 3); //will never be larger than this (todo make better)
-	BVH *bvh = bvhvec.ptrw();
 
 	AABB faces_a;
 	AABB faces_b;
@@ -1211,27 +1253,28 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 	bool first_b = true;
 
 	for (int i = 0; i < faces.size(); i++) {
-		bvh[i].left = -1;
-		bvh[i].right = -1;
-		bvh[i].face = i;
-		bvh[i].aabb.position = points[faces[i].points[0]];
-		bvh[i].aabb.expand_to(points[faces[i].points[1]]);
-		bvh[i].aabb.expand_to(points[faces[i].points[2]]);
-		bvh[i].center = bvh[i].aabb.position + bvh[i].aabb.size * 0.5;
-		bvh[i].next = -1;
+		bvhvec[i].left = -1;
+		bvhvec[i].right = -1;
+		bvhvec[i].face = i;
+		bvhvec[i].aabb.position = points[faces[i].points[0]];
+		bvhvec[i].aabb.expand_to(points[faces[i].points[1]]);
+		bvhvec[i].aabb.expand_to(points[faces[i].points[2]]);
+		bvhvec[i].center = bvhvec[i].aabb.position + bvhvec[i].aabb.size * 0.5;
+		bvhvec[i].next = -1;
+
 		if (faces[i].from_b) {
 			if (first_b) {
-				faces_b = bvh[i].aabb;
+				faces_b = bvhvec[i].aabb;
 				first_b = false;
 			} else {
-				faces_b.merge_with(bvh[i].aabb);
+				faces_b.merge_with(bvhvec[i].aabb);
 			}
 		} else {
 			if (first_a) {
-				faces_a = bvh[i].aabb;
+				faces_a = bvhvec[i].aabb;
 				first_a = false;
 			} else {
-				faces_a.merge_with(bvh[i].aabb);
+				faces_a.merge_with(bvhvec[i].aabb);
 			}
 		}
 	}
@@ -1242,21 +1285,21 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 	if (intersection_aabb.size == Vector3()) //AABB do not intersect, so neither do shapes.
 		return;
 
-	Vector<BVH *> bvhtrvec;
-	bvhtrvec.resize(faces.size());
-	BVH **bvhptr = bvhtrvec.ptrw();
-	for (int i = 0; i < faces.size(); i++) {
+	std::vector<BVH *> bvhtrvec;
 
-		bvhptr[i] = &bvh[i];
+	bvhtrvec.resize(faces.size());
+
+	for (int i = 0; i < faces.size(); i++) {
+		bvhtrvec[i] = &bvhvec[i];
 	}
 
 	int max_depth = 0;
 	int max_alloc = faces.size();
-	_create_bvh(bvh, bvhptr, 0, faces.size(), 1, max_depth, max_alloc);
+	_create_bvh(&bvhvec, &bvhtrvec, 0, faces.size(), 1, max_depth, max_alloc);
 
 	for (int i = 0; i < faces.size(); i++) {
 
-		if (!intersection_aabb.intersects(bvh[i].aabb))
+		if (!intersection_aabb.intersects(bvhvec[i].aabb))
 			continue; //not in AABB intersection, so not in face intersection
 		Vector3 center = points[faces[i].points[0]];
 		center += points[faces[i].points[1]];
@@ -1266,7 +1309,7 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 		Plane plane(points[faces[i].points[0]], points[faces[i].points[1]], points[faces[i].points[2]]);
 		Vector3 target = center + plane.normal * max_distance + Vector3(0.0001234, 0.000512, 0.00013423); //reduce chance of edge hits by doing a small increment
 
-		int intersections = _bvh_count_intersections(bvh, max_depth, max_alloc - 1, center, target, i);
+		int intersections = _bvh_count_intersections(&bvhvec, max_depth, max_alloc - 1, center, target, i);
 
 		if (intersections & 1) {
 			faces.write[i].inside = true;

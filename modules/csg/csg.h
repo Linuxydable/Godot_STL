@@ -31,6 +31,8 @@
 #ifndef CSG_H
 #define CSG_H
 
+#include <vector>
+
 #include "core/map.h"
 #include "core/math/aabb.h"
 #include "core/math/plane.h"
@@ -53,8 +55,8 @@ struct CSGBrush {
 		int material;
 	};
 
-	Vector<Face> faces;
-	Vector<Ref<Material> > materials;
+	std::vector<Face> faces;
+	std::vector<Ref<Material> > materials;
 
 	void _regen_face_aabbs();
 	//create a brush from faces
@@ -140,7 +142,7 @@ struct CSGBrushOperation {
 
 		OAHashMap<VertexKey, int, VertexKeyHash> snap_cache;
 
-		Vector<Vector3> points;
+		std::vector<Vector3> points;
 
 		struct Face {
 			bool from_b;
@@ -152,7 +154,7 @@ struct CSGBrushOperation {
 			int material_idx;
 		};
 
-		Vector<Face> faces;
+		std::vector<Face> faces;
 
 		Map<Ref<Material>, int> materials;
 
@@ -176,8 +178,9 @@ struct CSGBrushOperation {
 			Vector2 uv;
 		};
 
-		Vector<Point> points;
+		std::vector<Point> points;
 
+		// need_update : can be a Vector2
 		struct Edge {
 			bool outer;
 			int points[2];
@@ -186,7 +189,7 @@ struct CSGBrushOperation {
 			}
 		};
 
-		Vector<Edge> edges;
+		std::vector<Edge> edges;
 		Ref<Material> material;
 		bool smooth;
 		bool invert;
@@ -201,9 +204,9 @@ struct CSGBrushOperation {
 
 	struct PolyPoints {
 
-		Vector<int> points;
+		std::vector<int> points;
 
-		Vector<Vector<int> > holes;
+		std::vector<std::vector<int> > holes;
 	};
 
 	struct EdgeSort {
@@ -223,8 +226,8 @@ struct CSGBrushOperation {
 		Map<int, BuildPoly> build_polys_B;
 	};
 
-	void _add_poly_points(const BuildPoly &p_poly, int p_edge, int p_from_point, int p_to_point, const Vector<Vector<int> > &vertex_process, Vector<bool> &edge_process, Vector<PolyPoints> &r_poly);
-	void _add_poly_outline(const BuildPoly &p_poly, int p_from_point, int p_to_point, const Vector<Vector<int> > &vertex_process, Vector<int> &r_outline);
+	void _add_poly_points(const BuildPoly &p_poly, int p_edge, int p_from_point, int p_to_point, const std::vector<std::vector<int> > &vertex_process, std::vector<bool> &edge_process, std::vector<PolyPoints> &r_poly);
+	void _add_poly_outline(const BuildPoly &p_poly, int p_from_point, int p_to_point, const std::vector<std::vector<int> > &vertex_process, std::vector<int> &r_outline);
 	void _merge_poly(MeshMerge &mesh, int p_face_idx, const BuildPoly &p_poly, bool p_from_b);
 
 	void _collision_callback(const CSGBrush *A, int p_face_a, Map<int, BuildPoly> &build_polys_a, const CSGBrush *B, int p_face_b, Map<int, BuildPoly> &build_polys_b, MeshMerge &mesh_merge);
