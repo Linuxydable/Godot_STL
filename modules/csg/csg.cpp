@@ -31,6 +31,7 @@
 #include "csg.h"
 
 #include <algorithm>
+#include <cmath>
 
 #include "core/math/face3.h"
 #include "core/math/geometry.h"
@@ -1054,28 +1055,28 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 //use a limit to speed up bvh and limit the depth
 #define BVH_LIMIT 8
 
-int CSGBrushOperation::MeshMerge::_create_bvh(BVH *p_bvh, BVH **p_bb, int p_from, int p_size, int p_depth, int &max_depth, int &max_alloc) {
-
-	if (p_depth > max_depth) {
+// need_update : can be better
+int CSGBrushOperation::MeshMerge::_create_bvh(std::vector<BVH>& p_bvh, std::vector<BVH>& p_bb, int p_from, int p_size, int p_depth, int &max_depth, int &max_alloc) {
+	if(p_depth > max_depth){
 		max_depth = p_depth;
 	}
 
-	if (p_size == 0) {
-
+	if(p_size <= 0){
 		return -1;
-	} else if (p_size <= BVH_LIMIT) {
-
-		for (int i = 0; i < p_size - 1; i++) {
-			p_bb[p_from + i]->next = p_bb[p_from + i + 1] - p_bvh;
-		}
-		return p_bb[p_from] - p_bvh;
 	}
 
-	AABB aabb;
-	aabb = p_bb[p_from]->aabb;
-	for (int i = 1; i < p_size; i++) {
+	if(p_size <= BVH_LIMIT){
+		for (int i = 0; i < p_size - 1; i++) {
+			p_bb[p_from + i].next = &p_bb[p_from + i + 1] - &p_bvh[0];
+		}
 
-		aabb.merge_with(p_bb[p_from + i]->aabb);
+		return &p_bb[p_from] - &p_bvh[0];
+	}
+
+	AABB aabb = p_bb[p_from].aabb;
+
+	for (int i = 1; i < p_size; i++) {
+		aabb.merge_with(p_bb[p_from + i].aabb);
 	}
 
 	int li = aabb.get_longest_axis_index();
@@ -1084,7 +1085,7 @@ int CSGBrushOperation::MeshMerge::_create_bvh(BVH *p_bvh, BVH **p_bb, int p_from
 
 		case Vector3::AXIS_X: {
 			SortArray<BVH *, BVHCmpX> sort_x;
-			sort_x.nth_element(0, p_size, p_size / 2, &p_bb[p_from]);
+			sort_x.nth_element(0, p_size, p_size / 2, p_bb[p_from] );
 			//sort_x.sort(&p_bb[p_from],p_size);
 		} break;
 		case Vector3::AXIS_Y: {
@@ -1101,16 +1102,17 @@ int CSGBrushOperation::MeshMerge::_create_bvh(BVH *p_bvh, BVH **p_bb, int p_from
 	}
 
 	int left = _create_bvh(p_bvh, p_bb, p_from, p_size / 2, p_depth + 1, max_depth, max_alloc);
+
 	int right = _create_bvh(p_bvh, p_bb, p_from + p_size / 2, p_size - p_size / 2, p_depth + 1, max_depth, max_alloc);
 
 	int index = max_alloc++;
-	BVH *_new = &p_bvh[index];
-	_new->aabb = aabb;
-	_new->center = aabb.position + aabb.size * 0.5;
-	_new->face = -1;
-	_new->left = left;
-	_new->right = right;
-	_new->next = -1;
+
+	p_bvh[index].aabb = aabb;
+	p_bvh[index].center = aabb.position + aabb.size * 0.5;
+	p_bvh[index].face = -1;
+	p_bvh[index].left = left;
+	p_bvh[index].right = right;
+	p_bvh[index].next = -1;
 
 	return index;
 }
@@ -1134,8 +1136,6 @@ int CSGBrushOperation::MeshMerge::_bvh_count_intersections(BVH *bvhptr, int p_ma
 
 	int level = 0;
 
-	const Vector3 *vertexptr = points.ptr();
-	const Face *facesptr = faces.ptr();
 	AABB segment_aabb;
 	segment_aabb.position = p_begin;
 	segment_aabb.expand_to(p_end);
@@ -1161,8 +1161,8 @@ int CSGBrushOperation::MeshMerge::_bvh_count_intersections(BVH *bvhptr, int p_ma
 						bool valid = segment_aabb.intersects(bp->aabb) && bp->aabb.intersects_segment(p_begin, p_end);
 
 						if (valid && p_exclude != bp->face) {
-							const Face &s = facesptr[bp->face];
-							Face3 f3(vertexptr[s.points[0]], vertexptr[s.points[1]], vertexptr[s.points[2]]);
+							const Face &s = faces[bp->face];
+							Face3 f3(points[s.points[0]], points[s.points[1]], points[s.points[2]]);
 
 							Vector3 res;
 
@@ -1232,11 +1232,15 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 
 	AABB aabb;
 
-	for (int i = 0; i < points.size(); i++) {
-		if (i == 0) {
-			aabb.position = points[i];
-		} else {
-			aabb.expand_to(points[i]);
+	{
+		auto it = points.begin();
+
+		aabb.position = *it;
+
+		++it;
+
+		for(; it != points.end(); ++it){
+			aabb.expand_to(*it);
 		}
 	}
 
@@ -1246,35 +1250,40 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 
 	bvhvec.resize(faces.size() * 3); //will never be larger than this (todo make better)
 
-	AABB faces_a;
-	AABB faces_b;
+	AABB faces_a, faces_b;
 
-	bool first_a = true;
-	bool first_b = true;
+	bool first_a = true, first_b = true;
 
-	for (int i = 0; i < faces.size(); i++) {
-		bvhvec[i].left = -1;
-		bvhvec[i].right = -1;
-		bvhvec[i].face = i;
-		bvhvec[i].aabb.position = points[faces[i].points[0]];
-		bvhvec[i].aabb.expand_to(points[faces[i].points[1]]);
-		bvhvec[i].aabb.expand_to(points[faces[i].points[2]]);
-		bvhvec[i].center = bvhvec[i].aabb.position + bvhvec[i].aabb.size * 0.5;
-		bvhvec[i].next = -1;
+	{
+		auto it_bvhvec = bvhvec.begin();
+		auto it_faces = faces.begin();
 
-		if (faces[i].from_b) {
-			if (first_b) {
-				faces_b = bvhvec[i].aabb;
-				first_b = false;
-			} else {
-				faces_b.merge_with(bvhvec[i].aabb);
-			}
-		} else {
-			if (first_a) {
-				faces_a = bvhvec[i].aabb;
-				first_a = false;
-			} else {
-				faces_a.merge_with(bvhvec[i].aabb);
+		for(; it_faces != faces.end(); ++it_faces, ++it_bvhvec){
+			(*it_bvhvec).left = -1;
+			(*it_bvhvec).right = -1;
+			(*it_bvhvec).face = std::distance(faces.begin(), it_faces);
+			(*it_bvhvec).aabb.position = points[(*it_faces).points[0]];
+			(*it_bvhvec).aabb.expand_to(points[(*it_faces).points[1]]);
+			(*it_bvhvec).aabb.expand_to(points[(*it_faces).points[2]]);
+			(*it_bvhvec).center = (*it_bvhvec).aabb.position + (*it_bvhvec).aabb.size * 0.5;
+			(*it_bvhvec).next = -1;
+
+			if( (*it_faces).from_b){
+				if(first_b){
+					faces_b = (*it_bvhvec).aabb;
+					first_b = false;
+				}else{
+					// need_update : merge_with make assignment first time.
+					faces_b.merge_with( (*it_bvhvec).aabb);
+				}
+			}else{
+				if(first_a){
+					faces_a = (*it_bvhvec).aabb;
+					first_a = false;
+				}else{
+					// need_update : merge_with make assignment first time.
+					faces_a.merge_with( (*it_bvhvec).aabb);
+				}
 			}
 		}
 	}
@@ -1285,34 +1294,36 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 	if (intersection_aabb.size == Vector3()) //AABB do not intersect, so neither do shapes.
 		return;
 
-	std::vector<BVH *> bvhtrvec;
+	std::vector<BVH*> bvhtrvec;
 
-	bvhtrvec.resize(faces.size());
+	bvhtrvec.resize(faces.size() );
 
-	for (int i = 0; i < faces.size(); i++) {
+	for(decltype(faces.size() ) i = 0; i < faces.size(); i++) {
 		bvhtrvec[i] = &bvhvec[i];
 	}
 
-	int max_depth = 0;
-	int max_alloc = faces.size();
-	_create_bvh(&bvhvec, &bvhtrvec, 0, faces.size(), 1, max_depth, max_alloc);
+	int max_depth = 0, max_alloc = faces.size();
 
-	for (int i = 0; i < faces.size(); i++) {
+	_create_bvh(bvhvec, bvhtrvec, 0, faces.size(), 1, max_depth, max_alloc);
 
+	for(decltype(faces.size() ) i = 0; i < faces.size(); i++){
 		if (!intersection_aabb.intersects(bvhvec[i].aabb))
 			continue; //not in AABB intersection, so not in face intersection
+
 		Vector3 center = points[faces[i].points[0]];
+
 		center += points[faces[i].points[1]];
 		center += points[faces[i].points[2]];
 		center /= 3.0;
 
 		Plane plane(points[faces[i].points[0]], points[faces[i].points[1]], points[faces[i].points[2]]);
+
 		Vector3 target = center + plane.normal * max_distance + Vector3(0.0001234, 0.000512, 0.00013423); //reduce chance of edge hits by doing a small increment
 
 		int intersections = _bvh_count_intersections(&bvhvec, max_depth, max_alloc - 1, center, target, i);
 
 		if (intersections & 1) {
-			faces.write[i].inside = true;
+			faces[i].inside = true;
 		}
 	}
 }
