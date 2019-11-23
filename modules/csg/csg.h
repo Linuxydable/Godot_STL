@@ -109,8 +109,8 @@ struct CSGBrushOperation {
 			}
 		};
 
-		int _bvh_count_intersections(BVH *bvhptr, int p_max_depth, int p_bvh_first, const Vector3 &p_begin, const Vector3 &p_end, int p_exclude) const;
-		int _create_bvh(std::vector<BVH>& p_bvh, std::vector<BVH>& p_bb, int p_from, int p_size, int p_depth, int &max_depth, int &max_alloc);
+		int _bvh_count_intersections(std::vector<BVH>& bvhptr, int p_max_depth, int p_bvh_first, const Vector3 &p_begin, const Vector3 &p_end, int p_exclude) const;
+		int _create_bvh(std::vector<BVH>& p_bvh, std::vector<BVH*>& p_bb, int p_from, int p_size, int p_depth, int &max_depth, int &max_alloc);
 
 		struct VertexKey {
 			int32_t x, y, z;

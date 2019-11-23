@@ -1056,7 +1056,7 @@ void CSGBrushOperation::_merge_poly(MeshMerge &mesh, int p_face_idx, const Build
 #define BVH_LIMIT 8
 
 // need_update : can be better
-int CSGBrushOperation::MeshMerge::_create_bvh(std::vector<BVH>& p_bvh, std::vector<BVH>& p_bb, int p_from, int p_size, int p_depth, int &max_depth, int &max_alloc) {
+int CSGBrushOperation::MeshMerge::_create_bvh(std::vector<BVH>& p_bvh, std::vector<BVH*>& p_bb, int p_from, int p_size, int p_depth, int &max_depth, int &max_alloc) {
 	if(p_depth > max_depth){
 		max_depth = p_depth;
 	}
@@ -1067,16 +1067,16 @@ int CSGBrushOperation::MeshMerge::_create_bvh(std::vector<BVH>& p_bvh, std::vect
 
 	if(p_size <= BVH_LIMIT){
 		for (int i = 0; i < p_size - 1; i++) {
-			p_bb[p_from + i].next = &p_bb[p_from + i + 1] - &p_bvh[0];
+			p_bb[p_from + i]->next = p_bb[p_from + i + 1] - &p_bvh[0];
 		}
 
-		return &p_bb[p_from] - &p_bvh[0];
+		return p_bb[p_from] - &p_bvh[0];
 	}
 
-	AABB aabb = p_bb[p_from].aabb;
+	AABB aabb = p_bb[p_from]->aabb;
 
 	for (int i = 1; i < p_size; i++) {
-		aabb.merge_with(p_bb[p_from + i].aabb);
+		aabb.merge_with(p_bb[p_from + i]->aabb);
 	}
 
 	int li = aabb.get_longest_axis_index();
@@ -1085,17 +1085,17 @@ int CSGBrushOperation::MeshMerge::_create_bvh(std::vector<BVH>& p_bvh, std::vect
 
 		case Vector3::AXIS_X: {
 			SortArray<BVH *, BVHCmpX> sort_x;
-			sort_x.nth_element(0, p_size, p_size / 2, p_bb[p_from] );
+			sort_x.nth_element(0, p_size, p_size / 2, &p_bb[p_from] );
 			//sort_x.sort(&p_bb[p_from],p_size);
 		} break;
 		case Vector3::AXIS_Y: {
 			SortArray<BVH *, BVHCmpY> sort_y;
-			sort_y.nth_element(0, p_size, p_size / 2, &p_bb[p_from]);
+			sort_y.nth_element(0, p_size, p_size / 2, &p_bb[p_from] );
 			//sort_y.sort(&p_bb[p_from],p_size);
 		} break;
 		case Vector3::AXIS_Z: {
 			SortArray<BVH *, BVHCmpZ> sort_z;
-			sort_z.nth_element(0, p_size, p_size / 2, &p_bb[p_from]);
+			sort_z.nth_element(0, p_size, p_size / 2, &p_bb[p_from] );
 			//sort_z.sort(&p_bb[p_from],p_size);
 
 		} break;
@@ -1117,7 +1117,7 @@ int CSGBrushOperation::MeshMerge::_create_bvh(std::vector<BVH>& p_bvh, std::vect
 	return index;
 }
 
-int CSGBrushOperation::MeshMerge::_bvh_count_intersections(BVH *bvhptr, int p_max_depth, int p_bvh_first, const Vector3 &p_begin, const Vector3 &p_end, int p_exclude) const {
+int CSGBrushOperation::MeshMerge::_bvh_count_intersections(std::vector<BVH>& bvhptr, int p_max_depth, int p_bvh_first, const Vector3 &p_begin, const Vector3 &p_end, int p_exclude) const {
 
 	uint32_t *stack = (uint32_t *)alloca(sizeof(int) * p_max_depth);
 
@@ -1146,15 +1146,14 @@ int CSGBrushOperation::MeshMerge::_bvh_count_intersections(BVH *bvhptr, int p_ma
 	while (true) {
 
 		uint32_t node = stack[level] & NODE_IDX_MASK;
-		const BVH &b = bvhptr[node];
 		bool done = false;
 
 		switch (stack[level] >> VISITED_BIT_SHIFT) {
 			case TEST_AABB_BIT: {
 
-				if (b.face >= 0) {
+				if (bvhptr[node].face >= 0) {
 
-					const BVH *bp = &b;
+					const BVH *bp = &bvhptr[node];
 
 					while (bp) {
 
@@ -1181,7 +1180,7 @@ int CSGBrushOperation::MeshMerge::_bvh_count_intersections(BVH *bvhptr, int p_ma
 
 				} else {
 
-					bool valid = segment_aabb.intersects(b.aabb) && b.aabb.intersects_segment(p_begin, p_end);
+					bool valid = segment_aabb.intersects(bvhptr[node].aabb) && bvhptr[node].aabb.intersects_segment(p_begin, p_end);
 
 					if (!valid) {
 
@@ -1196,14 +1195,14 @@ int CSGBrushOperation::MeshMerge::_bvh_count_intersections(BVH *bvhptr, int p_ma
 			case VISIT_LEFT_BIT: {
 
 				stack[level] = (VISIT_RIGHT_BIT << VISITED_BIT_SHIFT) | node;
-				stack[level + 1] = b.left | TEST_AABB_BIT;
+				stack[level + 1] = bvhptr[node].left | TEST_AABB_BIT;
 				level++;
 				continue;
 			}
 			case VISIT_RIGHT_BIT: {
 
 				stack[level] = (VISIT_DONE_BIT << VISITED_BIT_SHIFT) | node;
-				stack[level + 1] = b.right | TEST_AABB_BIT;
+				stack[level + 1] = bvhptr[node].right | TEST_AABB_BIT;
 				level++;
 				continue;
 			}
@@ -1320,7 +1319,7 @@ void CSGBrushOperation::MeshMerge::mark_inside_faces() {
 
 		Vector3 target = center + plane.normal * max_distance + Vector3(0.0001234, 0.000512, 0.00013423); //reduce chance of edge hits by doing a small increment
 
-		int intersections = _bvh_count_intersections(&bvhvec, max_depth, max_alloc - 1, center, target, i);
+		int intersections = _bvh_count_intersections(bvhvec, max_depth, max_alloc - 1, center, target, i);
 
 		if (intersections & 1) {
 			faces[i].inside = true;
