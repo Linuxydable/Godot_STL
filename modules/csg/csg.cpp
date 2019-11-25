@@ -1378,23 +1378,27 @@ void CSGBrushOperation::MeshMerge::add_face(const Vector3 &p_a, const Vector3 &p
 	faces.push_back(face);
 }
 
-void CSGBrushOperation::merge_brushes(Operation p_operation, const CSGBrush &p_A, const CSGBrush &p_B, CSGBrush &result, float p_snap) {
-
+// need_update : return result
+void CSGBrushOperation::merge_brushes(Operation p_operation, const CSGBrush &p_A, const CSGBrush &p_B, CSGBrush &result, float p_snap){
 	CallbackData cd;
+
 	cd.self = this;
+
 	cd.A = &p_A;
+
 	cd.B = &p_B;
 
 	MeshMerge mesh_merge;
+
 	mesh_merge.vertex_snap = p_snap;
 
 	//check intersections between faces. Use AABB to speed up precheck
 	//this generates list of buildpolys and clips them.
 	//this was originally BVH optimized, but its not really worth it.
-	for (int i = 0; i < p_A.faces.size(); i++) {
+	for(decltype(p_A.faces.size() ) i = 0; i < p_A.faces.size(); i++){
 		cd.face_a = i;
-		for (int j = 0; j < p_B.faces.size(); j++) {
-			if (p_A.faces[i].aabb.intersects(p_B.faces[j].aabb)) {
+		for(decltype(p_B.faces.size() ) j = 0; j < p_B.faces.size(); j++){
+			if(p_A.faces[i].aabb.intersects(p_B.faces[j].aabb) ){
 				_collision_callback(&p_A, i, cd.build_polys_A, &p_B, j, cd.build_polys_B, mesh_merge);
 			}
 		}
@@ -1411,40 +1415,50 @@ void CSGBrushOperation::merge_brushes(Operation p_operation, const CSGBrush &p_A
 
 	//merge the non clipped faces back
 
-	for (int i = 0; i < p_A.faces.size(); i++) {
-
-		if (cd.build_polys_A.has(i))
-			continue; //made from buildpoly, skipping
-
+	// need_update : try to remove std::distance
+	// need_update : make a function or use multi_thread or merge A and B at same time
+	{
 		Vector3 points[3];
+
 		Vector2 uvs[3];
-		for (int j = 0; j < 3; j++) {
-			points[j] = p_A.faces[i].vertices[j];
-			uvs[j] = p_A.faces[i].uvs[j];
-		}
-		Ref<Material> material;
-		if (p_A.faces[i].material != -1) {
-			material = p_A.materials[p_A.faces[i].material];
-		}
-		mesh_merge.add_face(points[0], points[1], points[2], uvs[0], uvs[1], uvs[2], p_A.faces[i].smooth, p_A.faces[i].invert, material, false);
-	}
 
-	for (int i = 0; i < p_B.faces.size(); i++) {
+		for(auto it_faces = p_A.faces.begin(); it_faces != p_A.faces.end(); ++it_faces){
+			if (cd.build_polys_A.has(std::distance(p_A.faces.begin(), it_faces) ) )
+				continue; //made from buildpoly, skipping
 
-		if (cd.build_polys_B.has(i))
-			continue; //made from buildpoly, skipping
+			for(unsigned j = 0; j < 3; j++){
+				points[j] = (*it_faces).vertices[j];
 
-		Vector3 points[3];
-		Vector2 uvs[3];
-		for (int j = 0; j < 3; j++) {
-			points[j] = p_B.faces[i].vertices[j];
-			uvs[j] = p_B.faces[i].uvs[j];
+				uvs[j] = (*it_faces).uvs[j];
+			}
+
+			Ref<Material> material;
+
+			if( (*it_faces).material != -1){
+				material = p_A.materials[(*it_faces).material];
+			}
+
+			mesh_merge.add_face(points[0], points[1], points[2], uvs[0], uvs[1], uvs[2], (*it_faces).smooth, (*it_faces).invert, material, false);
 		}
-		Ref<Material> material;
-		if (p_B.faces[i].material != -1) {
-			material = p_B.materials[p_B.faces[i].material];
+
+		for(auto it_faces = p_B.faces.begin(); it_faces != p_B.faces.end(); ++it_faces){
+			if (cd.build_polys_B.has(std::distance(p_B.faces.begin(), it_faces) ) )
+				continue; //made from buildpoly, skipping
+
+			for(unsigned j = 0; j < 3; j++){
+				points[j] = (*it_faces).vertices[j];
+
+				uvs[j] = (*it_faces).uvs[j];
+			}
+
+			Ref<Material> material;
+
+			if( (*it_faces).material != -1){
+				material = p_B.materials[(*it_faces).material];
+			}
+
+			mesh_merge.add_face(points[0], points[1], points[2], uvs[0], uvs[1], uvs[2], (*it_faces).smooth, (*it_faces).invert, material, false);
 		}
-		mesh_merge.add_face(points[0], points[1], points[2], uvs[0], uvs[1], uvs[2], p_B.faces[i].smooth, p_B.faces[i].invert, material, true);
 	}
 
 	//mark faces that ended up inside the intersection
@@ -1453,121 +1467,63 @@ void CSGBrushOperation::merge_brushes(Operation p_operation, const CSGBrush &p_A
 	//regen new brush to start filling it again
 	result.clear();
 
-	switch (p_operation) {
+	result.faces.reserve( mesh_merge.faces.size() );
 
-		case OPERATION_UNION: {
+	// need_update : mesh_merge can be a CSGBrush or herit it
+	{
+		CSGBrush::Face face;
 
-			int outside_count = 0;
-
-			for (int i = 0; i < mesh_merge.faces.size(); i++) {
-				if (mesh_merge.faces[i].inside)
+		if(p_operation < OPERATION_SUBSTRACTION){
+			for(auto&& mm_face : mesh_merge.faces){
+				if( (p_operation == OPERATION_UNION && mm_face.inside) || (p_operation == OPERATION_INTERSECTION && !mm_face.inside) ){
 					continue;
-
-				outside_count++;
-			}
-
-			result.faces.resize(outside_count);
-
-			outside_count = 0;
-
-			for (int i = 0; i < mesh_merge.faces.size(); i++) {
-				if (mesh_merge.faces[i].inside)
-					continue;
-				for (int j = 0; j < 3; j++) {
-					result.faces.write[outside_count].vertices[j] = mesh_merge.points[mesh_merge.faces[i].points[j]];
-					result.faces.write[outside_count].uvs[j] = mesh_merge.faces[i].uvs[j];
 				}
 
-				result.faces.write[outside_count].smooth = mesh_merge.faces[i].smooth;
-				result.faces.write[outside_count].invert = mesh_merge.faces[i].invert;
-				result.faces.write[outside_count].material = mesh_merge.faces[i].material_idx;
-				outside_count++;
-			}
-
-			result._regen_face_aabbs();
-
-		} break;
-		case OPERATION_INTERSECTION: {
-
-			int inside_count = 0;
-
-			for (int i = 0; i < mesh_merge.faces.size(); i++) {
-				if (!mesh_merge.faces[i].inside)
-					continue;
-
-				inside_count++;
-			}
-
-			result.faces.resize(inside_count);
-
-			inside_count = 0;
-
-			for (int i = 0; i < mesh_merge.faces.size(); i++) {
-				if (!mesh_merge.faces[i].inside)
-					continue;
-				for (int j = 0; j < 3; j++) {
-					result.faces.write[inside_count].vertices[j] = mesh_merge.points[mesh_merge.faces[i].points[j]];
-					result.faces.write[inside_count].uvs[j] = mesh_merge.faces[i].uvs[j];
+				for(unsigned j = 0; j < 3; j++){
+					face.vertices[j] = mesh_merge.points[mm_face.points[j]];
+					face.uvs[j] = mm_face.uvs[j];
 				}
 
-				result.faces.write[inside_count].smooth = mesh_merge.faces[i].smooth;
-				result.faces.write[inside_count].invert = mesh_merge.faces[i].invert;
-				result.faces.write[inside_count].material = mesh_merge.faces[i].material_idx;
-				inside_count++;
+				face.smooth = mm_face.smooth;
+				face.invert = mm_face.invert;
+				face.material = mm_face.material_idx;
+
+				result.faces.push_back(face);
 			}
-
-			result._regen_face_aabbs();
-
-		} break;
-		case OPERATION_SUBSTRACTION: {
-
-			int face_count = 0;
-
-			for (int i = 0; i < mesh_merge.faces.size(); i++) {
-				if (mesh_merge.faces[i].from_b && !mesh_merge.faces[i].inside)
+		}else{
+			for(auto&& mm_face : mesh_merge.faces){
+				if( (mm_face.from_b && !mm_face.inside) || (!mm_face.from_b && mm_face.inside) ){
 					continue;
-				if (!mesh_merge.faces[i].from_b && mesh_merge.faces[i].inside)
-					continue;
-
-				face_count++;
-			}
-
-			result.faces.resize(face_count);
-
-			face_count = 0;
-
-			for (int i = 0; i < mesh_merge.faces.size(); i++) {
-
-				if (mesh_merge.faces[i].from_b && !mesh_merge.faces[i].inside)
-					continue;
-				if (!mesh_merge.faces[i].from_b && mesh_merge.faces[i].inside)
-					continue;
-
-				for (int j = 0; j < 3; j++) {
-					result.faces.write[face_count].vertices[j] = mesh_merge.points[mesh_merge.faces[i].points[j]];
-					result.faces.write[face_count].uvs[j] = mesh_merge.faces[i].uvs[j];
 				}
 
-				if (mesh_merge.faces[i].from_b) {
+				for(unsigned j = 0; j < 3; j++){
+					face.vertices[j] = mesh_merge.points[mm_face.points[j] ];
+					face.uvs[j] = mm_face.uvs[j];
+				}
+
+				if(mm_face.from_b){
 					//invert facing of insides of B
-					SWAP(result.faces.write[face_count].vertices[1], result.faces.write[face_count].vertices[2]);
-					SWAP(result.faces.write[face_count].uvs[1], result.faces.write[face_count].uvs[2]);
+					std::swap(face.vertices[1], face.vertices[2]);
+					std::swap(face.uvs[1], face.uvs[2]);
 				}
 
-				result.faces.write[face_count].smooth = mesh_merge.faces[i].smooth;
-				result.faces.write[face_count].invert = mesh_merge.faces[i].invert;
-				result.faces.write[face_count].material = mesh_merge.faces[i].material_idx;
-				face_count++;
+				face.smooth = mm_face.smooth;
+				face.invert = mm_face.invert;
+				face.material = mm_face.material_idx;
+
+				result.faces.push_back(face);
 			}
-
-			result._regen_face_aabbs();
-
-		} break;
+		}
 	}
+
+	result.faces.shrink_to_fit();
+
+	result._regen_face_aabbs();
 
 	//updatelist of materials
 	result.materials.resize(mesh_merge.materials.size());
+
 	for (const Map<Ref<Material>, int>::Element *E = mesh_merge.materials.front(); E; E = E->next()) {
-		result.materials.write[E->get()] = E->key();
+		result.materials[E->get()] = E->key();
 	}
 }
