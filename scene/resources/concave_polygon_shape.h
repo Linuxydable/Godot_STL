@@ -31,7 +31,11 @@
 #ifndef CONCAVE_POLYGON_SHAPE_H
 #define CONCAVE_POLYGON_SHAPE_H
 
-#include "scene/resources/shape.h"
+#include <vector>
+
+#include "core/math/vector3.h"
+
+#include "shape.h"
 
 class ConcavePolygonShape : public Shape {
 
@@ -66,7 +70,7 @@ public:
 	void set_faces(const PoolVector<Vector3> &p_faces);
 	PoolVector<Vector3> get_faces() const;
 
-	Vector<Vector3> get_debug_mesh_lines();
+	std::vector<Vector3> get_debug_mesh_lines();
 
 	ConcavePolygonShape();
 };
