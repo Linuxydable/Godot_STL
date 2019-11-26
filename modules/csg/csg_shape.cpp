@@ -286,22 +286,24 @@ void CSGShape::_update_shape() {
 
 	OAHashMap<Vector3, Vector3> vec_map;
 
-	Vector<int> face_count;
+	std::vector<int> face_count;
+
 	face_count.resize(n->materials.size() + 1);
-	for (int i = 0; i < face_count.size(); i++) {
-		face_count.write[i] = 0;
+
+	for(auto&& f_count : face_count){
+		f_count = 0;
 	}
 
-	for (int i = 0; i < n->faces.size(); i++) {
-		int mat = n->faces[i].material;
+	for(auto&& face : n->faces){
+		int mat = face.material;
 		ERR_CONTINUE(mat < -1 || mat >= face_count.size());
 		int idx = mat == -1 ? face_count.size() - 1 : mat;
-		if (n->faces[i].smooth) {
+		if (face.smooth) {
 
-			Plane p(n->faces[i].vertices[0], n->faces[i].vertices[1], n->faces[i].vertices[2]);
+			Plane p(face.vertices[0], face.vertices[1], face.vertices[2]);
 
 			for (int j = 0; j < 3; j++) {
-				Vector3 v = n->faces[i].vertices[j];
+				Vector3 v = face.vertices[j];
 				Vector3 add;
 				if (vec_map.lookup(v, add)) {
 					add += p.normal;
@@ -312,33 +314,35 @@ void CSGShape::_update_shape() {
 			}
 		}
 
-		face_count.write[idx]++;
+		face_count[idx]++;
 	}
 
-	Vector<ShapeUpdateSurface> surfaces;
+	std::vector<ShapeUpdateSurface> surfaces;
 
 	surfaces.resize(face_count.size());
 
 	//create arrays
-	for (int i = 0; i < surfaces.size(); i++) {
+	for(decltype(surfaces.size() ) i = 0; i < surfaces.size(); i++) {
+		surfaces[i].vertices.resize(face_count[i] * 3);
+		surfaces[i].normals.resize(face_count[i] * 3);
+		surfaces[i].uvs.resize(face_count[i] * 3);
 
-		surfaces.write[i].vertices.resize(face_count[i] * 3);
-		surfaces.write[i].normals.resize(face_count[i] * 3);
-		surfaces.write[i].uvs.resize(face_count[i] * 3);
 		if (calculate_tangents) {
-			surfaces.write[i].tans.resize(face_count[i] * 3 * 4);
+			surfaces[i].tans.resize(face_count[i] * 3 * 4);
 		}
-		surfaces.write[i].last_added = 0;
+
+		surfaces[i].last_added = 0;
 
 		if (i != surfaces.size() - 1) {
-			surfaces.write[i].material = n->materials[i];
+			surfaces[i].material = n->materials[i];
 		}
 
-		surfaces.write[i].verticesw = surfaces.write[i].vertices.write();
-		surfaces.write[i].normalsw = surfaces.write[i].normals.write();
-		surfaces.write[i].uvsw = surfaces.write[i].uvs.write();
+		surfaces[i].verticesw = surfaces[i].vertices.write();
+		surfaces[i].normalsw = surfaces[i].normals.write();
+		surfaces[i].uvsw = surfaces[i].uvs.write();
+
 		if (calculate_tangents) {
-			surfaces.write[i].tansw = surfaces.write[i].tans.write();
+			surfaces[i].tansw = surfaces[i].tans.write();
 		}
 	}
 
@@ -357,7 +361,7 @@ void CSGShape::_update_shape() {
 			physicsw = physics_faces.write();
 		}
 
-		for (int i = 0; i < n->faces.size(); i++) {
+		for (decltype(n->faces.size() ) i = 0; i < n->faces.size(); i++) {
 
 			int order[3] = { 0, 1, 2 };
 
@@ -409,18 +413,20 @@ void CSGShape::_update_shape() {
 				}
 			}
 
-			surfaces.write[idx].last_added += 3;
+			surfaces[idx].last_added += 3;
 		}
 	}
 
 	root_mesh.instance();
 	//create surfaces
 
-	for (int i = 0; i < surfaces.size(); i++) {
+	for(auto&& surface : surfaces){
 		// calculate tangents for this surface
 		bool have_tangents = calculate_tangents;
+
 		if (have_tangents) {
 			SMikkTSpaceInterface mkif;
+
 			mkif.m_getNormal = mikktGetNormal;
 			mkif.m_getNumFaces = mikktGetNumFaces;
 			mkif.m_getNumVerticesOfFace = mikktGetNumVerticesOfFace;
@@ -430,34 +436,39 @@ void CSGShape::_update_shape() {
 			mkif.m_setTSpaceBasic = NULL;
 
 			SMikkTSpaceContext msc;
+
 			msc.m_pInterface = &mkif;
-			msc.m_pUserData = &surfaces.write[i];
+			msc.m_pUserData = &surface;
+
 			have_tangents = genTangSpaceDefault(&msc);
 		}
 
 		// unset write access
-		surfaces.write[i].verticesw.release();
-		surfaces.write[i].normalsw.release();
-		surfaces.write[i].uvsw.release();
-		surfaces.write[i].tansw.release();
+		surface.verticesw.release();
+		surface.normalsw.release();
+		surface.uvsw.release();
+		surface.tansw.release();
 
-		if (surfaces[i].last_added == 0)
+		if (surface.last_added == 0)
 			continue;
 
 		// and convert to surface array
 		Array array;
+
 		array.resize(Mesh::ARRAY_MAX);
 
-		array[Mesh::ARRAY_VERTEX] = surfaces[i].vertices;
-		array[Mesh::ARRAY_NORMAL] = surfaces[i].normals;
-		array[Mesh::ARRAY_TEX_UV] = surfaces[i].uvs;
+		array[Mesh::ARRAY_VERTEX] = surface.vertices;
+		array[Mesh::ARRAY_NORMAL] = surface.normals;
+		array[Mesh::ARRAY_TEX_UV] = surface.uvs;
+
 		if (have_tangents) {
-			array[Mesh::ARRAY_TANGENT] = surfaces[i].tans;
+			array[Mesh::ARRAY_TANGENT] = surface.tans;
 		}
 
 		int idx = root_mesh->get_surface_count();
+
 		root_mesh->add_surface_from_arrays(Mesh::PRIMITIVE_TRIANGLES, array);
-		root_mesh->surface_set_material(idx, surfaces[i].material);
+		root_mesh->surface_set_material(idx, surface.material);
 	}
 
 	if (root_collision_shape.is_valid()) {
@@ -1774,13 +1785,13 @@ CSGBrush *CSGPolygon::_build_brush() {
 	if (polygon.size() < 3)
 		return NULL;
 
-	Vector<Point2> final_polygon = polygon;
+	std::vector<Point2> final_polygon = polygon;
 
 	if (Triangulate::get_area(final_polygon) > 0) {
 		final_polygon.invert();
 	}
 
-	Vector<int> triangles = Geometry::triangulate_polygon(final_polygon);
+	std::vector<int> triangles = Geometry::triangulate_polygon(final_polygon);
 
 	if (triangles.size() < 3)
 		return NULL;
@@ -1789,21 +1800,25 @@ CSGBrush *CSGPolygon::_build_brush() {
 	Ref<Curve3D> curve;
 
 	// get bounds for our polygon
-	Vector2 final_polygon_min;
-	Vector2 final_polygon_max;
-	for (int i = 0; i < final_polygon.size(); i++) {
-		Vector2 p = final_polygon[i];
-		if (i == 0) {
-			final_polygon_min = p;
-			final_polygon_max = final_polygon_min;
-		} else {
-			if (p.x < final_polygon_min.x) final_polygon_min.x = p.x;
-			if (p.y < final_polygon_min.y) final_polygon_min.y = p.y;
+	Vector2 final_polygon_min, final_polygon_max;
 
-			if (p.x > final_polygon_max.x) final_polygon_max.x = p.x;
-			if (p.y > final_polygon_max.y) final_polygon_max.y = p.y;
+	{
+		auto it = final_polygon.begin();
+
+		final_polygon_min = *it;
+		final_polygon_max = final_polygon_min;
+
+		++it;
+
+		for(; it != final_polygon.end(); ++it){
+			if( (*it).x < final_polygon_min.x) final_polygon_min.x = (*it).x;
+			if( (*it).y < final_polygon_min.y) final_polygon_min.y = (*it).y;
+
+			if( (*it).x > final_polygon_max.x) final_polygon_max.x = (*it).x;
+			if( (*it).y > final_polygon_max.y) final_polygon_max.y = (*it).y;
 		}
 	}
+
 	Vector2 final_polygon_size = final_polygon_max - final_polygon_min;
 
 	if (mode == MODE_PATH) {
@@ -2341,13 +2356,13 @@ void CSGPolygon::_bind_methods() {
 	BIND_ENUM_CONSTANT(PATH_ROTATION_PATH_FOLLOW);
 }
 
-void CSGPolygon::set_polygon(const Vector<Vector2> &p_polygon) {
+void CSGPolygon::set_polygon(const std::vector<Vector2> &p_polygon) {
 	polygon = p_polygon;
 	_make_dirty();
 	update_gizmo();
 }
 
-Vector<Vector2> CSGPolygon::get_polygon() const {
+std::vector<Vector2> CSGPolygon::get_polygon() const {
 	return polygon;
 }
 
