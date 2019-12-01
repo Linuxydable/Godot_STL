@@ -364,12 +364,13 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 		{ // Parse vertices to bullet
 
 			bt_vertices.resize(indices_map_size * 3);
+			
 			PoolVector<Vector3>::Read p_vertices_read = p_vertices.read();
 
 			for (int i = 0; i < indices_map_size; ++i) {
-				bt_vertices.write[3 * i + 0] = p_vertices_read[indices_table[i][0]].x;
-				bt_vertices.write[3 * i + 1] = p_vertices_read[indices_table[i][0]].y;
-				bt_vertices.write[3 * i + 2] = p_vertices_read[indices_table[i][0]].z;
+				bt_vertices[3 * i + 0] = p_vertices_read[indices_table[i][0]].x;
+				bt_vertices[3 * i + 1] = p_vertices_read[indices_table[i][0]].y;
+				bt_vertices[3 * i + 2] = p_vertices_read[indices_table[i][0]].z;
 			}
 		}
 
