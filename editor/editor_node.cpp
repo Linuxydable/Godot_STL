@@ -30,6 +30,8 @@
 
 #include "editor_node.h"
 
+#include <algorithm>
+
 #include "core/bind/core_bind.h"
 #include "core/class_db.h"
 #include "core/io/config_file.h"
@@ -561,25 +563,27 @@ void EditorNode::_fs_changed() {
 	}
 }
 
-void EditorNode::_resources_reimported(const Vector<String> &p_resources) {
-
+void EditorNode::_resources_reimported(const std::vector<String> &p_resources) {
 	List<String> scenes; //will load later
+
 	int current_tab = scene_tabs->get_current_tab();
 
-	for (int i = 0; i < p_resources.size(); i++) {
-		String file_type = ResourceLoader::get_resource_type(p_resources[i]);
-		if (file_type == "PackedScene") {
-			scenes.push_back(p_resources[i]);
+	for(auto&& p_resource : p_resources){
+		String file_type = ResourceLoader::get_resource_type(p_resource);
+
+		if(file_type == "PackedScene"){
+			scenes.push_back(p_resource);
 			//reload later if needed, first go with normal resources
 			continue;
 		}
 
-		if (!ResourceCache::has(p_resources[i])) {
+		if(!ResourceCache::has(p_resource) ){
 			continue; //not loaded, no need to reload
 		}
+
 		//reload normally
-		Resource *resource = ResourceCache::get(p_resources[i]);
-		if (resource) {
+		Resource *resource = ResourceCache::get(p_resource);
+		if(resource){
 			resource->reload_from_file();
 		}
 	}
@@ -658,7 +662,7 @@ Error EditorNode::load_resource(const String &p_resource, bool p_ignore_broken_d
 	if (!p_ignore_broken_deps && dependency_errors.has(p_resource)) {
 
 		//current_option = -1;
-		Vector<String> errors;
+		std::vector<String> errors;
 		for (Set<String>::Element *E = dependency_errors[p_resource].front(); E; E = E->next()) {
 
 			errors.push_back(E->get());
@@ -1258,13 +1262,16 @@ void EditorNode::save_all_scenes() {
 	_save_all_scenes();
 }
 
-void EditorNode::save_scene_list(Vector<String> p_scene_filenames) {
-
-	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
+void EditorNode::save_scene_list(std::vector<String> p_scene_filenames) {
+	for(int i = 0; i < editor_data.get_edited_scene_count(); i++){
 		Node *scene = editor_data.get_edited_scene_root(i);
 
-		if (scene && (p_scene_filenames.find(scene->get_filename()) >= 0)) {
-			_save_scene(scene->get_filename(), i);
+		if(scene){
+			auto it_find = std::find(p_scene_filenames.begin(), p_scene_filenames.end(), scene->get_filename() );
+
+			if(it_find != p_scene_filenames.end() ){
+				_save_scene(scene->get_filename(), i);
+			}
 		}
 	}
 }
@@ -1567,7 +1574,7 @@ bool EditorNode::_is_class_editor_disabled_by_feature_profile(const StringName &
 
 void EditorNode::edit_item(Object *p_object) {
 
-	Vector<EditorPlugin *> sub_plugins;
+	std::vector<EditorPlugin *> sub_plugins;
 
 	if (p_object) {
 		if (_is_class_editor_disabled_by_feature_profile(p_object->get_class())) {
@@ -1580,8 +1587,8 @@ void EditorNode::edit_item(Object *p_object) {
 
 		bool same = true;
 		if (sub_plugins.size() == editor_plugins_over->get_plugins_list().size()) {
-			for (int i = 0; i < sub_plugins.size(); i++) {
-				if (sub_plugins[i] != editor_plugins_over->get_plugins_list()[i]) {
+			for(decltype(sub_plugins.size() ) i = 0; i < sub_plugins.size(); i++){
+				if(sub_plugins[i] != editor_plugins_over->get_plugins_list()[i]){
 					same = false;
 				}
 			}
@@ -1645,7 +1652,7 @@ void EditorNode::_display_top_editors(bool p_display) {
 	editor_plugins_over->make_visible(p_display);
 }
 
-void EditorNode::_set_top_editors(Vector<EditorPlugin *> p_editor_plugins_over) {
+void EditorNode::_set_top_editors(std::vector<EditorPlugin *> p_editor_plugins_over) {
 	editor_plugins_over->set_plugins_list(p_editor_plugins_over);
 }
 
@@ -1811,7 +1818,7 @@ void EditorNode::_edit_current() {
 			}
 		}
 
-		Vector<EditorPlugin *> sub_plugins;
+		std::vector<EditorPlugin *> sub_plugins;
 
 		if (!_is_class_editor_disabled_by_feature_profile(current_obj->get_class())) {
 			sub_plugins = editor_data.get_subeditors(current_obj);
@@ -2884,15 +2891,15 @@ void EditorNode::_update_addon_config() {
 	if (_initializing_addons)
 		return;
 
-	Vector<String> enabled_addons;
+	std::vector<String> enabled_addons;
 
 	for (Map<String, EditorPlugin *>::Element *E = plugin_addons.front(); E; E = E->next()) {
 		enabled_addons.push_back(E->key());
 	}
 
-	if (enabled_addons.size() == 0) {
+	if(enabled_addons.empty() ){
 		ProjectSettings::get_singleton()->set("editor_plugins/enabled", Variant());
-	} else {
+	}else{
 		ProjectSettings::get_singleton()->set("editor_plugins/enabled", enabled_addons);
 	}
 
@@ -3263,7 +3270,7 @@ Error EditorNode::load_scene(const String &p_scene, bool p_ignore_broken_deps, b
 	if (!p_ignore_broken_deps && dependency_errors.has(lpath)) {
 
 		current_option = -1;
-		Vector<String> errors;
+		std::vector<String> errors;
 		for (Set<String>::Element *E = dependency_errors[lpath].front(); E; E = E->next()) {
 
 			errors.push_back(E->get());
@@ -3372,7 +3379,7 @@ void EditorNode::request_instance_scene(const String &p_path) {
 	scene_tree_dock->instance(p_path);
 }
 
-void EditorNode::request_instance_scenes(const Vector<String> &p_files) {
+void EditorNode::request_instance_scenes(const std::vector<String> &p_files) {
 
 	scene_tree_dock->instance_scenes(p_files);
 }
@@ -3400,7 +3407,7 @@ void EditorNode::_inherit_request(String p_file) {
 	_dialog_action(p_file);
 }
 
-void EditorNode::_instance_request(const Vector<String> &p_files) {
+void EditorNode::_instance_request(const std::vector<String> &p_files) {
 
 	request_instance_scenes(p_files);
 }
@@ -3467,15 +3474,12 @@ void EditorNode::_update_recent_scenes() {
 }
 
 void EditorNode::_quick_opened() {
+	std::vector<String> files = quick_open->get_selected_files();
 
-	Vector<String> files = quick_open->get_selected_files();
-
-	for (int i = 0; i < files.size(); i++) {
-		String res_path = files[i];
-
-		if (quick_open->get_base_type() == "PackedScene") {
+	for(auto&& res_path : files){
+		if(quick_open->get_base_type() == "PackedScene"){
 			open_request(res_path);
-		} else {
+		}else{
 			load_resource(res_path);
 		}
 	}
@@ -3588,15 +3592,25 @@ Ref<Script> EditorNode::get_object_custom_type_base(const Object *p_object) cons
 		// should probably be deprecated in 4.x
 		StringName base = script->get_instance_base_type();
 		if (base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base)) {
-			const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
+			const std::vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
 
 			Ref<Script> base_script = script;
-			while (base_script.is_valid()) {
-				for (int i = 0; i < types.size(); ++i) {
-					if (types[i].script == base_script) {
-						return types[i].script;
-					}
+
+			auto it_find = types.end();
+
+			while(base_script.is_valid() ){
+				it_find = std::find_if(types.begin(), types.end(),
+					[&](const EditorData::CustomType& type){
+						if(type.script == base_script){
+							return true;
+						}
+						return false;
+					});
+
+				if(it_find != types.end() ){
+					return (*it_find).script;
 				}
+
 				base_script = base_script->get_base_script();
 			}
 		}
@@ -3615,19 +3629,35 @@ StringName EditorNode::get_object_custom_type_name(const Object *p_object) const
 
 	if (script.is_valid()) {
 		Ref<Script> base_script = script;
+
+		StringName name, base;
+
+		const std::vector<EditorData::CustomType> &types;
+
+		std::vector<EditorData::CustomType>::iterator it_find;
+
 		while (base_script.is_valid()) {
-			StringName name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
-			if (name != StringName())
+			name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
+
+			if(name != StringName() )
 				return name;
 
 			// should probably be deprecated in 4.x
-			StringName base = base_script->get_instance_base_type();
-			if (base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base)) {
-				const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
-				for (int i = 0; i < types.size(); ++i) {
-					if (types[i].script == base_script) {
-						return types[i].name;
-					}
+			base = base_script->get_instance_base_type();
+
+			if(base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base) ){
+				types = EditorNode::get_editor_data().get_custom_types()[base];
+
+				it_find = std::find_if(types.begin(), types.end(),
+					[&](const EditorData::CustomType& type){
+						if(type.script == base_script){
+							return true;
+						}
+						return false;
+					});
+
+				if(it_find != types.end() ){
+					return (*it_find).name;
 				}
 			}
 			base_script = base_script->get_base_script();
@@ -3647,22 +3677,40 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 
 	if (script.is_valid()) {
 		Ref<Script> base_script = script;
+
+		StringName name, icon_path, base;
+
+		const std::vector<EditorData::CustomType>& types;
+
+		std::vector<EditorData::CustomType>::iterator it_find;
+
 		while (base_script.is_valid()) {
-			StringName name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
-			String icon_path = EditorNode::get_editor_data().script_class_get_icon_path(name);
-			if (icon_path.length())
+			name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
+
+			icon_path = EditorNode::get_editor_data().script_class_get_icon_path(name);
+
+			if(icon_path.length() )
 				return ResourceLoader::load(icon_path);
 
 			// should probably be deprecated in 4.x
-			StringName base = base_script->get_instance_base_type();
-			if (base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base)) {
-				const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
-				for (int i = 0; i < types.size(); ++i) {
-					if (types[i].script == base_script && types[i].icon.is_valid()) {
-						return types[i].icon;
-					}
+			base = base_script->get_instance_base_type();
+
+			if(base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base) ){
+				types = EditorNode::get_editor_data().get_custom_types()[base];
+
+				it_find = std::find_if(types.begin(), types.end(),
+					[&](const EditorData::CustomType& type){
+						if(type.script == base_script && type.icon.is_valid() ){
+							return true;
+						}
+						return false;
+					});
+
+				if(it_find != types.end() ){
+					return (*it_find).icon;
 				}
 			}
+
 			base_script = base_script->get_base_script();
 		}
 	}
@@ -3717,15 +3765,25 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 		return icon;
 	}
 
-	const Map<String, Vector<EditorData::CustomType> > &p_map = EditorNode::get_editor_data().get_custom_types();
-	for (const Map<String, Vector<EditorData::CustomType> >::Element *E = p_map.front(); E; E = E->next()) {
-		const Vector<EditorData::CustomType> &ct = E->value();
-		for (int i = 0; i < ct.size(); ++i) {
-			if (ct[i].name == p_class) {
-				if (ct[i].icon.is_valid()) {
-					return ct[i].icon;
+	const Map<String, std::vector<EditorData::CustomType> > &p_map = EditorNode::get_editor_data().get_custom_types();
+
+	const std::vector<EditorData::CustomType>& ct;
+
+	std::vector<EditorData::CustomType>::iterator it_find;
+
+	for(const Map<String, std::vector<EditorData::CustomType> >::Element *E = p_map.front(); E; E = E->next() ){
+		ct = E->value();
+
+		it_find = std::find_if(ct.begin(), ct.end(),
+			[&](const EditorData::CustomType& type){
+				if(type.name == p_class && type.icon.is_valid() ){
+					return true;
 				}
-			}
+				return false;
+			});
+
+		if(it_find != ct.end() ){
+			return (*it_find).icon;
 		}
 	}
 
@@ -3835,7 +3893,8 @@ void EditorNode::_editor_file_dialog_unregister(EditorFileDialog *p_dialog) {
 	singleton->editor_file_dialogs.erase(p_dialog);
 }
 
-Vector<EditorNodeInitCallback> EditorNode::_init_callbacks;
+// need_update : wut ?
+std::vector<EditorNodeInitCallback> EditorNode::_init_callbacks;
 
 Error EditorNode::export_preset(const String &p_preset, const String &p_path, bool p_debug, const String &p_password, bool p_quit_after) {
 
@@ -4251,11 +4310,10 @@ void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String 
 		if (!p_layout->has_section_key(p_section, "dock_" + itos(i + 1)))
 			continue;
 
-		Vector<String> names = String(p_layout->get_value(p_section, "dock_" + itos(i + 1))).split(",");
+		std::vector<String> names = String(p_layout->get_value(p_section, "dock_" + itos(i + 1))).split(",");
 
-		for (int j = 0; j < names.size(); j++) {
-
-			String name = names[j];
+		for(auto&& name : names){
+			// need_update
 			//find it, in a horribly inefficient way
 			int atidx = -1;
 			Control *node = NULL;
@@ -4881,39 +4939,64 @@ Variant EditorNode::drag_resource(const Ref<Resource> &p_res, Control *p_from) {
 	return drag_data;
 }
 
-Variant EditorNode::drag_files_and_dirs(const Vector<String> &p_paths, Control *p_from) {
-	bool has_folder = false;
-	bool has_file = false;
-	for (int i = 0; i < p_paths.size(); i++) {
-		bool is_folder = p_paths[i].ends_with("/");
-		has_folder |= is_folder;
-		has_file |= !is_folder;
-	}
+Variant EditorNode::drag_files_and_dirs(const std::vector<String> &p_paths, Control *p_from) {
+	bool has_folder = false, has_file = false;
 
-	int max_rows = 6;
-	int num_rows = p_paths.size() > max_rows ? max_rows - 1 : p_paths.size(); // Don't waste a row to say "1 more file" - list it instead.
-	VBoxContainer *vbox = memnew(VBoxContainer);
-	for (int i = 0; i < num_rows; i++) {
-		HBoxContainer *hbox = memnew(HBoxContainer);
-		TextureRect *icon = memnew(TextureRect);
-		Label *label = memnew(Label);
+	{
+		bool is_folder;
 
-		if (p_paths[i].ends_with("/")) {
-			label->set_text(p_paths[i].substr(0, p_paths[i].length() - 1).get_file());
-			icon->set_texture(gui_base->get_icon("Folder", "EditorIcons"));
-		} else {
-			label->set_text(p_paths[i].get_file());
-			icon->set_texture(gui_base->get_icon("File", "EditorIcons"));
+		for(auto&& p_path : p_paths){
+			is_folder = p_path.ends_with("/");
+
+			has_folder |= is_folder;
+
+			has_file |= !is_folder;
 		}
-		icon->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
-		icon->set_size(Size2(16, 16));
-		hbox->add_child(icon);
-		hbox->add_child(label);
-		vbox->add_child(hbox);
 	}
 
-	if (p_paths.size() > num_rows) {
+	// need_update : max_rows should be a class const => MAX_ROWS
+	decltype(p_paths.size() ) max_rows = 6;
+
+	// Don't waste a row to say "1 more file" - list it instead.
+	std::vector<String>::iterator num_rows = p_paths.size() > max_rows ? p_paths.begin()+max_rows : p_paths.end(); 
+	
+	VBoxContainer *vbox = memnew(VBoxContainer);
+
+	{
+		HBoxContainer *hbox;
+
+		TextureRect *icon;
+
+		Label *label;
+
+		for(auto it_p_paths = p_paths.begin(); it_p_paths != num_rows; ++it_p_paths){
+			hbox = memnew(HBoxContainer);
+			icon = memnew(TextureRect);
+			label = memnew(Label);
+
+			if( (*it_p_paths).ends_with("/") ){
+				label->set_text( (*it_p_paths).substr(0, (*it_p_paths).length() - 1).get_file() );
+
+				icon->set_texture(gui_base->get_icon("Folder", "EditorIcons") );
+			}else{
+				label->set_text( (*it_p_paths).get_file() );
+
+				icon->set_texture(gui_base->get_icon("File", "EditorIcons") );
+			}
+
+			icon->set_stretch_mode(TextureRect::STRETCH_KEEP_CENTERED);
+			icon->set_size(Size2(16, 16));
+
+			hbox->add_child(icon);
+			hbox->add_child(label);
+
+			vbox->add_child(hbox);
+		}
+	}
+
+	if(p_paths.end() > num_rows){
 		Label *label = memnew(Label);
+
 		if (has_file && has_folder) {
 			label->set_text(vformat(TTR("%d more files or folders"), p_paths.size() - num_rows));
 		} else if (has_folder) {
@@ -4921,8 +5004,10 @@ Variant EditorNode::drag_files_and_dirs(const Vector<String> &p_paths, Control *
 		} else {
 			label->set_text(vformat(TTR("%d more files"), p_paths.size() - num_rows));
 		}
+
 		vbox->add_child(label);
 	}
+
 	p_from->set_drag_preview(vbox); //wait until it enters scene
 
 	Dictionary drag_data;
@@ -4988,7 +5073,7 @@ void EditorNode::_global_menu_action(const Variant &p_id, const Variant &p_meta)
 	}
 }
 
-void EditorNode::_dropped_files(const Vector<String> &p_files, int p_screen) {
+void EditorNode::_dropped_files(const std::vector<String> &p_files, int p_screen) {
 
 	String to_path = ProjectSettings::get_singleton()->globalize_path(get_filesystem_dock()->get_selected_path());
 
@@ -4997,10 +5082,10 @@ void EditorNode::_dropped_files(const Vector<String> &p_files, int p_screen) {
 	EditorFileSystem::get_singleton()->scan_changes();
 }
 
-void EditorNode::_add_dropped_files_recursive(const Vector<String> &p_files, String to_path) {
+void EditorNode::_add_dropped_files_recursive(const std::vector<String> &p_files, String to_path) {
 
 	DirAccessRef dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-	Vector<String> just_copy = String("ttf,otf").split(",");
+	std::vector<String> just_copy = String("ttf,otf").split(",");
 
 	for (int i = 0; i < p_files.size(); i++) {
 
@@ -5009,7 +5094,7 @@ void EditorNode::_add_dropped_files_recursive(const Vector<String> &p_files, Str
 
 		if (dir->dir_exists(from)) {
 
-			Vector<String> sub_files;
+			std::vector<String> sub_files;
 
 			DirAccessRef sub_dir = DirAccess::open(from);
 			sub_dir->list_dir_begin();
@@ -5177,9 +5262,9 @@ void EditorNode::remove_resource_conversion_plugin(const Ref<EditorResourceConve
 	resource_conversion_plugins.erase(p_plugin);
 }
 
-Vector<Ref<EditorResourceConversionPlugin> > EditorNode::find_resource_conversion_plugin(const Ref<Resource> &p_for_resource) {
+std::vector<Ref<EditorResourceConversionPlugin> > EditorNode::find_resource_conversion_plugin(const Ref<Resource> &p_for_resource) {
 
-	Vector<Ref<EditorResourceConversionPlugin> > ret;
+	std::vector<Ref<EditorResourceConversionPlugin> > ret;
 
 	for (int i = 0; i < resource_conversion_plugins.size(); i++) {
 		if (resource_conversion_plugins[i].is_valid() && resource_conversion_plugins[i]->handles(p_for_resource)) {
@@ -6676,7 +6761,7 @@ EditorNode::EditorNode() {
 
 	{
 		_initializing_addons = true;
-		Vector<String> addons;
+		std::vector<String> addons;
 		if (ProjectSettings::get_singleton()->has_setting("editor_plugins/enabled")) {
 			addons = ProjectSettings::get_singleton()->get("editor_plugins/enabled");
 		}
