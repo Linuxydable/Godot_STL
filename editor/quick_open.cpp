@@ -58,9 +58,9 @@ String EditorQuickOpen::get_selected() const {
 	return "res://" + ti->get_text(0);
 }
 
-Vector<String> EditorQuickOpen::get_selected_files() const {
+std::vector<String> EditorQuickOpen::get_selected_files() const {
 
-	Vector<String> files;
+	std::vector<String> files;
 
 	TreeItem *item = search_options->get_next_selected(search_options->get_root());
 	while (item) {
@@ -122,7 +122,7 @@ float EditorQuickOpen::_path_cmp(String search, String path) const {
 	return path.to_lower().similarity(search.to_lower());
 }
 
-void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<String, Ref<Texture> > > &list) {
+void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, std::vector<Pair<String, Ref<Texture> > > &list) {
 
 	if (!add_directories) {
 		for (int i = 0; i < efsd->get_subdir_count(); i++) {
@@ -144,17 +144,18 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<Str
 				pair.first = path;
 				pair.second = get_icon("folder", "FileDialog");
 
-				if (search_text != String() && list.size() > 0) {
+				if (search_text != String() && !list.empty() ) {
 
 					float this_sim = _path_cmp(search_text, path);
 					float other_sim = _path_cmp(list[0].first, path);
 					int pos = 1;
 
-					while (pos < list.size() && this_sim <= other_sim) {
+					while(pos < list.size() && this_sim <= other_sim){
 						other_sim = _path_cmp(list[pos++].first, path);
 					}
 
 					pos = this_sim >= other_sim ? pos - 1 : pos;
+
 					list.insert(pos, pair);
 
 				} else {
@@ -184,15 +185,15 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<Str
 	}
 }
 
-Vector<Pair<String, Ref<Texture> > > EditorQuickOpen::_sort_fs(Vector<Pair<String, Ref<Texture> > > &list) {
+std::vector<Pair<String, Ref<Texture> > > EditorQuickOpen::_sort_fs(std::vector<Pair<String, Ref<Texture> > > &list) {
 
 	String search_text = search_box->get_text();
-	Vector<Pair<String, Ref<Texture> > > sorted_list;
+	std::vector<Pair<String, Ref<Texture> > > sorted_list;
 
 	if (search_text == String() || list.size() == 0)
 		return list;
 
-	Vector<float> scores;
+	std::vector<float> scores;
 	scores.resize(list.size());
 	for (int i = 0; i < list.size(); i++)
 		scores.write[i] = _path_cmp(search_text, list[i].first);
@@ -223,7 +224,7 @@ void EditorQuickOpen::_update_search() {
 	search_options->clear();
 	TreeItem *root = search_options->create_item();
 	EditorFileSystemDirectory *efsd = EditorFileSystem::get_singleton()->get_filesystem();
-	Vector<Pair<String, Ref<Texture> > > list;
+	std::vector<Pair<String, Ref<Texture> > > list;
 
 	_parse_fs(efsd, list);
 	list = _sort_fs(list);
