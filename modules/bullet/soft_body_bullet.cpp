@@ -391,7 +391,10 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 		}
 
 		btSoftBodyWorldInfo fake_world_info;
-		bt_soft_body = btSoftBodyHelpers::CreateFromTriMesh(fake_world_info, &bt_vertices[0], &bt_triangles, triangles_size, false);
+
+		// need_udpate : bt_vertices and bt_triangles need to be const std::vector<>&
+		bt_soft_body = btSoftBodyHelpers::CreateFromTriMesh(fake_world_info, bt_vertices.data(), bt_triangles.data(), triangles_size, false);
+		
 		setup_soft_body();
 	}
 }
