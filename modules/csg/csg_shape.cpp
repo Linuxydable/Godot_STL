@@ -29,6 +29,9 @@
 /*************************************************************************/
 
 #include "csg_shape.h"
+
+#include <algorithm>
+
 #include "scene/3d/path.h"
 
 void CSGShape::set_use_collision(bool p_enable) {
@@ -195,16 +198,19 @@ CSGBrush *CSGShape::_get_brush() {
 			}
 		}
 
-		if (n) {
+		if(n){
 			AABB aabb;
-			for (int i = 0; i < n->faces.size(); i++) {
-				for (int j = 0; j < 3; j++) {
-					if (i == 0 && j == 0)
-						aabb.position = n->faces[i].vertices[j];
-					else
-						aabb.expand_to(n->faces[i].vertices[j]);
+
+			aabb.position = n->faces[0].vertices[0];
+			aabb.expand_to(n->faces[0].vertices[1]);
+			aabb.expand_to(n->faces[0].vertices[2]);
+
+			for(auto it_faces = n->faces.begin()+1; it_faces != n->faces.end(); ++it_faces){
+				for(auto&& vertice : (*it_faces).vertices){
+					aabb.expand_to(vertice);
 				}
 			}
+
 			node_aabb = aabb;
 		} else {
 			node_aabb = AABB();
@@ -296,25 +302,30 @@ void CSGShape::_update_shape() {
 
 	for(auto&& face : n->faces){
 		int mat = face.material;
-		ERR_CONTINUE(mat < -1 || mat >= face_count.size());
-		int idx = mat == -1 ? face_count.size() - 1 : mat;
-		if (face.smooth) {
 
+		ERR_CONTINUE(mat < -1 || static_cast<unsigned>(mat) >= face_count.size());
+
+		if(mat == -1){
+			mat = face_count.size()-1;
+		}
+
+		if(face.smooth){
 			Plane p(face.vertices[0], face.vertices[1], face.vertices[2]);
 
-			for (int j = 0; j < 3; j++) {
-				Vector3 v = face.vertices[j];
+			for(auto&& vertice : face.vertices){
 				Vector3 add;
-				if (vec_map.lookup(v, add)) {
+
+				if(vec_map.lookup(vertice, add) ){
 					add += p.normal;
-				} else {
+				}else{
 					add = p.normal;
 				}
-				vec_map.set(v, add);
+
+				vec_map.set(vertice, add);
 			}
 		}
 
-		face_count[idx]++;
+		face_count[mat]++;
 	}
 
 	std::vector<ShapeUpdateSurface> surfaces;
@@ -362,8 +373,7 @@ void CSGShape::_update_shape() {
 		}
 
 		for (decltype(n->faces.size() ) i = 0; i < n->faces.size(); i++) {
-
-			int order[3] = { 0, 1, 2 };
+			unsigned order[3] = { 0, 1, 2 };
 
 			if (n->faces[i].invert) {
 				SWAP(order[1], order[2]);
@@ -376,44 +386,46 @@ void CSGShape::_update_shape() {
 			}
 
 			int mat = n->faces[i].material;
-			ERR_CONTINUE(mat < -1 || mat >= face_count.size());
-			int idx = mat == -1 ? face_count.size() - 1 : mat;
 
-			int last = surfaces[idx].last_added;
+			ERR_CONTINUE(mat < -1 || static_cast<unsigned>(mat) >= face_count.size());
+
+			if(mat == -1){
+				mat = face_count.size() - 1;
+			}
 
 			Plane p(n->faces[i].vertices[0], n->faces[i].vertices[1], n->faces[i].vertices[2]);
 
-			for (int j = 0; j < 3; j++) {
-
+			for(unsigned j = 0; j < 3; j++){
 				Vector3 v = n->faces[i].vertices[j];
 
 				Vector3 normal = p.normal;
 
-				if (n->faces[i].smooth && vec_map.lookup(v, normal)) {
+				if(n->faces[i].smooth && vec_map.lookup(v, normal) ){
 					normal.normalize();
 				}
 
-				if (n->faces[i].invert) {
-
+				if(n->faces[i].invert){
 					normal = -normal;
 				}
 
-				int k = last + order[j];
-				surfaces[idx].verticesw[k] = v;
-				surfaces[idx].uvsw[k] = n->faces[i].uvs[j];
-				surfaces[idx].normalsw[k] = normal;
+				int k = surfaces[mat].last_added + order[j];
 
-				if (calculate_tangents) {
+				surfaces[mat].verticesw[k] = v;
+				surfaces[mat].uvsw[k] = n->faces[i].uvs[j];
+				surfaces[mat].normalsw[k] = normal;
+
+				if(calculate_tangents){
 					// zero out our tangents for now
 					k *= 4;
-					surfaces[idx].tansw[k++] = 0.0;
-					surfaces[idx].tansw[k++] = 0.0;
-					surfaces[idx].tansw[k++] = 0.0;
-					surfaces[idx].tansw[k++] = 0.0;
+
+					surfaces[mat].tansw[k++] = 0.0;
+					surfaces[mat].tansw[k++] = 0.0;
+					surfaces[mat].tansw[k++] = 0.0;
+					surfaces[mat].tansw[k++] = 0.0;
 				}
 			}
 
-			surfaces[idx].last_added += 3;
+			surfaces[mat].last_added += 3;
 		}
 	}
 
@@ -1783,20 +1795,20 @@ CSGBrush *CSGPolygon::_build_brush() {
 	// set our bounding box
 
 	if (polygon.size() < 3)
-		return NULL;
+		return nullptr;
 
 	std::vector<Point2> final_polygon = polygon;
 
-	if (Triangulate::get_area(final_polygon) > 0) {
-		final_polygon.invert();
+	if(Triangulate::get_area(final_polygon) > 0){
+		std::reverse(final_polygon.begin(), final_polygon.end() );
 	}
 
 	std::vector<int> triangles = Geometry::triangulate_polygon(final_polygon);
 
 	if (triangles.size() < 3)
-		return NULL;
+		return nullptr;
 
-	Path *path = NULL;
+	Path *path = nullptr;
 	Ref<Curve3D> curve;
 
 	// get bounds for our polygon
@@ -1823,13 +1835,13 @@ CSGBrush *CSGPolygon::_build_brush() {
 
 	if (mode == MODE_PATH) {
 		if (!has_node(path_node))
-			return NULL;
+			return nullptr;
 		Node *n = get_node(path_node);
 		if (!n)
-			return NULL;
+			return nullptr;
 		path = Object::cast_to<Path>(n);
 		if (!path)
-			return NULL;
+			return nullptr;
 
 		if (path != path_cache) {
 			if (path_cache) {
@@ -1846,9 +1858,9 @@ CSGBrush *CSGPolygon::_build_brush() {
 		}
 		curve = path->get_curve();
 		if (curve.is_null())
-			return NULL;
+			return nullptr;
 		if (curve->get_baked_length() <= 0)
-			return NULL;
+			return nullptr;
 	}
 	CSGBrush *brush = memnew(CSGBrush);
 
@@ -1897,42 +1909,67 @@ CSGBrush *CSGPolygon::_build_brush() {
 
 		switch (mode) {
 			case MODE_DEPTH: {
-
 				//add triangles, front and back
-				for (int i = 0; i < 2; i++) {
+				for(auto it_triangles = triangles.begin(); it_triangles != triangles.end(); it_triangles+=3) {
+					for(unsigned k = 0; k < 3; k++){
+						Vector2 p = final_polygon[*(it_triangles+k)];
 
-					for (int j = 0; j < triangles.size(); j += 3) {
-						for (int k = 0; k < 3; k++) {
-							int src[3] = { 0, i == 0 ? 1 : 2, i == 0 ? 2 : 1 };
-							Vector2 p = final_polygon[triangles[j + src[k]]];
-							Vector3 v = Vector3(p.x, p.y, 0);
-							if (i == 0) {
-								v.z -= depth;
-							}
-							facesw[face * 3 + k] = v;
-							uvsw[face * 3 + k] = (p - final_polygon_min) / final_polygon_size;
-							if (i == 0) {
-								uvsw[face * 3 + k].x = 1.0 - uvsw[face * 3 + k].x; /* flip x */
-							}
-						}
+						Vector3 v = Vector3(p.x, p.y, 0);
 
-						smoothw[face] = false;
-						materialsw[face] = material;
-						invertw[face] = invert_val;
-						face++;
+						v.z -= depth;
+
+						facesw[face * 3 + k] = v;
+
+						uvsw[face * 3 + k] = (p - final_polygon_min) / final_polygon_size;
+
+						//flip x
+						uvsw[face * 3 + k].x = 1.0 - uvsw[face * 3 + k].x; 
 					}
+
+					smoothw[face] = false;
+
+					materialsw[face] = material;
+
+					invertw[face] = invert_val;
+
+					face++;
+				}
+
+				unsigned src[3] = {0, 2, 1};
+
+				for(auto it_triangles = triangles.begin(); it_triangles != triangles.end(); it_triangles+=3) {
+					for(unsigned k = 0; k < 3; k++){
+						Vector2 p = final_polygon[*(it_triangles+src[k])];
+
+						Vector3 v = Vector3(p.x, p.y, 0);
+
+						facesw[face * 3 + k] = v;
+
+						uvsw[face * 3 + k] = (p - final_polygon_min) / final_polygon_size;
+					}
+
+					smoothw[face] = false;
+
+					materialsw[face] = material;
+
+					invertw[face] = invert_val;
+
+					face++;
 				}
 
 				//add triangles for depth
-				for (int i = 0; i < final_polygon.size(); i++) {
+				for(auto it_f_poly = final_polygon.begin(); it_f_poly != final_polygon.end(); ++it_f_poly){
+					auto it_f_poly_n = it_f_poly+1;
 
-					int i_n = (i + 1) % final_polygon.size();
+					if(it_f_poly_n == final_polygon.end() ){
+						it_f_poly_n = final_polygon.begin();
+					}
 
 					Vector3 v[4] = {
-						Vector3(final_polygon[i].x, final_polygon[i].y, -depth),
-						Vector3(final_polygon[i_n].x, final_polygon[i_n].y, -depth),
-						Vector3(final_polygon[i_n].x, final_polygon[i_n].y, 0),
-						Vector3(final_polygon[i].x, final_polygon[i].y, 0),
+						Vector3( (*it_f_poly).x, (*it_f_poly).y, -depth),
+						Vector3( (*it_f_poly_n).x, (*it_f_poly_n).y, -depth),
+						Vector3( (*it_f_poly_n).x, (*it_f_poly_n).y, 0),
+						Vector3( (*it_f_poly).x, (*it_f_poly).y, 0),
 					};
 
 					Vector2 u[4] = {
