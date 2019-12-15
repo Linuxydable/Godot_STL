@@ -455,14 +455,7 @@ bool RigidBodyBullet::add_collision_object(RigidBodyBullet *p_otherObject, const
 bool RigidBodyBullet::was_colliding(RigidBodyBullet *p_other_object) {
 	auto m_rbegin = prev_collision_traces->rbegin() + ( prev_collision_traces->size() - prev_collision_count);
 
-	auto it = std::find_if(m_rbegin, prev_collision_traces->rend(),
-		[&](RigidBodyBullet* rbb){
-			if(rbb == p_other_object){
-				return true;
-			}
-			return false;
-		}
-	);
+	auto it = std::find_if(m_rbegin, prev_collision_traces->rend(), p_other_object);
 
 	if(it != prev_collision_traces->rend() ){
 		return true;
@@ -857,9 +850,9 @@ void RigidBodyBullet::on_enter_area(AreaBullet *p_area) {
 		return;
 	}
 
-	// need_update : if areaWhereIamCount is equal to areasWhereIam.size()
+	// need_update : if areaWhereIamCount is equal to areasWhereIam.size() => iterator
 	for(int i = 0; i < areaWhereIamCount; ++i){
-		if(areasWhereIam[i] == NULL) {
+		if(areasWhereIam[i] == nullptr) {
 			// This area has the highest priority
 			areasWhereIam[i] = p_area;
 			break;
@@ -892,7 +885,7 @@ void RigidBodyBullet::on_exit_area(AreaBullet *p_area) {
 	/// N.B. Since I don't want resize the array I can't use the "erase" function
 	bool wasTheAreaFound = false;
 
-	// need_update : if areaWhereIamCount is equal to areasWhereIam.size()
+	// need_update : if areaWhereIamCount is equal to areasWhereIam.size() => iterator
 	for(int i = 0; i < areaWhereIamCount; ++i){
 		if (areasWhereIam[i] == p_area) {
 			// The area was found, just shift down all elements
