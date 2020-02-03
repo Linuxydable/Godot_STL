@@ -84,7 +84,7 @@ void AreaBullet::dispatch_callbacks() {
 	isScratched = false;
 
 	overlappingObjects.erase(std::remove_if(overlappingObjects.begin(), overlappingObjects.end(),
-		[&](OverlappingObjectData&& overlappingObject){
+		[&](OverlappingObjectData& overlappingObject){
 			switch(overlappingObject.state){
 				case OVERLAP_STATE_ENTER:
 					overlappingObject.state = OVERLAP_STATE_INSIDE;
@@ -93,13 +93,14 @@ void AreaBullet::dispatch_callbacks() {
 
 				case OVERLAP_STATE_DIRTY:
 				case OVERLAP_STATE_INSIDE:
-				return false;
+				break;
 
 				case OVERLAP_STATE_EXIT:
 					call_event(overlappingObject.object, PhysicsServer::AREA_BODY_REMOVED);
 					overlappingObject.object->on_exit_area(this);
 				return true;
 			}
+			return false;
 		}
 	), overlappingObjects.end() );
 }
