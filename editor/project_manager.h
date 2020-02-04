@@ -31,6 +31,9 @@
 #ifndef PROJECT_MANAGER_H
 #define PROJECT_MANAGER_H
 
+#include <vector>
+#include <iterator>
+
 #include "editor/plugins/asset_library_editor_plugin.h"
 #include "scene/gui/dialogs.h"
 #include "scene/gui/file_dialog.h"
@@ -153,7 +156,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void _setup_filters(Vector<String> options);
+	void _setup_filters(std::vector<String> options);
 	void add_filter_option();
 	void add_search_box();
 	void set_filter_size(int h_size);
