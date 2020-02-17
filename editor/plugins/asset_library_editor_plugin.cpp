@@ -153,14 +153,16 @@ void EditorAssetLibraryItemDescription::set_image(int p_type, int p_index, const
 			icon = p_image;
 		} break;
 		case EditorAssetLibrary::IMAGE_QUEUE_THUMBNAIL: {
-
-			for (int i = 0; i < preview_images.size(); i++) {
-				if (preview_images[i].id == p_index) {
-					if (preview_images[i].is_video) {
+			for(auto&& preview_image : preview_images){
+				if(preview_image.id == p_index){
+					if(preview_image.is_video){
 						Ref<Image> overlay = get_icon("PlayOverlay", "EditorIcons")->get_data();
+						
 						Ref<Image> thumbnail = p_image->get_data();
+						
 						thumbnail = thumbnail->duplicate();
-						Point2 overlay_pos = Point2((thumbnail->get_width() - overlay->get_width() / 2) / 2, (thumbnail->get_height() - overlay->get_height() / 2) / 2);
+						
+						Point2 overlay_pos = Point2( (thumbnail->get_width() - overlay->get_width() / 2) / 2, (thumbnail->get_height() - overlay->get_height() / 2) / 2);
 
 						// Overlay and thumbnail need the same format for `blend_rect` to work.
 						thumbnail->convert(Image::FORMAT_RGBA8);
@@ -169,27 +171,30 @@ void EditorAssetLibraryItemDescription::set_image(int p_type, int p_index, const
 						thumbnail->unlock();
 
 						Ref<ImageTexture> tex;
+						
 						tex.instance();
 						tex->create_from_image(thumbnail);
 
-						preview_images[i].button->set_icon(tex);
+						preview_image.button->set_icon(tex);
 						// Make it clearer that clicking it will open an external link
-						preview_images[i].button->set_default_cursor_shape(CURSOR_POINTING_HAND);
-					} else {
-						preview_images[i].button->set_icon(p_image);
+						preview_image.button->set_default_cursor_shape(CURSOR_POINTING_HAND);
+					}else{
+						preview_image.button->set_icon(p_image);
 					}
+
 					break;
 				}
 			}
 		} break;
 		case EditorAssetLibrary::IMAGE_QUEUE_SCREENSHOT: {
+			for(auto&& preview_image : preview_images){
+				if(preview_image.id == p_index){
+					preview_image.image = p_image;
 
-			for (int i = 0; i < preview_images.size(); i++) {
-				if (preview_images[i].id == p_index) {
-					preview_images.write[i].image = p_image;
-					if (preview_images[i].button->is_pressed()) {
+					if(preview_image.button->is_pressed() ){
 						_preview_click(p_index);
 					}
+
 					break;
 				}
 			}
@@ -217,19 +222,20 @@ void EditorAssetLibraryItemDescription::_link_click(const String &p_url) {
 }
 
 void EditorAssetLibraryItemDescription::_preview_click(int p_id) {
-	for (int i = 0; i < preview_images.size(); i++) {
-		if (preview_images[i].id == p_id) {
-			preview_images[i].button->set_pressed(true);
-			if (!preview_images[i].is_video) {
-				if (preview_images[i].image.is_valid()) {
-					preview->set_texture(preview_images[i].image);
+	for(auto&& preview_image : preview_images){
+		if(preview_image.id == p_id){
+			preview_image.button->set_pressed(true);
+
+			if(!preview_image.is_video){
+				if(preview_image.image.is_valid() ) {
+					preview->set_texture(preview_image.image);
 					minimum_size_changed();
 				}
-			} else {
-				_link_click(preview_images[i].video_link);
+			}else{
+				_link_click(preview_image.video_link);
 			}
-		} else {
-			preview_images[i].button->set_pressed(false);
+		}else{
+			preview_image.button->set_pressed(false);
 		}
 	}
 }
@@ -830,7 +836,7 @@ void EditorAssetLibrary::_update_image_queue() {
 		if (!E->get().active && current_images < max_images) {
 
 			String cache_filename_base = EditorSettings::get_singleton()->get_cache_dir().plus_file("assetimage_" + E->get().image_url.md5_text());
-			Vector<String> headers;
+			std::vector<String> headers;
 
 			if (FileAccess::exists(cache_filename_base + ".etag") && FileAccess::exists(cache_filename_base + ".data")) {
 				FileAccess *file = FileAccess::open(cache_filename_base + ".etag", FileAccess::READ);

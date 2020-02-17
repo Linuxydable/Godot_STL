@@ -31,6 +31,8 @@
 #ifndef ASSET_LIBRARY_EDITOR_PLUGIN_H
 #define ASSET_LIBRARY_EDITOR_PLUGIN_H
 
+#include <vector>
+
 #include "editor/editor_asset_installer.h"
 #include "editor/editor_plugin.h"
 #include "editor/editor_plugin_settings.h"
@@ -98,7 +100,7 @@ class EditorAssetLibraryItemDescription : public ConfirmationDialog {
 		Ref<Texture> image;
 	};
 
-	Vector<Preview> preview_images;
+	std::vector<Preview> preview_images;
 	TextureRect *preview;
 
 	void set_image(int p_type, int p_index, const Ref<Texture> &p_image);
