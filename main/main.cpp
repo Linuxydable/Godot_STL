@@ -878,9 +878,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	if (script_debugger) {
 		//there is a debugger, parse breakpoints
 
-		for (int i = 0; i < breakpoints.size(); i++) {
-
-			String bp = breakpoints[i];
+		for(auto&& bp : breakpoints){
 			int sp = bp.find_last(":");
 			ERR_CONTINUE_MSG(sp == -1, "Invalid breakpoint: '" + bp + "', expected file:line format.");
 
