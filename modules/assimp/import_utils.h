@@ -31,6 +31,9 @@
 #ifndef IMPORT_UTILS_IMPORTER_ASSIMP_H
 #define IMPORT_UTILS_IMPORTER_ASSIMP_H
 
+#include <vector>
+#include <string>
+
 #include "core/io/image_loader.h"
 #include "import_state.h"
 
@@ -45,7 +48,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/Logger.hpp>
-#include <string>
 
 using namespace AssimpImporter;
 
@@ -244,7 +246,8 @@ public:
 	  * Find hardcoded textures from assimp which could be in many different directories
 	  */
 	static void find_texture_path(const String &p_path, _Directory &dir, String &path, bool &found, String extension) {
-		Vector<String> paths;
+		std::vector<String> paths;
+
 		paths.push_back(path.get_basename() + extension);
 		paths.push_back(path + extension);
 		paths.push_back(path);
@@ -275,10 +278,11 @@ public:
 		paths.push_back(p_path.get_base_dir().plus_file("../texture/" + path.get_file().get_basename() + extension));
 		paths.push_back(p_path.get_base_dir().plus_file("../texture/" + path.get_file() + extension));
 		paths.push_back(p_path.get_base_dir().plus_file("../texture/" + path.get_file()));
-		for (int i = 0; i < paths.size(); i++) {
-			if (dir.file_exists(paths[i])) {
+		
+		for(auto&& f_path : paths){
+			if(dir.file_exists(f_path) ){
 				found = true;
-				path = paths[i];
+				path = f_path;
 				return;
 			}
 		}
@@ -293,7 +297,7 @@ public:
 		List<String> exts;
 		ImageLoader::get_recognized_extensions(&exts);
 
-		Vector<String> split_path = r_path.get_basename().split("*");
+		std::vector<String> split_path = r_path.get_basename().split("*");
 		if (split_path.size() == 2) {
 			r_found = true;
 			return;
@@ -349,7 +353,7 @@ public:
 			return match->get();
 		}
 
-		Vector<String> split_path = p_path.get_basename().split("*");
+		std::vector<String> split_path = p_path.get_basename().split("*");
 		if (split_path.size() == 2) {
 			size_t texture_idx = split_path[1].to_int();
 			ERR_FAIL_COND_V(texture_idx >= p_scene->mNumTextures, Ref<Image>());
