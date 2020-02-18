@@ -30,6 +30,9 @@
 
 #include "editor_scene_importer_assimp.h"
 
+#include <algorithm>
+#include <string>
+
 #include "core/bind/core_bind.h"
 #include "core/io/image_loader.h"
 #include "editor/editor_file_system.h"
@@ -56,7 +59,6 @@
 #include <assimp/Importer.hpp>
 #include <assimp/LogStream.hpp>
 #include <assimp/Logger.hpp>
-#include <string>
 
 void EditorSceneImporterAssimp::get_extensions(List<String> *r_extensions) const {
 
@@ -64,13 +66,13 @@ void EditorSceneImporterAssimp::get_extensions(List<String> *r_extensions) const
 
 	Map<String, ImportFormat> import_format;
 	{
-		Vector<String> exts;
+		std::vector<String> exts;
 		exts.push_back("fbx");
 		ImportFormat import = { exts, true };
 		import_format.insert("fbx", import);
 	}
 	{
-		Vector<String> exts;
+		std::vector<String> exts;
 		exts.push_back("pmx");
 		ImportFormat import = { exts, true };
 		import_format.insert("mmd", import);
@@ -80,12 +82,14 @@ void EditorSceneImporterAssimp::get_extensions(List<String> *r_extensions) const
 	}
 }
 
-void EditorSceneImporterAssimp::_register_project_setting_import(const String generic, const String import_setting_string, const Vector<String> &exts, List<String> *r_extensions, const bool p_enabled) const {
+void EditorSceneImporterAssimp::_register_project_setting_import(const String generic, const String import_setting_string, const std::vector<String> &exts, List<String> *r_extensions, const bool p_enabled) const {
 	const String use_generic = "use_" + generic;
+
 	_GLOBAL_DEF(import_setting_string + use_generic, p_enabled, true);
-	if (ProjectSettings::get_singleton()->get(import_setting_string + use_generic)) {
-		for (int32_t i = 0; i < exts.size(); i++) {
-			r_extensions->push_back(exts[i]);
+	
+	if(ProjectSettings::get_singleton()->get(import_setting_string + use_generic) ){
+		for(auto&& f_ext : exts){
+			r_extensions->push_back(exts[f_ext]);
 		}
 	}
 }
@@ -200,76 +204,79 @@ struct EditorSceneImporterAssetImportInterpolate<Quat> {
 };
 
 template <class T>
-T EditorSceneImporterAssimp::_interpolate_track(const Vector<float> &p_times, const Vector<T> &p_values, float p_time, AssetImportAnimation::Interpolation p_interp) {
+T EditorSceneImporterAssimp::_interpolate_track(const std::vector<float> &p_times, const std::vector<T> &p_values, float p_time, AssetImportAnimation::Interpolation p_interp) {
+	// need_update
 	//could use binary search, worth it?
-	int idx = -1;
-	for (int i = 0; i < p_times.size(); i++) {
-		if (p_times[i] > p_time)
-			break;
-		idx++;
+
+	auto it_p_times = std::find_if(p_times.begin(), p_times.end(),
+		[&](T& f_p_time){
+			if(f_p_time > p_time){
+				return true;
+			}
+			return false;
+		}
+	);
+
+	if(it_p_times == p_times.end() ){
+		switch(p_interp){
+			case AssetImportAnimation::INTERP_LINEAR:
+			case AssetImportAnimation::INTERP_STEP:
+				return p_values.front();
+			
+			case AssetImportAnimation::INTERP_CATMULLROMSPLINE:
+			case AssetImportAnimation::INTERP_CUBIC_SPLINE:
+				return p_values[1];
+		}
+	}else if(it_p_times == p_times.end() - 1){
+		switch(p_interp):
+			case AssetImportAnimation::INTERP_LINEAR:
+			case AssetImportAnimation::INTERP_STEP:
+				return p_values[p_times.size() - 1];
+
+			case AssetImportAnimation::INTERP_CATMULLROMSPLINE:
+				return p_values[p_times.size()];
+
+			case AssetImportAnimation::INTERP_CUBIC_SPLINE:
+				return p_values[(p_times.size() - 1) * 3 + 1];
 	}
 
 	EditorSceneImporterAssetImportInterpolate<T> interp;
 
-	switch (p_interp) {
-		case AssetImportAnimation::INTERP_LINEAR: {
+	unsigned int dist_it_p_times = std::distance(p_times.begin(), it_p_times);
 
-			if (idx == -1) {
-				return p_values[0];
-			} else if (idx >= p_times.size() - 1) {
-				return p_values[p_times.size() - 1];
-			}
+	unsigned int it_p_values = p_values.begin() + dist_it_p_times;
 
-			float c = (p_time - p_times[idx]) / (p_times[idx + 1] - p_times[idx]);
-
-			return interp.lerp(p_values[idx], p_values[idx + 1], c);
-
-		} break;
-		case AssetImportAnimation::INTERP_STEP: {
-
-			if (idx == -1) {
-				return p_values[0];
-			} else if (idx >= p_times.size() - 1) {
-				return p_values[p_times.size() - 1];
-			}
-
-			return p_values[idx];
-
-		} break;
-		case AssetImportAnimation::INTERP_CATMULLROMSPLINE: {
-
-			if (idx == -1) {
-				return p_values[1];
-			} else if (idx >= p_times.size() - 1) {
-				return p_values[1 + p_times.size() - 1];
-			}
-
-			float c = (p_time - p_times[idx]) / (p_times[idx + 1] - p_times[idx]);
-
-			return interp.catmull_rom(p_values[idx - 1], p_values[idx], p_values[idx + 1], p_values[idx + 3], c);
-
-		} break;
-		case AssetImportAnimation::INTERP_CUBIC_SPLINE: {
-
-			if (idx == -1) {
-				return p_values[1];
-			} else if (idx >= p_times.size() - 1) {
-				return p_values[(p_times.size() - 1) * 3 + 1];
-			}
-
-			float c = (p_time - p_times[idx]) / (p_times[idx + 1] - p_times[idx]);
-
-			T from = p_values[idx * 3 + 1];
-			T c1 = from + p_values[idx * 3 + 2];
-			T to = p_values[idx * 3 + 4];
-			T c2 = to + p_values[idx * 3 + 3];
-
-			return interp.bezier(from, c1, c2, to, c);
-
-		} break;
+	if(p_interp == AssetImportAnimation::INTERP_STEP){
+		return *it_p_values;
 	}
 
-	ERR_FAIL_V(p_values[0]);
+	float c = (p_time - *it_p_times) / ( *(it_p_times + 1) - *it_p_times);
+
+	switch(p_interp){
+		case AssetImportAnimation::INTERP_LINEAR: {
+			return interp.lerp( *it_p_values, *(it_p_values + 1), c);
+		}
+		
+		case AssetImportAnimation::INTERP_CATMULLROMSPLINE: {
+			return interp.catmull_rom( (*it_p_values - 1), *it_p_values, *(it_p_values + 1), *(it_p_values + 3), c);
+		}
+
+		case AssetImportAnimation::INTERP_CUBIC_SPLINE: {
+			unsigned int dist_it_p_timesx3p1 = dist_it_p_times * 3 + 1;
+
+			T from = p_values[dist_it_p_timesx3p1];
+
+			T c1 = from + p_values[dist_it_p_timesx3p1 + 1];
+
+			T to = p_values[dist_it_p_timesx3p1 + 3];
+
+			T c2 = to + p_values[dist_it_p_timesx3p1 + 2];
+
+			return interp.bezier(from, c1, c2, to, c);
+		}
+	}
+
+	ERR_FAIL_V(p_values.front() );
 }
 
 Spatial *EditorSceneImporterAssimp::_generate_scene(const String &p_path, aiScene *scene, const uint32_t p_flags, int p_bake_fps, const int32_t p_max_bone_weights) {
@@ -350,12 +357,12 @@ void EditorSceneImporterAssimp::_insert_animation_track(ImportState &scene, cons
 		skeleton_bone = p_skeleton->find_bone(p_name);
 	}
 
-	Vector<Vector3> pos_values;
-	Vector<float> pos_times;
-	Vector<Vector3> scale_values;
-	Vector<float> scale_times;
-	Vector<Quat> rot_values;
-	Vector<float> rot_times;
+	std::vector<Vector3> pos_values;
+	std::vector<float> pos_times;
+	std::vector<Vector3> scale_values;
+	std::vector<float> scale_times;
+	std::vector<Quat> rot_values;
+	std::vector<float> rot_times;
 
 	for (size_t p = 0; p < assimp_track->mNumPositionKeys; p++) {
 		aiVector3D pos = assimp_track->mPositionKeys[p].mValue;
@@ -379,15 +386,15 @@ void EditorSceneImporterAssimp::_insert_animation_track(ImportState &scene, cons
 		Quat rot;
 		Vector3 scale(1, 1, 1);
 
-		if (pos_values.size()) {
+		if(!pos_values.empty() ){
 			pos = _interpolate_track<Vector3>(pos_times, pos_values, time, AssetImportAnimation::INTERP_LINEAR);
 		}
 
-		if (rot_values.size()) {
+		if(!rot_values.empty() ){
 			rot = _interpolate_track<Quat>(rot_times, rot_values, time, AssetImportAnimation::INTERP_LINEAR).normalized();
 		}
 
-		if (scale_values.size()) {
+		if(!scale_values.empty() ){
 			scale = _interpolate_track<Vector3>(scale_times, scale_values, time, AssetImportAnimation::INTERP_LINEAR);
 		}
 
@@ -534,7 +541,7 @@ void EditorSceneImporterAssimp::_import_animation(ImportState &state, int p_anim
 // [debt needs looked into]
 Ref<Mesh> EditorSceneImporterAssimp::_generate_mesh_from_surface_indices(
 		ImportState &state,
-		const Vector<int> &p_surface_indices,
+		const std::vector<int> &p_surface_indices,
 		const aiNode *assimp_node,
 		Skeleton *p_skeleton) {
 
@@ -568,7 +575,7 @@ Ref<Mesh> EditorSceneImporterAssimp::_generate_mesh_from_surface_indices(
 		const unsigned int mesh_idx = p_surface_indices[i];
 		const aiMesh *ai_mesh = state.assimp_scene->mMeshes[mesh_idx];
 
-		Map<uint32_t, Vector<BoneInfo> > vertex_weights;
+		Map<uint32_t, std::vector<BoneInfo> > vertex_weights;
 
 		if (p_skeleton) {
 			for (size_t b = 0; b < ai_mesh->mNumBones; b++) {
@@ -588,7 +595,7 @@ Ref<Mesh> EditorSceneImporterAssimp::_generate_mesh_from_surface_indices(
 					bi.weight = ai_weights.mWeight;
 
 					if (!vertex_weights.has(vertex_index)) {
-						vertex_weights[vertex_index] = Vector<BoneInfo>();
+						vertex_weights[vertex_index] = std::vector<BoneInfo>();
 					}
 
 					vertex_weights[vertex_index].push_back(bi);
@@ -641,10 +648,10 @@ Ref<Mesh> EditorSceneImporterAssimp::_generate_mesh_from_surface_indices(
 			// We have vertex weights right?
 			if (vertex_weights.has(j)) {
 
-				Vector<BoneInfo> bone_info = vertex_weights[j];
-				Vector<int> bones;
+				std::vector<BoneInfo> bone_info = vertex_weights[j];
+				std::vector<int> bones;
 				bones.resize(bone_info.size());
-				Vector<float> weights;
+				std::vector<float> weights;
 				weights.resize(bone_info.size());
 
 				// todo? do we really need to loop over all bones? - assimp may have helper to find all influences on this vertex.
@@ -1008,7 +1015,7 @@ void EditorSceneImporterAssimp::create_mesh(ImportState &state, const aiNode *as
 	Ref<Mesh> mesh;
 	Skeleton *skeleton = NULL;
 	// see if we have mesh cache for this.
-	Vector<int> surface_indices;
+	std::vector<int> surface_indices;
 	for (uint32_t i = 0; i < assimp_node->mNumMeshes; i++) {
 		int mesh_index = assimp_node->mMeshes[i];
 		aiMesh *ai_mesh = state.assimp_scene->mMeshes[assimp_node->mMeshes[i]];
