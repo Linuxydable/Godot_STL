@@ -30,6 +30,8 @@
 
 #include "api_generator.h"
 
+#include <vector>
+
 #ifdef TOOLS_ENABLED
 
 #include "core/class_db.h"
@@ -261,11 +263,12 @@ List<ClassAPI> generate_c_api_classes() {
 					signal.argument_types.push_back(type);
 				}
 
-				Vector<Variant> default_arguments = method_info.default_arguments;
+				std::vector<Variant> default_arguments = method_info.default_arguments;
 
-				int default_start = signal.argument_names.size() - default_arguments.size();
+				unsigned default_start = signal.argument_names.size() - default_arguments.size();
 
-				for (int j = 0; j < default_arguments.size(); j++) {
+				// need_update
+				for(decltype(default_arguments.size() ) j = 0; j < default_arguments.size(); j++){
 					signal.default_arguments[default_start + j] = default_arguments[j];
 				}
 
