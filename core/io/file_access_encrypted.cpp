@@ -78,21 +78,21 @@ Error FileAccessEncrypted::open_and_parse(FileAccess *p_base, const Vector<uint8
 
 		data.resize(ds);
 
-		uint32_t blen = p_base->get_buffer(data.ptrw(), ds);
+		uint32_t blen = p_base->get_buffer(data, ds);
 		ERR_FAIL_COND_V(blen != ds, ERR_FILE_CORRUPT);
 
 		CryptoCore::AESContext ctx;
-		ctx.set_decode_key(key.ptrw(), 256);
+		ctx.set_decode_key(key, 256);
 
 		for (size_t i = 0; i < ds; i += 16) {
 
-			ctx.decrypt_ecb(&data.write[i], &data.write[i]);
+			ctx.decrypt_ecb(&data[i], &data[i]);
 		}
 
 		data.resize(length);
 
 		unsigned char hash[16];
-		ERR_FAIL_COND_V(CryptoCore::md5(data.ptr(), data.size(), hash) != OK, ERR_BUG);
+		ERR_FAIL_COND_V(CryptoCore::md5(data, data.size(), hash) != OK, ERR_BUG);
 
 		ERR_FAIL_COND_V_MSG(String::md5(hash) != String::md5(md5d), ERR_FILE_CORRUPT, "The MD5 sum of the decrypted file does not match the expected value. It could be that the file is corrupt, or that the provided decryption key is invalid.");
 
@@ -105,12 +105,16 @@ Error FileAccessEncrypted::open_and_parse(FileAccess *p_base, const Vector<uint8
 Error FileAccessEncrypted::open_and_parse_password(FileAccess *p_base, const String &p_key, Mode p_mode) {
 
 	String cs = p_key.md5_text();
-	ERR_FAIL_COND_V(cs.length() != 32, ERR_INVALID_PARAMETER);
-	Vector<uint8_t> key;
-	key.resize(32);
-	for (int i = 0; i < 32; i++) {
 
-		key.write[i] = cs[i];
+	ERR_FAIL_COND_V(cs.length() != 32, ERR_INVALID_PARAMETER);
+
+	// need_update : use std::array
+	Vector<uint8_t> key;
+
+	key.resize(32);
+
+	for (int i = 0; i < 32; i++) {
+		key[i] = cs[i];
 	}
 
 	return open_and_parse(p_base, key, p_mode);
@@ -120,46 +124,49 @@ Error FileAccessEncrypted::_open(const String &p_path, int p_mode_flags) {
 
 	return OK;
 }
-void FileAccessEncrypted::close() {
-
+void FileAccessEncrypted::close(){
 	if (!file)
 		return;
 
 	if (writing) {
-
 		Vector<uint8_t> compressed;
-		size_t len = data.size();
-		if (len % 16) {
-			len += 16 - (len % 16);
+
+		if(data.size() % 16){
+			data.size() += 16 - (data.size() % 16);
 		}
 
 		unsigned char hash[16];
+
 		ERR_FAIL_COND(CryptoCore::md5(data.ptr(), data.size(), hash) != OK); // Bug?
 
-		compressed.resize(len);
-		zeromem(compressed.ptrw(), len);
-		for (int i = 0; i < data.size(); i++) {
-			compressed.write[i] = data[i];
+		compressed.resize(data.size() );
+
+		zeromem(compressed, data.size() );
+
+		for(decltype(data.size() ) i = 0; i < data.size(); i++){
+			compressed[i] = data[i];
 		}
 
 		CryptoCore::AESContext ctx;
-		ctx.set_encode_key(key.ptrw(), 256);
+		ctx.set_encode_key(key, 256);
 
-		for (size_t i = 0; i < len; i += 16) {
-
-			ctx.encrypt_ecb(&compressed.write[i], &compressed.write[i]);
+		for(decltype(data.size() ) i = 0; i < data.size(); i += 16){
+			ctx.encrypt_ecb(&compressed[i], &compressed[i]);
 		}
 
 		file->store_32(COMP_MAGIC);
 		file->store_32(mode);
 
 		file->store_buffer(hash, 16);
-		file->store_64(data.size());
+		file->store_64(data.size() );
 
-		file->store_buffer(compressed.ptr(), compressed.size());
+		file->store_buffer(compressed, compressed.size());
 		file->close();
+
 		memdelete(file);
+
 		file = NULL;
+
 		data.clear();
 
 	} else {
@@ -268,7 +275,7 @@ void FileAccessEncrypted::store_buffer(const uint8_t *p_src, int p_length) {
 		data.resize(pos + p_length);
 		for (int i = 0; i < p_length; i++) {
 
-			data.write[pos + i] = p_src[i];
+			data[pos + i] = p_src[i];
 		}
 		pos += p_length;
 	}
@@ -285,7 +292,7 @@ void FileAccessEncrypted::store_8(uint8_t p_dest) {
 	ERR_FAIL_COND_MSG(!writing, "File has not been opened in read mode.");
 
 	if (pos < data.size()) {
-		data.write[pos] = p_dest;
+		data[pos] = p_dest;
 		pos++;
 	} else if (pos == data.size()) {
 		data.push_back(p_dest);
