@@ -30,6 +30,8 @@
 
 #include "gdnative/string.h"
 
+#include <vector>
+
 #include "core/string_name.h"
 #include "core/ustring.h"
 #include "core/variant.h"
@@ -157,16 +159,22 @@ godot_bool GDAPI godot_string_begins_with_char_array(const godot_string *p_self,
 	return self->begins_with(p_char_array);
 }
 
+// need_update : why use 3 array ?
 godot_array GDAPI godot_string_bigrams(const godot_string *p_self) {
 	const String *self = (const String *)p_self;
-	Vector<String> return_value = self->bigrams();
+
+	std::vector<String> return_values = self->bigrams();
 
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
-		(*proxy)[i] = return_value[i];
+
+	//proxy->resize(return_value.size());
+
+	for(decltype(return_values.size()) i = 0; i < return_values.size(); ++i){
+		(*proxy)[i] = return_values[i];
 	}
 
 	return result;
@@ -214,40 +222,52 @@ godot_int GDAPI godot_string_find_from(const godot_string *p_self, godot_string 
 	return self->find(*what, p_from);
 }
 
+// need_update : do not use 2 array
 godot_int GDAPI godot_string_findmk(const godot_string *p_self, const godot_array *p_keys) {
 	const String *self = (const String *)p_self;
 
-	Vector<String> keys;
+	std::vector<String> keys;
+
 	Array *keys_proxy = (Array *)p_keys;
+
 	keys.resize(keys_proxy->size());
+
 	for (int i = 0; i < keys_proxy->size(); i++) {
-		keys.write[i] = (*keys_proxy)[i];
+		keys[i] = (*keys_proxy)[i];
 	}
 
 	return self->findmk(keys);
 }
 
+// need_update : do not use 2 array
 godot_int GDAPI godot_string_findmk_from(const godot_string *p_self, const godot_array *p_keys, godot_int p_from) {
 	const String *self = (const String *)p_self;
 
-	Vector<String> keys;
+	std::vector<String> keys;
+
 	Array *keys_proxy = (Array *)p_keys;
+
 	keys.resize(keys_proxy->size());
-	for (int i = 0; i < keys_proxy->size(); i++) {
-		keys.write[i] = (*keys_proxy)[i];
+
+	for(int i = 0; i < keys_proxy->size(); i++){
+		keys[i] = (*keys_proxy)[i];
 	}
 
 	return self->findmk(keys, p_from);
 }
 
+// need_update : do not use 2 array
 godot_int GDAPI godot_string_findmk_from_in_place(const godot_string *p_self, const godot_array *p_keys, godot_int p_from, godot_int *r_key) {
 	const String *self = (const String *)p_self;
 
-	Vector<String> keys;
+	std::vector<String> keys;
+
 	Array *keys_proxy = (Array *)p_keys;
+
 	keys.resize(keys_proxy->size());
-	for (int i = 0; i < keys_proxy->size(); i++) {
-		keys.write[i] = (*keys_proxy)[i];
+
+	for(int i = 0; i < keys_proxy->size(); i++){
+		keys[i] = (*keys_proxy)[i];
 	}
 
 	return self->findmk(keys, p_from, r_key);
@@ -639,16 +659,23 @@ godot_string GDAPI godot_string_get_slicec(const godot_string *p_self, wchar_t p
 	return result;
 }
 
+// need_update : do not use 3 array
 godot_array GDAPI godot_string_split(const godot_string *p_self, const godot_string *p_splitter) {
 	const String *self = (const String *)p_self;
-	const String *splitter = (const String *)p_splitter;
-	godot_array result;
-	memnew_placement(&result, Array);
-	Array *proxy = (Array *)&result;
-	Vector<String> return_value = self->split(*splitter, false);
 
-	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+	const String *splitter = (const String *)p_splitter;
+
+	godot_array result;
+
+	memnew_placement(&result, Array);
+
+	Array *proxy = (Array *)&result;
+
+	std::vector<String> return_value = self->split(*splitter, false);
+
+	proxy->resize(return_value.size() );
+
+	for(decltype(return_value.size() ) i = 0; i < return_value.size(); i++){
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -657,14 +684,20 @@ godot_array GDAPI godot_string_split(const godot_string *p_self, const godot_str
 
 godot_array GDAPI godot_string_split_allow_empty(const godot_string *p_self, const godot_string *p_splitter) {
 	const String *self = (const String *)p_self;
+
 	const String *splitter = (const String *)p_splitter;
+
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<String> return_value = self->split(*splitter);
+
+	std::vector<String> return_value = self->split(*splitter);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -673,14 +706,20 @@ godot_array GDAPI godot_string_split_allow_empty(const godot_string *p_self, con
 
 godot_array GDAPI godot_string_split_floats(const godot_string *p_self, const godot_string *p_splitter) {
 	const String *self = (const String *)p_self;
+
 	const String *splitter = (const String *)p_splitter;
+
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<float> return_value = self->split_floats(*splitter, false);
+
+	std::vector<float> return_value = self->split_floats(*splitter, false);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -689,14 +728,20 @@ godot_array GDAPI godot_string_split_floats(const godot_string *p_self, const go
 
 godot_array GDAPI godot_string_split_floats_allows_empty(const godot_string *p_self, const godot_string *p_splitter) {
 	const String *self = (const String *)p_self;
+
 	const String *splitter = (const String *)p_splitter;
+
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<float> return_value = self->split_floats(*splitter);
+
+	std::vector<float> return_value = self->split_floats(*splitter);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -706,20 +751,27 @@ godot_array GDAPI godot_string_split_floats_allows_empty(const godot_string *p_s
 godot_array GDAPI godot_string_split_floats_mk(const godot_string *p_self, const godot_array *p_splitters) {
 	const String *self = (const String *)p_self;
 
-	Vector<String> splitters;
+	std::vector<String> splitters;
+
 	Array *splitter_proxy = (Array *)p_splitters;
+
 	splitters.resize(splitter_proxy->size());
+
 	for (int i = 0; i < splitter_proxy->size(); i++) {
-		splitters.write[i] = (*splitter_proxy)[i];
+		splitters[i] = (*splitter_proxy)[i];
 	}
 
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<float> return_value = self->split_floats_mk(splitters, false);
+
+	std::vector<float> return_value = self->split_floats_mk(splitters, false);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -729,20 +781,27 @@ godot_array GDAPI godot_string_split_floats_mk(const godot_string *p_self, const
 godot_array GDAPI godot_string_split_floats_mk_allows_empty(const godot_string *p_self, const godot_array *p_splitters) {
 	const String *self = (const String *)p_self;
 
-	Vector<String> splitters;
+	std::vector<String> splitters;
+
 	Array *splitter_proxy = (Array *)p_splitters;
+
 	splitters.resize(splitter_proxy->size());
+
 	for (int i = 0; i < splitter_proxy->size(); i++) {
-		splitters.write[i] = (*splitter_proxy)[i];
+		splitters[i] = (*splitter_proxy)[i];
 	}
 
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<float> return_value = self->split_floats_mk(splitters);
+
+	std::vector<float> return_value = self->split_floats_mk(splitters);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -751,14 +810,20 @@ godot_array GDAPI godot_string_split_floats_mk_allows_empty(const godot_string *
 
 godot_array GDAPI godot_string_split_ints(const godot_string *p_self, const godot_string *p_splitter) {
 	const String *self = (const String *)p_self;
+
 	const String *splitter = (const String *)p_splitter;
+
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<int> return_value = self->split_ints(*splitter, false);
+
+	std::vector<int> return_value = self->split_ints(*splitter, false);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -767,14 +832,20 @@ godot_array GDAPI godot_string_split_ints(const godot_string *p_self, const godo
 
 godot_array GDAPI godot_string_split_ints_allows_empty(const godot_string *p_self, const godot_string *p_splitter) {
 	const String *self = (const String *)p_self;
+
 	const String *splitter = (const String *)p_splitter;
+
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<int> return_value = self->split_ints(*splitter);
+
+	std::vector<int> return_value = self->split_ints(*splitter);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -784,20 +855,27 @@ godot_array GDAPI godot_string_split_ints_allows_empty(const godot_string *p_sel
 godot_array GDAPI godot_string_split_ints_mk(const godot_string *p_self, const godot_array *p_splitters) {
 	const String *self = (const String *)p_self;
 
-	Vector<String> splitters;
+	std::vector<String> splitters;
+
 	Array *splitter_proxy = (Array *)p_splitters;
+
 	splitters.resize(splitter_proxy->size());
+
 	for (int i = 0; i < splitter_proxy->size(); i++) {
-		splitters.write[i] = (*splitter_proxy)[i];
+		splitters[i] = (*splitter_proxy)[i];
 	}
 
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<int> return_value = self->split_ints_mk(splitters, false);
+
+	std::vector<int> return_value = self->split_ints_mk(splitters, false);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -807,20 +885,27 @@ godot_array GDAPI godot_string_split_ints_mk(const godot_string *p_self, const g
 godot_array GDAPI godot_string_split_ints_mk_allows_empty(const godot_string *p_self, const godot_array *p_splitters) {
 	const String *self = (const String *)p_self;
 
-	Vector<String> splitters;
+	std::vector<String> splitters;
+
 	Array *splitter_proxy = (Array *)p_splitters;
+
 	splitters.resize(splitter_proxy->size());
+
 	for (int i = 0; i < splitter_proxy->size(); i++) {
-		splitters.write[i] = (*splitter_proxy)[i];
+		splitters[i] = (*splitter_proxy)[i];
 	}
 
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<int> return_value = self->split_ints_mk(splitters);
+
+	std::vector<int> return_value = self->split_ints_mk(splitters);
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -830,12 +915,16 @@ godot_array GDAPI godot_string_split_ints_mk_allows_empty(const godot_string *p_
 godot_array GDAPI godot_string_split_spaces(const godot_string *p_self) {
 	const String *self = (const String *)p_self;
 	godot_array result;
+
 	memnew_placement(&result, Array);
+
 	Array *proxy = (Array *)&result;
-	Vector<String> return_value = self->split_spaces();
+
+	std::vector<String> return_value = self->split_spaces();
 
 	proxy->resize(return_value.size());
-	for (int i = 0; i < return_value.size(); i++) {
+
+	for (decltype(return_value.size() ) i = 0; i < return_value.size(); i++) {
 		(*proxy)[i] = return_value[i];
 	}
 
@@ -1027,15 +1116,20 @@ uint32_t GDAPI godot_string_hash_utf8_chars_with_len(const wchar_t *p_str, godot
 
 godot_pool_byte_array GDAPI godot_string_md5_buffer(const godot_string *p_self) {
 	const String *self = (const String *)p_self;
-	Vector<uint8_t> tmp_result = self->md5_buffer();
+
+	std::vector<uint8_t> tmp_result = self->md5_buffer();
 
 	godot_pool_byte_array result;
+
 	memnew_placement(&result, PoolByteArray);
+
 	PoolByteArray *proxy = (PoolByteArray *)&result;
+
 	PoolByteArray::Write proxy_writer = proxy->write();
+
 	proxy->resize(tmp_result.size());
 
-	for (int i = 0; i < tmp_result.size(); i++) {
+	for (decltype(tmp_result.size() ) i = 0; i < tmp_result.size(); i++) {
 		proxy_writer[i] = tmp_result[i];
 	}
 
@@ -1052,15 +1146,20 @@ godot_string GDAPI godot_string_md5_text(const godot_string *p_self) {
 
 godot_pool_byte_array GDAPI godot_string_sha256_buffer(const godot_string *p_self) {
 	const String *self = (const String *)p_self;
-	Vector<uint8_t> tmp_result = self->sha256_buffer();
+
+	std::vector<uint8_t> tmp_result = self->sha256_buffer();
 
 	godot_pool_byte_array result;
+
 	memnew_placement(&result, PoolByteArray);
+
 	PoolByteArray *proxy = (PoolByteArray *)&result;
+
 	PoolByteArray::Write proxy_writer = proxy->write();
+
 	proxy->resize(tmp_result.size());
 
-	for (int i = 0; i < tmp_result.size(); i++) {
+	for (decltype(tmp_result.size() ) i = 0; i < tmp_result.size(); i++) {
 		proxy_writer[i] = tmp_result[i];
 	}
 
@@ -1341,16 +1440,22 @@ godot_string GDAPI godot_string_rstrip(const godot_string *p_self, const godot_s
 godot_pool_string_array GDAPI godot_string_rsplit(const godot_string *p_self, const godot_string *p_divisor,
 		const godot_bool p_allow_empty, const godot_int p_maxsplit) {
 	const String *self = (const String *)p_self;
+
 	String *divisor = (String *)p_divisor;
 
 	godot_pool_string_array result;
+
 	memnew_placement(&result, PoolStringArray);
+
 	PoolStringArray *proxy = (PoolStringArray *)&result;
+
 	PoolStringArray::Write proxy_writer = proxy->write();
-	Vector<String> tmp_result = self->rsplit(*divisor, p_allow_empty, p_maxsplit);
+
+	std::vector<String> tmp_result = self->rsplit(*divisor, p_allow_empty, p_maxsplit);
+	
 	proxy->resize(tmp_result.size());
 
-	for (int i = 0; i < tmp_result.size(); i++) {
+	for (decltype(tmp_result.size() ) i = 0; i < tmp_result.size(); i++) {
 		proxy_writer[i] = tmp_result[i];
 	}
 
