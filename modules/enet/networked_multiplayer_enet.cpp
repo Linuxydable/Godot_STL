@@ -659,7 +659,7 @@ size_t NetworkedMultiplayerENet::enet_compress(void *context, const ENetBuffer *
 
 	NetworkedMultiplayerENet *enet = (NetworkedMultiplayerENet *)(context);
 
-	if (size_t(enet->src_compressor_mem.size()) < inLimit) {
+	if (enet->src_compressor_mem.size() < inLimit) {
 		enet->src_compressor_mem.resize(inLimit);
 	}
 
@@ -691,11 +691,15 @@ size_t NetworkedMultiplayerENet::enet_compress(void *context, const ENetBuffer *
 		}
 	}
 
+	// need_update : need Compression::get_max_compressed_buffer_size return site_t or unsigned int not int
 	int req_size = Compression::get_max_compressed_buffer_size(ofs, mode);
-	if (enet->dst_compressor_mem.size() < req_size) {
+
+	if(int(enet->dst_compressor_mem.size() ) < req_size){
 		enet->dst_compressor_mem.resize(req_size);
 	}
-	int ret = Compression::compress(enet->dst_compressor_mem, enet->src_compressor_mem, ofs, mode);
+
+	// need_udpate : not use .data()
+	int ret = Compression::compress(enet->dst_compressor_mem.data(), enet->src_compressor_mem.data(), ofs, mode);
 
 	if (ret < 0)
 		return 0;
@@ -703,7 +707,7 @@ size_t NetworkedMultiplayerENet::enet_compress(void *context, const ENetBuffer *
 	if (ret > int(outLimit))
 		return 0; // Do not bother
 
-	copymem(outData, enet->dst_compressor_mem, ret);
+	copymem(outData, enet->dst_compressor_mem.data(), ret);
 
 	return ret;
 }
