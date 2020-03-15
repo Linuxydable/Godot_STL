@@ -30,6 +30,8 @@
 
 #include "nativescript.h"
 
+#include <algorithm>
+
 #include "gdnative/gdnative.h"
 
 #include "core/core_string_names.h"
@@ -1280,30 +1282,28 @@ void NativeScriptLanguage::profiling_add_data(StringName p_signature, uint64_t p
 #endif
 }
 
+// need_udpate : return iterator not int
 int NativeScriptLanguage::register_binding_functions(godot_instance_binding_functions p_binding_functions) {
 
 	// find index
 
-	int idx = -1;
-
-	for (int i = 0; i < binding_functions.size(); i++) {
-		if (!binding_functions[i].first) {
-			// free, we'll take it
-			idx = i;
-			break;
+	auto it_binding_functions = std::find_if(binding_functions.begin(), binding_functions.end(),
+		[&](const Pair<bool, godot_instance_binding_functions>& binding_function){
+			if(!binding_function.first){
+				return true;
+			}
+			return false;
 		}
+	);
+
+	if(it_binding_functions == binding_functions.end() ){
+		binding_functions.push_back(Pair<bool, godot_instance_binding_functions>(true, p_binding_functions) );
+	}else{
+		(*it_binding_functions).first = true;
+		(*it_binding_functions).second = p_binding_functions;
 	}
 
-	if (idx == -1) {
-		idx = binding_functions.size();
-		binding_functions.resize(idx + 1);
-	}
-
-	// set the functions
-	binding_functions.write[idx].first = true;
-	binding_functions.write[idx].second = p_binding_functions;
-
-	return idx;
+	return std::distance(binding_functions.begin(), it_binding_functions);
 }
 
 void NativeScriptLanguage::unregister_binding_functions(int p_idx) {

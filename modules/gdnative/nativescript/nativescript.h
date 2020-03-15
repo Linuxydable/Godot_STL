@@ -31,6 +31,8 @@
 #ifndef NATIVE_SCRIPT_H
 #define NATIVE_SCRIPT_H
 
+#include <vector>
+
 #include "core/io/resource_loader.h"
 #include "core/io/resource_saver.h"
 #include "core/oa_hash_map.h"
@@ -252,8 +254,8 @@ private:
 
 	void call_libraries_cb(const StringName &name);
 
-	Vector<Pair<bool, godot_instance_binding_functions> > binding_functions;
-	Set<Vector<void *> *> binding_instances;
+	std::vector<Pair<bool, godot_instance_binding_functions> > binding_functions;
+	Set<std::vector<void *> *> binding_instances;
 
 	Map<int, HashMap<StringName, const void *> > global_type_tags;
 
