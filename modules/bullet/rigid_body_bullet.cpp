@@ -455,7 +455,7 @@ bool RigidBodyBullet::add_collision_object(RigidBodyBullet *p_otherObject, const
 bool RigidBodyBullet::was_colliding(RigidBodyBullet *p_other_object) {
 	auto m_rbegin = prev_collision_traces->rbegin() + ( prev_collision_traces->size() - prev_collision_count);
 
-	auto it = std::find_if(m_rbegin, prev_collision_traces->rend(), p_other_object);
+	auto it = std::find(m_rbegin, prev_collision_traces->rend(), p_other_object);
 
 	if(it != prev_collision_traces->rend() ){
 		return true;
