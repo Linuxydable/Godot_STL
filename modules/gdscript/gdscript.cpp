@@ -227,7 +227,8 @@ void GDScript::get_script_method_list(List<MethodInfo> *p_list) const {
 			GDScriptFunction *func = E->get();
 			MethodInfo mi;
 			mi.name = E->key();
-			for (int i = 0; i < func->get_argument_count(); i++) {
+			auto len = func->get_argument_count();
+			for (decltype(len) i = 0; i < len; ++i) {
 				mi.arguments.push_back(func->get_argument_type(i));
 			}
 
@@ -246,7 +247,7 @@ void GDScript::get_script_property_list(List<PropertyInfo> *p_list) const {
 
 	while (sptr) {
 
-		Vector<_GDScriptMemberSort> msort;
+		std::vector<_GDScriptMemberSort> msort;
 		for (Map<StringName, PropertyInfo>::Element *E = sptr->member_info.front(); E; E = E->next()) {
 
 			_GDScriptMemberSort ms;
@@ -256,11 +257,10 @@ void GDScript::get_script_property_list(List<PropertyInfo> *p_list) const {
 			msort.push_back(ms);
 		}
 
-		msort.sort();
-		msort.invert();
-		for (int i = 0; i < msort.size(); i++) {
+		std::sort(msort.rbegin(), msort.rend());
+		for (auto &&m : msort) {
 
-			props.push_front(sptr->member_info[msort[i].name]);
+			props.push_front(sptr->member_info[m.name]);
 		}
 
 		sptr = sptr->_base;
@@ -285,7 +285,7 @@ MethodInfo GDScript::get_method_info(const StringName &p_method) const {
 	GDScriptFunction *func = E->get();
 	MethodInfo mi;
 	mi.name = E->key();
-	for (int i = 0; i < func->get_argument_count(); i++) {
+	for (uint32_t i = 0; i < func->get_argument_count(); ++i) {
 		mi.arguments.push_back(func->get_argument_type(i));
 	}
 
@@ -463,7 +463,7 @@ bool GDScript::_update_exports() {
 			members_cache.clear();
 			member_default_values_cache.clear();
 
-			for (int i = 0; i < c->variables.size(); i++) {
+			for (decltype(c->variables.size()) i = 0; i < c->variables.size(); ++i) {
 				if (c->variables[i]._export.type == Variant::NIL)
 					continue;
 
@@ -473,7 +473,7 @@ bool GDScript::_update_exports() {
 
 			_signals.clear();
 
-			for (int i = 0; i < c->_signals.size(); i++) {
+			for (decltype(c->_signals.size()) i = 0u; i < c->_signals.size(); ++i) {
 				_signals[c->_signals[i].name] = c->_signals[i].arguments;
 			}
 		} else {
@@ -597,7 +597,7 @@ Error GDScript::reload(bool p_keep_state) {
 	for (const List<GDScriptWarning>::Element *E = parser.get_warnings().front(); E; E = E->next()) {
 		const GDScriptWarning &warning = E->get();
 		if (ScriptDebugger::get_singleton()) {
-			Vector<ScriptLanguage::StackInfo> si;
+			std::vector<ScriptLanguage::StackInfo> si;
 			ScriptDebugger::get_singleton()->send_error("", get_path(), warning.line, warning.get_name(), warning.get_message(), ERR_HANDLER_WARNING, si);
 		}
 	}
@@ -715,7 +715,7 @@ void GDScript::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_as_byte_code"), &GDScript::get_as_byte_code);
 }
 
-Vector<uint8_t> GDScript::get_as_byte_code() const {
+std::vector<uint8_t> GDScript::get_as_byte_code() const {
 
 	GDScriptTokenizerBuffer tokenizer;
 	return tokenizer.parse_code_string(source);
@@ -723,7 +723,7 @@ Vector<uint8_t> GDScript::get_as_byte_code() const {
 
 Error GDScript::load_byte_code(const String &p_path) {
 
-	Vector<uint8_t> bytecode;
+	std::vector<uint8_t> bytecode;
 
 	if (p_path.ends_with("gde")) {
 
@@ -733,10 +733,10 @@ Error GDScript::load_byte_code(const String &p_path) {
 		FileAccessEncrypted *fae = memnew(FileAccessEncrypted);
 		ERR_FAIL_COND_V(!fae, ERR_CANT_OPEN);
 
-		Vector<uint8_t> key;
+		std::vector<uint8_t> key;
 		key.resize(32);
-		for (int i = 0; i < key.size(); i++) {
-			key.write[i] = script_encryption_key[i];
+		for (decltype(key.size()) i = 0; i < key.size(); ++i) {
+			key[i] = script_encryption_key[i];
 		}
 
 		Error err = fae->open_and_parse(fa, key, FileAccessEncrypted::MODE_READ);
@@ -750,7 +750,7 @@ Error GDScript::load_byte_code(const String &p_path) {
 		}
 
 		bytecode.resize(fae->get_len());
-		fae->get_buffer(bytecode.ptrw(), bytecode.size());
+		fae->get_buffer(bytecode.data(), bytecode.size());
 		fae->close();
 		memdelete(fae);
 
@@ -865,13 +865,13 @@ bool GDScript::has_script_signal(const StringName &p_signal) const {
 }
 void GDScript::get_script_signal_list(List<MethodInfo> *r_signals) const {
 
-	for (const Map<StringName, Vector<StringName> >::Element *E = _signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<StringName> >::Element *E = _signals.front(); E; E = E->next()) {
 
 		MethodInfo mi;
 		mi.name = E->key();
-		for (int i = 0; i < E->get().size(); i++) {
+		for (auto &&name : E->get()) {
 			PropertyInfo arg;
-			arg.name = E->get()[i];
+			arg.name = name;
 			mi.arguments.push_back(arg);
 		}
 		r_signals->push_back(mi);
@@ -894,9 +894,9 @@ GDScript::GDScript() :
 	_static_ref = this;
 	valid = false;
 	subclass_count = 0;
-	initializer = NULL;
-	_base = NULL;
-	_owner = NULL;
+	initializer = nullptr;
+	_base = nullptr;
+	_owner = nullptr;
 	tool = false;
 #ifdef TOOLS_ENABLED
 	source_changed_cache = false;
@@ -921,7 +921,7 @@ GDScript::~GDScript() {
 	}
 
 	for (Map<StringName, Ref<GDScript> >::Element *E = subclasses.front(); E; E = E->next()) {
-		E->get()->_owner = NULL; //bye, you are no longer owned cause I died
+		E->get()->_owner = nullptr; //bye, you are no longer owned cause I died
 	}
 
 #ifdef DEBUG_ENABLED
@@ -957,7 +957,7 @@ bool GDScriptInstance::set(const StringName &p_name, const Variant &p_value) {
 				if (!E->get().data_type.is_type(p_value)) {
 					return false; // Type mismatch
 				}
-				members.write[E->get().index] = p_value;
+				members[E->get().index] = p_value;
 			}
 			return true;
 		}
@@ -1097,7 +1097,7 @@ void GDScriptInstance::get_property_list(List<PropertyInfo> *p_properties) const
 
 		//instance a fake script for editing the values
 
-		Vector<_GDScriptMemberSort> msort;
+		std::vector<_GDScriptMemberSort> msort;
 		for (Map<StringName, PropertyInfo>::Element *F = sptr->member_info.front(); F; F = F->next()) {
 
 			_GDScriptMemberSort ms;
@@ -1107,11 +1107,10 @@ void GDScriptInstance::get_property_list(List<PropertyInfo> *p_properties) const
 			msort.push_back(ms);
 		}
 
-		msort.sort();
-		msort.invert();
-		for (int i = 0; i < msort.size(); i++) {
+		std::sort(msort.rbegin(), msort.rend());
+		for (auto &&m : msort) {
 
-			props.push_front(sptr->member_info[msort[i].name]);
+			props.push_front(sptr->member_info[m.name]);
 		}
 
 		sptr = sptr->_base;
@@ -1133,7 +1132,7 @@ void GDScriptInstance::get_method_list(List<MethodInfo> *p_list) const {
 			MethodInfo mi;
 			mi.name = E->key();
 			mi.flags |= METHOD_FLAG_FROM_SCRIPT;
-			for (int i = 0; i < E->get()->get_argument_count(); i++)
+			for (decltype(E->get()->get_argument_count()) i = 0; i < E->get()->get_argument_count(); ++i)
 				mi.arguments.push_back(PropertyInfo(Variant::NIL, "arg" + itos(i)));
 			p_list->push_back(mi);
 		}
@@ -1295,7 +1294,7 @@ void GDScriptInstance::reload_members() {
 
 	members.resize(script->member_indices.size()); //resize
 
-	Vector<Variant> new_members;
+	std::vector<Variant> new_members;
 	new_members.resize(script->member_indices.size());
 
 	//pass the values to the new indices
@@ -1303,7 +1302,7 @@ void GDScriptInstance::reload_members() {
 
 		if (member_indices_cache.has(E->key())) {
 			Variant value = members[member_indices_cache[E->key()]];
-			new_members.write[E->get().index] = value;
+			new_members[E->get().index] = value;
 		}
 	}
 
@@ -1321,7 +1320,7 @@ void GDScriptInstance::reload_members() {
 }
 
 GDScriptInstance::GDScriptInstance() {
-	owner = NULL;
+	owner = nullptr;
 	base_ref = false;
 }
 
@@ -1353,12 +1352,12 @@ void GDScriptLanguage::_add_global(const StringName &p_name, const Variant &p_va
 
 	if (globals.has(p_name)) {
 		//overwrite existing
-		global_array.write[globals[p_name]] = p_value;
+		global_array[globals[p_name]] = p_value;
 		return;
 	}
 	globals[p_name] = global_array.size();
 	global_array.push_back(p_value);
-	_global_array = global_array.ptrw();
+	_global_array = global_array.data();
 }
 
 void GDScriptLanguage::add_global_constant(const StringName &p_variable, const Variant &p_value) {
@@ -1379,7 +1378,7 @@ void GDScriptLanguage::init() {
 
 	//populate global constants
 	int gcc = GlobalConstants::get_global_constant_count();
-	for (int i = 0; i < gcc; i++) {
+	for (int i = 0; i < gcc; ++i) {
 
 		_add_global(StaticCString::create(GlobalConstants::get_global_constant_name(i)), GlobalConstants::get_global_constant_value(i));
 	}
@@ -1873,10 +1872,10 @@ String GDScriptLanguage::get_global_class_name(const String &p_path, String *r_b
 					if (subclass->extends_file) {
 						if (subclass->extends_class.size() == 0) {
 							get_global_class_name(subclass->extends_file, r_base_type);
-							subclass = NULL;
+							subclass = nullptr;
 							break;
 						} else {
-							Vector<StringName> extend_classes = subclass->extends_class;
+							std::vector<StringName> extend_classes = subclass->extends_class;
 
 							FileAccessRef subfile = FileAccess::open(subclass->extends_file, FileAccess::READ);
 							if (!subfile) {
@@ -1903,30 +1902,31 @@ String GDScriptLanguage::get_global_class_name(const String &p_path, String *r_b
 
 							while (extend_classes.size() > 0) {
 								bool found = false;
-								for (int i = 0; i < subclass->subclasses.size(); i++) {
+								auto len = subclass->subclasses.size();
+								for (decltype(len) i = 0; i < len; ++i) {
 									const GDScriptParser::ClassNode *inner_class = subclass->subclasses[i];
 									if (inner_class->name == extend_classes[0]) {
-										extend_classes.remove(0);
+										extend_classes.erase(extend_classes.begin());
 										found = true;
 										subclass = inner_class;
 										break;
 									}
 								}
 								if (!found) {
-									subclass = NULL;
+									subclass = nullptr;
 									break;
 								}
 							}
 						}
 					} else if (subclass->extends_class.size() == 1) {
 						*r_base_type = subclass->extends_class[0];
-						subclass = NULL;
+						subclass = nullptr;
 					} else {
 						break;
 					}
 				} else {
 					*r_base_type = "Reference";
-					subclass = NULL;
+					subclass = nullptr;
 				}
 			}
 		}
@@ -2135,14 +2135,14 @@ GDScriptLanguage::GDScriptLanguage() {
 
 	} else {
 		_debug_max_call_stack = 0;
-		_call_stack = NULL;
+		_call_stack = nullptr;
 	}
 
 #ifdef DEBUG_ENABLED
 	GLOBAL_DEF("debug/gdscript/warnings/enable", true);
 	GLOBAL_DEF("debug/gdscript/warnings/treat_warnings_as_errors", false);
 	GLOBAL_DEF("debug/gdscript/completion/autocomplete_setters_and_getters", false);
-	for (int i = 0; i < (int)GDScriptWarning::WARNING_MAX; i++) {
+	for (auto i = 0u; i < GDScriptWarning::WARNING_MAX; ++i) {
 		String warning = GDScriptWarning::get_name_from_code((GDScriptWarning::Code)i).to_lower();
 		GLOBAL_DEF("debug/gdscript/warnings/" + warning, !warning.begins_with("unsafe_"));
 	}
@@ -2153,12 +2153,12 @@ GDScriptLanguage::~GDScriptLanguage() {
 
 	if (lock) {
 		memdelete(lock);
-		lock = NULL;
+		lock = nullptr;
 	}
 	if (_call_stack) {
 		memdelete_arr(_call_stack);
 	}
-	singleton = NULL;
+	singleton = nullptr;
 }
 
 /*************** RESOURCE ***************/
