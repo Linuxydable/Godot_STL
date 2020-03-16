@@ -201,7 +201,7 @@ void EditorSpatialGizmo::add_mesh(const Ref<ArrayMesh> &p_mesh, bool p_billboard
 	instances.push_back(ins);
 }
 
-void EditorSpatialGizmo::add_lines(const Vector<Vector3> &p_lines, const Ref<Material> &p_material, bool p_billboard) {
+void EditorSpatialGizmo::add_lines(const std::vector<Vector3> &p_lines, const Ref<Material> &p_material, bool p_billboard) {
 
 	ERR_FAIL_COND(!spatial_node);
 	Instance ins;
@@ -216,7 +216,7 @@ void EditorSpatialGizmo::add_lines(const Vector<Vector3> &p_lines, const Ref<Mat
 	color.resize(p_lines.size());
 	{
 		PoolVector<Color>::Write w = color.write();
-		for (int i = 0; i < p_lines.size(); i++) {
+		for (size_t i = 0; i < p_lines.size(); ++i) {
 			if (is_selected())
 				w[i] = Color(1, 1, 1, 0.8);
 			else
@@ -231,7 +231,7 @@ void EditorSpatialGizmo::add_lines(const Vector<Vector3> &p_lines, const Ref<Mat
 
 	if (p_billboard) {
 		float md = 0;
-		for (int i = 0; i < p_lines.size(); i++) {
+		for (size_t i = 0; i < p_lines.size(); ++i) {
 
 			md = MAX(0, p_lines[i].length());
 		}
@@ -255,8 +255,8 @@ void EditorSpatialGizmo::add_unscaled_billboard(const Ref<Material> &p_material,
 	ERR_FAIL_COND(!spatial_node);
 	Instance ins;
 
-	Vector<Vector3> vs;
-	Vector<Vector2> uv;
+	std::vector<Vector3> vs;
+	std::vector<Vector2> uv;
 
 	vs.push_back(Vector3(-p_scale, p_scale, 0));
 	vs.push_back(Vector3(p_scale, p_scale, 0));
@@ -277,9 +277,9 @@ void EditorSpatialGizmo::add_unscaled_billboard(const Ref<Material> &p_material,
 	mesh->surface_set_material(0, p_material);
 
 	float md = 0;
-	for (int i = 0; i < vs.size(); i++) {
+	for (auto &&v : vs) {
 
-		md = MAX(0, vs[i].length());
+		md = MAX(0, v.length());
 	}
 	if (md) {
 		mesh->set_custom_aabb(AABB(Vector3(-md, -md, -md), Vector3(md, md, md) * 2.0));
@@ -305,7 +305,7 @@ void EditorSpatialGizmo::add_collision_triangles(const Ref<TriangleMesh> &p_tmes
 	collision_mesh = p_tmesh;
 }
 
-void EditorSpatialGizmo::add_collision_segments(const Vector<Vector3> &p_lines) {
+void EditorSpatialGizmo::add_collision_segments(const std::vector<Vector3> &p_lines) {
 
 	int from = collision_segments.size();
 	collision_segments.resize(from + p_lines.size());
@@ -315,7 +315,7 @@ void EditorSpatialGizmo::add_collision_segments(const Vector<Vector3> &p_lines) 
 	}
 }
 
-void EditorSpatialGizmo::add_handles(const Vector<Vector3> &p_handles, const Ref<Material> &p_material, bool p_billboard, bool p_secondary) {
+void EditorSpatialGizmo::add_handles(const std::vector<Vector3> &p_handles, const Ref<Material> &p_material, bool p_billboard, bool p_secondary) {
 
 	billboard_handle = p_billboard;
 
@@ -335,7 +335,7 @@ void EditorSpatialGizmo::add_handles(const Vector<Vector3> &p_handles, const Ref
 	{
 		colors.resize(p_handles.size());
 		PoolVector<Color>::Write w = colors.write();
-		for (int i = 0; i < p_handles.size(); i++) {
+		for (size_t i = 0; i < p_handles.size(); ++i) {
 
 			Color col(1, 1, 1, 1);
 			if (is_handle_highlighted(i))
@@ -408,7 +408,7 @@ void EditorSpatialGizmo::add_solid_box(Ref<Material> &p_material, Vector3 p_size
 	add_mesh(m);
 }
 
-bool EditorSpatialGizmo::intersect_frustum(const Camera *p_camera, const Vector<Plane> &p_frustum) {
+bool EditorSpatialGizmo::intersect_frustum(const Camera *p_camera, const std::vector<Plane> &p_frustum) {
 
 	ERR_FAIL_COND_V(!spatial_node, false);
 	ERR_FAIL_COND_V(!valid, false);
@@ -466,9 +466,9 @@ bool EditorSpatialGizmo::intersect_frustum(const Camera *p_camera, const Vector<
 
 		Transform it = t.affine_inverse();
 
-		Vector<Plane> transformed_frustum;
+		std::vector<Plane> transformed_frustum;
 
-		for (int i = 0; i < 4; i++) {
+		for (int i = 0; i < 4; ++i) {
 			transformed_frustum.push_back(it.xform(p_frustum[i]));
 		}
 
@@ -498,7 +498,7 @@ bool EditorSpatialGizmo::intersect_ray(Camera *p_camera, const Point2 &p_point, 
 		float min_d = 1e20;
 		int idx = -1;
 
-		for (int i = 0; i < secondary_handles.size(); i++) {
+		for (size_t i = 0; i < secondary_handles.size(); ++i) {
 
 			Vector3 hpos = t.xform(secondary_handles[i]);
 			Vector2 p = p_camera->unproject_position(hpos);
@@ -524,7 +524,7 @@ bool EditorSpatialGizmo::intersect_ray(Camera *p_camera, const Point2 &p_point, 
 
 		min_d = 1e20;
 
-		for (int i = 0; i < handles.size(); i++) {
+		for (size_t i = 0; i < handles.size(); ++i) {
 
 			Vector3 hpos = t.xform(handles[i]);
 			Vector2 p = p_camera->unproject_position(hpos);
@@ -599,8 +599,8 @@ bool EditorSpatialGizmo::intersect_ray(Camera *p_camera, const Point2 &p_point, 
 
 		Plane camp(p_camera->get_transform().origin, (-p_camera->get_transform().basis.get_axis(2)).normalized());
 
-		int vc = collision_segments.size();
-		const Vector3 *vptr = collision_segments.ptr();
+		size_t vc = collision_segments.size();
+		const Vector3 *vptr = collision_segments.data();
 		Transform t = spatial_node->get_global_transform();
 		if (billboard_handle) {
 			t.set_look_at(t.origin, t.origin - p_camera->get_transform().basis.get_axis(2), p_camera->get_transform().basis.get_axis(1));
@@ -609,7 +609,7 @@ bool EditorSpatialGizmo::intersect_ray(Camera *p_camera, const Point2 &p_point, 
 		Vector3 cp;
 		float cpd = 1e20;
 
-		for (int i = 0; i < vc / 2; i++) {
+		for (size_t i = 0; i < vc / 2; ++i) {
 
 			Vector3 a = t.xform(vptr[i * 2 + 0]);
 			Vector3 b = t.xform(vptr[i * 2 + 1]);
@@ -680,9 +680,9 @@ void EditorSpatialGizmo::create() {
 	ERR_FAIL_COND(valid);
 	valid = true;
 
-	for (int i = 0; i < instances.size(); i++) {
+	for (auto &&instance : instances) {
 
-		instances.write[i].create_instance(spatial_node, hidden);
+		instance.create_instance(spatial_node, hidden);
 	}
 
 	transform();
@@ -692,8 +692,8 @@ void EditorSpatialGizmo::transform() {
 
 	ERR_FAIL_COND(!spatial_node);
 	ERR_FAIL_COND(!valid);
-	for (int i = 0; i < instances.size(); i++) {
-		VS::get_singleton()->instance_set_transform(instances[i].instance, spatial_node->get_global_transform());
+	for (auto &&instance : instances) {
+		VS::get_singleton()->instance_set_transform(instance.instance, spatial_node->get_global_transform());
 	}
 }
 
@@ -702,11 +702,11 @@ void EditorSpatialGizmo::free() {
 	ERR_FAIL_COND(!spatial_node);
 	ERR_FAIL_COND(!valid);
 
-	for (int i = 0; i < instances.size(); i++) {
+	for (auto &&instance : instances) {
 
-		if (instances[i].instance.is_valid())
-			VS::get_singleton()->free(instances[i].instance);
-		instances.write[i].instance = RID();
+		if (instance.instance.is_valid())
+			VS::get_singleton()->free(instance.instance);
+		instance.instance = RID{};
 	}
 
 	clear();
@@ -717,8 +717,8 @@ void EditorSpatialGizmo::free() {
 void EditorSpatialGizmo::set_hidden(bool p_hidden) {
 	hidden = p_hidden;
 	int layer = hidden ? 0 : 1 << SpatialEditorViewport::GIZMO_EDIT_LAYER;
-	for (int i = 0; i < instances.size(); ++i) {
-		VS::get_singleton()->instance_set_layer_mask(instances[i].instance, layer);
+	for (auto &&instance : instances) {
+		VS::get_singleton()->instance_set_layer_mask(instance.instance, layer);
 	}
 }
 
@@ -758,17 +758,17 @@ EditorSpatialGizmo::EditorSpatialGizmo() {
 	valid = false;
 	billboard_handle = false;
 	hidden = false;
-	base = NULL;
+	base = nullptr;
 	selected = false;
 	instanced = false;
-	spatial_node = NULL;
-	gizmo_plugin = NULL;
+	spatial_node = nullptr;
+	gizmo_plugin = nullptr;
 	selectable_icon_size = -1.0f;
 }
 
 EditorSpatialGizmo::~EditorSpatialGizmo() {
 
-	if (gizmo_plugin != NULL) gizmo_plugin->unregister_gizmo(this);
+	if (gizmo_plugin != nullptr) gizmo_plugin->unregister_gizmo(this);
 	clear();
 }
 
@@ -798,7 +798,7 @@ LightSpatialGizmoPlugin::LightSpatialGizmoPlugin() {
 }
 
 bool LightSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<Light>(p_spatial) != NULL;
+	return Object::cast_to<Light>(p_spatial) != nullptr;
 }
 
 String LightSpatialGizmoPlugin::get_name() const {
@@ -831,14 +831,14 @@ Variant LightSpatialGizmoPlugin::get_handle_value(EditorSpatialGizmo *p_gizmo, i
 static float _find_closest_angle_to_half_pi_arc(const Vector3 &p_from, const Vector3 &p_to, float p_arc_radius, const Transform &p_arc_xform) {
 
 	//bleh, discrete is simpler
-	static const int arc_test_points = 64;
+	static constexpr uint8_t arc_test_points = 64u;
 	float min_d = 1e20;
 	Vector3 min_p;
 
-	for (int i = 0; i < arc_test_points; i++) {
+	for (uint8_t i = 0; i < arc_test_points; ++i) {
 
-		float a = i * Math_PI * 0.5 / arc_test_points;
-		float an = (i + 1) * Math_PI * 0.5 / arc_test_points;
+		float a = i * M_PI_2 / arc_test_points;
+		float an = (i + 1) * M_PI_2 / arc_test_points;
 		Vector3 p = Vector3(Math::cos(a), 0, -Math::sin(a)) * p_arc_radius;
 		Vector3 n = Vector3(Math::cos(an), 0, -Math::sin(an)) * p_arc_radius;
 
@@ -853,8 +853,8 @@ static float _find_closest_angle_to_half_pi_arc(const Vector3 &p_from, const Vec
 	}
 
 	//min_p = p_arc_xform.affine_inverse().xform(min_p);
-	float a = (Math_PI * 0.5) - Vector2(min_p.x, -min_p.z).angle();
-	return a * 180.0 / Math_PI;
+	float a = M_PI_2 - Vector2(min_p.x, -min_p.z).angle();
+	return a * 180.0 / M_PI;
 }
 
 void LightSpatialGizmoPlugin::set_handle(EditorSpatialGizmo *p_gizmo, int p_idx, Camera *p_camera, const Point2 &p_point) {
@@ -941,8 +941,8 @@ void LightSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		Ref<Material> material = get_material("lines_primary", p_gizmo);
 		Ref<Material> icon = get_material("light_directional_icon", p_gizmo);
 
-		const int arrow_points = 7;
-		const float arrow_length = 1.5;
+		constexpr uint8_t arrow_points = 7;
+		constexpr float arrow_length = 1.5f;
 
 		Vector3 arrow[arrow_points] = {
 			Vector3(0, 0, -1),
@@ -954,12 +954,12 @@ void LightSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			Vector3(0, -0.8, 0)
 		};
 
-		int arrow_sides = 2;
+		constexpr uint8_t arrow_sides = 2;
 
-		Vector<Vector3> lines;
+		std::vector<Vector3> lines;
 
-		for (int i = 0; i < arrow_sides; i++) {
-			for (int j = 0; j < arrow_points; j++) {
+		for (uint8_t i = 0; i < arrow_sides; ++i) {
+			for (uint8_t j = 0; j < arrow_points; ++j) {
 				Basis ma(Vector3(0, 0, 1), Math_PI * i / arrow_sides);
 
 				Vector3 v1 = arrow[j] - Vector3(0, 0, arrow_length);
@@ -983,10 +983,10 @@ void LightSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		OmniLight *on = Object::cast_to<OmniLight>(light);
 		const float r = on->get_param(Light::PARAM_RANGE);
-		Vector<Vector3> points;
-		Vector<Vector3> points_billboard;
+		std::vector<Vector3> points;
+		std::vector<Vector3> points_billboard;
 
-		for (int i = 0; i < 120; i++) {
+		for (uint8_t i = 0; i < 120u; ++i) {
 
 			// Create a circle
 			const float ra = Math::deg2rad((float)(i * 3));
@@ -1011,7 +1011,7 @@ void LightSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		p_gizmo->add_lines(points_billboard, lines_billboard_material, true);
 		p_gizmo->add_unscaled_billboard(icon, 0.05);
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(r, 0, 0));
 		p_gizmo->add_handles(handles, get_material("handles_billboard"), true);
 	}
@@ -1022,15 +1022,15 @@ void LightSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		const Ref<Material> material_secondary = get_material("lines_secondary", p_gizmo);
 		const Ref<Material> icon = get_material("light_spot_icon", p_gizmo);
 
-		Vector<Vector3> points_primary;
-		Vector<Vector3> points_secondary;
+		std::vector<Vector3> points_primary;
+		std::vector<Vector3> points_secondary;
 		SpotLight *sl = Object::cast_to<SpotLight>(light);
 
 		float r = sl->get_param(Light::PARAM_RANGE);
 		float w = r * Math::sin(Math::deg2rad(sl->get_param(Light::PARAM_SPOT_ANGLE)));
 		float d = r * Math::cos(Math::deg2rad(sl->get_param(Light::PARAM_SPOT_ANGLE)));
 
-		for (int i = 0; i < 120; i++) {
+		for (uint8_t i = 0; i < 120u; ++i) {
 
 			// Draw a circle
 			const float ra = Math::deg2rad((float)(i * 3));
@@ -1054,10 +1054,10 @@ void LightSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		p_gizmo->add_lines(points_primary, material_primary);
 		p_gizmo->add_lines(points_secondary, material_secondary);
 
-		const float ra = 16 * Math_PI * 2.0 / 64.0;
+		constexpr float ra = 16 * Math_PI * 2.0 / 64.0;
 		const Point2 a = Vector2(Math::sin(ra), Math::cos(ra)) * w;
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(0, 0, -r));
 		handles.push_back(Vector3(a.x, a.y, -d));
 
@@ -1080,7 +1080,7 @@ AudioStreamPlayer3DSpatialGizmoPlugin::AudioStreamPlayer3DSpatialGizmoPlugin() {
 }
 
 bool AudioStreamPlayer3DSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<AudioStreamPlayer3D>(p_spatial) != NULL;
+	return Object::cast_to<AudioStreamPlayer3D>(p_spatial) != nullptr;
 }
 
 String AudioStreamPlayer3DSpatialGizmoPlugin::get_name() const {
@@ -1119,7 +1119,7 @@ void AudioStreamPlayer3DSpatialGizmoPlugin::set_handle(EditorSpatialGizmo *p_giz
 	float closest_dist = 1e20;
 	float closest_angle = 1e20;
 
-	for (int i = 0; i < 180; i++) {
+	for (uint8_t i = 0; i < 180u; ++i) {
 
 		float a = i * Math_PI / 180.0;
 		float an = (i + 1) * Math_PI / 180.0;
@@ -1173,10 +1173,10 @@ void AudioStreamPlayer3DSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) 
 		const float ofs = -Math::cos(Math::deg2rad(pc));
 		const float radius = Math::sin(Math::deg2rad(pc));
 
-		Vector<Vector3> points_primary;
+		std::vector<Vector3> points_primary;
 		points_primary.resize(200);
 
-		for (int i = 0; i < 100; i++) {
+		for (uint8_t i = 0; i < 100u; ++i) {
 
 			const float a = i * 2.0 * Math_PI / 100.0;
 			const float an = (i + 1) * 2.0 * Math_PI / 100.0;
@@ -1191,10 +1191,10 @@ void AudioStreamPlayer3DSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) 
 		const Ref<Material> material_primary = get_material("stream_player_3d_material_primary", p_gizmo);
 		p_gizmo->add_lines(points_primary, material_primary);
 
-		Vector<Vector3> points_secondary;
+		std::vector<Vector3> points_secondary;
 		points_secondary.resize(16);
 
-		for (int i = 0; i < 8; i++) {
+		for (uint8_t i = 0; i < 8u; ++i) {
 
 			const float a = i * 2.0 * Math_PI / 8.0;
 			const Vector3 from(Math::sin(a) * radius, Math::cos(a) * radius, ofs);
@@ -1206,7 +1206,7 @@ void AudioStreamPlayer3DSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) 
 		const Ref<Material> material_secondary = get_material("stream_player_3d_material_secondary", p_gizmo);
 		p_gizmo->add_lines(points_secondary, material_secondary);
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		const float ha = Math::deg2rad(player->get_emission_angle());
 		handles.push_back(Vector3(Math::sin(ha), 0, -Math::cos(ha)));
 		p_gizmo->add_handles(handles, get_material("handles"));
@@ -1227,7 +1227,7 @@ CameraSpatialGizmoPlugin::CameraSpatialGizmoPlugin() {
 }
 
 bool CameraSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<Camera>(p_spatial) != NULL;
+	return Object::cast_to<Camera>(p_spatial) != nullptr;
 }
 
 String CameraSpatialGizmoPlugin::get_name() const {
@@ -1332,8 +1332,8 @@ void CameraSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
-	Vector<Vector3> handles;
+	std::vector<Vector3> lines;
+	std::vector<Vector3> handles;
 
 	Ref<Material> material = get_material("camera_material", p_gizmo);
 	Ref<Material> icon = get_material("camera_icon", p_gizmo);
@@ -1468,8 +1468,8 @@ void CameraSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		}
 
 		Transform local = camera->get_global_transform().affine_inverse();
-		for (int i = 0; i < lines.size(); i++) {
-			lines.write[i] = local.xform(lines[i]);
+		for (auto &&line : lines) {
+			line = local.xform(line);
 		}
 
 		p_gizmo->add_lines(lines, material);
@@ -1482,7 +1482,7 @@ MeshInstanceSpatialGizmoPlugin::MeshInstanceSpatialGizmoPlugin() {
 }
 
 bool MeshInstanceSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<MeshInstance>(p_spatial) != NULL && Object::cast_to<SoftBody>(p_spatial) == NULL;
+	return Object::cast_to<MeshInstance>(p_spatial) != nullptr && Object::cast_to<SoftBody>(p_spatial) == nullptr;
 }
 
 String MeshInstanceSpatialGizmoPlugin::get_name() const {
@@ -1519,7 +1519,7 @@ Sprite3DSpatialGizmoPlugin::Sprite3DSpatialGizmoPlugin() {
 }
 
 bool Sprite3DSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<Sprite3D>(p_spatial) != NULL;
+	return Object::cast_to<Sprite3D>(p_spatial) != nullptr;
 }
 
 String Sprite3DSpatialGizmoPlugin::get_name() const {
@@ -1550,10 +1550,10 @@ void Sprite3DSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 Position3DSpatialGizmoPlugin::Position3DSpatialGizmoPlugin() {
 	pos3d_mesh = Ref<ArrayMesh>(memnew(ArrayMesh));
-	cursor_points = Vector<Vector3>();
+	cursor_points = std::vector<Vector3>{};
 
 	PoolVector<Color> cursor_colors;
-	float cs = 0.25;
+	constexpr float cs = 0.25;
 	cursor_points.push_back(Vector3(+cs, 0, 0));
 	cursor_points.push_back(Vector3(-cs, 0, 0));
 	cursor_points.push_back(Vector3(0, +cs, 0));
@@ -1582,7 +1582,7 @@ Position3DSpatialGizmoPlugin::Position3DSpatialGizmoPlugin() {
 }
 
 bool Position3DSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<Position3D>(p_spatial) != NULL;
+	return Object::cast_to<Position3D>(p_spatial) != nullptr;
 }
 
 String Position3DSpatialGizmoPlugin::get_name() const {
@@ -1609,7 +1609,7 @@ SkeletonSpatialGizmoPlugin::SkeletonSpatialGizmoPlugin() {
 }
 
 bool SkeletonSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<Skeleton>(p_spatial) != NULL;
+	return Object::cast_to<Skeleton>(p_spatial) != nullptr;
 }
 
 String SkeletonSpatialGizmoPlugin::get_name() const {
@@ -1632,34 +1632,34 @@ void SkeletonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	surface_tool->begin(Mesh::PRIMITIVE_LINES);
 	surface_tool->set_material(material);
-	Vector<Transform> grests;
+	std::vector<Transform> grests;
 	grests.resize(skel->get_bone_count());
 
-	Vector<int> bones;
-	Vector<float> weights;
+	std::vector<int> bones;
+	std::vector<float> weights;
 	bones.resize(4);
 	weights.resize(4);
 
-	for (int i = 0; i < 4; i++) {
-		bones.write[i] = 0;
-		weights.write[i] = 0;
+	for (uint8_t i = 0; i < 4u; ++i) {
+		bones[i] = 0;
+		weights[i] = 0;
 	}
 
-	weights.write[0] = 1;
+	weights[0] = 1;
 
 	AABB aabb;
 
 	Color bonecolor = Color(1.0, 0.4, 0.4, 0.3);
 	Color rootcolor = Color(0.4, 1.0, 0.4, 0.1);
 
-	for (int i_bone = 0; i_bone < skel->get_bone_count(); i_bone++) {
+	for (uint32_t i_bone = 0; i_bone < skel->get_bone_count(); ++i_bone) {
 
 		int i = skel->get_process_order(i_bone);
 
 		int parent = skel->get_bone_parent(i);
 
 		if (parent >= 0) {
-			grests.write[i] = grests[parent] * skel->get_bone_rest(i);
+			grests[i] = grests[parent] * skel->get_bone_rest(i);
 
 			Vector3 v0 = grests[parent].origin;
 			Vector3 v1 = grests[i].origin;
@@ -1670,7 +1670,7 @@ void SkeletonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			int closest = -1;
 			float closest_d = 0.0;
 
-			for (int j = 0; j < 3; j++) {
+			for (uint8_t j = 0; j < 3u; ++j) {
 				float dp = Math::abs(grests[parent].basis[j].normalized().dot(d));
 				if (j == 0 || dp > closest_d)
 					closest = j;
@@ -1680,9 +1680,9 @@ void SkeletonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			Vector3 first;
 			Vector3 points[4];
 			int pointidx = 0;
-			for (int j = 0; j < 3; j++) {
+			for (uint8_t j = 0; j < 3u; ++j) {
 
-				bones.write[0] = parent;
+				bones.front() = parent;
 				surface_tool->add_bones(bones);
 				surface_tool->add_weights(weights);
 				surface_tool->add_color(rootcolor);
@@ -1703,14 +1703,14 @@ void SkeletonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 					axis = d.cross(first).normalized();
 				}
 
-				for (int k = 0; k < 2; k++) {
+				for (uint8_t k = 0; k < 2; ++k) {
 
 					if (k == 1)
 						axis = -axis;
 					Vector3 point = v0 + d * dist * 0.2;
 					point += axis * dist * 0.1;
 
-					bones.write[0] = parent;
+					bones.front() = parent;
 					surface_tool->add_bones(bones);
 					surface_tool->add_weights(weights);
 					surface_tool->add_color(bonecolor);
@@ -1720,12 +1720,12 @@ void SkeletonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 					surface_tool->add_color(bonecolor);
 					surface_tool->add_vertex(point);
 
-					bones.write[0] = parent;
+					bones.front() = parent;
 					surface_tool->add_bones(bones);
 					surface_tool->add_weights(weights);
 					surface_tool->add_color(bonecolor);
 					surface_tool->add_vertex(point);
-					bones.write[0] = i;
+					bones[0] = i;
 					surface_tool->add_bones(bones);
 					surface_tool->add_weights(weights);
 					surface_tool->add_color(bonecolor);
@@ -1735,9 +1735,9 @@ void SkeletonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			}
 
 			SWAP(points[1], points[2]);
-			for (int j = 0; j < 4; j++) {
+			for (uint8_t j = 0; j < 4; ++j) {
 
-				bones.write[0] = parent;
+				bones.front() = parent;
 				surface_tool->add_bones(bones);
 				surface_tool->add_weights(weights);
 				surface_tool->add_color(bonecolor);
@@ -1762,8 +1762,8 @@ void SkeletonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 */
 		} else {
 
-			grests.write[i] = skel->get_bone_rest(i);
-			bones.write[0] = i;
+			grests[i] = skel->get_bone_rest(i);
+			bones.front() = i;
 		}
 		/*
 		Transform  t = grests[i];
@@ -1816,7 +1816,7 @@ PhysicalBoneSpatialGizmoPlugin::PhysicalBoneSpatialGizmoPlugin() {
 }
 
 bool PhysicalBoneSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<PhysicalBone>(p_spatial) != NULL;
+	return Object::cast_to<PhysicalBone>(p_spatial) != nullptr;
 }
 
 String PhysicalBoneSpatialGizmoPlugin::get_name() const {
@@ -1848,7 +1848,7 @@ void PhysicalBoneSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	if (!pbp)
 		return;
 
-	Vector<Vector3> points;
+	std::vector<Vector3> points;
 
 	switch (physical_bone->get_joint_type()) {
 		case PhysicalBone::JOINT_TYPE_PIN: {
@@ -2062,7 +2062,7 @@ RayCastSpatialGizmoPlugin::RayCastSpatialGizmoPlugin() {
 }
 
 bool RayCastSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<RayCast>(p_spatial) != NULL;
+	return Object::cast_to<RayCast>(p_spatial) != nullptr;
 }
 
 String RayCastSpatialGizmoPlugin::get_name() const {
@@ -2079,9 +2079,9 @@ void RayCastSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 
-	lines.push_back(Vector3());
+	lines.push_back(Vector3{});
 	lines.push_back(raycast->get_cast_to());
 
 	const Ref<SpatialMaterial> material =
@@ -2099,7 +2099,7 @@ void SpringArmSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 
 	lines.push_back(Vector3());
 	lines.push_back(Vector3(0, 0, 1.0) * spring_arm->get_length());
@@ -2116,7 +2116,7 @@ SpringArmSpatialGizmoPlugin::SpringArmSpatialGizmoPlugin() {
 }
 
 bool SpringArmSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<SpringArm>(p_spatial) != NULL;
+	return Object::cast_to<SpringArm>(p_spatial) != nullptr;
 }
 
 String SpringArmSpatialGizmoPlugin::get_name() const {
@@ -2136,7 +2136,7 @@ VehicleWheelSpatialGizmoPlugin::VehicleWheelSpatialGizmoPlugin() {
 }
 
 bool VehicleWheelSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<VehicleWheel>(p_spatial) != NULL;
+	return Object::cast_to<VehicleWheel>(p_spatial) != nullptr;
 }
 
 String VehicleWheelSpatialGizmoPlugin::get_name() const {
@@ -2153,11 +2153,11 @@ void VehicleWheelSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> points;
+	std::vector<Vector3> points;
 
 	float r = car_wheel->get_radius();
 	const int skip = 10;
-	for (int i = 0; i <= 360; i += skip) {
+	for (uint16_t i = 0; i <= 360u; i += skip) {
 
 		float ra = Math::deg2rad((float)i);
 		float rb = Math::deg2rad((float)i + skip);
@@ -2167,9 +2167,9 @@ void VehicleWheelSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		points.push_back(Vector3(0, a.x, a.y));
 		points.push_back(Vector3(0, b.x, b.y));
 
-		const int springsec = 4;
+		constexpr uint8_t springsec = 4;
 
-		for (int j = 0; j < springsec; j++) {
+		for (uint8_t j = 0; j < springsec; ++j) {
 			float t = car_wheel->get_suspension_rest_length() * 5;
 			points.push_back(Vector3(a.x, i / 360.0 * t / springsec + j * (t / springsec), a.y) * 0.2);
 			points.push_back(Vector3(b.x, (i + skip) / 360.0 * t / springsec + j * (t / springsec), b.y) * 0.2);
@@ -2210,7 +2210,7 @@ SoftBodySpatialGizmoPlugin::SoftBodySpatialGizmoPlugin() {
 }
 
 bool SoftBodySpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<SoftBody>(p_spatial) != NULL;
+	return Object::cast_to<SoftBody>(p_spatial) != nullptr;
 }
 
 String SoftBodySpatialGizmoPlugin::get_name() const {
@@ -2236,7 +2236,7 @@ void SoftBodySpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	// find mesh
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 
 	soft_body->get_mesh()->generate_debug_mesh_lines(lines);
 
@@ -2246,7 +2246,7 @@ void SoftBodySpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	Ref<TriangleMesh> tm = soft_body->get_mesh()->generate_triangle_mesh();
 
-	Vector<Vector3> points;
+	std::vector<Vector3> points;
 	soft_body->get_mesh()->generate_debug_mesh_indices(points);
 
 	Ref<Material> material = get_material("shape_material", p_gizmo);
@@ -2286,7 +2286,7 @@ VisibilityNotifierGizmoPlugin::VisibilityNotifierGizmoPlugin() {
 }
 
 bool VisibilityNotifierGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<VisibilityNotifier>(p_spatial) != NULL;
+	return Object::cast_to<VisibilityNotifier>(p_spatial) != nullptr;
 }
 
 String VisibilityNotifierGizmoPlugin::get_name() const {
@@ -2391,19 +2391,19 @@ void VisibilityNotifierGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 	AABB aabb = notifier->get_aabb();
 
-	for (int i = 0; i < 12; i++) {
+	for (uint8_t i = 0; i < 12u; ++i) {
 		Vector3 a, b;
 		aabb.get_edge(i, a, b);
 		lines.push_back(a);
 		lines.push_back(b);
 	}
 
-	Vector<Vector3> handles;
+	std::vector<Vector3> handles;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		Vector3 ax;
 		ax[i] = aabb.position[i] + aabb.size[i];
@@ -2413,7 +2413,7 @@ void VisibilityNotifierGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	}
 
 	Vector3 center = aabb.position + aabb.size * 0.5;
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		Vector3 ax;
 		ax[i] = 1.0;
@@ -2442,7 +2442,7 @@ CPUParticlesGizmoPlugin::CPUParticlesGizmoPlugin() {
 }
 
 bool CPUParticlesGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<CPUParticles>(p_spatial) != NULL;
+	return Object::cast_to<CPUParticles>(p_spatial) != nullptr;
 }
 
 String CPUParticlesGizmoPlugin::get_name() const {
@@ -2474,7 +2474,7 @@ ParticlesGizmoPlugin::ParticlesGizmoPlugin() {
 }
 
 bool ParticlesGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<Particles>(p_spatial) != NULL;
+	return Object::cast_to<Particles>(p_spatial) != nullptr;
 }
 
 String ParticlesGizmoPlugin::get_name() const {
@@ -2581,19 +2581,19 @@ void ParticlesGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 	AABB aabb = particles->get_visibility_aabb();
 
-	for (int i = 0; i < 12; i++) {
+	for (uint8_t i = 0; i < 12u; ++i) {
 		Vector3 a, b;
 		aabb.get_edge(i, a, b);
 		lines.push_back(a);
 		lines.push_back(b);
 	}
 
-	Vector<Vector3> handles;
+	std::vector<Vector3> handles;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3; ++i) {
 
 		Vector3 ax;
 		ax[i] = aabb.position[i] + aabb.size[i];
@@ -2603,7 +2603,7 @@ void ParticlesGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	}
 
 	Vector3 center = aabb.position + aabb.size * 0.5;
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3; ++i) {
 
 		Vector3 ax;
 		ax[i] = 1.0;
@@ -2643,7 +2643,7 @@ ReflectionProbeGizmoPlugin::ReflectionProbeGizmoPlugin() {
 }
 
 bool ReflectionProbeGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<ReflectionProbe>(p_spatial) != NULL;
+	return Object::cast_to<ReflectionProbe>(p_spatial) != nullptr;
 }
 
 String ReflectionProbeGizmoPlugin::get_name() const {
@@ -2757,37 +2757,37 @@ void ReflectionProbeGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
-	Vector<Vector3> internal_lines;
+	std::vector<Vector3> lines;
+	std::vector<Vector3> internal_lines;
 	Vector3 extents = probe->get_extents();
 
 	AABB aabb;
 	aabb.position = -extents;
 	aabb.size = extents * 2;
 
-	for (int i = 0; i < 12; i++) {
+	for (uint8_t i = 0; i < 12u; ++i) {
 		Vector3 a, b;
 		aabb.get_edge(i, a, b);
 		lines.push_back(a);
 		lines.push_back(b);
 	}
 
-	for (int i = 0; i < 8; i++) {
+	for (uint8_t i = 0; i < 8u; ++i) {
 		Vector3 ep = aabb.get_endpoint(i);
 		internal_lines.push_back(probe->get_origin_offset());
 		internal_lines.push_back(ep);
 	}
 
-	Vector<Vector3> handles;
+	std::vector<Vector3> handles;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		Vector3 ax;
 		ax[i] = aabb.position[i] + aabb.size[i];
 		handles.push_back(ax);
 	}
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		Vector3 orig_handle = probe->get_origin_offset();
 		orig_handle[i] -= 0.25;
@@ -2830,7 +2830,7 @@ GIProbeGizmoPlugin::GIProbeGizmoPlugin() {
 }
 
 bool GIProbeGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<GIProbe>(p_spatial) != NULL;
+	return Object::cast_to<GIProbe>(p_spatial) != nullptr;
 }
 
 String GIProbeGizmoPlugin::get_name() const {
@@ -2915,7 +2915,7 @@ void GIProbeGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 	Vector3 extents = probe->get_extents();
 
 	static const int subdivs[GIProbe::SUBDIV_MAX] = { 64, 128, 256, 512 };
@@ -2924,7 +2924,7 @@ void GIProbeGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	int subdiv = subdivs[probe->get_subdiv()];
 	float cell_size = aabb.get_longest_axis_size() / subdiv;
 
-	for (int i = 0; i < 12; i++) {
+	for (uint8_t i = 0; i < 12u; ++i) {
 		Vector3 a, b;
 		aabb.get_edge(i, a, b);
 		lines.push_back(a);
@@ -2935,9 +2935,9 @@ void GIProbeGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	lines.clear();
 
-	for (int i = 1; i < subdiv; i++) {
+	for (int i = 1; i < subdiv; ++i) {
 
-		for (int j = 0; j < 3; j++) {
+		for (uint8_t j = 0; j < 3u; ++j) {
 
 			if (cell_size * i > aabb.size[j]) {
 				continue;
@@ -2951,7 +2951,7 @@ void GIProbeGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			ta[j_n1] = 1.0;
 			tb[j_n2] = 1.0;
 
-			for (int k = 0; k < 4; k++) {
+			for (uint8_t k = 0; k < 4u; ++k) {
 
 				Vector3 from = aabb.position, to = aabb.position;
 				from[j] += cell_size * i;
@@ -2977,9 +2977,9 @@ void GIProbeGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->add_lines(lines, material_internal);
 
-	Vector<Vector3> handles;
+	std::vector<Vector3> handles;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		Vector3 ax;
 		ax[i] = aabb.position[i] + aabb.size[i];
@@ -3074,7 +3074,7 @@ void BakedIndirectLightGizmoPlugin::commit_handle(EditorSpatialGizmo *p_gizmo, i
 }
 
 bool BakedIndirectLightGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<BakedLightmap>(p_spatial) != NULL;
+	return Object::cast_to<BakedLightmap>(p_spatial) != nullptr;
 }
 
 String BakedIndirectLightGizmoPlugin::get_name() const {
@@ -3095,12 +3095,12 @@ void BakedIndirectLightGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 	Vector3 extents = baker->get_extents();
 
 	AABB aabb = AABB(-extents, extents * 2);
 
-	for (int i = 0; i < 12; i++) {
+	for (uint8_t i = 0; i < 12; ++i) {
 		Vector3 a, b;
 		aabb.get_edge(i, a, b);
 		lines.push_back(a);
@@ -3109,9 +3109,9 @@ void BakedIndirectLightGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->add_lines(lines, material);
 
-	Vector<Vector3> handles;
+	std::vector<Vector3> handles;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		Vector3 ax;
 		ax[i] = aabb.position[i] + aabb.size[i];
@@ -3138,7 +3138,7 @@ CollisionShapeSpatialGizmoPlugin::CollisionShapeSpatialGizmoPlugin() {
 }
 
 bool CollisionShapeSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<CollisionShape>(p_spatial) != NULL;
+	return Object::cast_to<CollisionShape>(p_spatial) != nullptr;
 }
 
 String CollisionShapeSpatialGizmoPlugin::get_name() const {
@@ -3465,9 +3465,9 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		Ref<SphereShape> sp = s;
 		float r = sp->get_radius();
 
-		Vector<Vector3> points;
+		std::vector<Vector3> points;
 
-		for (int i = 0; i <= 360; i++) {
+		for (uint16_t i = 0; i <= 360u; ++i) {
 
 			float ra = Math::deg2rad((float)i);
 			float rb = Math::deg2rad((float)i + 1);
@@ -3482,9 +3482,9 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			points.push_back(Vector3(b.x, b.y, 0));
 		}
 
-		Vector<Vector3> collision_segments;
+		std::vector<Vector3> collision_segments;
 
-		for (int i = 0; i < 64; i++) {
+		for (uint8_t i = 0; i < 64u; ++i) {
 
 			float ra = i * Math_PI * 2.0 / 64.0;
 			float rb = (i + 1) * Math_PI * 2.0 / 64.0;
@@ -3501,7 +3501,7 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		p_gizmo->add_lines(points, material);
 		p_gizmo->add_collision_segments(collision_segments);
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(r, 0, 0));
 		p_gizmo->add_handles(handles, handles_material);
 	}
@@ -3514,16 +3514,16 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		aabb.position = -bs->get_extents();
 		aabb.size = aabb.position * -2;
 
-		for (int i = 0; i < 12; i++) {
+		for (uint8_t i = 0; i < 12u; ++i) {
 			Vector3 a, b;
 			aabb.get_edge(i, a, b);
 			lines.push_back(a);
 			lines.push_back(b);
 		}
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 
-		for (int i = 0; i < 3; i++) {
+		for (uint8_t i = 0; i < 3u; ++i) {
 
 			Vector3 ax;
 			ax[i] = bs->get_extents()[i];
@@ -3541,10 +3541,10 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		float radius = cs2->get_radius();
 		float height = cs2->get_height();
 
-		Vector<Vector3> points;
+		std::vector<Vector3> points;
 
 		Vector3 d(0, 0, height * 0.5);
-		for (int i = 0; i < 360; i++) {
+		for (uint16_t i = 0; i < 360; ++i) {
 
 			float ra = Math::deg2rad((float)i);
 			float rb = Math::deg2rad((float)i + 1);
@@ -3573,9 +3573,9 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		p_gizmo->add_lines(points, material);
 
-		Vector<Vector3> collision_segments;
+		std::vector<Vector3> collision_segments;
 
-		for (int i = 0; i < 64; i++) {
+		for (uint8_t i = 0; i < 64u; ++i) {
 
 			float ra = i * Math_PI * 2.0 / 64.0;
 			float rb = (i + 1) * Math_PI * 2.0 / 64.0;
@@ -3604,7 +3604,7 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		p_gizmo->add_collision_segments(collision_segments);
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(cs2->get_radius(), 0, 0));
 		handles.push_back(Vector3(0, 0, cs2->get_height() * 0.5 + cs2->get_radius()));
 		p_gizmo->add_handles(handles, handles_material);
@@ -3616,10 +3616,10 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		float radius = cs2->get_radius();
 		float height = cs2->get_height();
 
-		Vector<Vector3> points;
+		std::vector<Vector3> points;
 
 		Vector3 d(0, height * 0.5, 0);
-		for (int i = 0; i < 360; i++) {
+		for (uint16_t i = 0; i < 360u; ++i) {
 
 			float ra = Math::deg2rad((float)i);
 			float rb = Math::deg2rad((float)i + 1);
@@ -3641,9 +3641,9 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		p_gizmo->add_lines(points, material);
 
-		Vector<Vector3> collision_segments;
+		std::vector<Vector3> collision_segments;
 
-		for (int i = 0; i < 64; i++) {
+		for (uint8_t i = 0; i < 64u; ++i) {
 
 			float ra = i * Math_PI * 2.0 / 64.0;
 			float rb = (i + 1) * Math_PI * 2.0 / 64.0;
@@ -3665,7 +3665,7 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		p_gizmo->add_collision_segments(collision_segments);
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(cs2->get_radius(), 0, 0));
 		handles.push_back(Vector3(0, cs2->get_height() * 0.5, 0));
 		p_gizmo->add_handles(handles, handles_material);
@@ -3675,7 +3675,7 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		Ref<PlaneShape> ps = s;
 		Plane p = ps->get_plane();
-		Vector<Vector3> points;
+		std::vector<Vector3> points;
 
 		Vector3 n1 = p.get_any_perpendicular_normal();
 		Vector3 n2 = p.normal.cross(n1).normalized();
@@ -3708,15 +3708,15 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		if (points.size() > 3) {
 
-			Vector<Vector3> varr = Variant(points);
+			std::vector<Vector3> varr = Variant(points);
 			Geometry::MeshData md;
 			Error err = QuickHull::build(varr, md);
 			if (err == OK) {
-				Vector<Vector3> points2;
+				std::vector<Vector3> points2;
 				points2.resize(md.edges.size() * 2);
-				for (int i = 0; i < md.edges.size(); i++) {
-					points2.write[i * 2 + 0] = md.vertices[md.edges[i].a];
-					points2.write[i * 2 + 1] = md.vertices[md.edges[i].b];
+				for (size_t i = 0; i < md.edges.size(); ++i) {
+					points2[i * 2 + 0] = md.vertices[md.edges[i].a];
+					points2[i * 2 + 1] = md.vertices[md.edges[i].b];
 				}
 
 				p_gizmo->add_lines(points2, material);
@@ -3737,12 +3737,12 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		Ref<RayShape> rs = s;
 
-		Vector<Vector3> points;
+		std::vector<Vector3> points;
 		points.push_back(Vector3());
 		points.push_back(Vector3(0, 0, rs->get_length()));
 		p_gizmo->add_lines(points, material);
 		p_gizmo->add_collision_segments(points);
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(0, 0, rs->get_length()));
 		p_gizmo->add_handles(handles, handles_material);
 	}
@@ -3767,7 +3767,7 @@ CollisionPolygonSpatialGizmoPlugin::CollisionPolygonSpatialGizmoPlugin() {
 }
 
 bool CollisionPolygonSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<CollisionPolygon>(p_spatial) != NULL;
+	return Object::cast_to<CollisionPolygon>(p_spatial) != nullptr;
 }
 
 String CollisionPolygonSpatialGizmoPlugin::get_name() const {
@@ -3784,10 +3784,10 @@ void CollisionPolygonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	p_gizmo->clear();
 
-	Vector<Vector2> points = polygon->get_polygon();
+	std::vector<Vector2> points = polygon->get_polygon();
 	float depth = polygon->get_depth() * 0.5;
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 	for (int i = 0; i < points.size(); i++) {
 
 		int n = (i + 1) % points.size();
@@ -3816,7 +3816,7 @@ NavigationMeshSpatialGizmoPlugin::NavigationMeshSpatialGizmoPlugin() {
 }
 
 bool NavigationMeshSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<NavigationMeshInstance>(p_spatial) != NULL;
+	return Object::cast_to<NavigationMeshInstance>(p_spatial) != nullptr;
 }
 
 String NavigationMeshSpatialGizmoPlugin::get_name() const {
@@ -3845,9 +3845,9 @@ void NavigationMeshSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	PoolVector<Vector3>::Read vr = vertices.read();
 	List<Face3> faces;
 	for (int i = 0; i < navmeshie->get_polygon_count(); i++) {
-		Vector<int> p = navmeshie->get_polygon(i);
+		std::vector<int> p = navmeshie->get_polygon(i);
 
-		for (int j = 2; j < p.size(); j++) {
+		for (size_t j = 2; j < p.size(); ++j) {
 			Face3 f;
 			f.vertex[0] = vr[p[0]];
 			f.vertex[1] = vr[p[j - 1]];
@@ -3894,7 +3894,8 @@ void NavigationMeshSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			}
 		}
 	}
-	Vector<Vector3> lines;
+
+	std::vector<Vector3> lines;
 
 	for (Map<_EdgeKey, bool>::Element *E = edge_map.front(); E; E = E->next()) {
 
@@ -4060,7 +4061,7 @@ Basis JointGizmosDrawer::look_body_toward_z(const Transform &p_joint_transform, 
 	return base;
 }
 
-void JointGizmosDrawer::draw_circle(Vector3::Axis p_axis, real_t p_radius, const Transform &p_offset, const Basis &p_base, real_t p_limit_lower, real_t p_limit_upper, Vector<Vector3> &r_points, bool p_inverse) {
+void JointGizmosDrawer::draw_circle(Vector3::Axis p_axis, real_t p_radius, const Transform &p_offset, const Basis &p_base, real_t p_limit_lower, real_t p_limit_upper, std::vector<Vector3> &r_points, bool p_inverse) {
 
 	if (p_limit_lower == p_limit_upper) {
 
@@ -4126,7 +4127,7 @@ void JointGizmosDrawer::draw_circle(Vector3::Axis p_axis, real_t p_radius, const
 	}
 }
 
-void JointGizmosDrawer::draw_cone(const Transform &p_offset, const Basis &p_base, real_t p_swing, real_t p_twist, Vector<Vector3> &r_points) {
+void JointGizmosDrawer::draw_cone(const Transform &p_offset, const Basis &p_base, real_t p_swing, real_t p_twist, std::vector<Vector3> &r_points) {
 
 	float r = 1.0;
 	float w = r * Math::sin(p_swing);
@@ -4180,7 +4181,7 @@ JointSpatialGizmoPlugin::JointSpatialGizmoPlugin() {
 }
 
 bool JointSpatialGizmoPlugin::has_gizmo(Spatial *p_spatial) {
-	return Object::cast_to<Joint>(p_spatial) != NULL;
+	return Object::cast_to<Joint>(p_spatial) != nullptr;
 }
 
 String JointSpatialGizmoPlugin::get_name() const {
@@ -4203,9 +4204,9 @@ void JointSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	Ref<Material> body_a_material = get_material("joint_body_a_material", p_gizmo);
 	Ref<Material> body_b_material = get_material("joint_body_b_material", p_gizmo);
 
-	Vector<Vector3> points;
-	Vector<Vector3> body_a_points;
-	Vector<Vector3> body_b_points;
+	std::vector<Vector3> points;
+	std::vector<Vector3> body_a_points;
+	std::vector<Vector3> body_b_points;
 
 	if (Object::cast_to<PinJoint>(joint)) {
 		CreatePinJointGizmo(Transform(), points);
@@ -4225,8 +4226,8 @@ void JointSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 				hinge->get_param(HingeJoint::PARAM_LIMIT_UPPER),
 				hinge->get_flag(HingeJoint::FLAG_USE_LIMIT),
 				points,
-				node_body_a ? &body_a_points : NULL,
-				node_body_b ? &body_b_points : NULL);
+				node_body_a ? &body_a_points : nullptr,
+				node_body_b ? &body_b_points : nullptr);
 
 		p_gizmo->add_collision_segments(points);
 		p_gizmo->add_collision_segments(body_a_points);
@@ -4250,8 +4251,8 @@ void JointSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 				slider->get_param(SliderJoint::PARAM_LINEAR_LIMIT_LOWER),
 				slider->get_param(SliderJoint::PARAM_LINEAR_LIMIT_UPPER),
 				points,
-				node_body_a ? &body_a_points : NULL,
-				node_body_b ? &body_b_points : NULL);
+				node_body_a ? &body_a_points : nullptr,
+				node_body_b ? &body_b_points : nullptr);
 
 		p_gizmo->add_collision_segments(points);
 		p_gizmo->add_collision_segments(body_a_points);
@@ -4272,8 +4273,8 @@ void JointSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 				node_body_b ? node_body_b->get_global_transform() : Transform(),
 				cone->get_param(ConeTwistJoint::PARAM_SWING_SPAN),
 				cone->get_param(ConeTwistJoint::PARAM_TWIST_SPAN),
-				node_body_a ? &body_a_points : NULL,
-				node_body_b ? &body_b_points : NULL);
+				node_body_a ? &body_a_points : nullptr,
+				node_body_b ? &body_b_points : nullptr);
 
 		p_gizmo->add_collision_segments(body_a_points);
 		p_gizmo->add_collision_segments(body_b_points);
@@ -4313,8 +4314,8 @@ void JointSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 				gen->get_flag_z(Generic6DOFJoint::FLAG_ENABLE_LINEAR_LIMIT),
 
 				points,
-				node_body_a ? &body_a_points : NULL,
-				node_body_a ? &body_b_points : NULL);
+				node_body_a ? &body_a_points : nullptr,
+				node_body_a ? &body_b_points : nullptr);
 
 		p_gizmo->add_collision_segments(points);
 		p_gizmo->add_collision_segments(body_a_points);
@@ -4326,8 +4327,8 @@ void JointSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	}
 }
 
-void JointSpatialGizmoPlugin::CreatePinJointGizmo(const Transform &p_offset, Vector<Vector3> &r_cursor_points) {
-	float cs = 0.25;
+void JointSpatialGizmoPlugin::CreatePinJointGizmo(const Transform &p_offset, std::vector<Vector3> &r_cursor_points) {
+	constexpr float cs = 0.25;
 
 	r_cursor_points.push_back(p_offset.translated(Vector3(+cs, 0, 0)).origin);
 	r_cursor_points.push_back(p_offset.translated(Vector3(-cs, 0, 0)).origin);
@@ -4337,7 +4338,7 @@ void JointSpatialGizmoPlugin::CreatePinJointGizmo(const Transform &p_offset, Vec
 	r_cursor_points.push_back(p_offset.translated(Vector3(0, 0, -cs)).origin);
 }
 
-void JointSpatialGizmoPlugin::CreateHingeJointGizmo(const Transform &p_offset, const Transform &p_trs_joint, const Transform &p_trs_body_a, const Transform &p_trs_body_b, real_t p_limit_lower, real_t p_limit_upper, bool p_use_limit, Vector<Vector3> &r_common_points, Vector<Vector3> *r_body_a_points, Vector<Vector3> *r_body_b_points) {
+void JointSpatialGizmoPlugin::CreateHingeJointGizmo(const Transform &p_offset, const Transform &p_trs_joint, const Transform &p_trs_body_a, const Transform &p_trs_body_b, real_t p_limit_lower, real_t p_limit_upper, bool p_use_limit, std::vector<Vector3> &r_common_points, std::vector<Vector3> *r_body_a_points, std::vector<Vector3> *r_body_b_points) {
 
 	r_common_points.push_back(p_offset.translated(Vector3(0, 0, 0.5)).origin);
 	r_common_points.push_back(p_offset.translated(Vector3(0, 0, -0.5)).origin);
@@ -4369,12 +4370,12 @@ void JointSpatialGizmoPlugin::CreateHingeJointGizmo(const Transform &p_offset, c
 	}
 }
 
-void JointSpatialGizmoPlugin::CreateSliderJointGizmo(const Transform &p_offset, const Transform &p_trs_joint, const Transform &p_trs_body_a, const Transform &p_trs_body_b, real_t p_angular_limit_lower, real_t p_angular_limit_upper, real_t p_linear_limit_lower, real_t p_linear_limit_upper, Vector<Vector3> &r_points, Vector<Vector3> *r_body_a_points, Vector<Vector3> *r_body_b_points) {
+void JointSpatialGizmoPlugin::CreateSliderJointGizmo(const Transform &p_offset, const Transform &p_trs_joint, const Transform &p_trs_body_a, const Transform &p_trs_body_b, real_t p_angular_limit_lower, real_t p_angular_limit_upper, real_t p_linear_limit_lower, real_t p_linear_limit_upper, std::vector<Vector3> &r_points, std::vector<Vector3> *r_body_a_points, std::vector<Vector3> *r_body_b_points) {
 
 	p_linear_limit_lower = -p_linear_limit_lower;
 	p_linear_limit_upper = -p_linear_limit_upper;
 
-	float cs = 0.25;
+	constexpr float cs = 0.25;
 	r_points.push_back(p_offset.translated(Vector3(0, 0, 0.5)).origin);
 	r_points.push_back(p_offset.translated(Vector3(0, 0, -0.5)).origin);
 
@@ -4429,7 +4430,7 @@ void JointSpatialGizmoPlugin::CreateSliderJointGizmo(const Transform &p_offset, 
 				true);
 }
 
-void JointSpatialGizmoPlugin::CreateConeTwistJointGizmo(const Transform &p_offset, const Transform &p_trs_joint, const Transform &p_trs_body_a, const Transform &p_trs_body_b, real_t p_swing, real_t p_twist, Vector<Vector3> *r_body_a_points, Vector<Vector3> *r_body_b_points) {
+void JointSpatialGizmoPlugin::CreateConeTwistJointGizmo(const Transform &p_offset, const Transform &p_trs_joint, const Transform &p_trs_body_a, const Transform &p_trs_body_b, real_t p_swing, real_t p_twist, std::vector<Vector3> *r_body_a_points, std::vector<Vector3> *r_body_b_points) {
 
 	if (r_body_a_points)
 		JointGizmosDrawer::draw_cone(
@@ -4448,8 +4449,7 @@ void JointSpatialGizmoPlugin::CreateConeTwistJointGizmo(const Transform &p_offse
 				*r_body_b_points);
 }
 
-void JointSpatialGizmoPlugin::CreateGeneric6DOFJointGizmo(
-		const Transform &p_offset,
+void JointSpatialGizmoPlugin::CreateGeneric6DOFJointGizmo(const Transform &p_offset,
 		const Transform &p_trs_joint,
 		const Transform &p_trs_body_a,
 		const Transform &p_trs_body_b,
@@ -4471,13 +4471,13 @@ void JointSpatialGizmoPlugin::CreateGeneric6DOFJointGizmo(
 		real_t p_linear_limit_upper_z,
 		bool p_enable_angular_limit_z,
 		bool p_enable_linear_limit_z,
-		Vector<Vector3> &r_points,
-		Vector<Vector3> *r_body_a_points,
-		Vector<Vector3> *r_body_b_points) {
+		std::vector<Vector3> &r_points,
+		std::vector<Vector3> *r_body_a_points,
+		std::vector<Vector3> *r_body_b_points) {
 
-	float cs = 0.25;
+	constexpr float cs = 0.25;
 
-	for (int ax = 0; ax < 3; ax++) {
+	for (uint8_t ax = 0; ax < 3u; ++ax) {
 		float ll = 0;
 		float ul = 0;
 		float lll = 0;
