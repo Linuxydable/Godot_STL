@@ -33,6 +33,8 @@
 
 #ifdef WASAPI_ENABLED
 
+#include <vector>
+
 #include "core/os/mutex.h"
 #include "core/os/thread.h"
 #include "servers/audio_server.h"
@@ -78,7 +80,7 @@ class AudioDriverWASAPI : public AudioDriver {
 	Mutex *mutex;
 	Thread *thread;
 
-	Vector<int32_t> samples_in;
+	std::vector<int32_t> samples_in;
 
 	unsigned int channels;
 	int mix_rate;
