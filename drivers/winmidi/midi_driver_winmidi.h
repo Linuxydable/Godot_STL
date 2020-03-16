@@ -33,8 +33,9 @@
 #ifndef MIDI_DRIVER_WINMIDI_H
 #define MIDI_DRIVER_WINMIDI_H
 
+#include <vector>
+
 #include "core/os/midi_driver.h"
-#include "core/vector.h"
 
 #include <stdio.h>
 #include <windows.h>
@@ -43,7 +44,7 @@
 
 class MIDIDriverWinMidi : public MIDIDriver {
 
-	Vector<HMIDIIN> connected_sources;
+	std::vector<HMIDIIN> connected_sources;
 
 	static void CALLBACK read(HMIDIIN hMidiIn, UINT wMsg, DWORD_PTR dwInstance, DWORD_PTR dwParam1, DWORD_PTR dwParam2);
 
