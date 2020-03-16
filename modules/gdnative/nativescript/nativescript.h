@@ -348,9 +348,9 @@ public:
 	virtual int profiling_get_frame_data(ProfilingInfo *p_info_arr, int p_info_max);
 
 	int register_binding_functions(godot_instance_binding_functions p_binding_functions);
-	void unregister_binding_functions(int p_idx);
+	void unregister_binding_functions(size_t p_idx);
 
-	void *get_instance_binding_data(int p_idx, Object *p_object);
+	void *get_instance_binding_data(size_t p_idx, Object *p_object);
 
 	virtual void *alloc_instance_binding_data(Object *p_object);
 	virtual void free_instance_binding_data(void *p_data);
@@ -368,7 +368,7 @@ public:
 
 inline NativeScriptDesc *NativeScript::get_script_desc() const {
 	Map<StringName, NativeScriptDesc>::Element *E = NativeScriptLanguage::singleton->library_classes[lib_path].find(class_name);
-	return E ? &E->get() : NULL;
+	return E ? &E->get() : nullptr;
 }
 
 class NativeReloadNode : public Node {
