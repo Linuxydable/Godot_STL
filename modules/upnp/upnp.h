@@ -46,7 +46,7 @@ private:
 	int discover_local_port;
 	bool discover_ipv6;
 
-	Vector<Ref<UPNPDevice> > devices;
+	std::vector<Ref<UPNPDevice> > devices;
 
 	bool is_common_device(const String &dev) const;
 	void add_device_to_list(UPNPDev *dev, UPNPDev *devlist);
@@ -93,10 +93,10 @@ public:
 	static int upnp_result(int in);
 
 	int get_device_count() const;
-	Ref<UPNPDevice> get_device(int index) const;
+	Ref<UPNPDevice> get_device(size_t index) const;
 	void add_device(Ref<UPNPDevice> device);
-	void set_device(int index, Ref<UPNPDevice> device);
-	void remove_device(int index);
+	void set_device(size_t index, Ref<UPNPDevice> device);
+	void remove_device(size_t index);
 	void clear_devices();
 
 	Ref<UPNPDevice> get_gateway() const;

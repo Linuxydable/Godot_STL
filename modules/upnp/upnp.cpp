@@ -54,9 +54,9 @@ int UPNP::discover(int timeout, int ttl, const String &device_filter) {
 	struct UPNPDev *devlist;
 
 	if (is_common_device(device_filter)) {
-		devlist = upnpDiscover(timeout, discover_multicast_if.utf8().get_data(), NULL, discover_local_port, discover_ipv6, ttl, &error);
+		devlist = upnpDiscover(timeout, discover_multicast_if.utf8().get_data(), nullptr, discover_local_port, discover_ipv6, ttl, &error);
 	} else {
-		devlist = upnpDiscoverAll(timeout, discover_multicast_if.utf8().get_data(), NULL, discover_local_port, discover_ipv6, ttl, &error);
+		devlist = upnpDiscoverAll(timeout, discover_multicast_if.utf8().get_data(), nullptr, discover_local_port, discover_ipv6, ttl, &error);
 	}
 
 	if (error != UPNPDISCOVER_SUCCESS) {
@@ -234,29 +234,29 @@ int UPNP::get_device_count() const {
 	return devices.size();
 }
 
-Ref<UPNPDevice> UPNP::get_device(int index) const {
-	ERR_FAIL_INDEX_V(index, devices.size(), NULL);
+Ref<UPNPDevice> UPNP::get_device(size_t index) const {
+	ERR_FAIL_INDEX_V(index, devices.size(), nullptr);
 
-	return devices.get(index);
+	return devices[index];
 }
 
 void UPNP::add_device(Ref<UPNPDevice> device) {
-	ERR_FAIL_COND(device == NULL);
+	ERR_FAIL_COND(device == nullptr);
 
 	devices.push_back(device);
 }
 
-void UPNP::set_device(int index, Ref<UPNPDevice> device) {
+void UPNP::set_device(size_t index, Ref<UPNPDevice> device) {
 	ERR_FAIL_INDEX(index, devices.size());
-	ERR_FAIL_COND(device == NULL);
+	ERR_FAIL_COND(device == nullptr);
 
-	devices.set(index, device);
+	devices[index] = device;
 }
 
-void UPNP::remove_device(int index) {
+void UPNP::remove_device(size_t index) {
 	ERR_FAIL_INDEX(index, devices.size());
 
-	devices.remove(index);
+	devices.erase(devices.begin() + index);
 }
 
 void UPNP::clear_devices() {
@@ -264,17 +264,15 @@ void UPNP::clear_devices() {
 }
 
 Ref<UPNPDevice> UPNP::get_gateway() const {
-	ERR_FAIL_COND_V(devices.size() < 1, NULL);
+	ERR_FAIL_COND_V(devices.size() < 1, nullptr);
 
-	for (int i = 0; i < devices.size(); i++) {
-		Ref<UPNPDevice> dev = get_device(i);
-
-		if (dev != NULL && dev->is_valid_gateway()) {
+	for (auto &&dev : devices) {
+		if (dev != nullptr && dev->is_valid_gateway()) {
 			return dev;
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void UPNP::set_discover_multicast_if(const String &m_if) {
@@ -304,7 +302,7 @@ bool UPNP::is_discover_ipv6() const {
 String UPNP::query_external_address() const {
 	Ref<UPNPDevice> dev = get_gateway();
 
-	if (dev == NULL) {
+	if (dev == nullptr) {
 		return "";
 	}
 
@@ -314,7 +312,7 @@ String UPNP::query_external_address() const {
 int UPNP::add_port_mapping(int port, int port_internal, String desc, String proto, int duration) const {
 	Ref<UPNPDevice> dev = get_gateway();
 
-	if (dev == NULL) {
+	if (dev == nullptr) {
 		return UPNP_RESULT_NO_GATEWAY;
 	}
 
@@ -326,7 +324,7 @@ int UPNP::add_port_mapping(int port, int port_internal, String desc, String prot
 int UPNP::delete_port_mapping(int port, String proto) const {
 	Ref<UPNPDevice> dev = get_gateway();
 
-	if (dev == NULL) {
+	if (dev == nullptr) {
 		return UPNP_RESULT_NO_GATEWAY;
 	}
 
