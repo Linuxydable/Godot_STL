@@ -590,7 +590,7 @@ private:
 	bool _recover_from_completion();
 
 	bool _parse_arguments(Node *p_parent, std::vector<Node *> &p_args, bool p_static, bool p_can_codecomplete = false, bool p_parsing_constant = false);
-	bool _enter_indent_block(BlockNode *p_block = NULL);
+	bool _enter_indent_block(BlockNode *p_block = nullptr);
 	bool _parse_newline();
 	Node *_parse_expression(Node *p_parent, bool p_static, bool p_allow_assign = false, bool p_parsing_constant = false);
 	Node *_reduce_expression(Node *p_node, bool p_to_const = false);
@@ -614,7 +614,7 @@ private:
 	DataType _type_from_gdtype(const GDScriptDataType &p_gdtype) const;
 	DataType _get_operation_type(const Variant::Operator p_op, const DataType &p_a, const DataType &p_b, bool &r_valid) const;
 	Variant::Operator _get_variant_operation(const OperatorNode::Operator &p_op) const;
-	bool _get_function_signature(DataType &p_base_type, const StringName &p_function, DataType &r_return_type, List<DataType> &r_arg_types, int &r_default_arg_count, bool &r_static, bool &r_vararg) const;
+	bool _get_function_signature(DataType &p_base_type, const StringName &p_function, DataType &r_return_type, List<DataType> &r_arg_types, size_t &r_default_arg_count, bool &r_static, bool &r_vararg) const;
 	bool _get_member_type(const DataType &p_base_type, const StringName &p_member, DataType &r_member_type) const;
 	bool _is_type_compatible(const DataType &p_container, const DataType &p_expression, bool p_allow_implicit_conversion = false) const;
 	Node *_get_default_value_for_type(const DataType &p_type, int p_line = -1);
