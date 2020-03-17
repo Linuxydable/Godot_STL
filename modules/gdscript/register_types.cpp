@@ -73,12 +73,12 @@ public:
 		if (!p_path.ends_with(".gd") || script_mode == EditorExportPreset::MODE_SCRIPT_TEXT)
 			return;
 
-		Vector<uint8_t> file = FileAccess::get_file_as_array(p_path);
+		std::vector<uint8_t> file = FileAccess::get_file_as_array(p_path);
 		if (file.empty())
 			return;
 
 		String txt;
-		txt.parse_utf8((const char *)file.ptr(), file.size());
+		txt.parse_utf8((const char *)file.data(), file.size());
 		file = GDScriptTokenizerBuffer::parse_code_string(txt);
 
 		if (!file.empty()) {
@@ -88,9 +88,9 @@ public:
 				String tmp_path = EditorSettings::get_singleton()->get_cache_dir().plus_file("script.gde");
 				FileAccess *fa = FileAccess::open(tmp_path, FileAccess::WRITE);
 
-				Vector<uint8_t> key;
+				std::vector<uint8_t> key;
 				key.resize(32);
-				for (int i = 0; i < 32; i++) {
+				for (uint8_t i = 0; i < 32u; ++i) {
 					int v = 0;
 					if (i * 2 < script_key.length()) {
 						CharType ct = script_key[i * 2];
@@ -109,13 +109,13 @@ public:
 							ct = 10 + ct - 'a';
 						v |= ct;
 					}
-					key.write[i] = v;
+					key[i] = v;
 				}
 				FileAccessEncrypted *fae = memnew(FileAccessEncrypted);
 				Error err = fae->open_and_parse(fa, key, FileAccessEncrypted::MODE_WRITE_AES256);
 
 				if (err == OK) {
-					fae->store_buffer(file.ptr(), file.size());
+					fae->store_buffer(file.data(), file.size());
 				}
 
 				memdelete(fae);
