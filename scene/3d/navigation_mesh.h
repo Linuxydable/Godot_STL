@@ -168,7 +168,7 @@ public:
 	PoolVector<Vector3> get_vertices() const;
 
 	void add_polygon(const std::vector<int> &p_polygon);
-	int get_polygon_count() const;
+	size_t get_polygon_count() const;
 	std::vector<int> get_polygon(size_t p_idx);
 	void clear_polygons();
 
