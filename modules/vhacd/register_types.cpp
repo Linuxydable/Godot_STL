@@ -32,43 +32,43 @@
 #include "scene/resources/mesh.h"
 #include "thirdparty/vhacd/public/VHACD.h"
 
-static Vector<Vector<Face3> > convex_decompose(const Vector<Face3> &p_faces) {
+static std::vector<std::vector<Face3> > convex_decompose(const std::vector<Face3> &p_faces) {
 
-	Vector<float> vertices;
+	std::vector<float> vertices;
 	vertices.resize(p_faces.size() * 9);
-	Vector<uint32_t> indices;
+	std::vector<uint32_t> indices;
 	indices.resize(p_faces.size() * 3);
 
-	for (int i = 0; i < p_faces.size(); i++) {
-		for (int j = 0; j < 3; j++) {
-			vertices.write[i * 9 + j * 3 + 0] = p_faces[i].vertex[j].x;
-			vertices.write[i * 9 + j * 3 + 1] = p_faces[i].vertex[j].y;
-			vertices.write[i * 9 + j * 3 + 2] = p_faces[i].vertex[j].z;
-			indices.write[i * 3 + j] = i * 3 + j;
+	for (decltype(p_faces.size()) i = 0; i < p_faces.size(); ++i) {
+		for (uint8_t j = 0; j < 3u; ++j) {
+			vertices[i * 9 + j * 3 + 0] = p_faces[i].vertex[j].x;
+			vertices[i * 9 + j * 3 + 1] = p_faces[i].vertex[j].y;
+			vertices[i * 9 + j * 3 + 2] = p_faces[i].vertex[j].z;
+			indices[i * 3 + j] = i * 3 + j;
 		}
 	}
 
 	VHACD::IVHACD *decomposer = VHACD::CreateVHACD();
 	VHACD::IVHACD::Parameters params;
-	decomposer->Compute(vertices.ptr(), vertices.size() / 3, indices.ptr(), indices.size() / 3, params);
+	decomposer->Compute(vertices.data(), vertices.size() / 3, indices.data(), indices.size() / 3, params);
 
-	int hull_count = decomposer->GetNConvexHulls();
+	auto hull_count = decomposer->GetNConvexHulls();
 
-	Vector<Vector<Face3> > ret;
+	std::vector<std::vector<Face3> > ret;
 
-	for (int i = 0; i < hull_count; i++) {
-		Vector<Face3> triangles;
+	for (decltype(hull_count) i = 0; i < hull_count; ++i) {
+		std::vector<Face3> triangles;
 		VHACD::IVHACD::ConvexHull hull;
 		decomposer->GetConvexHull(i, hull);
 		triangles.resize(hull.m_nTriangles);
-		for (uint32_t j = 0; j < hull.m_nTriangles; j++) {
+		for (uint32_t j = 0; j < hull.m_nTriangles; ++j) {
 			Face3 f;
-			for (int k = 0; k < 3; k++) {
-				for (int l = 0; l < 3; l++) {
+			for (uint8_t k = 0; k < 3u; ++k) {
+				for (uint8_t l = 0; l < 3u; ++l) {
 					f.vertex[k][l] = hull.m_points[hull.m_triangles[j * 3 + k] * 3 + l];
 				}
 			}
-			triangles.write[j] = f;
+			triangles[j] = f;
 		}
 		ret.push_back(triangles);
 	}
@@ -84,5 +84,5 @@ void register_vhacd_types() {
 }
 
 void unregister_vhacd_types() {
-	Mesh::convex_composition_function = NULL;
+	Mesh::convex_composition_function = nullptr;
 }
