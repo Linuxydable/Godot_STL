@@ -233,7 +233,7 @@ private:
 	int _default_arg_count;
 	const int *_code_ptr;
 	int _code_size;
-	int _argument_count;
+	uint32_t _argument_count;
 	int _stack_size;
 	int _call_size;
 	int _initial_line;
@@ -290,7 +290,7 @@ public:
 		ObjectID instance_id;
 		GDScriptInstance *instance;
 		std::vector<uint8_t> stack;
-		int stack_size;
+		uint32_t stack_size;
 		Variant self;
 		uint32_t alloca_size;
 		Ref<GDScript> script;
@@ -304,14 +304,14 @@ public:
 
 	const int *get_code() const; //used for debug
 	int get_code_size() const;
-	Variant get_constant(int p_idx) const;
-	StringName get_global_name(int p_idx) const;
+	Variant get_constant(size_t p_idx) const;
+	StringName get_global_name(size_t p_idx) const;
 	StringName get_name() const;
 	int get_max_stack_size() const;
 	int get_default_argument_count() const;
-	int get_default_argument_addr(int p_idx) const;
+	int get_default_argument_addr(size_t p_idx) const;
 	GDScriptDataType get_return_type() const;
-	GDScriptDataType get_argument_type(int p_idx) const;
+	GDScriptDataType get_argument_type(uint32_t p_idx) const;
 	GDScript *get_script() const { return _script; }
 	StringName get_source() const { return source; }
 
@@ -319,7 +319,7 @@ public:
 
 	_FORCE_INLINE_ bool is_empty() const { return _code_size == 0; }
 
-	int get_argument_count() const { return _argument_count; }
+	uint32_t get_argument_count() const { return _argument_count; }
 	StringName get_argument_name(unsigned p_idx) const {
 #ifdef TOOLS_ENABLED
 		ERR_FAIL_INDEX_V(p_idx, arg_names.size(), StringName());
@@ -333,7 +333,7 @@ public:
 		return default_arguments[p_idx];
 	}
 
-	Variant call(GDScriptInstance *p_instance, const Variant **p_args, int p_argcount, Variant::CallError &r_err, CallState *p_state = NULL);
+	Variant call(GDScriptInstance *p_instance, const Variant **p_args, uint32_t p_argcount, Variant::CallError &r_err, CallState *p_state = nullptr);
 
 	_FORCE_INLINE_ MultiplayerAPI::RPCMode get_rpc_mode() const { return rpc_mode; }
 	GDScriptFunction();
