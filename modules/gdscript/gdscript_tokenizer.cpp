@@ -172,7 +172,7 @@ static const _bit _type_list[] = {
 	{ Variant::POOL_VECTOR2_ARRAY, "PoolVector2Array" },
 	{ Variant::POOL_VECTOR3_ARRAY, "PoolVector3Array" },
 	{ Variant::POOL_COLOR_ARRAY, "PoolColorArray" },
-	{ Variant::VARIANT_MAX, NULL },
+	{ Variant::VARIANT_MAX, nullptr },
 };
 
 struct _kws {
@@ -232,7 +232,7 @@ static const _kws _keyword_list[] = {
 	{ GDScriptTokenizer::TK_WILDCARD, "_" },
 	{ GDScriptTokenizer::TK_CONST_INF, "INF" },
 	{ GDScriptTokenizer::TK_CONST_NAN, "NAN" },
-	{ GDScriptTokenizer::TK_ERROR, NULL }
+	{ GDScriptTokenizer::TK_ERROR, nullptr }
 };
 
 const char *GDScriptTokenizer::get_token_name(Token p_token) {
@@ -843,7 +843,7 @@ void GDScriptTokenizerText::_advance() {
 							case 'u': {
 								//hexnumbarh - oct is deprecated
 								i += 1;
-								for (int j = 0; j < 4; j++) {
+								for (uint8_t j = 0; j < 4u; ++j) {
 									CharType c = GETCHAR(i + j);
 									if (c == 0) {
 										_make_error("Unterminated String");
@@ -1044,7 +1044,7 @@ void GDScriptTokenizerText::_advance() {
 
 							//built in func?
 
-							for (int j = 0; j < GDScriptFunctions::FUNC_MAX; j++) {
+							for (uint8_t j = 0; j < GDScriptFunctions::FUNC_MAX; ++j) {
 
 								if (str == GDScriptFunctions::get_func_name(GDScriptFunctions::Function(j))) {
 
@@ -1101,7 +1101,7 @@ void GDScriptTokenizerText::set_code(const String &p_code) {
 	if (len) {
 		_code = &code[0];
 	} else {
-		_code = NULL;
+		_code = nullptr;
 	}
 	code_pos = 0;
 	line = 1; //it is stand-ar-ized that lines begin in 1 in code..
@@ -1113,7 +1113,7 @@ void GDScriptTokenizerText::set_code(const String &p_code) {
 #endif // DEBUG_ENABLED
 	last_error = "";
 	file_indent_type = INDENT_NONE;
-	for (int i = 0; i < MAX_LOOKAHEAD + 1; i++)
+	for (uint8_t i = 0; i < MAX_LOOKAHEAD + 1; ++i)
 		_advance();
 }
 
@@ -1203,7 +1203,7 @@ String GDScriptTokenizerText::get_token_error(int p_offset) const {
 void GDScriptTokenizerText::advance(int p_amount) {
 
 	ERR_FAIL_COND(p_amount <= 0);
-	for (int i = 0; i < p_amount; i++)
+	for (int i = 0; i < p_amount; ++i)
 		_advance();
 }
 
@@ -1211,45 +1211,45 @@ void GDScriptTokenizerText::advance(int p_amount) {
 
 #define BYTECODE_VERSION 13
 
-Error GDScriptTokenizerBuffer::set_code_buffer(const Vector<uint8_t> &p_buffer) {
+Error GDScriptTokenizerBuffer::set_code_buffer(const std::vector<uint8_t> &p_buffer) {
 
-	const uint8_t *buf = p_buffer.ptr();
-	int total_len = p_buffer.size();
+	const uint8_t *buf = p_buffer.data();
+	auto total_len = p_buffer.size();
 	ERR_FAIL_COND_V(p_buffer.size() < 24 || p_buffer[0] != 'G' || p_buffer[1] != 'D' || p_buffer[2] != 'S' || p_buffer[3] != 'C', ERR_INVALID_DATA);
 
 	int version = decode_uint32(&buf[4]);
 	ERR_FAIL_COND_V_MSG(version > BYTECODE_VERSION, ERR_INVALID_DATA, "Bytecode is too recent! Please use a newer engine version.");
 
-	int identifier_count = decode_uint32(&buf[8]);
-	int constant_count = decode_uint32(&buf[12]);
-	int line_count = decode_uint32(&buf[16]);
-	int token_count = decode_uint32(&buf[20]);
+	auto identifier_count = decode_uint32(&buf[8]);
+	auto constant_count = decode_uint32(&buf[12]);
+	auto line_count = decode_uint32(&buf[16]);
+	auto token_count = decode_uint32(&buf[20]);
 
 	const uint8_t *b = &buf[24];
 	total_len -= 24;
 
 	identifiers.resize(identifier_count);
-	for (int i = 0; i < identifier_count; i++) {
+	for (decltype(identifier_count) i = 0; i < identifier_count; ++i) {
 
-		int len = decode_uint32(b);
+		auto len = decode_uint32(b);
 		ERR_FAIL_COND_V(len > total_len, ERR_INVALID_DATA);
 		b += 4;
-		Vector<uint8_t> cs;
+		std::vector<uint8_t> cs;
 		cs.resize(len);
-		for (int j = 0; j < len; j++) {
-			cs.write[j] = b[j] ^ 0xb6;
+		for (decltype(len) j = 0; j < len; ++j) {
+			cs[j] = b[j] ^ 0xb6;
 		}
 
-		cs.write[cs.size() - 1] = 0;
+		cs[cs.size() - 1] = 0;
 		String s;
-		s.parse_utf8((const char *)cs.ptr());
+		s.parse_utf8((const char *)cs.data());
 		b += len;
 		total_len -= len + 4;
-		identifiers.write[i] = s;
+		identifiers[i] = s;
 	}
 
 	constants.resize(constant_count);
-	for (int i = 0; i < constant_count; i++) {
+	for (decltype(constant_count) i = 0; i < constant_count; ++i) {
 
 		Variant v;
 		int len;
@@ -1259,12 +1259,12 @@ Error GDScriptTokenizerBuffer::set_code_buffer(const Vector<uint8_t> &p_buffer) 
 			return err;
 		b += len;
 		total_len -= len;
-		constants.write[i] = v;
+		constants[i] = v;
 	}
 
 	ERR_FAIL_COND_V(line_count * 8 > total_len, ERR_INVALID_DATA);
 
-	for (int i = 0; i < line_count; i++) {
+	for (decltype(line_count) i = 0; i < line_count; ++i) {
 
 		uint32_t token = decode_uint32(b);
 		b += 4;
@@ -1277,17 +1277,17 @@ Error GDScriptTokenizerBuffer::set_code_buffer(const Vector<uint8_t> &p_buffer) 
 
 	tokens.resize(token_count);
 
-	for (int i = 0; i < token_count; i++) {
+	for (decltype(token_count) i = 0; i < token_count; ++i) {
 
 		ERR_FAIL_COND_V(total_len < 1, ERR_INVALID_DATA);
 
 		if ((*b) & TOKEN_BYTE_MASK) { //little endian always
 			ERR_FAIL_COND_V(total_len < 4, ERR_INVALID_DATA);
 
-			tokens.write[i] = decode_uint32(b) & ~TOKEN_BYTE_MASK;
+			tokens[i] = decode_uint32(b) & ~TOKEN_BYTE_MASK;
 			b += 4;
 		} else {
-			tokens.write[i] = *b;
+			tokens[i] = *b;
 			b += 1;
 			total_len--;
 		}
@@ -1298,14 +1298,14 @@ Error GDScriptTokenizerBuffer::set_code_buffer(const Vector<uint8_t> &p_buffer) 
 	return OK;
 }
 
-Vector<uint8_t> GDScriptTokenizerBuffer::parse_code_string(const String &p_code) {
+std::vector<uint8_t> GDScriptTokenizerBuffer::parse_code_string(const String &p_code) {
 
-	Vector<uint8_t> buf;
+	std::vector<uint8_t> buf;
 
 	Map<StringName, int> identifier_map;
 	HashMap<Variant, int, VariantHasher, VariantComparator> constant_map;
 	Map<uint32_t, int> line_map;
-	Vector<uint32_t> token_array;
+	std::vector<uint32_t> token_array;
 
 	GDScriptTokenizerText tt;
 	tt.set_code(p_code);
@@ -1354,7 +1354,7 @@ Vector<uint8_t> GDScriptTokenizerBuffer::parse_code_string(const String &p_code)
 			} break;
 			case TK_ERROR: {
 
-				ERR_FAIL_V(Vector<uint8_t>());
+				ERR_FAIL_V(std::vector<uint8_t>{});
 			} break;
 			default: {
 			}
@@ -1375,7 +1375,7 @@ Vector<uint8_t> GDScriptTokenizerBuffer::parse_code_string(const String &p_code)
 	}
 
 	Map<int, Variant> rev_constant_map;
-	const Variant *K = NULL;
+	const Variant *K = nullptr;
 	while ((K = constant_map.next(K))) {
 		rev_constant_map[constant_map[*K]] = *K;
 	}
@@ -1387,35 +1387,35 @@ Vector<uint8_t> GDScriptTokenizerBuffer::parse_code_string(const String &p_code)
 
 	//save header
 	buf.resize(24);
-	buf.write[0] = 'G';
-	buf.write[1] = 'D';
-	buf.write[2] = 'S';
-	buf.write[3] = 'C';
-	encode_uint32(BYTECODE_VERSION, &buf.write[4]);
-	encode_uint32(identifier_map.size(), &buf.write[8]);
-	encode_uint32(constant_map.size(), &buf.write[12]);
-	encode_uint32(line_map.size(), &buf.write[16]);
-	encode_uint32(token_array.size(), &buf.write[20]);
+	buf[0] = 'G';
+	buf[1] = 'D';
+	buf[2] = 'S';
+	buf[3] = 'C';
+	encode_uint32(BYTECODE_VERSION, &buf[4]);
+	encode_uint32(identifier_map.size(), &buf[8]);
+	encode_uint32(constant_map.size(), &buf[12]);
+	encode_uint32(line_map.size(), &buf[16]);
+	encode_uint32(token_array.size(), &buf[20]);
 
 	//save identifiers
 
 	for (Map<int, StringName>::Element *E = rev_identifier_map.front(); E; E = E->next()) {
 
 		CharString cs = String(E->get()).utf8();
-		int len = cs.length() + 1;
-		int extra = 4 - (len % 4);
+		uint32_t len = cs.length() + 1;
+		auto extra = 4 - (len % 4);
 		if (extra == 4)
 			extra = 0;
 
 		uint8_t ibuf[4];
 		encode_uint32(len + extra, ibuf);
-		for (int i = 0; i < 4; i++) {
+		for (uint8_t i = 0; i < 4u; ++i) {
 			buf.push_back(ibuf[i]);
 		}
-		for (int i = 0; i < len; i++) {
+		for (decltype(len) i = 0; i < len; ++i) {
 			buf.push_back(cs[i] ^ 0xb6);
 		}
-		for (int i = 0; i < extra; i++) {
+		for (decltype(extra) i = 0; i < extra; ++i) {
 			buf.push_back(0 ^ 0xb6);
 		}
 	}
@@ -1424,11 +1424,11 @@ Vector<uint8_t> GDScriptTokenizerBuffer::parse_code_string(const String &p_code)
 
 		int len;
 		// Objects cannot be constant, never encode objects
-		Error err = encode_variant(E->get(), NULL, len, false);
-		ERR_FAIL_COND_V_MSG(err != OK, Vector<uint8_t>(), "Error when trying to encode Variant.");
+		Error err = encode_variant(E->get(), nullptr, len, false);
+		ERR_FAIL_COND_V_MSG(err != OK, std::vector<uint8_t>{}, "Error when trying to encode Variant.");
 		int pos = buf.size();
 		buf.resize(pos + len);
-		encode_variant(E->get(), &buf.write[pos], len, false);
+		encode_variant(E->get(), &buf[pos], len, false);
 	}
 
 	for (Map<int, uint32_t>::Element *E = rev_line_map.front(); E; E = E->next()) {
@@ -1436,18 +1436,16 @@ Vector<uint8_t> GDScriptTokenizerBuffer::parse_code_string(const String &p_code)
 		uint8_t ibuf[8];
 		encode_uint32(E->key(), &ibuf[0]);
 		encode_uint32(E->get(), &ibuf[4]);
-		for (int i = 0; i < 8; i++)
+		for (uint8_t i = 0; i < 8u; ++i)
 			buf.push_back(ibuf[i]);
 	}
 
-	for (int i = 0; i < token_array.size(); i++) {
-
-		uint32_t token = token_array[i];
+	for (auto &&token : token_array) {
 
 		if (token & ~TOKEN_MASK) {
 			uint8_t buf4[4];
-			encode_uint32(token_array[i] | TOKEN_BYTE_MASK, &buf4[0]);
-			for (int j = 0; j < 4; j++) {
+			encode_uint32(token | TOKEN_BYTE_MASK, &buf4[0]);
+			for (uint8_t j = 0; j < 4u; ++j) {
 				buf.push_back(buf4[j]);
 			}
 		} else {
