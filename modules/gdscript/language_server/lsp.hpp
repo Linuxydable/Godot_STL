@@ -156,7 +156,7 @@ struct LocationLink {
 	 * Used as the underlined span for mouse interaction. Defaults to the word range at
 	 * the mouse position.
 	 */
-	Range *originSelectionRange = NULL;
+	Range *originSelectionRange = nullptr;
 
 	/**
 	 * The target resource identifier of this link.
@@ -323,7 +323,7 @@ struct CompletionOptions {
 	/**
 	 * The characters that trigger completion automatically.
 	 */
-	Vector<String> triggerCharacters;
+	std::vector<String> triggerCharacters;
 
 	CompletionOptions() {
 		triggerCharacters.push_back(".");
@@ -350,7 +350,7 @@ struct SignatureHelpOptions {
 	 * The characters that trigger signature help
 	 * automatically.
 	 */
-	Vector<String> triggerCharacters;
+	std::vector<String> triggerCharacters;
 
 	Dictionary to_json() {
 		Dictionary dict;
@@ -414,7 +414,7 @@ struct ExecuteCommandOptions {
 	/**
 	 * The commands to be executed on the server
 	 */
-	Vector<String> commands;
+	std::vector<String> commands;
 
 	Dictionary to_json() {
 		Dictionary dict;
@@ -524,7 +524,7 @@ struct DocumentOnTypeFormattingOptions {
 	/**
 	 * More trigger characters.
 	 */
-	Vector<String> moreTriggerCharacter;
+	std::vector<String> moreTriggerCharacter;
 
 	Dictionary to_json() {
 		Dictionary dict;
@@ -680,7 +680,7 @@ struct Diagnostic {
 	 * An array of related diagnostic information, e.g. when symbol-names within
 	 * a scope collide all definitions can be marked via this property.
 	 */
-	Vector<DiagnosticRelatedInformation> relatedInformation;
+	std::vector<DiagnosticRelatedInformation> relatedInformation;
 
 	Dictionary to_json() const {
 		Dictionary dict;
@@ -690,9 +690,10 @@ struct Diagnostic {
 		dict["message"] = message;
 		dict["source"] = source;
 		if (!relatedInformation.empty()) {
+			auto len = relatedInformation.size();
 			Array arr;
-			arr.resize(relatedInformation.size());
-			for (int i = 0; i < relatedInformation.size(); i++) {
+			arr.resize(len);
+			for (decltype(len) i = 0; i < len; ++i) {
 				arr[i] = relatedInformation[i].to_json();
 			}
 			dict["relatedInformation"] = arr;
@@ -913,14 +914,14 @@ struct CompletionItem {
 	 * (for example adding an import statement at the top of the file if the completion item will
 	 * insert an unqualified type).
 	 */
-	Vector<TextEdit> additionalTextEdits;
+	std::vector<TextEdit> additionalTextEdits;
 
 	/**
 	 * An optional set of characters that when pressed while this completion is active will accept it first and
 	 * then type that character. *Note* that all commit characters should have `length=1` and that superfluous
 	 * characters will be ignored.
 	 */
-	Vector<String> commitCharacters;
+	std::vector<String> commitCharacters;
 
 	/**
 	 * An optional command that is executed *after* inserting this completion. *Note* that
@@ -990,7 +991,7 @@ struct CompletionList {
 	/**
 	 * The completion items.
 	 */
-	Vector<CompletionItem> items;
+	std::vector<CompletionItem> items;
 };
 
 // Use namespace instead of enumeration to follow the LSP specifications
@@ -1149,7 +1150,7 @@ struct DocumentSymbol {
 	/**
 	 * Children of this symbol, e.g. properties of a class.
 	 */
-	Vector<DocumentSymbol> children;
+	std::vector<DocumentSymbol> children;
 
 	Dictionary to_json(bool with_doc = false) const {
 		Dictionary dict;
@@ -1163,16 +1164,17 @@ struct DocumentSymbol {
 			dict["documentation"] = documentation;
 			dict["native_class"] = native_class;
 		}
+		auto len = children.size();
 		Array arr;
-		arr.resize(children.size());
-		for (int i = 0; i < children.size(); i++) {
+		arr.resize(len);
+		for (decltype(len) i = 0; i < len; ++i) {
 			arr[i] = children[i].to_json(with_doc);
 		}
 		dict["children"] = arr;
 		return dict;
 	}
 
-	void symbol_tree_as_list(const String &p_uri, Vector<DocumentedSymbolInformation> &r_list, const String &p_container = "", bool p_join_name = false) const {
+	void symbol_tree_as_list(const String &p_uri, std::vector<DocumentedSymbolInformation> &r_list, const String &p_container = "", bool p_join_name = false) const {
 		DocumentedSymbolInformation si;
 		if (p_join_name && !p_container.empty()) {
 			si.name = p_container + ">" + name;
@@ -1187,8 +1189,8 @@ struct DocumentSymbol {
 		si.detail = detail;
 		si.documentation = documentation;
 		r_list.push_back(si);
-		for (int i = 0; i < children.size(); i++) {
-			children[i].symbol_tree_as_list(p_uri, r_list, si.name, p_join_name);
+		for (auto &&child : children) {
+			child.symbol_tree_as_list(p_uri, r_list, si.name, p_join_name);
 		}
 	}
 
@@ -1572,8 +1574,8 @@ struct InitializeResult {
 struct GodotNativeClassInfo {
 
 	String name;
-	const DocData::ClassDoc *class_doc = NULL;
-	const ClassDB::ClassInfo *class_info = NULL;
+	const DocData::ClassDoc *class_doc = nullptr;
+	const ClassDB::ClassInfo *class_info = nullptr;
 
 	Dictionary to_json() {
 		Dictionary dict;
@@ -1607,12 +1609,12 @@ static String marked_documentation(const String &p_bbcode) {
 
 	String markdown = p_bbcode.strip_edges();
 
-	Vector<String> lines = markdown.split("\n");
+	std::vector<String> lines = markdown.split("\n");
 	bool in_code_block = false;
 	int code_block_indent = -1;
 
 	markdown = "";
-	for (int i = 0; i < lines.size(); i++) {
+	for (decltype(lines.size()) i = 0; i < lines.size(); ++i) {
 		String line = lines[i];
 		int block_start = line.find("[codeblock]");
 		if (block_start != -1) {

@@ -87,12 +87,12 @@ void GDScriptTextDocument::initialize() {
 
 		const HashMap<StringName, ClassMembers> &native_members = GDScriptLanguageProtocol::get_singleton()->get_workspace()->native_members;
 
-		const StringName *class_ptr = native_members.next(NULL);
+		const StringName *class_ptr = native_members.next(nullptr);
 		while (class_ptr) {
 
 			const ClassMembers &members = native_members.get(*class_ptr);
 
-			const String *name = members.next(NULL);
+			const String *name = members.next(nullptr);
 			while (name) {
 
 				const lsp::DocumentSymbol *symbol = members.get(*name);
@@ -129,10 +129,10 @@ Array GDScriptTextDocument::documentSymbol(const Dictionary &p_params) {
 	String path = GDScriptLanguageProtocol::get_singleton()->get_workspace()->get_file_path(uri);
 	Array arr;
 	if (const Map<String, ExtendGDScriptParser *>::Element *parser = GDScriptLanguageProtocol::get_singleton()->get_workspace()->scripts.find(path)) {
-		Vector<lsp::DocumentedSymbolInformation> list;
+		std::vector<lsp::DocumentedSymbolInformation> list;
 		parser->get()->get_symbols().symbol_tree_as_list(uri, list);
-		for (int i = 0; i < list.size(); i++) {
-			arr.push_back(list[i].to_json());
+		for (auto &&info : list) {
+			arr.push_back(info.to_json());
 		}
 	}
 	return arr;
@@ -208,7 +208,7 @@ Array GDScriptTextDocument::completion(const Dictionary &p_params) {
 
 			const int start_size = arr.size();
 			arr.resize(start_size + items.size());
-			for (int i = start_size; i < arr.size(); i++) {
+			for (int i = start_size; i < arr.size(); ++i) {
 				arr[i] = items[i - start_size];
 			}
 		}
@@ -224,7 +224,7 @@ Dictionary GDScriptTextDocument::resolve(const Dictionary &p_params) {
 	lsp::CompletionParams params;
 	Variant data = p_params["data"];
 
-	const lsp::DocumentSymbol *symbol = NULL;
+	const lsp::DocumentSymbol *symbol = nullptr;
 
 	if (data.get_type() == Variant::DICTIONARY) {
 
@@ -235,7 +235,7 @@ Dictionary GDScriptTextDocument::resolve(const Dictionary &p_params) {
 
 		String query = data;
 
-		Vector<String> param_symbols = query.split(SYMBOL_SEPERATOR, false);
+		std::vector<String> param_symbols = query.split(SYMBOL_SEPERATOR, false);
 
 		if (param_symbols.size() >= 2) {
 
