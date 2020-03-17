@@ -79,8 +79,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::get_native_symbol(const String &p_
 			if (p_member.empty()) {
 				return &class_symbol;
 			} else {
-				for (int i = 0; i < class_symbol.children.size(); i++) {
-					const lsp::DocumentSymbol &symbol = class_symbol.children[i];
+				for (auto &&symbol : class_symbol.children) {
 					if (symbol.name == p_member) {
 						return &symbol;
 					}
@@ -90,7 +89,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::get_native_symbol(const String &p_
 		class_name = ClassDB::get_parent_class(class_name);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 const lsp::DocumentSymbol *GDScriptWorkspace::get_script_symbol(const String &p_path) const {
@@ -98,7 +97,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::get_script_symbol(const String &p_
 	if (S) {
 		return &(S->get()->get_symbols());
 	}
-	return NULL;
+	return nullptr;
 }
 
 void GDScriptWorkspace::reload_all_workspace_scripts() {
@@ -150,7 +149,7 @@ ExtendGDScriptParser *GDScriptWorkspace::get_parse_successed_script(const String
 	if (S) {
 		return S->get();
 	}
-	return NULL;
+	return nullptr;
 }
 
 ExtendGDScriptParser *GDScriptWorkspace::get_parse_result(const String &p_path) {
@@ -162,7 +161,7 @@ ExtendGDScriptParser *GDScriptWorkspace::get_parse_result(const String &p_path) 
 	if (S) {
 		return S->get();
 	}
-	return NULL;
+	return nullptr;
 }
 
 Array GDScriptWorkspace::symbol(const Dictionary &p_params) {
@@ -170,11 +169,11 @@ Array GDScriptWorkspace::symbol(const Dictionary &p_params) {
 	Array arr;
 	if (!query.empty()) {
 		for (Map<String, ExtendGDScriptParser *>::Element *E = scripts.front(); E; E = E->next()) {
-			Vector<lsp::DocumentedSymbolInformation> script_symbols;
+			std::vector<lsp::DocumentedSymbolInformation> script_symbols;
 			E->get()->get_symbols().symbol_tree_as_list(E->key(), script_symbols);
-			for (int i = 0; i < script_symbols.size(); ++i) {
-				if (query.is_subsequence_ofi(script_symbols[i].name)) {
-					arr.push_back(script_symbols[i].to_json());
+			for (auto &&symbol : script_symbols) {
+				if (query.is_subsequence_ofi(symbol.name)) {
+					arr.push_back(symbol.to_json());
 				}
 			}
 		}
@@ -200,8 +199,7 @@ Error GDScriptWorkspace::initialize() {
 		}
 		class_symbol.documentation = class_data.brief_description + "\n" + class_data.description;
 
-		for (int i = 0; i < class_data.constants.size(); i++) {
-			const DocData::ConstantDoc &const_data = class_data.constants[i];
+		for (auto &&const_data : class_data.constants) {
 			lsp::DocumentSymbol symbol;
 			symbol.name = const_data.name;
 			symbol.native_class = class_name;
@@ -215,12 +213,12 @@ Error GDScriptWorkspace::initialize() {
 			class_symbol.children.push_back(symbol);
 		}
 
-		Vector<DocData::PropertyDoc> properties;
-		properties.append_array(class_data.properties);
-		const int theme_prop_start_idx = properties.size();
-		properties.append_array(class_data.theme_properties);
+		std::vector<DocData::PropertyDoc> properties;
+		properties.insert(properties.end(), class_data.properties.begin(), class_data.properties.end());
+		const auto theme_prop_start_idx = properties.size();
+		properties.insert(properties.end(), class_data.theme_properties.begin(), class_data.theme_properties.end());
 
-		for (int i = 0; i < class_data.properties.size(); i++) {
+		for (decltype(class_data.properties.size()) i = 0; i < class_data.properties.size(); ++i) {
 			const DocData::PropertyDoc &data = class_data.properties[i];
 			lsp::DocumentSymbol symbol;
 			symbol.name = data.name;
@@ -236,12 +234,12 @@ Error GDScriptWorkspace::initialize() {
 			class_symbol.children.push_back(symbol);
 		}
 
-		Vector<DocData::MethodDoc> methods_signals;
-		methods_signals.append_array(class_data.methods);
-		const int signal_start_idx = methods_signals.size();
-		methods_signals.append_array(class_data.signals);
+		std::vector<DocData::MethodDoc> methods_signals;
+		methods_signals.insert(methods_signals.end(), class_data.methods.begin(), class_data.methods.end());
+		const auto signal_start_idx = methods_signals.size();
+		methods_signals.insert(methods_signals.end(), class_data.signals.begin(), class_data.signals.end());
 
-		for (int i = 0; i < methods_signals.size(); i++) {
+		for (decltype(methods_signals.size()) i = 0; i < methods_signals.size(); ++i) {
 			const DocData::MethodDoc &data = methods_signals[i];
 
 			lsp::DocumentSymbol symbol;
@@ -251,7 +249,7 @@ Error GDScriptWorkspace::initialize() {
 
 			String params = "";
 			bool arg_default_value_started = false;
-			for (int j = 0; j < data.arguments.size(); j++) {
+			for (decltype(data.arguments.size()) j = 0; j < data.arguments.size(); ++j) {
 				const DocData::ArgumentDoc &arg = data.arguments[j];
 				if (!arg_default_value_started && !arg.default_value.empty()) {
 					arg_default_value_started = true;
@@ -287,8 +285,7 @@ Error GDScriptWorkspace::initialize() {
 		for (Map<StringName, lsp::DocumentSymbol>::Element *E = native_symbols.front(); E; E = E->next()) {
 			ClassMembers members;
 			const lsp::DocumentSymbol &class_symbol = E->get();
-			for (int i = 0; i < class_symbol.children.size(); i++) {
-				const lsp::DocumentSymbol &symbol = class_symbol.children[i];
+			for (auto &&symbol : class_symbol.children) {
 				members.set(symbol.name, &symbol);
 			}
 			native_members.set(E->key(), members);
@@ -355,9 +352,10 @@ void GDScriptWorkspace::publish_diagnostics(const String &p_path) {
 	Array errors;
 	const Map<String, ExtendGDScriptParser *>::Element *ele = parse_results.find(p_path);
 	if (ele) {
-		const Vector<lsp::Diagnostic> &list = ele->get()->get_diagnostics();
-		errors.resize(list.size());
-		for (int i = 0; i < list.size(); ++i) {
+		const std::vector<lsp::Diagnostic> &list = ele->get()->get_diagnostics();
+		auto len = list.size();
+		errors.resize(len);
+		for (decltype(len) i = 0; i < len; ++i) {
 			errors[i] = list[i].to_json();
 		}
 	}
@@ -374,19 +372,19 @@ void GDScriptWorkspace::completion(const lsp::CompletionParams &p_params, List<S
 
 	if (const ExtendGDScriptParser *parser = get_parse_result(path)) {
 		String code = parser->get_text_for_completion(p_params.position);
-		GDScriptLanguage::get_singleton()->complete_code(code, path, NULL, r_options, forced, call_hint);
+		GDScriptLanguage::get_singleton()->complete_code(code, path, nullptr, r_options, forced, call_hint);
 	}
 }
 
 const lsp::DocumentSymbol *GDScriptWorkspace::resolve_symbol(const lsp::TextDocumentPositionParams &p_doc_pos, const String &p_symbol_name, bool p_func_requred) {
 
-	const lsp::DocumentSymbol *symbol = NULL;
+	const lsp::DocumentSymbol *symbol = nullptr;
 
 	String path = get_file_path(p_doc_pos.textDocument.uri);
 	if (const ExtendGDScriptParser *parser = get_parse_result(path)) {
 
 		String symbol_identifier = p_symbol_name;
-		Vector<String> identifier_parts = symbol_identifier.split("(");
+		std::vector<String> identifier_parts = symbol_identifier.split("(");
 		if (identifier_parts.size()) {
 			symbol_identifier = identifier_parts[0];
 		}
@@ -408,7 +406,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::resolve_symbol(const lsp::TextDocu
 			} else {
 
 				ScriptLanguage::LookupResult ret;
-				if (OK == GDScriptLanguage::get_singleton()->lookup_code(parser->get_text_for_lookup_symbol(pos, symbol_identifier, p_func_requred), symbol_identifier, path, NULL, ret)) {
+				if (OK == GDScriptLanguage::get_singleton()->lookup_code(parser->get_text_for_lookup_symbol(pos, symbol_identifier, p_func_requred), symbol_identifier, path, nullptr, ret)) {
 
 					if (ret.type == ScriptLanguage::LookupResult::RESULT_SCRIPT_LOCATION) {
 
@@ -448,7 +446,7 @@ void GDScriptWorkspace::resolve_related_symbols(const lsp::TextDocumentPositionP
 		Vector2i offset;
 		symbol_identifier = parser->get_identifier_under_position(p_doc_pos.position, offset);
 
-		const StringName *class_ptr = native_members.next(NULL);
+		const StringName *class_ptr = native_members.next(nullptr);
 		while (class_ptr) {
 			const ClassMembers &members = native_members.get(*class_ptr);
 			if (const lsp::DocumentSymbol *const *symbol = members.getptr(symbol_identifier)) {
@@ -465,7 +463,7 @@ void GDScriptWorkspace::resolve_related_symbols(const lsp::TextDocumentPositionP
 			}
 
 			const HashMap<String, ClassMembers> &inner_classes = script->get_inner_classes();
-			const String *_class = inner_classes.next(NULL);
+			const String *_class = inner_classes.next(nullptr);
 			while (_class) {
 
 				const ClassMembers *inner_class = inner_classes.getptr(*_class);
@@ -487,14 +485,14 @@ const lsp::DocumentSymbol *GDScriptWorkspace::resolve_native_symbol(const lsp::N
 			return &symbol;
 		}
 
-		for (int i = 0; i < symbol.children.size(); ++i) {
-			if (symbol.children[i].name == p_params.symbol_name) {
-				return &(symbol.children[i]);
+		for (auto &&child : symbol.children) {
+			if (child.name == p_params.symbol_name) {
+				return &(child);
 			}
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void GDScriptWorkspace::resolve_document_links(const String &p_uri, List<lsp::DocumentLink> &r_list) {
