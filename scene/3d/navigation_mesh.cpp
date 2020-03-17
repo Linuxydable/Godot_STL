@@ -37,7 +37,7 @@ void NavigationMesh::create_from_mesh(const Ref<Mesh> &p_mesh) {
 	vertices = PoolVector<Vector3>();
 	clear_polygons();
 
-	for (int i = 0; i < p_mesh->get_surface_count(); i++) {
+	for (int i = 0; i < p_mesh->get_surface_count(); ++i) {
 
 		if (p_mesh->surface_get_primitive_type(i) != Mesh::PRIMITIVE_TRIANGLES)
 			continue;
@@ -53,11 +53,11 @@ void NavigationMesh::create_from_mesh(const Ref<Mesh> &p_mesh) {
 		PoolVector<int>::Read r = iarr.read();
 
 		for (int j = 0; j < rlen; j += 3) {
-			Vector<int> vi;
+			std::vector<int> vi;
 			vi.resize(3);
-			vi.write[0] = r[j + 0] + from;
-			vi.write[1] = r[j + 1] + from;
-			vi.write[2] = r[j + 2] + from;
+			vi[0] = r[j + 0] + from;
+			vi[1] = r[j + 1] + from;
+			vi[2] = r[j + 2] + from;
 
 			add_polygon(vi);
 		}
@@ -250,8 +250,8 @@ PoolVector<Vector3> NavigationMesh::get_vertices() const {
 void NavigationMesh::_set_polygons(const Array &p_array) {
 
 	polygons.resize(p_array.size());
-	for (int i = 0; i < p_array.size(); i++) {
-		polygons.write[i].indices = p_array[i];
+	for (int i = 0; i < p_array.size(); ++i) {
+		polygons[i].indices = p_array[i];
 	}
 	_change_notify();
 }
@@ -260,14 +260,14 @@ Array NavigationMesh::_get_polygons() const {
 
 	Array ret;
 	ret.resize(polygons.size());
-	for (int i = 0; i < ret.size(); i++) {
+	for (int i = 0; i < ret.size(); ++i) {
 		ret[i] = polygons[i].indices;
 	}
 
 	return ret;
 }
 
-void NavigationMesh::add_polygon(const Vector<int> &p_polygon) {
+void NavigationMesh::add_polygon(const std::vector<int> &p_polygon) {
 
 	Polygon polygon;
 	polygon.indices = p_polygon;
@@ -278,9 +278,9 @@ int NavigationMesh::get_polygon_count() const {
 
 	return polygons.size();
 }
-Vector<int> NavigationMesh::get_polygon(int p_idx) {
+std::vector<int> NavigationMesh::get_polygon(size_t p_idx) {
 
-	ERR_FAIL_INDEX_V(p_idx, polygons.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_idx, polygons.size(), std::vector<int>{});
 	return polygons[p_idx].indices;
 }
 void NavigationMesh::clear_polygons() {
@@ -296,7 +296,7 @@ Ref<Mesh> NavigationMesh::get_debug_mesh() {
 	PoolVector<Vector3> vertices = get_vertices();
 	PoolVector<Vector3>::Read vr = vertices.read();
 	List<Face3> faces;
-	for (int i = 0; i < get_polygon_count(); i++) {
+	for (int i = 0; i < get_polygon_count(); ++i) {
 		Vector<int> p = get_polygon(i);
 
 		for (int j = 2; j < p.size(); j++) {
