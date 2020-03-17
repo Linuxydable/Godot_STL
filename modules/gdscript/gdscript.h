@@ -31,6 +31,7 @@
 #ifndef GDSCRIPT_H
 #define GDSCRIPT_H
 
+#include <algorithm>
 #include <vector>
 
 #include "core/io/resource_loader.h"

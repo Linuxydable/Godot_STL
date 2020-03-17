@@ -39,10 +39,10 @@
 struct VideoDecoderGDNative {
 	const godot_videodecoder_interface_gdnative *interface;
 	String plugin_name;
-	Vector<String> supported_extensions;
+	std::vector<String> supported_extensions;
 
 	VideoDecoderGDNative() :
-			interface(NULL),
+			interface(nullptr),
 			plugin_name("none") {}
 
 	VideoDecoderGDNative(const godot_videodecoder_interface_gdnative *p_interface) :
@@ -54,9 +54,9 @@ struct VideoDecoderGDNative {
 private:
 	void _get_supported_extensions() {
 		supported_extensions.clear();
-		int num_ext;
+		size_t num_ext;
 		const char **supported_ext = interface->get_supported_extensions(&num_ext);
-		for (int i = 0; i < num_ext; i++) {
+		for (size_t i = 0; i < num_ext; ++i) {
 			supported_extensions.push_back(supported_ext[i]);
 		}
 	}
@@ -64,7 +64,7 @@ private:
 
 class VideoDecoderServer {
 private:
-	Vector<VideoDecoderGDNative *> decoders;
+	std::vector<VideoDecoderGDNative *> decoders;
 	Map<String, int> extensions;
 
 	static VideoDecoderServer *instance;
@@ -80,16 +80,16 @@ public:
 
 	void register_decoder_interface(const godot_videodecoder_interface_gdnative *p_interface) {
 		VideoDecoderGDNative *decoder = memnew(VideoDecoderGDNative(p_interface));
-		int index = decoders.size();
-		for (int i = 0; i < decoder->supported_extensions.size(); i++) {
-			extensions[decoder->supported_extensions[i]] = index;
+		auto index = decoders.size();
+		for (auto &&ext : decoder->supported_extensions) {
+			extensions[ext] = index;
 		}
 		decoders.push_back(decoder);
 	}
 
 	VideoDecoderGDNative *get_decoder(const String &extension) {
 		if (extensions.size() == 0 || !extensions.has(extension))
-			return NULL;
+			return nullptr;
 		return decoders[extensions[extension]];
 	}
 
@@ -98,11 +98,12 @@ public:
 	}
 
 	~VideoDecoderServer() {
-		for (int i = 0; i < decoders.size(); i++) {
-			memdelete(decoders[i]);
+		for (auto &&decoder : decoders) {
+			memdelete(decoder);
 		}
+
 		decoders.clear();
-		instance = NULL;
+		instance = nullptr;
 	}
 };
 
