@@ -39,13 +39,13 @@
 void ConnectionInfoDialog::ok_pressed() {
 }
 
-void ConnectionInfoDialog::popup_connections(String p_method, Vector<Node *> p_nodes) {
+void ConnectionInfoDialog::popup_connections(String p_method, std::vector<Node *> p_nodes) {
 	method->set_text(p_method);
 
 	tree->clear();
 	TreeItem *root = tree->create_item();
 
-	for (int i = 0; i < p_nodes.size(); i++) {
+	for (int i = 0; i < p_nodes.size(); ++i) {
 		List<Connection> all_connections;
 		p_nodes[i]->get_signals_connected_to_this(&all_connections);
 
@@ -106,7 +106,7 @@ ConnectionInfoDialog::ConnectionInfoDialog() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-Vector<String> ScriptTextEditor::get_functions() {
+std::vector<String> ScriptTextEditor::get_functions() {
 
 	String errortxt;
 	int line = -1, col;
@@ -649,7 +649,7 @@ void ScriptTextEditor::_validate_script() {
 	line--;
 	bool highlight_safe = EDITOR_DEF("text_editor/highlighting/highlight_type_safe_lines", true);
 	bool last_is_safe = false;
-	for (int i = 0; i < te->get_line_count(); i++) {
+	for (int i = 0; i < te->get_line_count(); ++i) {
 		te->set_line_as_marked(i, line == i);
 		if (highlight_safe) {
 			if (safe_lines.has(i + 1)) {
@@ -687,7 +687,7 @@ void ScriptTextEditor::_update_bookmark_list() {
 
 	bookmarks_menu->add_separator();
 
-	for (int i = 0; i < bookmark_list.size(); i++) {
+	for (int i = 0; i < bookmark_list.size(); ++i) {
 		String line = code_editor->get_text_edit()->get_line(bookmark_list[i]).strip_edges();
 		// Limit the size of the line if too big.
 		if (line.length() > 50) {
@@ -708,9 +708,9 @@ void ScriptTextEditor::_bookmark_item_pressed(int p_idx) {
 	}
 }
 
-static Vector<Node *> _find_all_node_for_script(Node *p_base, Node *p_current, const Ref<Script> &p_script) {
+static std::vector<Node *> _find_all_node_for_script(Node *p_base, Node *p_current, const Ref<Script> &p_script) {
 
-	Vector<Node *> nodes;
+	std::vector<Node *> nodes;
 
 	if (p_current->get_owner() != p_base && p_base != p_current) {
 		return nodes;
@@ -721,8 +721,8 @@ static Vector<Node *> _find_all_node_for_script(Node *p_base, Node *p_current, c
 		nodes.push_back(p_current);
 	}
 
-	for (int i = 0; i < p_current->get_child_count(); i++) {
-		Vector<Node *> found = _find_all_node_for_script(p_base, p_current->get_child(i), p_script);
+	for (int i = 0; i < p_current->get_child_count(); ++i) {
+		std::vector<Node *> found = _find_all_node_for_script(p_base, p_current->get_child(i), p_script);
 		nodes.append_array(found);
 	}
 
@@ -732,17 +732,17 @@ static Vector<Node *> _find_all_node_for_script(Node *p_base, Node *p_current, c
 static Node *_find_node_for_script(Node *p_base, Node *p_current, const Ref<Script> &p_script) {
 
 	if (p_current->get_owner() != p_base && p_base != p_current)
-		return NULL;
+		return nullptr;
 	Ref<Script> c = p_current->get_script();
 	if (c == p_script)
 		return p_current;
-	for (int i = 0; i < p_current->get_child_count(); i++) {
+	for (int i = 0; i < p_current->get_child_count(); ++i) {
 		Node *found = _find_node_for_script(p_base, p_current->get_child(i), p_script);
 		if (found)
 			return found;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 static void _find_changed_scripts_for_external_editor(Node *p_base, Node *p_current, Set<Ref<Script> > &r_scripts) {
@@ -754,7 +754,7 @@ static void _find_changed_scripts_for_external_editor(Node *p_base, Node *p_curr
 	if (c.is_valid())
 		r_scripts.insert(c);
 
-	for (int i = 0; i < p_current->get_child_count(); i++) {
+	for (int i = 0; i < p_current->get_child_count(); ++i) {
 		_find_changed_scripts_for_external_editor(p_base, p_current->get_child(i), r_scripts);
 	}
 }
@@ -836,7 +836,7 @@ void ScriptTextEditor::_update_breakpoint_list() {
 
 	breakpoints_menu->add_separator();
 
-	for (int i = 0; i < breakpoint_list.size(); i++) {
+	for (int i = 0; i < breakpoint_list.size(); ++i) {
 		String line = code_editor->get_text_edit()->get_line(breakpoint_list[i]).strip_edges();
 		// Limit the size of the line if too big.
 		if (line.length() > 50) {
@@ -972,10 +972,10 @@ void ScriptTextEditor::_update_connected_methods() {
 		return;
 	}
 
-	Vector<Node *> nodes = _find_all_node_for_script(base, base, script);
-	for (int i = 0; i < nodes.size(); i++) {
+	std::vector<Node *> nodes = _find_all_node_for_script(base, base, script);
+	for (auto &&node : nodes) {
 		List<Connection> connections;
-		nodes[i]->get_signals_connected_to_this(&connections);
+		node->get_signals_connected_to_this(&connections);
 
 		for (List<Connection>::Element *E = connections.front(); E; E = E->next()) {
 			Connection connection = E->get();
@@ -1023,7 +1023,7 @@ void ScriptTextEditor::_lookup_connections(int p_row, String p_method) {
 		return;
 	}
 
-	Vector<Node *> nodes = _find_all_node_for_script(base, base, script);
+	std::vector<Node *> nodes = _find_all_node_for_script(base, base, script);
 	connection_info_dialog->popup_connections(p_method, nodes);
 }
 
@@ -1138,7 +1138,7 @@ void ScriptTextEditor::_edit_option(int p_op) {
 				end = tx->get_line_count() - 1;
 			}
 			scr->get_language()->auto_indent_code(text, begin, end);
-			Vector<String> lines = text.split("\n");
+			std::vector<String> lines = text.split("\n");
 			for (int i = begin; i <= end; ++i) {
 				tx->set_line(i, lines[i]);
 			}
@@ -1176,11 +1176,10 @@ void ScriptTextEditor::_edit_option(int p_op) {
 		case EDIT_EVALUATE: {
 
 			Expression expression;
-			Vector<String> lines = code_editor->get_text_edit()->get_selection_text().split("\n");
+			std::vector<String> lines = code_editor->get_text_edit()->get_selection_text().split("\n");
 			PoolStringArray results;
 
-			for (int i = 0; i < lines.size(); i++) {
-				String line = lines[i];
+			for (auto &&line : lines) {
 				String whitespace = line.substr(0, line.size() - line.strip_edges(true, false).size()); //extract the whitespace at the beginning
 
 				if (expression.parse(line) == OK) {
@@ -1366,7 +1365,7 @@ void ScriptTextEditor::add_syntax_highlighter(SyntaxHighlighter *p_highlighter) 
 void ScriptTextEditor::set_syntax_highlighter(SyntaxHighlighter *p_highlighter) {
 	TextEdit *te = code_editor->get_text_edit();
 	te->_set_syntax_highlighting(p_highlighter);
-	if (p_highlighter != NULL)
+	if (p_highlighter != nullptr)
 		highlighter_menu->set_item_checked(highlighter_menu->get_item_idx_from_text(p_highlighter->get_name()), true);
 	else
 		highlighter_menu->set_item_checked(highlighter_menu->get_item_idx_from_text(TTR("Standard")), true);
@@ -1374,7 +1373,7 @@ void ScriptTextEditor::set_syntax_highlighter(SyntaxHighlighter *p_highlighter) 
 
 void ScriptTextEditor::_change_syntax_highlighter(int p_idx) {
 	Map<String, SyntaxHighlighter *>::Element *el = highlighters.front();
-	while (el != NULL) {
+	while (el != nullptr) {
 		highlighter_menu->set_item_checked(highlighter_menu->get_item_idx_from_text(el->key()), false);
 		el = el->next();
 	}
@@ -1464,20 +1463,20 @@ bool ScriptTextEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
 
 	if (p_edited_scene != p_current_node && p_current_node->get_owner() != p_edited_scene)
-		return NULL;
+		return nullptr;
 
 	Ref<Script> scr = p_current_node->get_script();
 
 	if (scr.is_valid() && scr == script)
 		return p_current_node;
 
-	for (int i = 0; i < p_current_node->get_child_count(); i++) {
+	for (int i = 0; i < p_current_node->get_child_count(); ++i) {
 		Node *n = _find_script_node(p_edited_scene, p_current_node->get_child(i), script);
 		if (n)
 			return n;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
@@ -1510,7 +1509,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 		Array files = d["files"];
 
 		String text_to_drop;
-		for (int i = 0; i < files.size(); i++) {
+		for (int i = 0; i < files.size(); ++i) {
 
 			if (i > 0)
 				text_to_drop += ",";
@@ -1533,7 +1532,7 @@ void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data
 
 		Array nodes = d["nodes"];
 		String text_to_drop;
-		for (int i = 0; i < nodes.size(); i++) {
+		for (int i = 0; i < nodes.size(); ++i) {
 
 			if (i > 0)
 				text_to_drop += ",";
@@ -1625,7 +1624,7 @@ void ScriptTextEditor::_text_edit_gui_input(const Ref<InputEvent> &ev) {
 			int begin = 0;
 			int end = 0;
 			bool valid = false;
-			for (int i = col; i < line.length(); i++) {
+			for (int i = col; i < line.length(); ++i) {
 				if (line[i] == '(') {
 					begin = i;
 					continue;
@@ -1638,7 +1637,7 @@ void ScriptTextEditor::_text_edit_gui_input(const Ref<InputEvent> &ev) {
 			if (valid) {
 				color_args = line.substr(begin, end - begin);
 				String stripped = color_args.replace(" ", "").replace("(", "").replace(")", "");
-				Vector<float> color = stripped.split_floats(",");
+				std::vector<float> color = stripped.split_floats(",");
 				if (color.size() > 2) {
 					float alpha = color.size() > 3 ? color[3] : 1.0f;
 					color_picker->set_pick_color(Color(color[0], color[1], color[2], alpha));
@@ -1822,7 +1821,7 @@ ScriptTextEditor::ScriptTextEditor() {
 	convert_case->add_shortcut(ED_SHORTCUT("script_text_editor/capitalize", TTR("Capitalize"), KEY_MASK_SHIFT | KEY_F6), EDIT_CAPITALIZE);
 	convert_case->connect("id_pressed", this, "_edit_option");
 
-	highlighters[TTR("Standard")] = NULL;
+	highlighters[TTR("Standard")] = nullptr;
 	highlighter_menu = memnew(PopupMenu);
 	highlighter_menu->set_name("highlighter_menu");
 	edit_menu->get_popup()->add_child(highlighter_menu);
@@ -1888,7 +1887,7 @@ ScriptTextEditor::ScriptTextEditor() {
 
 ScriptTextEditor::~ScriptTextEditor() {
 	for (const Map<String, SyntaxHighlighter *>::Element *E = highlighters.front(); E; E = E->next()) {
-		if (E->get() != NULL) {
+		if (E->get() != nullptr) {
 			memdelete(E->get());
 		}
 	}
@@ -1900,7 +1899,7 @@ static ScriptEditorBase *create_editor(const RES &p_resource) {
 	if (Object::cast_to<Script>(*p_resource)) {
 		return memnew(ScriptTextEditor);
 	}
-	return NULL;
+	return nullptr;
 }
 
 void ScriptTextEditor::register_editor() {

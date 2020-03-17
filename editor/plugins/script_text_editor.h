@@ -46,7 +46,7 @@ class ConnectionInfoDialog : public AcceptDialog {
 	virtual void ok_pressed();
 
 public:
-	void popup_connections(String p_method, Vector<Node *> p_nodes);
+	void popup_connections(String p_method, std::vector<Node *> p_nodes);
 
 	ConnectionInfoDialog();
 };
@@ -60,11 +60,11 @@ class ScriptTextEditor : public ScriptEditorBase {
 
 	Ref<Script> script;
 
-	Vector<String> functions;
+	std::vector<String> functions;
 
 	List<Connection> missing_connections;
 
-	Vector<String> member_keywords;
+	std::vector<String> member_keywords;
 
 	HBoxContainer *edit_hb;
 
@@ -194,7 +194,7 @@ public:
 	virtual void apply_code();
 	virtual RES get_edited_resource() const;
 	virtual void set_edited_resource(const RES &p_res);
-	virtual Vector<String> get_functions();
+	virtual std::vector<String> get_functions();
 	virtual void reload_text();
 	virtual String get_name();
 	virtual Ref<Texture> get_icon();
