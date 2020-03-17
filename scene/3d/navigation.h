@@ -85,13 +85,13 @@ class Navigation : public Spatial {
 			int C_edge;
 			List<ConnectionPending>::Element *P;
 			Edge() {
-				C = NULL;
+				C = nullptr;
 				C_edge = -1;
-				P = NULL;
+				P = nullptr;
 			}
 		};
 
-		Vector<Edge> edges;
+		std::vector<Edge> edges;
 
 		Vector3 center;
 		Vector3 entry;
@@ -113,8 +113,8 @@ class Navigation : public Spatial {
 		List<ConnectionPending> pending;
 
 		Connection() {
-			A = NULL;
-			B = NULL;
+			A = nullptr;
+			B = nullptr;
 			A_edge = -1;
 			B_edge = -1;
 		}
@@ -158,7 +158,7 @@ class Navigation : public Spatial {
 	int last_id;
 
 	Vector3 up;
-	void _clip_path(Vector<Vector3> &path, Polygon *from_poly, const Vector3 &p_to_point, Polygon *p_to_poly);
+	void _clip_path(std::vector<Vector3> &path, Polygon *from_poly, const Vector3 &p_to_point, Polygon *p_to_poly);
 
 protected:
 	static void _bind_methods();
@@ -168,11 +168,11 @@ public:
 	Vector3 get_up_vector() const;
 
 	//API should be as dynamic as possible
-	int navmesh_add(const Ref<NavigationMesh> &p_mesh, const Transform &p_xform, Object *p_owner = NULL);
+	int navmesh_add(const Ref<NavigationMesh> &p_mesh, const Transform &p_xform, Object *p_owner = nullptr);
 	void navmesh_set_transform(int p_id, const Transform &p_xform);
 	void navmesh_remove(int p_id);
 
-	Vector<Vector3> get_simple_path(const Vector3 &p_start, const Vector3 &p_end, bool p_optimize = true);
+	std::vector<Vector3> get_simple_path(const Vector3 &p_start, const Vector3 &p_end, bool p_optimize = true);
 	Vector3 get_closest_point_to_segment(const Vector3 &p_from, const Vector3 &p_to, const bool &p_use_collision = false);
 	Vector3 get_closest_point(const Vector3 &p_point);
 	Vector3 get_closest_point_normal(const Vector3 &p_point);

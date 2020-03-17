@@ -104,10 +104,10 @@ class GridMap : public Spatial {
 				IndexKey key;
 			};
 
-			Vector<Item> items; //tools only, for changing visibility
+			std::vector<Item> items; //tools only, for changing visibility
 		};
 
-		Vector<MultimeshInstance> multimesh_instances;
+		std::vector<MultimeshInstance> multimesh_instances;
 		Set<IndexKey> cells;
 		RID collision_debug;
 		RID collision_debug_instance;
@@ -199,7 +199,7 @@ class GridMap : public Spatial {
 		RID instance;
 	};
 
-	Vector<BakedMesh> baked_meshes;
+	std::vector<BakedMesh> baked_meshes;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
@@ -270,7 +270,7 @@ public:
 	void clear();
 
 	Array get_bake_meshes();
-	RID get_bake_mesh_instance(int p_idx);
+	RID get_bake_mesh_instance(size_t p_idx);
 
 	GridMap();
 	~GridMap();

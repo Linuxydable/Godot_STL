@@ -37,7 +37,7 @@ void NavigationMesh::create_from_mesh(const Ref<Mesh> &p_mesh) {
 	vertices = PoolVector<Vector3>();
 	clear_polygons();
 
-	for (int i = 0; i < p_mesh->get_surface_count(); i++) {
+	for (int i = 0; i < p_mesh->get_surface_count(); ++i) {
 
 		if (p_mesh->surface_get_primitive_type(i) != Mesh::PRIMITIVE_TRIANGLES)
 			continue;
@@ -53,11 +53,11 @@ void NavigationMesh::create_from_mesh(const Ref<Mesh> &p_mesh) {
 		PoolVector<int>::Read r = iarr.read();
 
 		for (int j = 0; j < rlen; j += 3) {
-			Vector<int> vi;
+			std::vector<int> vi;
 			vi.resize(3);
-			vi.write[0] = r[j + 0] + from;
-			vi.write[1] = r[j + 1] + from;
-			vi.write[2] = r[j + 2] + from;
+			vi[0] = r[j + 0] + from;
+			vi[1] = r[j + 1] + from;
+			vi[2] = r[j + 2] + from;
 
 			add_polygon(vi);
 		}
@@ -250,8 +250,8 @@ PoolVector<Vector3> NavigationMesh::get_vertices() const {
 void NavigationMesh::_set_polygons(const Array &p_array) {
 
 	polygons.resize(p_array.size());
-	for (int i = 0; i < p_array.size(); i++) {
-		polygons.write[i].indices = p_array[i];
+	for (int i = 0; i < p_array.size(); ++i) {
+		polygons[i].indices = p_array[i];
 	}
 	_change_notify();
 }
@@ -260,29 +260,32 @@ Array NavigationMesh::_get_polygons() const {
 
 	Array ret;
 	ret.resize(polygons.size());
-	for (int i = 0; i < ret.size(); i++) {
+	for (int i = 0; i < ret.size(); ++i) {
 		ret[i] = polygons[i].indices;
 	}
 
 	return ret;
 }
 
-void NavigationMesh::add_polygon(const Vector<int> &p_polygon) {
+void NavigationMesh::add_polygon(const std::vector<int> &p_polygon) {
 
 	Polygon polygon;
 	polygon.indices = p_polygon;
 	polygons.push_back(polygon);
 	_change_notify();
 }
-int NavigationMesh::get_polygon_count() const {
+
+size_t NavigationMesh::get_polygon_count() const {
 
 	return polygons.size();
 }
-Vector<int> NavigationMesh::get_polygon(int p_idx) {
 
-	ERR_FAIL_INDEX_V(p_idx, polygons.size(), Vector<int>());
+std::vector<int> NavigationMesh::get_polygon(size_t p_idx) {
+
+	ERR_FAIL_INDEX_V(p_idx, polygons.size(), std::vector<int>{});
 	return polygons[p_idx].indices;
 }
+
 void NavigationMesh::clear_polygons() {
 
 	polygons.clear();
@@ -296,10 +299,10 @@ Ref<Mesh> NavigationMesh::get_debug_mesh() {
 	PoolVector<Vector3> vertices = get_vertices();
 	PoolVector<Vector3>::Read vr = vertices.read();
 	List<Face3> faces;
-	for (int i = 0; i < get_polygon_count(); i++) {
-		Vector<int> p = get_polygon(i);
+	for (decltype(get_polygon_count()) i = 0; i < get_polygon_count(); ++i) {
+		std::vector<int> p = get_polygon(i);
 
-		for (int j = 2; j < p.size(); j++) {
+		for (decltype(p.size()) j = 2; j < p.size(); ++j) {
 			Face3 f;
 			f.vertex[0] = vr[p[0]];
 			f.vertex[1] = vr[p[j - 1]];
@@ -321,7 +324,7 @@ Ref<Mesh> NavigationMesh::get_debug_mesh() {
 
 			const Face3 &f = E->get();
 
-			for (int j = 0; j < 3; j++) {
+			for (uint8_t j = 0; j < 3u; ++j) {
 
 				tw[tidx++] = f.vertex[j];
 				_EdgeKey ek;
@@ -613,9 +616,10 @@ void NavigationMeshInstance::_notification(int p_what) {
 
 			if (debug_view) {
 				debug_view->queue_delete();
-				debug_view = NULL;
+				debug_view = nullptr;
 			}
-			navigation = NULL;
+
+			navigation = nullptr;
 		} break;
 	}
 }
@@ -696,8 +700,8 @@ void NavigationMeshInstance::_changed_callback(Object *p_changed, const char *p_
 
 NavigationMeshInstance::NavigationMeshInstance() {
 
-	debug_view = NULL;
-	navigation = NULL;
+	debug_view = nullptr;
+	navigation = nullptr;
 	nav_id = -1;
 	enabled = true;
 	set_notify_transform(true);
