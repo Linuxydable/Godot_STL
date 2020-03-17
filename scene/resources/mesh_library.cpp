@@ -46,7 +46,7 @@ bool MeshLibrary::_set(const StringName &p_name, const Variant &p_value) {
 		else if (what == "mesh")
 			set_item_mesh(idx, p_value);
 		else if (what == "shape") {
-			Vector<ShapeData> shapes;
+			std::vector<ShapeData> shapes;
 			ShapeData sd;
 			sd.shape = p_value;
 			shapes.push_back(sd);
@@ -133,7 +133,7 @@ void MeshLibrary::set_item_mesh(int p_item, const Ref<Mesh> &p_mesh) {
 	_change_notify();
 }
 
-void MeshLibrary::set_item_shapes(int p_item, const Vector<ShapeData> &p_shapes) {
+void MeshLibrary::set_item_shapes(int p_item, const std::vector<ShapeData> &p_shapes) {
 
 	ERR_FAIL_COND_MSG(!item_map.has(p_item), "Requested for nonexistent MeshLibrary item '" + itos(p_item) + "'.");
 	item_map[p_item].shapes = p_shapes;
@@ -182,9 +182,9 @@ Ref<Mesh> MeshLibrary::get_item_mesh(int p_item) const {
 	return item_map[p_item].mesh;
 }
 
-Vector<MeshLibrary::ShapeData> MeshLibrary::get_item_shapes(int p_item) const {
+std::vector<MeshLibrary::ShapeData> MeshLibrary::get_item_shapes(int p_item) const {
 
-	ERR_FAIL_COND_V_MSG(!item_map.has(p_item), Vector<ShapeData>(), "Requested for nonexistent MeshLibrary item '" + itos(p_item) + "'.");
+	ERR_FAIL_COND_V_MSG(!item_map.has(p_item), std::vector<ShapeData>{}, "Requested for nonexistent MeshLibrary item '" + itos(p_item) + "'.");
 	return item_map[p_item].shapes;
 }
 
@@ -232,14 +232,14 @@ void MeshLibrary::clear() {
 	emit_changed();
 }
 
-Vector<int> MeshLibrary::get_item_list() const {
+std::vector<int> MeshLibrary::get_item_list() const {
 
-	Vector<int> ret;
+	std::vector<int> ret;
 	ret.resize(item_map.size());
 	int idx = 0;
 	for (Map<int, Item>::Element *E = item_map.front(); E; E = E->next()) {
 
-		ret.write[idx++] = E->key();
+		ret[idx++] = E->key();
 	}
 
 	return ret;
@@ -266,8 +266,8 @@ int MeshLibrary::get_last_unused_item_id() const {
 void MeshLibrary::_set_item_shapes(int p_item, const Array &p_shapes) {
 
 	ERR_FAIL_COND(p_shapes.size() & 1);
-	Vector<ShapeData> shapes;
-	for (int i = 0; i < p_shapes.size(); i += 2) {
+	std::vector<ShapeData> shapes;
+	for (decltype(p_shapes.size()) i = 0; i < p_shapes.size(); i += 2) {
 		ShapeData sd;
 		sd.shape = p_shapes[i + 0];
 		sd.local_transform = p_shapes[i + 1];
@@ -282,11 +282,11 @@ void MeshLibrary::_set_item_shapes(int p_item, const Array &p_shapes) {
 
 Array MeshLibrary::_get_item_shapes(int p_item) const {
 
-	Vector<ShapeData> shapes = get_item_shapes(p_item);
+	std::vector<ShapeData> shapes = get_item_shapes(p_item);
 	Array ret;
-	for (int i = 0; i < shapes.size(); i++) {
-		ret.push_back(shapes[i].shape);
-		ret.push_back(shapes[i].local_transform);
+	for (auto &&sh : shapes) {
+		ret.push_back(sh.shape);
+		ret.push_back(sh.local_transform);
 	}
 
 	return ret;
