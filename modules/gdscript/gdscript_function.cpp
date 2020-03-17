@@ -62,7 +62,7 @@ Variant *GDScriptFunction::_get_variant(int p_address, GDScriptInstance *p_insta
 			}
 #endif
 			//member indexing is O(1)
-			return &p_instance->members.write[address];
+			return &p_instance->members[address];
 		} break;
 		case ADDR_TYPE_CLASS_CONSTANT: {
 
@@ -257,7 +257,7 @@ String GDScriptFunction::_get_call_error(const Variant::CallError &p_err, const 
 #define OPCODE_OUT break
 #endif
 
-Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_args, int p_argcount, Variant::CallError &r_err, CallState *p_state) {
+Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_args, uint32_t p_argcount, Variant::CallError &r_err, CallState *p_state) {
 
 	OPCODES_TABLE;
 
@@ -270,7 +270,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 	Variant self;
 	Variant retvalue;
-	Variant *stack = NULL;
+	Variant *stack = nullptr;
 	Variant **call_args;
 	int defarg = 0;
 
@@ -287,8 +287,8 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 	if (p_state) {
 		//use existing (supplied) state (yielded)
-		stack = (Variant *)p_state->stack.ptr();
-		call_args = (Variant **)&p_state->stack.ptr()[sizeof(Variant) * p_state->stack_size]; //ptr() to avoid bounds check
+		stack = (Variant *)p_state->stack.data();
+		call_args = (Variant **)&p_state->stack.data()[sizeof(Variant) * p_state->stack_size]; //ptr() to avoid bounds check
 		line = p_state->line;
 		ip = p_state->ip;
 		alloca_size = p_state->stack.size();
@@ -328,7 +328,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 			if (_stack_size) {
 
 				stack = (Variant *)aptr;
-				for (int i = 0; i < p_argcount; i++) {
+				for (decltype(p_argcount) i = 0; i < p_argcount; ++i) {
 					if (!argument_types[i].has_type) {
 						memnew_placement(&stack[i], Variant(*p_args[i]));
 						continue;
@@ -352,7 +352,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 						memnew_placement(&stack[i], Variant(*p_args[i]));
 					}
 				}
-				for (int i = p_argcount; i < _stack_size; i++) {
+				for (int i = p_argcount; i < _stack_size; ++i) {
 					memnew_placement(&stack[i], Variant);
 				}
 			} else {
@@ -975,7 +975,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 				int argc = _code_ptr[ip + 2];
 				CHECK_SPACE(argc + 2);
 				Variant **argptrs = call_args;
-				for (int i = 0; i < argc; i++) {
+				for (int i = 0; i < argc; ++i) {
 					GET_VARIANT_PTR(v, 3 + i);
 					argptrs[i] = v;
 				}
@@ -1005,7 +1005,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 				array.resize(argc);
 				CHECK_SPACE(argc + 2);
 
-				for (int i = 0; i < argc; i++) {
+				for (int i = 0; i < argc; ++i) {
 					GET_VARIANT_PTR(v, 2 + i);
 					array[i] = *v;
 				}
@@ -1026,7 +1026,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 				CHECK_SPACE(argc * 2 + 2);
 
-				for (int i = 0; i < argc; i++) {
+				for (int i = 0; i < argc; ++i) {
 
 					GET_VARIANT_PTR(k, 2 + i * 2 + 0);
 					GET_VARIANT_PTR(v, 2 + i * 2 + 1);
@@ -1059,7 +1059,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 				CHECK_SPACE(argc + 1);
 				Variant **argptrs = call_args;
 
-				for (int i = 0; i < argc; i++) {
+				for (int i = 0; i < argc; ++i) {
 					GET_VARIANT_PTR(v, i);
 					argptrs[i] = v;
 				}
@@ -1134,7 +1134,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 				CHECK_SPACE(argc + 1);
 				Variant **argptrs = call_args;
 
-				for (int i = 0; i < argc; i++) {
+				for (int i = 0; i < argc; ++i) {
 					GET_VARIANT_PTR(v, i);
 					argptrs[i] = v;
 				}
@@ -1187,7 +1187,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 				Variant **argptrs = call_args;
 
-				for (int i = 0; i < argc; i++) {
+				for (int i = 0; i < argc; ++i) {
 					GET_VARIANT_PTR(v, i + 3);
 					argptrs[i] = v;
 				}
@@ -1259,8 +1259,8 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 				gdfs->state.stack.resize(alloca_size);
 				//copy variant stack
-				for (int i = 0; i < _stack_size; i++) {
-					memnew_placement(&gdfs->state.stack.write[sizeof(Variant) * i], Variant(stack[i]));
+				for (int i = 0; i < _stack_size; ++i) {
+					memnew_placement(&gdfs->state.stack[sizeof(Variant) * i], Variant(stack[i]));
 				}
 				gdfs->state.stack_size = _stack_size;
 				gdfs->state.self = self;
@@ -1607,7 +1607,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 		if (_stack_size) {
 			//free stack
-			for (int i = 0; i < _stack_size; i++)
+			for (int i = 0; i < _stack_size; ++i)
 				stack[i].~Variant();
 		}
 
@@ -1627,13 +1627,13 @@ int GDScriptFunction::get_code_size() const {
 	return _code_size;
 }
 
-Variant GDScriptFunction::get_constant(int p_idx) const {
+Variant GDScriptFunction::get_constant(size_t p_idx) const {
 
 	ERR_FAIL_INDEX_V(p_idx, constants.size(), "<errconst>");
 	return constants[p_idx];
 }
 
-StringName GDScriptFunction::get_global_name(int p_idx) const {
+StringName GDScriptFunction::get_global_name(size_t p_idx) const {
 
 	ERR_FAIL_INDEX_V(p_idx, global_names.size(), "<errgname>");
 	return global_names[p_idx];
@@ -1643,7 +1643,8 @@ int GDScriptFunction::get_default_argument_count() const {
 
 	return _default_arg_count;
 }
-int GDScriptFunction::get_default_argument_addr(int p_idx) const {
+
+int GDScriptFunction::get_default_argument_addr(size_t p_idx) const {
 
 	ERR_FAIL_INDEX_V(p_idx, default_arguments.size(), -1);
 	return default_arguments[p_idx];
@@ -1653,7 +1654,7 @@ GDScriptDataType GDScriptFunction::get_return_type() const {
 	return return_type;
 }
 
-GDScriptDataType GDScriptFunction::get_argument_type(int p_idx) const {
+GDScriptDataType GDScriptFunction::get_argument_type(uint32_t p_idx) const {
 	ERR_FAIL_INDEX_V(p_idx, argument_types.size(), GDScriptDataType());
 	return argument_types[p_idx];
 }
@@ -1800,7 +1801,7 @@ Variant GDScriptFunctionState::_signal_callback(const Variant **p_args, int p_ar
 		arg = *p_args[0];
 	} else {
 		Array extra_args;
-		for (int i = 0; i < p_argcount - 1; i++) {
+		for (int i = 0; i < p_argcount - 1; ++i) {
 			extra_args.push_back(*p_args[i]);
 		}
 		arg = extra_args;
@@ -1820,7 +1821,7 @@ Variant GDScriptFunctionState::_signal_callback(const Variant **p_args, int p_ar
 
 bool GDScriptFunctionState::is_valid(bool p_extended_check) const {
 
-	if (function == NULL)
+	if (function == nullptr)
 		return false;
 
 	if (p_extended_check) {
@@ -1845,7 +1846,7 @@ Variant GDScriptFunctionState::resume(const Variant &p_arg) {
 
 	state.result = p_arg;
 	Variant::CallError err;
-	Variant ret = function->call(NULL, NULL, 0, err, &state);
+	Variant ret = function->call(nullptr, nullptr, 0, err, &state);
 
 	bool completed = true;
 
@@ -1874,8 +1875,8 @@ Variant GDScriptFunctionState::resume(const Variant &p_arg) {
 			GDScriptLanguage::get_singleton()->exit_function();
 		if (state.stack_size) {
 			//free stack
-			Variant *stack = (Variant *)state.stack.ptr();
-			for (int i = 0; i < state.stack_size; i++)
+			Variant *stack = (Variant *)state.stack.data();
+			for (decltype(state.stack_size) i = 0; i < state.stack_size; ++i)
 				stack[i].~Variant();
 		}
 #endif
@@ -1895,14 +1896,14 @@ void GDScriptFunctionState::_bind_methods() {
 
 GDScriptFunctionState::GDScriptFunctionState() {
 
-	function = NULL;
+	function = nullptr;
 }
 
 GDScriptFunctionState::~GDScriptFunctionState() {
 
-	if (function != NULL) {
+	if (function != nullptr) {
 		//never called, deinitialize stack
-		for (int i = 0; i < state.stack_size; i++) {
+		for (decltype(state.stack_size) i = 0; i < state.stack_size; ++i) {
 			Variant *v = (Variant *)&state.stack[sizeof(Variant) * i];
 			v->~Variant();
 		}

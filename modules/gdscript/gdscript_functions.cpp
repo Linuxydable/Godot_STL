@@ -696,7 +696,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 				return;
 			}
 			String str;
-			for (int i = 0; i < p_arg_count; i++) {
+			for (int i = 0; i < p_arg_count; ++i) {
 
 				String os = p_args[i]->operator String();
 
@@ -712,7 +712,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 		case TEXT_PRINT: {
 
 			String str;
-			for (int i = 0; i < p_arg_count; i++) {
+			for (int i = 0; i < p_arg_count; ++i) {
 
 				str += p_args[i]->operator String();
 			}
@@ -724,7 +724,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 		case TEXT_PRINT_TABBED: {
 
 			String str;
-			for (int i = 0; i < p_arg_count; i++) {
+			for (int i = 0; i < p_arg_count; ++i) {
 
 				if (i)
 					str += "\t";
@@ -738,7 +738,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 		case TEXT_PRINT_SPACED: {
 
 			String str;
-			for (int i = 0; i < p_arg_count; i++) {
+			for (int i = 0; i < p_arg_count; ++i) {
 
 				if (i)
 					str += " ";
@@ -753,7 +753,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 		case TEXT_PRINTERR: {
 
 			String str;
-			for (int i = 0; i < p_arg_count; i++) {
+			for (int i = 0; i < p_arg_count; ++i) {
 
 				str += p_args[i]->operator String();
 			}
@@ -764,7 +764,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 		} break;
 		case TEXT_PRINTRAW: {
 			String str;
-			for (int i = 0; i < p_arg_count; i++) {
+			for (int i = 0; i < p_arg_count; ++i) {
 
 				str += p_args[i]->operator String();
 			}
@@ -775,7 +775,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 		} break;
 		case TEXT_PRINT_DEBUG: {
 			String str;
-			for (int i = 0; i < p_arg_count; i++) {
+			for (int i = 0; i < p_arg_count; ++i) {
 
 				str += p_args[i]->operator String();
 			}
@@ -954,7 +954,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 						return;
 					}
 
-					for (int i = 0; i < count; i++) {
+					for (int i = 0; i < count; ++i) {
 						arr[i] = i;
 					}
 
@@ -979,7 +979,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 						r_ret = Variant();
 						return;
 					}
-					for (int i = from; i < to; i++)
+					for (int i = from; i < to; ++i)
 						arr[i - from] = i;
 					r_ret = arr;
 				} break;
@@ -1101,14 +1101,14 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 					}
 
 					GDScript *p = base.ptr();
-					Vector<StringName> sname;
+					std::vector<StringName> sname;
 
 					while (p->_owner) {
 
 						sname.push_back(p->name);
 						p = p->_owner;
 					}
-					sname.invert();
+					std::reverse(sname.begin(), sname.end());
 
 					if (!p->path.is_resource_file()) {
 						r_error.error = Variant::CallError::CALL_ERROR_INVALID_ARGUMENT;
@@ -1121,7 +1121,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 						return;
 					}
 
-					NodePath cp(sname, Vector<StringName>(), false);
+					NodePath cp(sname, std::vector<StringName>{}, false);
 
 					Dictionary d;
 					d["@subpath"] = cp;
@@ -1204,7 +1204,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 				sub = d["@subpath"];
 			}
 
-			for (int i = 0; i < sub.get_name_count(); i++) {
+			for (decltype(sub.get_name_count()) i = 0; i < sub.get_name_count(); ++i) {
 
 				gdscr = gdscr->subclasses[sub.get_name(i)];
 				if (!gdscr.is_valid()) {
@@ -1218,14 +1218,14 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 				}
 			}
 
-			r_ret = gdscr->_new(NULL, 0, r_error);
+			r_ret = gdscr->_new(nullptr, 0, r_error);
 
 			GDScriptInstance *ins = static_cast<GDScriptInstance *>(static_cast<Object *>(r_ret)->get_script_instance());
 			Ref<GDScript> gd_ref = ins->get_script();
 
 			for (Map<StringName, GDScript::MemberInfo>::Element *E = gd_ref->member_indices.front(); E; E = E->next()) {
 				if (d.has(E->key())) {
-					ins->members.write[E->get().index] = d[E->key()];
+					ins->members[E->get().index] = d[E->key()];
 				}
 			}
 
@@ -1353,7 +1353,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 			VALIDATE_ARG_COUNT(0);
 
 			ScriptLanguage *script = GDScriptLanguage::get_singleton();
-			for (int i = 0; i < script->debug_get_stack_level_count(); i++) {
+			for (int i = 0; i < script->debug_get_stack_level_count(); ++i) {
 
 				print_line("Frame " + itos(i) + " - " + script->debug_get_stack_level_source(i) + ":" + itos(script->debug_get_stack_level_line(i)) + " in function '" + script->debug_get_stack_level_function(i) + "'");
 			};
@@ -1364,7 +1364,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 
 			ScriptLanguage *script = GDScriptLanguage::get_singleton();
 			Array ret;
-			for (int i = 0; i < script->debug_get_stack_level_count(); i++) {
+			for (int i = 0; i < script->debug_get_stack_level_count(); ++i) {
 
 				Dictionary frame;
 				frame["source"] = script->debug_get_stack_level_source(i);
