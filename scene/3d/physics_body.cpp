@@ -342,7 +342,7 @@ void RigidBody::_body_enter_tree(ObjectID p_id) {
 
 	emit_signal(SceneStringNames::get_singleton()->body_entered, node);
 
-	for (int i = 0; i < E->get().shapes.size(); i++) {
+	for (int i = 0; i < E->get().shapes.size(); ++i) {
 
 		emit_signal(SceneStringNames::get_singleton()->body_shape_entered, p_id, node, E->get().shapes[i].body_shape, E->get().shapes[i].local_shape);
 	}
@@ -365,7 +365,7 @@ void RigidBody::_body_exit_tree(ObjectID p_id) {
 
 	emit_signal(SceneStringNames::get_singleton()->body_exited, node);
 
-	for (int i = 0; i < E->get().shapes.size(); i++) {
+	for (int i = 0; i < E->get().shapes.size(); ++i) {
 
 		emit_signal(SceneStringNames::get_singleton()->body_shape_exited, p_id, node, E->get().shapes[i].body_shape, E->get().shapes[i].local_shape);
 	}
@@ -469,10 +469,10 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 		int rc = 0;
 		for (Map<ObjectID, BodyState>::Element *E = contact_monitor->body_map.front(); E; E = E->next()) {
 
-			for (int i = 0; i < E->get().shapes.size(); i++) {
+			for (int i = 0; i < E->get().shapes.size(); ++i) {
 
 				E->get().shapes[i].tagged = false;
-				rc++;
+				++rc;
 			}
 		}
 
@@ -483,7 +483,7 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 
 		//put the ones to add
 
-		for (int i = 0; i < state->get_contact_count(); i++) {
+		for (int i = 0; i < state->get_contact_count(); ++i) {
 
 			ObjectID obj = state->get_contact_collider_id(i);
 			int local_shape = state->get_contact_local_shape(i);
@@ -496,7 +496,7 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 				toadd[toadd_count].local_shape = local_shape;
 				toadd[toadd_count].id = obj;
 				toadd[toadd_count].shape = shape;
-				toadd_count++;
+				++toadd_count;
 				continue;
 			}
 
@@ -507,7 +507,7 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 				toadd[toadd_count].local_shape = local_shape;
 				toadd[toadd_count].id = obj;
 				toadd[toadd_count].shape = shape;
-				toadd_count++;
+				++toadd_count;
 				continue;
 			}
 
@@ -518,27 +518,27 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 
 		for (Map<ObjectID, BodyState>::Element *E = contact_monitor->body_map.front(); E; E = E->next()) {
 
-			for (int i = 0; i < E->get().shapes.size(); i++) {
+			for (int i = 0; i < E->get().shapes.size(); ++i) {
 
 				if (!E->get().shapes[i].tagged) {
 
 					toremove[toremove_count].body_id = E->key();
 					toremove[toremove_count].pair = E->get().shapes[i];
-					toremove_count++;
+					++toremove_count;
 				}
 			}
 		}
 
 		//process remotions
 
-		for (int i = 0; i < toremove_count; i++) {
+		for (int i = 0; i < toremove_count; ++i) {
 
 			_body_inout(0, toremove[i].body_id, toremove[i].pair.body_shape, toremove[i].pair.local_shape);
 		}
 
 		//process aditions
 
-		for (int i = 0; i < toadd_count; i++) {
+		for (int i = 0; i < toadd_count; ++i) {
 
 			_body_inout(1, toadd[i].id, toadd[i].shape, toadd[i].local_shape);
 		}
@@ -546,7 +546,7 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 		contact_monitor->locked = false;
 	}
 
-	state = NULL;
+	state = nullptr;
 }
 
 void RigidBody::_notification(int p_what) {
@@ -869,7 +869,7 @@ void RigidBody::set_contact_monitor(bool p_enabled) {
 		}
 
 		memdelete(contact_monitor);
-		contact_monitor = NULL;
+		contact_monitor = nullptr;
 	} else {
 
 		contact_monitor = memnew(ContactMonitor);
@@ -879,7 +879,7 @@ void RigidBody::set_contact_monitor(bool p_enabled) {
 
 bool RigidBody::is_contact_monitor_enabled() const {
 
-	return contact_monitor != NULL;
+	return contact_monitor != nullptr;
 }
 
 void RigidBody::set_axis_lock(PhysicsServer::BodyAxis p_axis, bool p_lock) {
@@ -1051,7 +1051,7 @@ RigidBody::RigidBody() :
 
 	mass = 1;
 	max_contacts_reported = 0;
-	state = NULL;
+	state = nullptr;
 
 	gravity_scale = 1;
 	linear_damp = -1;
@@ -1062,7 +1062,7 @@ RigidBody::RigidBody() :
 	ccd = false;
 
 	custom_integrator = false;
-	contact_monitor = NULL;
+	contact_monitor = nullptr;
 	can_sleep = true;
 
 	PhysicsServer::get_singleton()->body_set_force_integration_callback(get_rid(), this, "_direct_state_changed");
@@ -1123,7 +1123,7 @@ bool KinematicBody::move_and_collide(const Vector3 &p_motion, bool p_infinite_in
 		r_collision.local_shape = result.collision_local_shape;
 	}
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 		if (locked_axis & (1 << i)) {
 			result.motion[i] = 0;
 		}
@@ -1144,7 +1144,7 @@ Vector3 KinematicBody::move_and_slide(const Vector3 &p_linear_velocity, const Ve
 
 	Vector3 lv = p_linear_velocity;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 		if (locked_axis & (1 << i)) {
 			lv[i] = 0;
 		}
@@ -1166,7 +1166,7 @@ Vector3 KinematicBody::move_and_slide(const Vector3 &p_linear_velocity, const Ve
 		Collision collision;
 		bool found_collision = false;
 
-		for (int i = 0; i < 2; ++i) {
+		for (uint8_t i = 0; i < 2u; ++i) {
 			bool collided;
 			if (i == 0) { //collide
 				collided = move_and_collide(motion, p_infinite_inertia, collision);
@@ -1225,7 +1225,7 @@ Vector3 KinematicBody::move_and_slide(const Vector3 &p_linear_velocity, const Ve
 					lv = lv.slide(n);
 				}
 
-				for (int j = 0; j < 3; j++) {
+				for (uint8_t j = 0; j < 3u; ++j) {
 					if (locked_axis & (1 << j)) {
 						lv[j] = 0;
 					}
@@ -1316,7 +1316,7 @@ bool KinematicBody::separate_raycast_shapes(bool p_infinite_inertia, Collision &
 	int hits = PhysicsServer::get_singleton()->body_test_ray_separation(get_rid(), gt, p_infinite_inertia, recover, sep_res, 8, margin);
 	int deepest = -1;
 	float deepest_depth;
-	for (int i = 0; i < hits; i++) {
+	for (int i = 0; i < hits; ++i) {
 		if (deepest == -1 || sep_res[i].collision_depth > deepest_depth) {
 			deepest = i;
 			deepest_depth = sep_res[i].collision_depth;
@@ -1379,11 +1379,11 @@ Ref<KinematicCollision> KinematicBody::_get_slide_collision(int p_bounce) {
 	}
 
 	if (slide_colliders[p_bounce].is_null()) {
-		slide_colliders.write[p_bounce].instance();
-		slide_colliders.write[p_bounce]->owner = this;
+		slide_colliders[p_bounce].instance();
+		slide_colliders[p_bounce]->owner = this;
 	}
 
-	slide_colliders.write[p_bounce]->collision = colliders[p_bounce];
+	slide_colliders[p_bounce]->collision = colliders[p_bounce];
 	return slide_colliders[p_bounce];
 }
 
@@ -1440,12 +1440,12 @@ KinematicBody::KinematicBody() :
 KinematicBody::~KinematicBody() {
 
 	if (motion_cache.is_valid()) {
-		motion_cache->owner = NULL;
+		motion_cache->owner = nullptr;
 	}
 
-	for (int i = 0; i < slide_colliders.size(); i++) {
-		if (slide_colliders[i].is_valid()) {
-			slide_colliders.write[i]->owner = NULL;
+	for (auto &&collider : slide_colliders) {
+		if (collider.is_valid()) {
+			collider->owner = nullptr;
 		}
 	}
 }
@@ -1465,7 +1465,7 @@ Vector3 KinematicCollision::get_remainder() const {
 	return collision.remainder;
 }
 Object *KinematicCollision::get_local_shape() const {
-	if (!owner) return NULL;
+	if (!owner) return nullptr;
 	uint32_t ownerid = owner->shape_find_owner(collision.local_shape);
 	return owner->shape_owner_get_owner(ownerid);
 }
@@ -1476,7 +1476,7 @@ Object *KinematicCollision::get_collider() const {
 		return ObjectDB::get_instance(collision.collider);
 	}
 
-	return NULL;
+	return nullptr;
 }
 ObjectID KinematicCollision::get_collider_id() const {
 
@@ -1493,7 +1493,7 @@ Object *KinematicCollision::get_collider_shape() const {
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 int KinematicCollision::get_collider_shape_index() const {
 
@@ -1539,7 +1539,7 @@ KinematicCollision::KinematicCollision() {
 	collision.collider = 0;
 	collision.collider_shape = 0;
 	collision.local_shape = 0;
-	owner = NULL;
+	owner = nullptr;
 }
 
 ///////////////////////////////////////
@@ -2073,7 +2073,7 @@ bool PhysicalBone::SixDOFJointData::_get(const StringName &p_name, Variant &r_re
 
 void PhysicalBone::SixDOFJointData::_get_property_list(List<PropertyInfo> *p_list) const {
 	const StringName axis_names[] = { "x", "y", "z" };
-	for (int i = 0; i < 3; ++i) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 		p_list->push_back(PropertyInfo(Variant::BOOL, "joint_constraints/" + axis_names[i] + "/linear_limit_enabled"));
 		p_list->push_back(PropertyInfo(Variant::REAL, "joint_constraints/" + axis_names[i] + "/linear_limit_upper"));
 		p_list->push_back(PropertyInfo(Variant::REAL, "joint_constraints/" + axis_names[i] + "/linear_limit_lower"));
@@ -2137,7 +2137,7 @@ void PhysicalBone::_get_property_list(List<PropertyInfo> *p_list) const {
 	if (parent) {
 
 		String names;
-		for (int i = 0; i < parent->get_bone_count(); i++) {
+		for (int i = 0; i < parent->get_bone_count(); ++i) {
 			if (i > 0)
 				names += ",";
 			names += parent->get_bone_name(i);
@@ -2168,7 +2168,7 @@ void PhysicalBone::_notification(int p_what) {
 					parent_skeleton->unbind_physical_bone_from_bone(bone_id);
 				}
 			}
-			parent_skeleton = NULL;
+			parent_skeleton = nullptr;
 			update_bone_id();
 			break;
 		case NOTIFICATION_TRANSFORM_CHANGED:
@@ -2267,7 +2267,7 @@ void PhysicalBone::_bind_methods() {
 
 Skeleton *PhysicalBone::find_skeleton_parent(Node *p_parent) {
 	if (!p_parent) {
-		return NULL;
+		return nullptr;
 	}
 	Skeleton *s = Object::cast_to<Skeleton>(p_parent);
 	return s ? s : find_skeleton_parent(p_parent->get_parent());
@@ -2353,7 +2353,7 @@ void PhysicalBone::_reload_joint() {
 
 			joint = PhysicsServer::get_singleton()->joint_create_generic_6dof(body_a->get_rid(), local_a, get_rid(), joint_offset);
 			const SixDOFJointData *g6dofjd(static_cast<const SixDOFJointData *>(joint_data));
-			for (int axis = 0; axis < 3; ++axis) {
+			for (uint8_t axis = 0; axis < 3u; ++axis) {
 				PhysicsServer::get_singleton()->generic_6dof_joint_set_flag(joint, static_cast<Vector3::Axis>(axis), PhysicsServer::G6DOF_JOINT_FLAG_ENABLE_LINEAR_LIMIT, g6dofjd->axis_data[axis].linear_limit_enabled);
 				PhysicsServer::get_singleton()->generic_6dof_joint_set_param(joint, static_cast<Vector3::Axis>(axis), PhysicsServer::G6DOF_JOINT_LINEAR_UPPER_LIMIT, g6dofjd->axis_data[axis].linear_limit_upper);
 				PhysicsServer::get_singleton()->generic_6dof_joint_set_param(joint, static_cast<Vector3::Axis>(axis), PhysicsServer::G6DOF_JOINT_LINEAR_LOWER_LIMIT, g6dofjd->axis_data[axis].linear_limit_lower);
@@ -2419,7 +2419,7 @@ void PhysicalBone::set_joint_type(JointType p_joint_type) {
 
 	if (joint_data)
 		memdelete(joint_data);
-	joint_data = NULL;
+	joint_data = nullptr;
 	switch (p_joint_type) {
 		case JOINT_TYPE_PIN:
 			joint_data = memnew(PinJointData);
@@ -2600,8 +2600,8 @@ PhysicalBone::PhysicalBone() :
 #ifdef TOOLS_ENABLED
 		gizmo_move_joint(false),
 #endif
-		joint_data(NULL),
-		parent_skeleton(NULL),
+		joint_data(nullptr),
+		parent_skeleton(nullptr),
 		static_body(false),
 		_internal_static_body(false),
 		simulate_physics(false),
@@ -2726,7 +2726,7 @@ void PhysicalBone::_stop_physics_simulation() {
 	PhysicsServer::get_singleton()->body_set_mode(get_rid(), PhysicsServer::BODY_MODE_STATIC);
 	PhysicsServer::get_singleton()->body_set_collision_layer(get_rid(), 0);
 	PhysicsServer::get_singleton()->body_set_collision_mask(get_rid(), 0);
-	PhysicsServer::get_singleton()->body_set_force_integration_callback(get_rid(), NULL, "");
+	PhysicsServer::get_singleton()->body_set_force_integration_callback(get_rid(), nullptr, "");
 	parent_skeleton->set_bone_global_pose_override(bone_id, Transform(), 0.0, false);
 	_internal_simulate_physics = false;
 }
