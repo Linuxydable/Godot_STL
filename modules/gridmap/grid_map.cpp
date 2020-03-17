@@ -53,7 +53,7 @@ bool GridMap::_set(const StringName &p_name, const Variant &p_value) {
 			PoolVector<int>::Read r = cells.read();
 			ERR_FAIL_COND_V(amount % 3, false); // not even
 			cell_map.clear();
-			for (int i = 0; i < amount / 3; i++) {
+			for (int i = 0; i < amount / 3; ++i) {
 
 				IndexKey ik;
 				ik.key = decode_uint64((const uint8_t *)&r[i * 3]);
@@ -71,7 +71,7 @@ bool GridMap::_set(const StringName &p_name, const Variant &p_value) {
 
 		Array meshes = p_value;
 
-		for (int i = 0; i < meshes.size(); i++) {
+		for (int i = 0; i < meshes.size(); ++i) {
 			BakedMesh bm;
 			bm.mesh = meshes[i];
 			ERR_CONTINUE(!bm.mesh.is_valid());
@@ -118,11 +118,10 @@ bool GridMap::_get(const StringName &p_name, Variant &r_ret) const {
 
 		r_ret = d;
 	} else if (name == "baked_meshes") {
-
 		Array ret;
 		ret.resize(baked_meshes.size());
-		for (int i = 0; i < baked_meshes.size(); i++) {
-			ret.push_back(baked_meshes[i].mesh);
+		for (auto &&b_mesh : baked_meshes) {
+			ret.push_back(b_mesh.mesh);
 		}
 		r_ret = ret;
 
@@ -413,8 +412,8 @@ void GridMap::_octant_transform(const OctantKey &p_key) {
 		VS::get_singleton()->instance_set_transform(g.collision_debug_instance, get_global_transform());
 	}
 
-	for (int i = 0; i < g.multimesh_instances.size(); i++) {
-		VS::get_singleton()->instance_set_transform(g.multimesh_instances[i].instance, get_global_transform());
+	for (auto &&multimesh_instance : g.multimesh_instances) {
+		VS::get_singleton()->instance_set_transform(multimesh_instance.instance, get_global_transform());
 	}
 }
 
@@ -443,10 +442,10 @@ bool GridMap::_octant_update(const OctantKey &p_key) {
 
 	//erase multimeshes
 
-	for (int i = 0; i < g.multimesh_instances.size(); i++) {
+	for (auto &&multimesh_instance : g.multimesh_instances) {
 
-		VS::get_singleton()->free(g.multimesh_instances[i].instance);
-		VS::get_singleton()->free(g.multimesh_instances[i].multimesh);
+		VS::get_singleton()->free(multimesh_instance.instance);
+		VS::get_singleton()->free(multimesh_instance.multimesh);
 	}
 	g.multimesh_instances.clear();
 
@@ -495,15 +494,15 @@ bool GridMap::_octant_update(const OctantKey &p_key) {
 			}
 		}
 
-		Vector<MeshLibrary::ShapeData> shapes = mesh_library->get_item_shapes(c.item);
+		std::vector<MeshLibrary::ShapeData> shapes = mesh_library->get_item_shapes(c.item);
 		// add the item's shape at given xform to octant's static_body
-		for (int i = 0; i < shapes.size(); i++) {
+		for (auto &&sh : shapes) {
 			// add the item's shape
-			if (!shapes[i].shape.is_valid())
+			if (!sh.shape.is_valid())
 				continue;
-			PhysicsServer::get_singleton()->body_add_shape(g.static_body, shapes[i].shape->get_rid(), xform * shapes[i].local_transform);
+			PhysicsServer::get_singleton()->body_add_shape(g.static_body, sh.shape->get_rid(), xform * sh.local_transform);
 			if (g.collision_debug.is_valid()) {
-				shapes.write[i].shape->add_vertices_to_array(col_debug, xform * shapes[i].local_transform);
+				sh.shape->add_vertices_to_array(col_debug, xform * sh.local_transform);
 			}
 		}
 
@@ -599,9 +598,9 @@ void GridMap::_octant_enter_world(const OctantKey &p_key) {
 		VS::get_singleton()->instance_set_transform(g.collision_debug_instance, get_global_transform());
 	}
 
-	for (int i = 0; i < g.multimesh_instances.size(); i++) {
-		VS::get_singleton()->instance_set_scenario(g.multimesh_instances[i].instance, get_world()->get_scenario());
-		VS::get_singleton()->instance_set_transform(g.multimesh_instances[i].instance, get_global_transform());
+	for (auto &&multimesh_instance : g.multimesh_instances) {
+		VS::get_singleton()->instance_set_scenario(multimesh_instance.instance, get_world()->get_scenario());
+		VS::get_singleton()->instance_set_transform(multimesh_instance.instance, get_global_transform());
 	}
 
 	if (navigation && mesh_library.is_valid()) {
@@ -629,8 +628,8 @@ void GridMap::_octant_exit_world(const OctantKey &p_key) {
 		VS::get_singleton()->instance_set_scenario(g.collision_debug_instance, RID());
 	}
 
-	for (int i = 0; i < g.multimesh_instances.size(); i++) {
-		VS::get_singleton()->instance_set_scenario(g.multimesh_instances[i].instance, RID());
+	for (auto &&multimesh_instance : g.multimesh_instances) {
+		VS::get_singleton()->instance_set_scenario(multimesh_instance.instance, RID());
 	}
 
 	if (navigation) {
@@ -666,10 +665,10 @@ void GridMap::_octant_clean_up(const OctantKey &p_key) {
 
 	//erase multimeshes
 
-	for (int i = 0; i < g.multimesh_instances.size(); i++) {
+	for (auto &&multimesh_instance : g.multimesh_instances) {
 
-		VS::get_singleton()->free(g.multimesh_instances[i].instance);
-		VS::get_singleton()->free(g.multimesh_instances[i].multimesh);
+		VS::get_singleton()->free(multimesh_instance.instance);
+		VS::get_singleton()->free(multimesh_instance.multimesh);
 	}
 	g.multimesh_instances.clear();
 }
@@ -696,9 +695,9 @@ void GridMap::_notification(int p_what) {
 				_octant_enter_world(E->key());
 			}
 
-			for (int i = 0; i < baked_meshes.size(); i++) {
-				VS::get_singleton()->instance_set_scenario(baked_meshes[i].instance, get_world()->get_scenario());
-				VS::get_singleton()->instance_set_transform(baked_meshes[i].instance, get_global_transform());
+			for (auto &&mesh : baked_meshes) {
+				VS::get_singleton()->instance_set_scenario(mesh.instance, get_world()->get_scenario());
+				VS::get_singleton()->instance_set_transform(mesh.instance, get_global_transform());
 			}
 
 		} break;
@@ -714,8 +713,8 @@ void GridMap::_notification(int p_what) {
 
 			last_transform = new_xform;
 
-			for (int i = 0; i < baked_meshes.size(); i++) {
-				VS::get_singleton()->instance_set_transform(baked_meshes[i].instance, get_global_transform());
+			for (auto &&mesh : baked_meshes) {
+				VS::get_singleton()->instance_set_transform(mesh.instance, get_global_transform());
 			}
 
 		} break;
@@ -725,13 +724,13 @@ void GridMap::_notification(int p_what) {
 				_octant_exit_world(E->key());
 			}
 
-			navigation = NULL;
+			navigation = nullptr;
 
 			//_queue_octants_dirty(MAP_DIRTY_INSTANCES|MAP_DIRTY_TRANSFORMS);
 			//_update_octants_callback();
 			//_update_area_instances();
-			for (int i = 0; i < baked_meshes.size(); i++) {
-				VS::get_singleton()->instance_set_scenario(baked_meshes[i].instance, RID());
+			for (auto &&mesh : baked_meshes) {
+				VS::get_singleton()->instance_set_scenario(mesh.instance, RID());
 			}
 
 		} break;
@@ -749,8 +748,7 @@ void GridMap::_update_visibility() {
 
 	for (Map<OctantKey, Octant *>::Element *e = octant_map.front(); e; e = e->next()) {
 		Octant *octant = e->value();
-		for (int i = 0; i < octant->multimesh_instances.size(); i++) {
-			const Octant::MultimeshInstance &mi = octant->multimesh_instances[i];
+		for (auto &&mi : octant->multimesh_instances) {
 			VS::get_singleton()->instance_set_visible(mi.instance, is_visible());
 		}
 	}
@@ -994,8 +992,8 @@ Vector3 GridMap::_get_offset() const {
 
 void GridMap::clear_baked_meshes() {
 
-	for (int i = 0; i < baked_meshes.size(); i++) {
-		VS::get_singleton()->free(baked_meshes[i].instance);
+	for (auto &&mesh : baked_meshes) {
+		VS::get_singleton()->free(mesh.instance);
 	}
 	baked_meshes.clear();
 
@@ -1042,7 +1040,7 @@ void GridMap::make_baked_meshes(bool p_gen_lightmap_uv, float p_lightmap_uv_texe
 
 		Map<Ref<Material>, Ref<SurfaceTool> > &mat_map = surface_map[ok];
 
-		for (int i = 0; i < mesh->get_surface_count(); i++) {
+		for (int i = 0; i < mesh->get_surface_count(); ++i) {
 
 			if (mesh->surface_get_primitive_type(i) != Mesh::PRIMITIVE_TRIANGLES)
 				continue;
@@ -1094,15 +1092,15 @@ Array GridMap::get_bake_meshes() {
 	}
 
 	Array arr;
-	for (int i = 0; i < baked_meshes.size(); i++) {
-		arr.push_back(baked_meshes[i].mesh);
-		arr.push_back(Transform());
+	for (auto &&mesh : baked_meshes) {
+		arr.push_back(mesh.mesh);
+		arr.push_back(Transform{});
 	}
 
 	return arr;
 }
 
-RID GridMap::get_bake_mesh_instance(int p_idx) {
+RID GridMap::get_bake_mesh_instance(size_t p_idx) {
 
 	ERR_FAIL_INDEX_V(p_idx, baked_meshes.size(), RID());
 	return baked_meshes[p_idx].instance;
@@ -1127,7 +1125,7 @@ GridMap::GridMap() {
 	clip_above = true;
 	cell_scale = 1.0;
 
-	navigation = NULL;
+	navigation = nullptr;
 	set_notify_transform(true);
 	recreating_octants = false;
 }
