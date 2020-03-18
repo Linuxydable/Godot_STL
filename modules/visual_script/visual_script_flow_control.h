@@ -196,7 +196,7 @@ class VisualScriptSwitch : public VisualScriptNode {
 		Case() { type = Variant::NIL; }
 	};
 
-	Vector<Case> case_values;
+	std::vector<Case> case_values;
 
 	friend class VisualScriptNodeInstanceSwitch;
 

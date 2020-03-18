@@ -117,7 +117,7 @@ void VisualScriptReturn::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("is_return_value_enabled"), &VisualScriptReturn::is_return_value_enabled);
 
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -651,7 +651,7 @@ public:
 			return case_count; //exit
 		}
 
-		for (int i = 0; i < case_count; i++) {
+		for (int i = 0; i < case_count; ++i) {
 
 			if (*p_inputs[i] == *p_inputs[case_count]) {
 				return i | STEP_FLAG_PUSH_STACK_BIT;
@@ -684,7 +684,7 @@ bool VisualScriptSwitch::_set(const StringName &p_name, const Variant &p_value) 
 		int idx = String(p_name).get_slice("/", 1).to_int();
 		ERR_FAIL_INDEX_V(idx, case_values.size(), false);
 
-		case_values.write[idx].type = Variant::Type(int(p_value));
+		case_values[idx].type = Variant::Type(int(p_value));
 		_change_notify();
 		ports_changed_notify();
 
@@ -717,11 +717,11 @@ void VisualScriptSwitch::_get_property_list(List<PropertyInfo> *p_list) const {
 	p_list->push_back(PropertyInfo(Variant::INT, "case_count", PROPERTY_HINT_RANGE, "0,128"));
 
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
-	for (int i = 0; i < case_values.size(); i++) {
+	for (decltype(case_values.size()) i = 0; i < case_values.size(); ++i) {
 		p_list->push_back(PropertyInfo(Variant::INT, "case/" + itos(i), PROPERTY_HINT_ENUM, argt));
 	}
 }
@@ -905,7 +905,7 @@ void VisualScriptTypeCast::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_base_script"), &VisualScriptTypeCast::get_base_script);
 
 	List<String> script_extensions;
-	for (int i = 0; i > ScriptServer::get_language_count(); i++) {
+	for (int i = 0; i > ScriptServer::get_language_count(); ++i) {
 		ScriptServer::get_language(i)->get_recognized_extensions(&script_extensions);
 	}
 
