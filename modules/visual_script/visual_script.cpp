@@ -78,7 +78,7 @@ void VisualScriptNode::validate_input_default_values() {
 	default_input_values.resize(MAX(default_input_values.size(), get_input_value_port_count())); //let it grow as big as possible, we don't want to lose values on resize
 
 	//actually validate on save
-	for (int i = 0; i < get_input_value_port_count(); i++) {
+	for (int i = 0; i < get_input_value_port_count(); ++i) {
 
 		Variant::Type expected = get_input_value_port_info(i).type;
 
@@ -733,7 +733,7 @@ void VisualScript::add_custom_signal(const StringName &p_name) {
 	ERR_FAIL_COND(!String(p_name).is_valid_identifier());
 	ERR_FAIL_COND(custom_signals.has(p_name));
 
-	custom_signals[p_name] = Vector<Argument>();
+	custom_signals[p_name] = std::vector<Argument>{};
 }
 
 bool VisualScript::has_custom_signal(const StringName &p_name) const {
@@ -747,17 +747,18 @@ void VisualScript::custom_signal_add_argument(const StringName &p_func, Variant:
 	Argument arg;
 	arg.type = p_type;
 	arg.name = p_name;
+	auto &args = custom_signals[p_func];
 	if (p_index < 0)
-		custom_signals[p_func].push_back(arg);
+		args.push_back(arg);
 	else
-		custom_signals[p_func].insert(0, arg);
+		args.insert(args.begin(), arg);
 }
 void VisualScript::custom_signal_set_argument_type(const StringName &p_func, int p_argidx, Variant::Type p_type) {
 
 	ERR_FAIL_COND(instances.size());
 	ERR_FAIL_COND(!custom_signals.has(p_func));
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
-	custom_signals[p_func].write[p_argidx].type = p_type;
+	custom_signals[p_func][p_argidx].type = p_type;
 }
 Variant::Type VisualScript::custom_signal_get_argument_type(const StringName &p_func, int p_argidx) const {
 
@@ -769,7 +770,7 @@ void VisualScript::custom_signal_set_argument_name(const StringName &p_func, int
 	ERR_FAIL_COND(instances.size());
 	ERR_FAIL_COND(!custom_signals.has(p_func));
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
-	custom_signals[p_func].write[p_argidx].name = p_name;
+	custom_signals[p_func][p_argidx].name = p_name;
 }
 String VisualScript::custom_signal_get_argument_name(const StringName &p_func, int p_argidx) const {
 
@@ -782,7 +783,8 @@ void VisualScript::custom_signal_remove_argument(const StringName &p_func, int p
 	ERR_FAIL_COND(instances.size());
 	ERR_FAIL_COND(!custom_signals.has(p_func));
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
-	custom_signals[p_func].remove(p_argidx);
+	auto &args = custom_signals[p_func];
+	args.erase(args.begin() + p_argidx);
 }
 
 int VisualScript::custom_signal_get_argument_count(const StringName &p_func) const {
@@ -790,6 +792,7 @@ int VisualScript::custom_signal_get_argument_count(const StringName &p_func) con
 	ERR_FAIL_COND_V(!custom_signals.has(p_func), 0);
 	return custom_signals[p_func].size();
 }
+
 void VisualScript::custom_signal_swap_argument(const StringName &p_func, int p_argidx, int p_with_argidx) {
 
 	ERR_FAIL_COND(instances.size());
@@ -797,7 +800,7 @@ void VisualScript::custom_signal_swap_argument(const StringName &p_func, int p_a
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
 	ERR_FAIL_INDEX(p_with_argidx, custom_signals[p_func].size());
 
-	SWAP(custom_signals[p_func].write[p_argidx], custom_signals[p_func].write[p_with_argidx]);
+	SWAP(custom_signals[p_func][p_argidx], custom_signals[p_func][p_with_argidx]);
 }
 void VisualScript::remove_custom_signal(const StringName &p_name) {
 
@@ -825,7 +828,7 @@ void VisualScript::rename_custom_signal(const StringName &p_name, const StringNa
 
 void VisualScript::get_custom_signal_list(List<StringName> *r_custom_signals) const {
 
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 		r_custom_signals->push_back(E->key());
 	}
 
@@ -981,14 +984,14 @@ bool VisualScript::has_script_signal(const StringName &p_signal) const {
 
 void VisualScript::get_script_signal_list(List<MethodInfo> *r_signals) const {
 
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 
 		MethodInfo mi;
 		mi.name = E->key();
-		for (int i = 0; i < E->get().size(); i++) {
+		for (auto &&a : E->get()) {
 			PropertyInfo arg;
-			arg.type = E->get()[i].type;
-			arg.name = E->get()[i].name;
+			arg.type = a.type;
+			arg.name = a.name;
 			mi.arguments.push_back(arg);
 		}
 
@@ -1014,7 +1017,7 @@ void VisualScript::get_script_method_list(List<MethodInfo> *p_list) const {
 
 			Ref<VisualScriptFunction> func = E->get().nodes[E->get().function_id].node;
 			if (func.is_valid()) {
-				for (int i = 0; i < func->get_argument_count(); i++) {
+				for (int i = 0; i < func->get_argument_count(); ++i) {
 					PropertyInfo arg;
 					arg.name = func->get_argument_name(i);
 					arg.type = func->get_argument_type(i);
@@ -1044,7 +1047,7 @@ MethodInfo VisualScript::get_method_info(const StringName &p_method) const {
 		Ref<VisualScriptFunction> func = E->get().nodes[E->get().function_id].node;
 		if (func.is_valid()) {
 
-			for (int i = 0; i < func->get_argument_count(); i++) {
+			for (int i = 0; i < func->get_argument_count(); ++i) {
 				PropertyInfo arg;
 				arg.name = func->get_argument_name(i);
 				arg.type = func->get_argument_type(i);
@@ -1110,7 +1113,7 @@ void VisualScript::_set_data(const Dictionary &p_data) {
 
 	variables.clear();
 	Array vars = d["variables"];
-	for (int i = 0; i < vars.size(); i++) {
+	for (int i = 0; i < vars.size(); ++i) {
 
 		Dictionary v = vars[i];
 		StringName name = v["name"];
@@ -1122,7 +1125,7 @@ void VisualScript::_set_data(const Dictionary &p_data) {
 
 	custom_signals.clear();
 	Array sigs = d["signals"];
-	for (int i = 0; i < sigs.size(); i++) {
+	for (int i = 0; i < sigs.size(); ++i) {
 
 		Dictionary cs = sigs[i];
 		add_custom_signal(cs["name"]);
@@ -1139,7 +1142,7 @@ void VisualScript::_set_data(const Dictionary &p_data) {
 	Vector2 last_pos = Vector2(-100 * funcs.size(), -100 * funcs.size()); // this is the center of the last fn box
 	Vector2 last_size = Vector2(0.0, 0.0);
 
-	for (int i = 0; i < funcs.size(); i++) {
+	for (int i = 0; i < funcs.size(); ++i) {
 
 		Dictionary func = funcs[i];
 
@@ -1224,14 +1227,14 @@ Dictionary VisualScript::_get_data() const {
 	d["variables"] = vars;
 
 	Array sigs;
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 
 		Dictionary cs;
 		cs["name"] = E->key();
 		Array args;
-		for (int i = 0; i < E->get().size(); i++) {
-			args.push_back(E->get()[i].name);
-			args.push_back(E->get()[i].type);
+		for (auto &&arg : E->get()) {
+			args.push_back(arg.name);
+			args.push_back(arg.type);
 		}
 		cs["arguments"] = args;
 
@@ -1451,7 +1454,7 @@ void VisualScriptInstance::get_method_list(List<MethodInfo> *p_list) const {
 			Ref<VisualScriptFunction> vsf = E->get().nodes[E->get().function_id].node;
 			if (vsf.is_valid()) {
 
-				for (int i = 0; i < vsf->get_argument_count(); i++) {
+				for (int i = 0; i < vsf->get_argument_count(); ++i) {
 					PropertyInfo arg;
 					arg.name = vsf->get_argument_name(i);
 					arg.type = vsf->get_argument_type(i);
@@ -1489,19 +1492,15 @@ void VisualScriptInstance::_dependency_step(VisualScriptNodeInstance *node, int 
 	pass_stack[node->pass_idx] = p_pass;
 
 	if (!node->dependencies.empty()) {
+		for (auto &&dep : node->dependencies) {
 
-		int dc = node->dependencies.size();
-		VisualScriptNodeInstance **deps = node->dependencies.ptrw();
-
-		for (int i = 0; i < dc; i++) {
-
-			_dependency_step(deps[i], p_pass, pass_stack, input_args, output_args, variant_stack, r_error, error_str, r_error_node);
+			_dependency_step(dep, p_pass, pass_stack, input_args, output_args, variant_stack, r_error, error_str, r_error_node);
 			if (r_error.error != Variant::CallError::CALL_OK)
 				return;
 		}
 	}
 
-	for (int i = 0; i < node->input_port_count; i++) {
+	for (int i = 0; i < node->input_port_count; ++i) {
 
 		int index = node->input_ports[i] & VisualScriptNodeInstance::INPUT_MASK;
 
@@ -1513,7 +1512,7 @@ void VisualScriptInstance::_dependency_step(VisualScriptNodeInstance *node, int 
 			input_args[i] = &variant_stack[index];
 		}
 	}
-	for (int i = 0; i < node->output_port_count; i++) {
+	for (int i = 0; i < node->output_port_count; ++i) {
 		output_args[i] = &variant_stack[node->output_ports[i]];
 	}
 
@@ -1547,7 +1546,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 	bool error = false;
 	int current_node_id = f->node;
 	Variant return_value;
-	Variant *working_mem = NULL;
+	Variant *working_mem = nullptr;
 
 	int flow_stack_pos = p_flow_stack_pos;
 
@@ -1573,7 +1572,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 		if (current_node_id == f->node) {
 			//if function node, set up function arguments from beginning of stack
 
-			for (int i = 0; i < f->argument_count; i++) {
+			for (int i = 0; i < f->argument_count; ++i) {
 				input_args[i] = &variant_stack[i];
 			}
 		} else {
@@ -1581,13 +1580,9 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 			//run dependencies first
 
 			if (!node->dependencies.empty()) {
+				for (auto &&dep : node->dependencies) {
 
-				int dc = node->dependencies.size();
-				VisualScriptNodeInstance **deps = node->dependencies.ptrw();
-
-				for (int i = 0; i < dc; i++) {
-
-					_dependency_step(deps[i], p_pass, pass_stack, input_args, output_args, variant_stack, r_error, error_str, &node);
+					_dependency_step(dep, p_pass, pass_stack, input_args, output_args, variant_stack, r_error, error_str, &node);
 					if (r_error.error != Variant::CallError::CALL_OK) {
 						error = true;
 						current_node_id = node->id;
@@ -1601,7 +1596,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 				//setup input pointers normally
 				VSDEBUG("INPUT PORTS: " + itos(node->input_port_count));
 
-				for (int i = 0; i < node->input_port_count; i++) {
+				for (int i = 0; i < node->input_port_count; ++i) {
 
 					int index = node->input_ports[i] & VisualScriptNodeInstance::INPUT_MASK;
 
@@ -1624,7 +1619,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 		//setup output pointers
 
 		VSDEBUG("OUTPUT PORTS: " + itos(node->output_port_count));
-		for (int i = 0; i < node->output_port_count; i++) {
+		for (int i = 0; i < node->output_port_count; ++i) {
 			output_args[i] = &variant_stack[node->output_ports[i]];
 			VSDEBUG("PORT " + itos(i) + " AT STACK " + itos(node->output_ports[i]));
 		}
@@ -1683,7 +1678,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 				state->flow_stack_pos = flow_stack_pos;
 				state->stack.resize(p_stack_size);
 				state->pass = p_pass;
-				copymem(state->stack.ptrw(), p_stack, p_stack_size);
+				copymem(state->stack.data(), p_stack, p_stack_size);
 				//step 2, run away, return directly
 				r_error.error = Variant::CallError::CALL_OK;
 
@@ -1912,7 +1907,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 #endif
 
 	//clean up variant stack
-	for (int i = 0; i < f->max_stack; i++) {
+	for (int i = 0; i < f->max_stack; ++i) {
 		variant_stack[i].~Variant();
 	}
 
@@ -1959,7 +1954,7 @@ Variant VisualScriptInstance::call(const StringName &p_method, const Variant **p
 	int *flow_stack = flow_max ? (int *)(output_args + max_output_args) : (int *)NULL;
 	int *pass_stack = flow_stack ? (int *)(flow_stack + flow_max) : (int *)NULL;
 
-	for (int i = 0; i < f->node_count; i++) {
+	for (int i = 0; i < f->node_count; ++i) {
 		sequence_bits[i] = false; //all starts as false
 	}
 
@@ -1995,12 +1990,12 @@ Variant VisualScriptInstance::call(const StringName &p_method, const Variant **p
 	}
 
 	//allocate variant stack
-	for (int i = 0; i < f->max_stack; i++) {
+	for (int i = 0; i < f->max_stack; ++i) {
 		memnew_placement(&variant_stack[i], Variant);
 	}
 
 	//allocate function arguments (must be copied for yield to work properly)
-	for (int i = 0; i < p_argcount; i++) {
+	for (int i = 0; i < p_argcount; ++i) {
 		variant_stack[i] = *p_args[i];
 	}
 
@@ -2157,7 +2152,7 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 
 			if (instance->input_port_count) {
 				instance->input_ports = memnew_arr(int, instance->input_port_count);
-				for (int i = 0; i < instance->input_port_count; i++) {
+				for (int i = 0; i < instance->input_port_count; ++i) {
 
 					instance->input_ports[i] = -1; //if not assigned, will become default value
 				}
@@ -2165,14 +2160,14 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 
 			if (instance->output_port_count) {
 				instance->output_ports = memnew_arr(int, instance->output_port_count);
-				for (int i = 0; i < instance->output_port_count; i++) {
+				for (int i = 0; i < instance->output_port_count; ++i) {
 					instance->output_ports[i] = -1; //if not assigned, will output to trash
 				}
 			}
 
 			if (instance->sequence_output_count) {
 				instance->sequence_outputs = memnew_arr(VisualScriptNodeInstance *, instance->sequence_output_count);
-				for (int i = 0; i < instance->sequence_output_count; i++) {
+				for (int i = 0; i < instance->sequence_output_count; ++i) {
 					instance->sequence_outputs[i] = NULL; //if it remains null, flow ends here
 				}
 			}
@@ -2228,11 +2223,11 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 				from->output_ports[dc.from_port] = stack_pos;
 			}
 
-			if (from->get_sequence_output_count() == 0 && to->dependencies.find(from) == -1) {
+			if (from->get_sequence_output_count() == 0 && std::find(to->dependencies.begin(), to->dependencies.end(), from) == to->dependencies.end()) {
 				//if the node we are reading from has no output sequence, we must call step() before reading from it.
 				if (from->pass_idx == -1) {
 					from->pass_idx = function.pass_stack_size;
-					function.pass_stack_size++;
+					++function.pass_stack_size;
 				}
 				to->dependencies.push_back(from);
 			}
@@ -2266,7 +2261,7 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 			VisualScriptNodeInstance *instance = instances[F->key()];
 
 			// connect to default values
-			for (int i = 0; i < instance->input_port_count; i++) {
+			for (int i = 0; i < instance->input_port_count; ++i) {
 				if (instance->input_ports[i] == -1) {
 
 					//unassigned, connect to default val
@@ -2276,7 +2271,7 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 			}
 
 			// connect to trash
-			for (int i = 0; i < instance->output_port_count; i++) {
+			for (int i = 0; i < instance->output_port_count; ++i) {
 				if (instance->output_ports[i] == -1) {
 					instance->output_ports[i] = function.trash_pos; //trash is same for all
 				}
@@ -2337,7 +2332,7 @@ Variant VisualScriptFunctionState::_signal_callback(const Variant **p_args, int 
 		//noooneee, reserved for me, me and only me.
 	} else {
 
-		for (int i = 0; i < p_argcount - 1; i++) {
+		for (int i = 0; i < p_argcount - 1; ++i) {
 			args.push_back(*p_args[i]);
 		}
 	}
@@ -2353,19 +2348,21 @@ Variant VisualScriptFunctionState::_signal_callback(const Variant **p_args, int 
 
 	r_error.error = Variant::CallError::CALL_OK;
 
-	Variant *working_mem = ((Variant *)stack.ptr()) + working_mem_index;
+	Variant *working_mem = ((Variant *)stack.data()) + working_mem_index;
 
 	*working_mem = args; //arguments go to working mem.
 
-	Variant ret = instance->_call_internal(function, stack.ptrw(), stack.size(), node, flow_stack_pos, pass, true, r_error);
+	Variant ret = instance->_call_internal(function, stack.data(), stack.size(), node, flow_stack_pos, pass, true, r_error);
 	function = StringName(); //invalidate
 	return ret;
 }
 
 void VisualScriptFunctionState::connect_to_signal(Object *p_obj, const String &p_signal, Array p_binds) {
 
-	Vector<Variant> binds;
-	for (int i = 0; i < p_binds.size(); i++) {
+	auto len = p_binds.size();
+	std::vector<Variant> binds;
+	binds.reserve(len);
+	for (decltype(len) i = 0; i < len; ++i) {
 		binds.push_back(p_binds[i]);
 	}
 	binds.push_back(Ref<VisualScriptFunctionState>(this)); //add myself on the back to avoid dying from unreferencing
@@ -2390,11 +2387,11 @@ Variant VisualScriptFunctionState::resume(Array p_args) {
 	Variant::CallError r_error;
 	r_error.error = Variant::CallError::CALL_OK;
 
-	Variant *working_mem = ((Variant *)stack.ptr()) + working_mem_index;
+	Variant *working_mem = ((Variant *)stack.data()) + working_mem_index;
 
 	*working_mem = p_args; //arguments go to working mem.
 
-	Variant ret = instance->_call_internal(function, stack.ptrw(), stack.size(), node, flow_stack_pos, pass, true, r_error);
+	Variant ret = instance->_call_internal(function, stack.data(), stack.size(), node, flow_stack_pos, pass, true, r_error);
 	function = StringName(); //invalidate
 	return ret;
 }
@@ -2413,8 +2410,8 @@ VisualScriptFunctionState::VisualScriptFunctionState() {
 VisualScriptFunctionState::~VisualScriptFunctionState() {
 
 	if (function != StringName()) {
-		Variant *s = ((Variant *)stack.ptr());
-		for (int i = 0; i < variant_stack_size; i++) {
+		Variant *s = ((Variant *)stack.data());
+		for (int i = 0; i < variant_stack_size; ++i) {
 			s[i].~Variant();
 		}
 	}
@@ -2591,7 +2588,7 @@ void VisualScriptLanguage::debug_get_stack_level_locals(int p_level, List<String
 	p_locals->push_back("node_name");
 	p_values->push_back(node->get_base_node()->get_text());
 
-	for (int i = 0; i < node->input_port_count; i++) {
+	for (int i = 0; i < node->input_port_count; ++i) {
 		String name = node->get_base_node()->get_input_value_port_info(i).name;
 		if (name == String()) {
 			name = "in_" + itos(i);
@@ -2611,7 +2608,7 @@ void VisualScriptLanguage::debug_get_stack_level_locals(int p_level, List<String
 		}
 	}
 
-	for (int i = 0; i < node->output_port_count; i++) {
+	for (int i = 0; i < node->output_port_count; ++i) {
 
 		String name = node->get_base_node()->get_output_value_port_info(i).name;
 		if (name == String()) {
@@ -2626,7 +2623,7 @@ void VisualScriptLanguage::debug_get_stack_level_locals(int p_level, List<String
 		p_values->push_back(_call_stack[l].stack[in_from]);
 	}
 
-	for (int i = 0; i < node->get_working_memory_size(); i++) {
+	for (int i = 0; i < node->get_working_memory_size(); ++i) {
 		p_locals->push_back("working_mem/mem_" + itos(i));
 		p_values->push_back((*_call_stack[l].work_mem)[i]);
 	}

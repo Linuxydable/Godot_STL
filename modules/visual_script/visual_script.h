@@ -116,7 +116,7 @@ class VisualScriptNodeInstance {
 	int sequence_index;
 	VisualScriptNodeInstance **sequence_outputs;
 	int sequence_output_count;
-	Vector<VisualScriptNodeInstance *> dependencies;
+	std::vector<VisualScriptNodeInstance *> dependencies;
 	int *input_ports;
 	int input_port_count;
 	int *output_ports;
@@ -244,7 +244,7 @@ private:
 
 	Map<StringName, Function> functions;
 	Map<StringName, Variable> variables;
-	Map<StringName, Vector<Argument> > custom_signals;
+	Map<StringName, std::vector<Argument> > custom_signals;
 
 	Map<Object *, VisualScriptInstance *> instances;
 
@@ -315,6 +315,8 @@ public:
 	void add_custom_signal(const StringName &p_name);
 	bool has_custom_signal(const StringName &p_name) const;
 	void custom_signal_add_argument(const StringName &p_func, Variant::Type p_type, const String &p_name, int p_index = -1);
+
+	// need_update : int to const unsigned& p_argidx
 	void custom_signal_set_argument_type(const StringName &p_func, int p_argidx, Variant::Type p_type);
 	Variant::Type custom_signal_get_argument_type(const StringName &p_func, int p_argidx) const;
 	void custom_signal_set_argument_name(const StringName &p_func, int p_argidx, const String &p_name);
@@ -322,6 +324,7 @@ public:
 	void custom_signal_remove_argument(const StringName &p_func, int p_argidx);
 	int custom_signal_get_argument_count(const StringName &p_func) const;
 	void custom_signal_swap_argument(const StringName &p_func, int p_argidx, int p_with_argidx);
+
 	void remove_custom_signal(const StringName &p_name);
 	void rename_custom_signal(const StringName &p_name, const StringName &p_new_name);
 	Set<int> get_output_sequence_ports_connected(const String &edited_func, int from_node);
@@ -389,7 +392,7 @@ class VisualScriptInstance : public ScriptInstance {
 
 	Map<StringName, Function> functions;
 
-	Vector<Variant> default_values;
+	std::vector<Variant> default_values;
 	int max_input_args, max_output_args;
 
 	StringName source;
@@ -457,7 +460,7 @@ class VisualScriptFunctionState : public Reference {
 	ObjectID script_id;
 	VisualScriptInstance *instance;
 	StringName function;
-	Vector<uint8_t> stack;
+	std::vector<uint8_t> stack;
 	int working_mem_index;
 	int variant_stack_size;
 	VisualScriptNodeInstance *node;
