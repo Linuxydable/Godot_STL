@@ -100,20 +100,20 @@ void WSLClient::_do_handshake() {
 
 bool WSLClient::_verify_headers(String &r_protocol) {
 	String s = (char *)_resp_buf;
-	Vector<String> psa = s.split("\r\n");
-	int len = psa.size();
+	std::vector<String> psa = s.split("\r\n");
+	auto len = psa.size();
 	ERR_FAIL_COND_V_MSG(len < 4, false, "Not enough response headers, got: " + itos(len) + ", expected >= 4.");
 
-	Vector<String> req = psa[0].split(" ", false);
+	std::vector<String> req = psa[0].split(" ", false);
 	ERR_FAIL_COND_V_MSG(req.size() < 2, false, "Invalid protocol or status code.");
 
 	// Wrong protocol
 	ERR_FAIL_COND_V_MSG(req[0] != "HTTP/1.1" || req[1] != "101", false, "Invalid protocol or status code.");
 
 	Map<String, String> headers;
-	for (int i = 1; i < len; i++) {
-		Vector<String> header = psa[i].split(":", false, 1);
-		ERR_FAIL_COND_V_MSG(header.size() != 2, false, "Invalid header -> " + psa[i] + ".");
+	for (auto &&str : psa) {
+		std::vector<String> header = str.split(":", false, 1);
+		ERR_FAIL_COND_V_MSG(header.size() != 2, false, "Invalid header -> " + str + ".");
 		String name = header[0].to_lower();
 		String value = header[1].strip_edges();
 		if (headers.has(name))
@@ -140,8 +140,8 @@ bool WSLClient::_verify_headers(String &r_protocol) {
 		ERR_FAIL_COND_V(!headers.has("sec-websocket-protocol"), false);
 		r_protocol = headers["sec-websocket-protocol"];
 		bool valid = false;
-		for (int i = 0; i < _protocols.size(); i++) {
-			if (_protocols[i] != r_protocol)
+		for (auto &&protocol : _protocols) {
+			if (protocol != r_protocol)
 				continue;
 			valid = true;
 			break;
@@ -152,7 +152,7 @@ bool WSLClient::_verify_headers(String &r_protocol) {
 	return true;
 }
 
-Error WSLClient::connect_to_host(String p_host, String p_path, uint16_t p_port, bool p_ssl, const Vector<String> p_protocols, const Vector<String> p_custom_headers) {
+Error WSLClient::connect_to_host(String p_host, String p_path, uint16_t p_port, bool p_ssl, const std::vector<String> p_protocols, const std::vector<String> p_custom_headers) {
 
 	ERR_FAIL_COND_V(_connection.is_valid(), ERR_ALREADY_IN_USE);
 
@@ -182,7 +182,7 @@ Error WSLClient::connect_to_host(String p_host, String p_path, uint16_t p_port, 
 	_use_ssl = p_ssl;
 	_host = p_host;
 	_protocols.clear();
-	_protocols.append_array(p_protocols);
+	_protocols.insert(_protocols.end(), p_protocols.begin(), p_protocols.end());
 
 	_key = WSLPeer::generate_key();
 	// TODO custom extra headers (allow overriding this too?)
@@ -192,17 +192,17 @@ Error WSLClient::connect_to_host(String p_host, String p_path, uint16_t p_port, 
 	request += "Connection: Upgrade\r\n";
 	request += "Sec-WebSocket-Key: " + _key + "\r\n";
 	request += "Sec-WebSocket-Version: 13\r\n";
-	if (p_protocols.size() > 0) {
+	if (!p_protocols.empty()) {
 		request += "Sec-WebSocket-Protocol: ";
-		for (int i = 0; i < p_protocols.size(); i++) {
+		for (decltype(p_protocols.size()) i = 0; i < p_protocols.size(); ++i) {
 			if (i != 0)
 				request += ",";
 			request += p_protocols[i];
 		}
 		request += "\r\n";
 	}
-	for (int i = 0; i < p_custom_headers.size(); i++) {
-		request += p_custom_headers[i] + "\r\n";
+	for (auto &&header : p_custom_headers) {
+		request += header + "\r\n";
 	}
 	request += "\r\n";
 	_request = request.utf8();
@@ -274,7 +274,7 @@ void WSLClient::poll() {
 
 Ref<WebSocketPeer> WSLClient::get_peer(int p_peer_id) const {
 
-	ERR_FAIL_COND_V(p_peer_id != 1, NULL);
+	ERR_FAIL_COND_V(p_peer_id != 1, nullptr);
 
 	return _peer;
 }
@@ -293,7 +293,7 @@ NetworkedMultiplayerPeer::ConnectionStatus WSLClient::get_connection_status() co
 void WSLClient::disconnect_from_host(int p_code, String p_reason) {
 
 	_peer->close(p_code, p_reason);
-	_connection = Ref<StreamPeer>(NULL);
+	_connection = Ref<StreamPeer>(nullptr);
 	_tcp = Ref<StreamPeerTCP>(memnew(StreamPeerTCP));
 
 	_key = "";
