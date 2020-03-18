@@ -58,20 +58,20 @@ bool VisualScriptFunctionCall::has_input_sequence_port() const {
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
 
 	if (p_edited_scene != p_current_node && p_current_node->get_owner() != p_edited_scene)
-		return NULL;
+		return nullptr;
 
 	Ref<Script> scr = p_current_node->get_script();
 
 	if (scr.is_valid() && scr == script)
 		return p_current_node;
 
-	for (int i = 0; i < p_current_node->get_child_count(); i++) {
+	for (int i = 0; i < p_current_node->get_child_count(); ++i) {
 		Node *n = _find_script_node(p_edited_scene, p_current_node->get_child(i), script);
 		if (n)
 			return n;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 #endif
@@ -80,33 +80,33 @@ Node *VisualScriptFunctionCall::_get_base_node() const {
 #ifdef TOOLS_ENABLED
 	Ref<Script> script = get_visual_script();
 	if (!script.is_valid())
-		return NULL;
+		return nullptr;
 
 	MainLoop *main_loop = OS::get_singleton()->get_main_loop();
 	SceneTree *scene_tree = Object::cast_to<SceneTree>(main_loop);
 
 	if (!scene_tree)
-		return NULL;
+		return nullptr;
 
 	Node *edited_scene = scene_tree->get_edited_scene_root();
 
 	if (!edited_scene)
-		return NULL;
+		return nullptr;
 
 	Node *script_node = _find_script_node(edited_scene, edited_scene, script);
 
 	if (!script_node)
-		return NULL;
+		return nullptr;
 
 	if (!script_node->has_node(base_path))
-		return NULL;
+		return nullptr;
 
 	Node *path_to = script_node->get_node(base_path);
 
 	return path_to;
 #else
 
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -126,7 +126,7 @@ StringName VisualScriptFunctionCall::_get_base_type() const {
 int VisualScriptFunctionCall::get_input_value_port_count() const {
 
 	if (call_mode == CALL_MODE_BASIC_TYPE) {
-		Vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
+		std::vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
 		return types.size() + (rpc_call_mode >= RPC_RELIABLE_TO_ID ? 1 : 0) + 1;
 
 	} else {
@@ -158,7 +158,7 @@ int VisualScriptFunctionCall::get_output_value_port_count() const {
 			ret = 1; //it is assumed that script always returns something
 
 		if (call_mode == CALL_MODE_INSTANCE) {
-			ret++;
+			++ret;
 		}
 
 		return ret;
@@ -188,7 +188,7 @@ PropertyInfo VisualScriptFunctionCall::get_input_value_port_info(int p_idx) cons
 		if (p_idx == 0) {
 			return PropertyInfo(Variant::INT, "peer_id");
 		} else {
-			p_idx--;
+			--p_idx;
 		}
 	}
 
@@ -196,8 +196,8 @@ PropertyInfo VisualScriptFunctionCall::get_input_value_port_info(int p_idx) cons
 
 	if (call_mode == CALL_MODE_BASIC_TYPE) {
 
-		Vector<StringName> names = Variant::get_method_argument_names(basic_type, function);
-		Vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
+		std::vector<StringName> names = Variant::get_method_argument_names(basic_type, function);
+		std::vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
 		return PropertyInfo(types[p_idx], names[p_idx]);
 
 	} else {
@@ -396,7 +396,7 @@ void VisualScriptFunctionCall::_update_method_cache() {
 	if (mb) {
 		use_default_args = mb->get_default_argument_count();
 		method_cache = MethodInfo();
-		for (int i = 0; i < mb->get_argument_count(); i++) {
+		for (int i = 0; i < mb->get_argument_count(); ++i) {
 #ifdef DEBUG_METHODS_ENABLED
 			method_cache.arguments.push_back(mb->get_argument_info(i));
 #else
@@ -415,7 +415,7 @@ void VisualScriptFunctionCall::_update_method_cache() {
 
 		if (mb->is_vararg()) {
 			//for vararg just give it 10 arguments (should be enough for most use cases)
-			for (int i = 0; i < 10; i++) {
+			for (uint8_t i = 0; i < 10u; ++i) {
 				method_cache.arguments.push_back(PropertyInfo(Variant::NIL, "arg" + itos(i)));
 				use_default_args++;
 			}
@@ -698,7 +698,7 @@ void VisualScriptFunctionCall::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_validate"), &VisualScriptFunctionCall::get_validate);
 
 	String bt;
-	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 0; i < Variant::VARIANT_MAX; ++i) {
 		if (i > 0)
 			bt += ",";
 
@@ -706,7 +706,7 @@ void VisualScriptFunctionCall::_bind_methods() {
 	}
 
 	List<String> script_extensions;
-	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
+	for (int i = 0; i < ScriptServer::get_language_count(); ++i) {
 		ScriptServer::get_language(i)->get_recognized_extensions(&script_extensions);
 	}
 
@@ -955,34 +955,34 @@ Node *VisualScriptPropertySet::_get_base_node() const {
 #ifdef TOOLS_ENABLED
 	Ref<Script> script = get_visual_script();
 	if (!script.is_valid())
-		return NULL;
+		return nullptr;
 
 	MainLoop *main_loop = OS::get_singleton()->get_main_loop();
 
 	SceneTree *scene_tree = Object::cast_to<SceneTree>(main_loop);
 
 	if (!scene_tree)
-		return NULL;
+		return nullptr;
 
 	Node *edited_scene = scene_tree->get_edited_scene_root();
 
 	if (!edited_scene)
-		return NULL;
+		return nullptr;
 
 	Node *script_node = _find_script_node(edited_scene, edited_scene, script);
 
 	if (!script_node)
-		return NULL;
+		return nullptr;
 
 	if (!script_node->has_node(base_path))
-		return NULL;
+		return nullptr;
 
 	Node *path_to = script_node->get_node(base_path);
 
 	return path_to;
 #else
 
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -1021,7 +1021,7 @@ void VisualScriptPropertySet::_adjust_input_index(PropertyInfo &pinfo) const {
 
 		Variant v;
 		Variant::CallError ce;
-		v = Variant::construct(pinfo.type, NULL, 0, ce);
+		v = Variant::construct(pinfo.type, nullptr, 0, ce);
 		Variant i = v.get(index);
 		pinfo.type = i.get_type();
 	}
@@ -1168,7 +1168,7 @@ void VisualScriptPropertySet::_update_cache() {
 
 		Variant v;
 		Variant::CallError ce;
-		v = Variant::construct(basic_type, NULL, 0, ce);
+		v = Variant::construct(basic_type, nullptr, 0, ce);
 
 		List<PropertyInfo> pinfo;
 		v.get_property_list(&pinfo);
@@ -1185,7 +1185,7 @@ void VisualScriptPropertySet::_update_cache() {
 
 		StringName type;
 		Ref<Script> script;
-		Node *node = NULL;
+		Node *node = nullptr;
 
 		if (call_mode == CALL_MODE_NODE_PATH) {
 
@@ -1410,7 +1410,7 @@ void VisualScriptPropertySet::_validate_property(PropertyInfo &property) const {
 	if (property.name == "index") {
 
 		Variant::CallError ce;
-		Variant v = Variant::construct(type_cache.type, NULL, 0, ce);
+		Variant v = Variant::construct(type_cache.type, nullptr, 0, ce);
 		List<PropertyInfo> plist;
 		v.get_property_list(&plist);
 		String options = "";
@@ -1456,7 +1456,7 @@ void VisualScriptPropertySet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_assign_op"), &VisualScriptPropertySet::get_assign_op);
 
 	String bt;
-	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 0; i < Variant::VARIANT_MAX; ++i) {
 		if (i > 0)
 			bt += ",";
 
@@ -1464,7 +1464,7 @@ void VisualScriptPropertySet::_bind_methods() {
 	}
 
 	List<String> script_extensions;
-	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
+	for (int i = 0; i < ScriptServer::get_language_count(); ++i) {
 		ScriptServer::get_language(i)->get_recognized_extensions(&script_extensions);
 	}
 
@@ -1735,34 +1735,34 @@ Node *VisualScriptPropertyGet::_get_base_node() const {
 #ifdef TOOLS_ENABLED
 	Ref<Script> script = get_visual_script();
 	if (!script.is_valid())
-		return NULL;
+		return nullptr;
 
 	MainLoop *main_loop = OS::get_singleton()->get_main_loop();
 
 	SceneTree *scene_tree = Object::cast_to<SceneTree>(main_loop);
 
 	if (!scene_tree)
-		return NULL;
+		return nullptr;
 
 	Node *edited_scene = scene_tree->get_edited_scene_root();
 
 	if (!edited_scene)
-		return NULL;
+		return nullptr;
 
 	Node *script_node = _find_script_node(edited_scene, edited_scene, script);
 
 	if (!script_node)
-		return NULL;
+		return nullptr;
 
 	if (!script_node->has_node(base_path))
-		return NULL;
+		return nullptr;
 
 	Node *path_to = script_node->get_node(base_path);
 
 	return path_to;
 #else
 
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -1876,7 +1876,7 @@ void VisualScriptPropertyGet::_update_cache() {
 
 		Variant v;
 		Variant::CallError ce;
-		v = Variant::construct(basic_type, NULL, 0, ce);
+		v = Variant::construct(basic_type, nullptr, 0, ce);
 
 		List<PropertyInfo> pinfo;
 		v.get_property_list(&pinfo);
@@ -1894,7 +1894,7 @@ void VisualScriptPropertyGet::_update_cache() {
 
 		StringName type;
 		Ref<Script> script;
-		Node *node = NULL;
+		Node *node = nullptr;
 
 		if (call_mode == CALL_MODE_NODE_PATH) {
 
@@ -2125,7 +2125,7 @@ void VisualScriptPropertyGet::_validate_property(PropertyInfo &property) const {
 	if (property.name == "index") {
 
 		Variant::CallError ce;
-		Variant v = Variant::construct(type_cache, NULL, 0, ce);
+		Variant v = Variant::construct(type_cache, nullptr, 0, ce);
 		List<PropertyInfo> plist;
 		v.get_property_list(&plist);
 		String options = "";
@@ -2168,7 +2168,7 @@ void VisualScriptPropertyGet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_index"), &VisualScriptPropertyGet::get_index);
 
 	String bt;
-	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 0; i < Variant::VARIANT_MAX; ++i) {
 		if (i > 0)
 			bt += ",";
 
@@ -2176,7 +2176,7 @@ void VisualScriptPropertyGet::_bind_methods() {
 	}
 
 	List<String> script_extensions;
-	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
+	for (int i = 0; i < ScriptServer::get_language_count(); ++i) {
 		ScriptServer::get_language(i)->get_recognized_extensions(&script_extensions);
 	}
 
@@ -2459,7 +2459,7 @@ VisualScriptEmitSignal::VisualScriptEmitSignal() {
 
 static Ref<VisualScriptNode> create_basic_type_call_node(const String &p_name) {
 
-	Vector<String> path = p_name.split("/");
+	std::vector<String> path = p_name.split("/");
 	ERR_FAIL_COND_V(path.size() < 4, Ref<VisualScriptNode>());
 	String base_type = path[2];
 	String method = path[3];
@@ -2469,7 +2469,7 @@ static Ref<VisualScriptNode> create_basic_type_call_node(const String &p_name) {
 
 	Variant::Type type = Variant::VARIANT_MAX;
 
-	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 0; i < Variant::VARIANT_MAX; ++i) {
 
 		if (Variant::get_type_name(Variant::Type(i)) == base_type) {
 			type = Variant::Type(i);
@@ -2496,12 +2496,12 @@ void register_visual_script_func_nodes() {
 	//VisualScriptLanguage::singleton->add_register_func("functions/call_script/call_node",create_script_call_node<VisualScriptScriptCall::CALL_MODE_NODE_PATH>);
 	VisualScriptLanguage::singleton->add_register_func("functions/emit_signal", create_node_generic<VisualScriptEmitSignal>);
 
-	for (int i = 0; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 0; i < Variant::VARIANT_MAX; ++i) {
 
 		Variant::Type t = Variant::Type(i);
 		String type_name = Variant::get_type_name(t);
 		Variant::CallError ce;
-		Variant vt = Variant::construct(t, NULL, 0, ce);
+		Variant vt = Variant::construct(t, nullptr, 0, ce);
 		List<MethodInfo> ml;
 		vt.get_method_list(&ml);
 
