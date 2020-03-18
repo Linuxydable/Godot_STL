@@ -450,8 +450,8 @@ public:
 
 		HingeJointData() :
 				angular_limit_enabled(false),
-				angular_limit_upper(M_PI_2),
-				angular_limit_lower(-M_PI_2),
+				angular_limit_upper(Math_PI_2),
+				angular_limit_lower(-Math_PI_2),
 				angular_limit_bias(0.3),
 				angular_limit_softness(0.9),
 				angular_limit_relaxation(1.) {}
