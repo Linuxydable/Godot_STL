@@ -53,9 +53,9 @@ bool VisualScriptFunction::_set(const StringName &p_name, const Variant &p_value
 
 		arguments.resize(new_argc);
 
-		for (int i = argc; i < new_argc; i++) {
-			arguments.write[i].name = "arg" + itos(i + 1);
-			arguments.write[i].type = Variant::NIL;
+		for (int i = argc; i < new_argc; ++i) {
+			arguments[i].name = "arg" + itos(i + 1);
+			arguments[i].type = Variant::NIL;
 		}
 		ports_changed_notify();
 		_change_notify();
@@ -68,7 +68,7 @@ bool VisualScriptFunction::_set(const StringName &p_name, const Variant &p_value
 		if (what == "type") {
 
 			Variant::Type new_type = Variant::Type(int(p_value));
-			arguments.write[idx].type = new_type;
+			arguments[idx].type = new_type;
 			ports_changed_notify();
 
 			return true;
@@ -76,7 +76,7 @@ bool VisualScriptFunction::_set(const StringName &p_name, const Variant &p_value
 
 		if (what == "name") {
 
-			arguments.write[idx].name = p_value;
+			arguments[idx].name = p_value;
 			ports_changed_notify();
 			return true;
 		}
@@ -152,11 +152,11 @@ void VisualScriptFunction::_get_property_list(List<PropertyInfo> *p_list) const 
 
 	p_list->push_back(PropertyInfo(Variant::INT, "argument_count", PROPERTY_HINT_RANGE, "0,256"));
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
-	for (int i = 0; i < arguments.size(); i++) {
+	for (decltype(arguments.size()) i = 0; i < arguments.size(); ++i) {
 		p_list->push_back(PropertyInfo(Variant::INT, "argument_" + itos(i + 1) + "/type", PROPERTY_HINT_ENUM, argt));
 		p_list->push_back(PropertyInfo(Variant::STRING, "argument_" + itos(i + 1) + "/name"));
 	}
@@ -227,7 +227,7 @@ void VisualScriptFunction::add_argument(Variant::Type p_type, const String &p_na
 	arg.hint = p_hint;
 	arg.hint_string = p_hint_string;
 	if (p_index >= 0)
-		arguments.insert(p_index, arg);
+		arguments.insert(arguments.begin() + p_index, arg);
 	else
 		arguments.push_back(arg);
 
@@ -237,7 +237,7 @@ void VisualScriptFunction::set_argument_type(int p_argidx, Variant::Type p_type)
 
 	ERR_FAIL_INDEX(p_argidx, arguments.size());
 
-	arguments.write[p_argidx].type = p_type;
+	arguments[p_argidx].type = p_type;
 	ports_changed_notify();
 }
 Variant::Type VisualScriptFunction::get_argument_type(int p_argidx) const {
@@ -249,7 +249,7 @@ void VisualScriptFunction::set_argument_name(int p_argidx, const String &p_name)
 
 	ERR_FAIL_INDEX(p_argidx, arguments.size());
 
-	arguments.write[p_argidx].name = p_name;
+	arguments[p_argidx].name = p_name;
 	ports_changed_notify();
 }
 String VisualScriptFunction::get_argument_name(int p_argidx) const {
@@ -261,7 +261,7 @@ void VisualScriptFunction::remove_argument(int p_argidx) {
 
 	ERR_FAIL_INDEX(p_argidx, arguments.size());
 
-	arguments.remove(p_argidx);
+	arguments.erase(arguments.begin() + p_argidx);
 	ports_changed_notify();
 }
 
@@ -287,9 +287,9 @@ public:
 
 	virtual int step(const Variant **p_inputs, Variant **p_outputs, StartMode p_start_mode, Variant *p_working_mem, Variant::CallError &r_error, String &r_error_str) {
 
-		int ac = node->get_argument_count();
+		auto ac = node->get_argument_count();
 
-		for (int i = 0; i < ac; i++) {
+		for (decltype(ac) i = 0; i < ac; ++i) {
 #ifdef DEBUG_ENABLED
 			Variant::Type expected = node->get_argument_type(i);
 			if (expected != Variant::NIL) {
@@ -428,9 +428,9 @@ bool VisualScriptLists::_set(const StringName &p_name, const Variant &p_value) {
 
 		inputports.resize(new_argc);
 
-		for (int i = argc; i < new_argc; i++) {
-			inputports.write[i].name = "arg" + itos(i + 1);
-			inputports.write[i].type = Variant::NIL;
+		for (int i = argc; i < new_argc; ++i) {
+			inputports[i].name = "arg" + itos(i + 1);
+			inputports[i].type = Variant::NIL;
 		}
 		ports_changed_notify();
 		_change_notify();
@@ -443,7 +443,7 @@ bool VisualScriptLists::_set(const StringName &p_name, const Variant &p_value) {
 		if (what == "type") {
 
 			Variant::Type new_type = Variant::Type(int(p_value));
-			inputports.write[idx].type = new_type;
+			inputports[idx].type = new_type;
 			ports_changed_notify();
 
 			return true;
@@ -451,7 +451,7 @@ bool VisualScriptLists::_set(const StringName &p_name, const Variant &p_value) {
 
 		if (what == "name") {
 
-			inputports.write[idx].name = p_value;
+			inputports[idx].name = p_value;
 			ports_changed_notify();
 			return true;
 		}
@@ -466,9 +466,9 @@ bool VisualScriptLists::_set(const StringName &p_name, const Variant &p_value) {
 
 		outputports.resize(new_argc);
 
-		for (int i = argc; i < new_argc; i++) {
-			outputports.write[i].name = "arg" + itos(i + 1);
-			outputports.write[i].type = Variant::NIL;
+		for (int i = argc; i < new_argc; ++i) {
+			outputports[i].name = "arg" + itos(i + 1);
+			outputports[i].type = Variant::NIL;
 		}
 		ports_changed_notify();
 		_change_notify();
@@ -481,7 +481,7 @@ bool VisualScriptLists::_set(const StringName &p_name, const Variant &p_value) {
 		if (what == "type") {
 
 			Variant::Type new_type = Variant::Type(int(p_value));
-			outputports.write[idx].type = new_type;
+			outputports[idx].type = new_type;
 			ports_changed_notify();
 
 			return true;
@@ -489,7 +489,7 @@ bool VisualScriptLists::_set(const StringName &p_name, const Variant &p_value) {
 
 		if (what == "name") {
 
-			outputports.write[idx].name = p_value;
+			outputports[idx].name = p_value;
 			ports_changed_notify();
 			return true;
 		}
@@ -553,11 +553,11 @@ void VisualScriptLists::_get_property_list(List<PropertyInfo> *p_list) const {
 	if (is_input_port_editable()) {
 		p_list->push_back(PropertyInfo(Variant::INT, "input_count", PROPERTY_HINT_RANGE, "0,256"));
 		String argt = "Any";
-		for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+		for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 			argt += "," + Variant::get_type_name(Variant::Type(i));
 		}
 
-		for (int i = 0; i < inputports.size(); i++) {
+		for (decltype(inputports.size()) i = 0; i < inputports.size(); ++i) {
 			p_list->push_back(PropertyInfo(Variant::INT, "input_" + itos(i + 1) + "/type", PROPERTY_HINT_ENUM, argt));
 			p_list->push_back(PropertyInfo(Variant::STRING, "input_" + itos(i + 1) + "/name"));
 		}
@@ -566,11 +566,11 @@ void VisualScriptLists::_get_property_list(List<PropertyInfo> *p_list) const {
 	if (is_output_port_editable()) {
 		p_list->push_back(PropertyInfo(Variant::INT, "output_count", PROPERTY_HINT_RANGE, "0,256"));
 		String argt = "Any";
-		for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+		for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 			argt += "," + Variant::get_type_name(Variant::Type(i));
 		}
 
-		for (int i = 0; i < outputports.size(); i++) {
+		for (decltype(outputports.size()) i = 0; i < outputports.size(); ++i) {
 			p_list->push_back(PropertyInfo(Variant::INT, "output_" + itos(i + 1) + "/type", PROPERTY_HINT_ENUM, argt));
 			p_list->push_back(PropertyInfo(Variant::STRING, "output_" + itos(i + 1) + "/name"));
 		}
@@ -588,7 +588,7 @@ void VisualScriptLists::add_input_data_port(Variant::Type p_type, const String &
 	inp.name = p_name;
 	inp.type = p_type;
 	if (p_index >= 0)
-		inputports.insert(p_index, inp);
+		inputports.insert(inputports.begin() + p_index, inp);
 	else
 		inputports.push_back(inp);
 
@@ -602,7 +602,7 @@ void VisualScriptLists::set_input_data_port_type(int p_idx, Variant::Type p_type
 
 	ERR_FAIL_INDEX(p_idx, inputports.size());
 
-	inputports.write[p_idx].type = p_type;
+	inputports[p_idx].type = p_type;
 	ports_changed_notify();
 	_change_notify();
 }
@@ -613,7 +613,7 @@ void VisualScriptLists::set_input_data_port_name(int p_idx, const String &p_name
 
 	ERR_FAIL_INDEX(p_idx, inputports.size());
 
-	inputports.write[p_idx].name = p_name;
+	inputports[p_idx].name = p_name;
 	ports_changed_notify();
 	_change_notify();
 }
@@ -624,7 +624,7 @@ void VisualScriptLists::remove_input_data_port(int p_argidx) {
 
 	ERR_FAIL_INDEX(p_argidx, inputports.size());
 
-	inputports.remove(p_argidx);
+	inputports.erase(inputports.begin() + p_argidx);
 
 	ports_changed_notify();
 	_change_notify();
@@ -640,7 +640,7 @@ void VisualScriptLists::add_output_data_port(Variant::Type p_type, const String 
 	out.name = p_name;
 	out.type = p_type;
 	if (p_index >= 0)
-		outputports.insert(p_index, out);
+		outputports.insert(outputports.begin() + p_index, out);
 	else
 		outputports.push_back(out);
 
@@ -654,7 +654,7 @@ void VisualScriptLists::set_output_data_port_type(int p_idx, Variant::Type p_typ
 
 	ERR_FAIL_INDEX(p_idx, outputports.size());
 
-	outputports.write[p_idx].type = p_type;
+	outputports[p_idx].type = p_type;
 	ports_changed_notify();
 	_change_notify();
 }
@@ -665,7 +665,7 @@ void VisualScriptLists::set_output_data_port_name(int p_idx, const String &p_nam
 
 	ERR_FAIL_INDEX(p_idx, outputports.size());
 
-	outputports.write[p_idx].name = p_name;
+	outputports[p_idx].name = p_name;
 	ports_changed_notify();
 	_change_notify();
 }
@@ -676,7 +676,7 @@ void VisualScriptLists::remove_output_data_port(int p_argidx) {
 
 	ERR_FAIL_INDEX(p_argidx, outputports.size());
 
-	outputports.remove(p_argidx);
+	outputports.erase(outputports.begin() + p_argidx);
 
 	ports_changed_notify();
 	_change_notify();
@@ -766,7 +766,7 @@ public:
 
 		if (input_count > 0) {
 			Array arr;
-			for (int i = 0; i < input_count; i++)
+			for (int i = 0; i < input_count; ++i)
 				arr.push_back((*p_inputs[i]));
 			Variant va = Variant(arr);
 
@@ -1009,14 +1009,14 @@ void VisualScriptOperator::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_typed"), &VisualScriptOperator::get_typed);
 
 	String types;
-	for (int i = 0; i < Variant::OP_MAX; i++) {
+	for (uint8_t i = 0; i < Variant::OP_MAX; ++i) {
 		if (i > 0)
 			types += ",";
 		types += op_names[i];
 	}
 
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -1154,7 +1154,7 @@ void VisualScriptSelect::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_typed"), &VisualScriptSelect::get_typed);
 
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -1524,7 +1524,7 @@ void VisualScriptConstant::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_constant_value"), &VisualScriptConstant::get_constant_value);
 
 	String argt = "Null";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -1887,7 +1887,7 @@ void VisualScriptGlobalConstant::_bind_methods() {
 
 	String cc;
 
-	for (int i = 0; i < GlobalConstants::get_global_constant_count(); i++) {
+	for (int i = 0; i < GlobalConstants::get_global_constant_count(); ++i) {
 
 		if (i > 0)
 			cc += ",";
@@ -2150,7 +2150,7 @@ void VisualScriptBasicTypeConstant::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_basic_type_constant"), &VisualScriptBasicTypeConstant::get_basic_type_constant);
 
 	String argt = "Null";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -2265,7 +2265,7 @@ void VisualScriptMathConstant::_bind_methods() {
 
 	String cc;
 
-	for (int i = 0; i < MATH_CONSTANT_MAX; i++) {
+	for (uint8_t i = 0; i < MATH_CONSTANT_MAX; ++i) {
 
 		if (i > 0)
 			cc += ",";
@@ -2510,13 +2510,13 @@ static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const
 	if (scr.is_valid() && scr == script)
 		return p_current_node;
 
-	for (int i = 0; i < p_current_node->get_child_count(); i++) {
+	for (int i = 0; i < p_current_node->get_child_count(); ++i) {
 		Node *n = _find_script_node(p_edited_scene, p_current_node->get_child(i), script);
 		if (n)
 			return n;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 #endif
@@ -2993,7 +2993,7 @@ public:
 
 			in_values.resize(in_count);
 
-			for (int i = 0; i < in_count; i++) {
+			for (int i = 0; i < in_count; ++i) {
 				in_values[i] = *p_inputs[i];
 			}
 
@@ -3001,7 +3001,7 @@ public:
 
 			work_mem.resize(work_mem_size);
 
-			for (int i = 0; i < work_mem_size; i++) {
+			for (int i = 0; i < work_mem_size; ++i) {
 				work_mem[i] = p_working_mem[i];
 			}
 
@@ -3020,13 +3020,13 @@ public:
 				return 0;
 			}
 
-			for (int i = 0; i < out_count; i++) {
+			for (int i = 0; i < out_count; ++i) {
 				if (i < out_values.size()) {
 					*p_outputs[i] = out_values[i];
 				}
 			}
 
-			for (int i = 0; i < work_mem_size; i++) {
+			for (int i = 0; i < work_mem_size; ++i) {
 				if (i < work_mem.size()) {
 					p_working_mem[i] = work_mem[i];
 				}
@@ -3592,7 +3592,7 @@ void VisualScriptLocalVar::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_var_type"), &VisualScriptLocalVar::get_var_type);
 
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -3714,7 +3714,7 @@ void VisualScriptLocalVarSet::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_var_type"), &VisualScriptLocalVarSet::get_var_type);
 
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -3863,7 +3863,7 @@ void VisualScriptInputAction::_validate_property(PropertyInfo &property) const {
 
 		List<PropertyInfo> pinfo;
 		ProjectSettings::get_singleton()->get_property_list(&pinfo);
-		Vector<String> al;
+		std::vector<String> al;
 
 		for (List<PropertyInfo>::Element *E = pinfo.front(); E; E = E->next()) {
 			const PropertyInfo &pi = E->get();
@@ -3876,12 +3876,12 @@ void VisualScriptInputAction::_validate_property(PropertyInfo &property) const {
 			al.push_back(name);
 		}
 
-		al.sort();
+		std::sort(al.begin(), al.end());
 
-		for (int i = 0; i < al.size(); i++) {
+		for (auto &&a : al) {
 			if (actions != String())
 				actions += ",";
-			actions += al[i];
+			actions += a;
 		}
 
 		property.hint_string = actions;
@@ -3997,18 +3997,18 @@ void VisualScriptDeconstruct::_set_elem_cache(const Array &p_elements) {
 
 	ERR_FAIL_COND(p_elements.size() % 2 == 1);
 	elements.resize(p_elements.size() / 2);
-	for (int i = 0; i < elements.size(); i++) {
-		elements.write[i].name = p_elements[i * 2 + 0];
-		elements.write[i].type = Variant::Type(int(p_elements[i * 2 + 1]));
+	for (decltype(elements.size()) i = 0; i < elements.size(); ++i) {
+		elements[i].name = p_elements[i * 2 + 0];
+		elements[i].type = Variant::Type(int(p_elements[i * 2 + 1]));
 	}
 }
 
 Array VisualScriptDeconstruct::_get_elem_cache() const {
 
 	Array ret;
-	for (int i = 0; i < elements.size(); i++) {
-		ret.push_back(elements[i].name);
-		ret.push_back(elements[i].type);
+	for (auto &&element : elements) {
+		ret.push_back(element.name);
+		ret.push_back(element.type);
 	}
 	return ret;
 }
@@ -4016,7 +4016,7 @@ Array VisualScriptDeconstruct::_get_elem_cache() const {
 class VisualScriptNodeInstanceDeconstruct : public VisualScriptNodeInstance {
 public:
 	VisualScriptInstance *instance;
-	Vector<StringName> outputs;
+	std::vector<StringName> outputs;
 
 	//virtual int get_working_memory_size() const { return 0; }
 
@@ -4024,7 +4024,7 @@ public:
 
 		Variant in = *p_inputs[0];
 
-		for (int i = 0; i < outputs.size(); i++) {
+		for (decltype(outputs.size()) i = 0; i < outputs.size(); ++i) {
 			bool valid;
 			*p_outputs[i] = in.get(outputs[i], &valid);
 			if (!valid) {
@@ -4042,9 +4042,10 @@ VisualScriptNodeInstance *VisualScriptDeconstruct::instance(VisualScriptInstance
 
 	VisualScriptNodeInstanceDeconstruct *instance = memnew(VisualScriptNodeInstanceDeconstruct);
 	instance->instance = p_instance;
-	instance->outputs.resize(elements.size());
-	for (int i = 0; i < elements.size(); i++) {
-		instance->outputs.write[i] = elements[i].name;
+	auto len = elements.size();
+	instance->outputs.resize(len);
+	for (decltype(len) i = 0; i < len; ++i) {
+		instance->outputs[i] = elements[i].name;
 	}
 
 	return instance;
@@ -4062,7 +4063,7 @@ void VisualScriptDeconstruct::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("_get_elem_cache"), &VisualScriptDeconstruct::_get_elem_cache);
 
 	String argt = "Any";
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 		argt += "," + Variant::get_type_name(Variant::Type(i));
 	}
 
@@ -4152,7 +4153,7 @@ void register_visual_script_nodes() {
 	VisualScriptLanguage::singleton->add_register_func("functions/deconstruct/" + Variant::get_type_name(Variant::Type::TRANSFORM), create_node_deconst_typed<Variant::Type::TRANSFORM>);
 	VisualScriptLanguage::singleton->add_register_func("functions/compose_array", create_node_generic<VisualScriptComposeArray>);
 
-	for (int i = 1; i < Variant::VARIANT_MAX; i++) {
+	for (uint8_t i = 1; i < Variant::VARIANT_MAX; ++i) {
 
 		List<MethodInfo> constructors;
 		Variant::get_constructor_list(Variant::Type(i), &constructors);

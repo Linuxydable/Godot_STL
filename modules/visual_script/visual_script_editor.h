@@ -133,7 +133,7 @@ class VisualScriptEditor : public ScriptEditorBase {
 		String name;
 		Variant::Type ret;
 		bool ret_variant;
-		Vector<Pair<Variant::Type, String> > args;
+		std::vector<Pair<Variant::Type, String> > args;
 	};
 
 	HashMap<StringName, Ref<StyleBox> > node_styles;
@@ -295,7 +295,7 @@ public:
 	virtual void apply_code();
 	virtual RES get_edited_resource() const;
 	virtual void set_edited_resource(const RES &p_res);
-	virtual Vector<String> get_functions();
+	virtual std::vector<String> get_functions();
 	virtual void reload_text();
 	virtual String get_name();
 	virtual Ref<Texture> get_icon();

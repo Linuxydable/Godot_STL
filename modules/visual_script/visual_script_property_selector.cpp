@@ -154,7 +154,7 @@ void VisualScriptPropertySelector::_update_search() {
 				if (!(F->get().usage & PROPERTY_USAGE_EDITOR) && !(F->get().usage & PROPERTY_USAGE_SCRIPT_VARIABLE))
 					continue;
 
-				if (type_filter.size() && type_filter.find(F->get().type) == -1)
+				if (type_filter.size() && std::find(type_filter.begin(), type_filter.end(), F->get().type) == type_filter.end())
 					continue;
 
 				// capitalize() also converts underscore to space, we'll match again both possible styles
@@ -194,7 +194,7 @@ void VisualScriptPropertySelector::_update_search() {
 			if (type != Variant::NIL) {
 				Variant v;
 				Variant::CallError ce;
-				v = Variant::construct(type, NULL, 0, ce);
+				v = Variant::construct(type, nullptr, 0, ce);
 				v.get_method_list(&methods);
 			} else {
 
@@ -222,7 +222,7 @@ void VisualScriptPropertySelector::_update_search() {
 			String desc_arguments;
 			if (mi.arguments.size() > 0) {
 				desc_arguments = "(";
-				for (int i = 0; i < mi.arguments.size(); i++) {
+				for (int i = 0; i < mi.arguments.size(); ++i) {
 
 					if (i > 0) {
 						desc_arguments += ", ";
@@ -262,7 +262,7 @@ void VisualScriptPropertySelector::_update_search() {
 			item->set_metadata(2, connecting);
 		}
 
-		if (category && category->get_children() == NULL) {
+		if (category && category->get_children() == nullptr) {
 			memdelete(category); //old category was unused
 		}
 	}
@@ -302,12 +302,12 @@ void VisualScriptPropertySelector::_update_search() {
 	}
 
 	TreeItem *selected_item = search_options->search_item_text(search_box->get_text());
-	if (!found && selected_item != NULL) {
+	if (!found && selected_item != nullptr) {
 		selected_item->select(0);
 		found = true;
 	}
 
-	get_ok()->set_disabled(root->get_children() == NULL);
+	get_ok()->set_disabled(root->get_children() == nullptr);
 }
 
 void VisualScriptPropertySelector::create_visualscript_item(const String &name, TreeItem *const root, const String &search_input, const String &text) {
@@ -335,18 +335,18 @@ void VisualScriptPropertySelector::get_visual_node_names(const String &root_filt
 		if (!E->get().begins_with(root_filter)) {
 			continue;
 		}
-		Vector<String> path = E->get().split("/");
+		std::vector<String> path = E->get().split("/");
 
 		// check if the name has the filter
 		bool in_filter = false;
-		Vector<String> tx_filters = search_box->get_text().split(" ");
-		for (int i = 0; i < tx_filters.size(); i++) {
-			if (tx_filters[i] == "") {
+		std::vector<String> tx_filters = search_box->get_text().split(" ");
+		for (auto &&filter : tx_filters) {
+			if (filter == "") {
 				in_filter = true;
 			} else {
 				in_filter = false;
 			}
-			if (E->get().findn(tx_filters[i]) != -1) {
+			if (E->get().findn(filter) != -1) {
 				in_filter = true;
 				break;
 			}
@@ -388,11 +388,11 @@ void VisualScriptPropertySelector::get_visual_node_names(const String &root_filt
 		if (vnode_deconstruct.is_valid()) {
 			type_name = "Deconstruct ";
 		}
-		Vector<String> desc = path[path.size() - 1].replace("(", " ").replace(")", " ").replace(",", " ").split(" ");
-		for (int i = 0; i < desc.size(); i++) {
-			desc.write[i] = desc[i].capitalize();
-			if (desc[i].ends_with(",")) {
-				desc.write[i] = desc[i].replace(",", ", ");
+		std::vector<String> desc = path[path.size() - 1].replace("(", " ").replace(")", " ").replace(",", " ").split(" ");
+		for (auto &&d : desc) {
+			d = d.capitalize();
+			if (d.ends_with(",")) {
+				d = d.replace(",", ", ");
 			}
 		}
 
@@ -443,9 +443,9 @@ void VisualScriptPropertySelector::_item_selected() {
 
 		Map<String, DocData::ClassDoc>::Element *E = dd->class_list.find(at_class);
 		if (E) {
-			for (int i = 0; i < E->get().properties.size(); i++) {
-				if (E->get().properties[i].name == name) {
-					text = E->get().properties[i].description;
+			for (auto &&property : E->get().properties) {
+				if (property.name == name) {
+					text = property.description;
 				}
 			}
 		}
@@ -458,9 +458,9 @@ void VisualScriptPropertySelector::_item_selected() {
 
 		Map<String, DocData::ClassDoc>::Element *C = dd->class_list.find(at_class);
 		if (C) {
-			for (int i = 0; i < C->get().methods.size(); i++) {
-				if (C->get().methods[i].name == name) {
-					text = C->get().methods[i].description;
+			for (auto &&method : C->get().methods) {
+				if (method.name == name) {
+					text = method.description;
 				}
 			}
 		}
@@ -469,17 +469,17 @@ void VisualScriptPropertySelector::_item_selected() {
 	}
 	Map<String, DocData::ClassDoc>::Element *T = dd->class_list.find(class_type);
 	if (T) {
-		for (int i = 0; i < T->get().methods.size(); i++) {
-			Vector<String> functions = name.rsplit("/", false, 1);
-			if (T->get().methods[i].name == functions[functions.size() - 1]) {
-				text = T->get().methods[i].description;
+		for (auto &&method : T->get().methods) {
+			std::vector<String> functions = name.rsplit("/", false, 1);
+			if (method.name == functions[functions.size() - 1]) {
+				text = method.description;
 			}
 		}
 	}
 
 	List<String> *names = memnew(List<String>);
 	VisualScriptLanguage::singleton->get_registered_node_names(names);
-	if (names->find(name) != NULL) {
+	if (names->find(name) != nullptr) {
 		Ref<VisualScriptOperator> operator_node = VisualScriptLanguage::singleton->create_node_from_name(name);
 		if (operator_node.is_valid()) {
 			Map<String, DocData::ClassDoc>::Element *F = dd->class_list.find(operator_node->get_class_name());
@@ -499,9 +499,9 @@ void VisualScriptPropertySelector::_item_selected() {
 		if (builtin_node.is_valid()) {
 			Map<String, DocData::ClassDoc>::Element *F = dd->class_list.find(builtin_node->get_class_name());
 			if (F) {
-				for (int i = 0; i < F->get().constants.size(); i++) {
-					if (F->get().constants[i].value.to_int() == int(builtin_node->get_func())) {
-						text = F->get().constants[i].description;
+				for (auto &&constant : F->get().constants) {
+					if (constant.value.to_int() == int(builtin_node->get_func())) {
+						text = constant.description;
 					}
 				}
 			}
@@ -531,7 +531,7 @@ void VisualScriptPropertySelector::select_method_from_base_type(const String &p_
 	type = Variant::NIL;
 	script = 0;
 	properties = false;
-	instance = NULL;
+	instance = nullptr;
 	virtuals_only = p_virtuals_only;
 
 	show_window(.5f);
@@ -545,7 +545,7 @@ void VisualScriptPropertySelector::select_method_from_base_type(const String &p_
 	_update_search();
 }
 
-void VisualScriptPropertySelector::set_type_filter(const Vector<Variant::Type> &p_type_filter) {
+void VisualScriptPropertySelector::set_type_filter(const std::vector<Variant::Type> &p_type_filter) {
 	type_filter = p_type_filter;
 }
 
@@ -557,7 +557,7 @@ void VisualScriptPropertySelector::select_from_base_type(const String &p_base, c
 	script = 0;
 	properties = true;
 	visual_script_generic = false;
-	instance = NULL;
+	instance = nullptr;
 	virtuals_only = p_virtuals_only;
 
 	show_window(.5f);
@@ -581,7 +581,7 @@ void VisualScriptPropertySelector::select_from_script(const Ref<Script> &p_scrip
 	script = p_script->get_instance_id();
 	properties = true;
 	visual_script_generic = false;
-	instance = NULL;
+	instance = nullptr;
 	virtuals_only = false;
 
 	show_window(.5f);
@@ -604,7 +604,7 @@ void VisualScriptPropertySelector::select_from_basic_type(Variant::Type p_type, 
 	script = 0;
 	properties = true;
 	visual_script_generic = false;
-	instance = NULL;
+	instance = nullptr;
 	virtuals_only = false;
 
 	show_window(.5f);
@@ -626,7 +626,7 @@ void VisualScriptPropertySelector::select_from_action(const String &p_type, cons
 	script = 0;
 	properties = false;
 	visual_script_generic = false;
-	instance = NULL;
+	instance = nullptr;
 	virtuals_only = false;
 
 	show_window(.5f);
@@ -670,7 +670,7 @@ void VisualScriptPropertySelector::select_from_visual_script(const String &p_bas
 	script = 0;
 	properties = true;
 	visual_script_generic = true;
-	instance = NULL;
+	instance = nullptr;
 	virtuals_only = false;
 	show_window(.5f);
 	if (clear_text)

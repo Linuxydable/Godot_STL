@@ -44,7 +44,7 @@ class VisualScriptFunction : public VisualScriptNode {
 		String hint_string;
 	};
 
-	Vector<Argument> arguments;
+	std::vector<Argument> arguments;
 
 	bool stack_less;
 	int stack_size;
@@ -65,6 +65,7 @@ public:
 	virtual int get_input_value_port_count() const;
 	virtual int get_output_value_port_count() const;
 
+	// need_update : int to const unsigned& p_idx
 	virtual PropertyInfo get_input_value_port_info(int p_idx) const;
 	virtual PropertyInfo get_output_value_port_info(int p_idx) const;
 
@@ -73,6 +74,8 @@ public:
 	virtual String get_category() const { return "flow_control"; }
 
 	void add_argument(Variant::Type p_type, const String &p_name, int p_index = -1, const PropertyHint p_hint = PROPERTY_HINT_NONE, const String &p_hint_string = String(""));
+
+	// need_update : int to const unsigned& p_argidx
 	void set_argument_type(int p_argidx, Variant::Type p_type);
 	Variant::Type get_argument_type(int p_argidx) const;
 	void set_argument_name(int p_argidx, const String &p_name);
@@ -113,8 +116,8 @@ class VisualScriptLists : public VisualScriptNode {
 	};
 
 protected:
-	Vector<Port> inputports;
-	Vector<Port> outputports;
+	std::vector<Port> inputports;
+	std::vector<Port> outputports;
 
 	enum {
 		OUTPUT_EDITABLE = 0x0001,
@@ -159,12 +162,17 @@ public:
 	virtual String get_text() const = 0;
 	virtual String get_category() const = 0;
 
+	// need_update : int to const unsigned& p_index
 	void add_input_data_port(Variant::Type p_type, const String &p_name, int p_index = -1);
+
+	// need_update : int to const unsigned& p_idx and p_argidx
 	void set_input_data_port_type(int p_idx, Variant::Type p_type);
 	void set_input_data_port_name(int p_idx, const String &p_name);
 	void remove_input_data_port(int p_argidx);
 
 	void add_output_data_port(Variant::Type p_type, const String &p_name, int p_index = -1);
+
+	// need_update : int to const unsigned& p_idx and p_argidx
 	void set_output_data_port_type(int p_idx, Variant::Type p_type);
 	void set_output_data_port_name(int p_idx, const String &p_name);
 	void remove_output_data_port(int p_argidx);
@@ -1050,7 +1058,7 @@ class VisualScriptDeconstruct : public VisualScriptNode {
 		Variant::Type type;
 	};
 
-	Vector<Element> elements;
+	std::vector<Element> elements;
 
 	void _update_elements();
 	Variant::Type type;
