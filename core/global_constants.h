@@ -35,7 +35,10 @@
 
 class GlobalConstants {
 public:
+	// need_update : int to unsigned
 	static int get_global_constant_count();
+
+	// need_update : int to const unsigned& p_idx
 	static StringName get_global_constant_enum(int p_idx);
 	static const char *get_global_constant_name(int p_idx);
 	static int get_global_constant_value(int p_idx);
