@@ -941,7 +941,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 			int fcount = DragQueryFileW(hDropInfo, 0xFFFFFFFF, NULL, 0);
 
-			Vector<String> files;
+			std::vector<String> files;
 
 			for (int i = 0; i < fcount; i++) {
 
@@ -950,7 +950,7 @@ LRESULT OS_Windows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				files.push_back(file);
 			}
 
-			if (files.size() && main_loop) {
+			if (!files.empty() && main_loop) {
 				main_loop->drop_files(files, 0);
 			}
 
@@ -2369,7 +2369,7 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 
 	if (p_cursor.is_valid()) {
 
-		Map<CursorShape, Vector<Variant> >::Element *cursor_c = cursors_cache.find(p_shape);
+		Map<CursorShape, std::vector<Variant> >::Element *cursor_c = cursors_cache.find(p_shape);
 
 		if (cursor_c) {
 			if (cursor_c->get()[0] == p_cursor && cursor_c->get()[1] == p_hotspot) {
@@ -2462,7 +2462,7 @@ void OS_Windows::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shap
 
 		cursors[p_shape] = CreateIconIndirect(&iconinfo);
 
-		Vector<Variant> params;
+		std::vector<Variant> params;
 		params.push_back(p_cursor);
 		params.push_back(p_hotspot);
 		cursors_cache.insert(p_shape, params);
@@ -2604,11 +2604,15 @@ Error OS_Windows::execute(const String &p_path, const List<String> &p_arguments,
 	ZeroMemory(&pi.pi, sizeof(pi.pi));
 	LPSTARTUPINFOW si_w = (LPSTARTUPINFOW)&pi.si;
 
-	Vector<CharType> modstr; //windows wants to change this no idea why
-	modstr.resize(cmdline.size());
+	std::vector<CharType> modstr; //windows wants to change this no idea why
+
+	modstr.reserve(cmdline.size());
+
 	for (int i = 0; i < cmdline.size(); i++)
-		modstr.write[i] = cmdline[i];
-	int ret = CreateProcessW(NULL, modstr.ptrw(), NULL, NULL, 0, NORMAL_PRIORITY_CLASS & CREATE_NO_WINDOW, NULL, NULL, si_w, &pi.pi);
+		modstr.push_back(cmdline[i]);
+
+	int ret = CreateProcessW(NULL, modstr.data(), NULL, NULL, 0, NORMAL_PRIORITY_CLASS & CREATE_NO_WINDOW, NULL, NULL, si_w, &pi.pi);
+
 	ERR_FAIL_COND_V(ret == 0, ERR_CANT_FORK);
 
 	if (p_blocking) {
@@ -2724,22 +2728,36 @@ void OS_Windows::set_native_icon(const String &p_filename) {
 
 	// Read the big icon
 	DWORD bytecount_big = icon_dir->idEntries[big_icon_index].dwBytesInRes;
-	Vector<uint8_t> data_big;
+
+	std::vector<uint8_t> data_big;
+
 	data_big.resize(bytecount_big);
+
 	pos = icon_dir->idEntries[big_icon_index].dwImageOffset;
+
 	f->seek(pos);
-	f->get_buffer((uint8_t *)&data_big.write[0], bytecount_big);
-	HICON icon_big = CreateIconFromResource((PBYTE)&data_big.write[0], bytecount_big, TRUE, 0x00030000);
+
+	f->get_buffer((uint8_t *)&data_big[0], bytecount_big);
+
+	HICON icon_big = CreateIconFromResource((PBYTE)&data_big[0], bytecount_big, TRUE, 0x00030000);
+
 	ERR_FAIL_COND_MSG(!icon_big, "Could not create " + itos(big_icon_width) + "x" + itos(big_icon_width) + " @" + itos(big_icon_cc) + " icon, error: " + format_error_message(GetLastError()) + ".");
 
 	// Read the small icon
 	DWORD bytecount_small = icon_dir->idEntries[small_icon_index].dwBytesInRes;
-	Vector<uint8_t> data_small;
+
+	std::vector<uint8_t> data_small;
+
 	data_small.resize(bytecount_small);
+
 	pos = icon_dir->idEntries[small_icon_index].dwImageOffset;
+
 	f->seek(pos);
-	f->get_buffer((uint8_t *)&data_small.write[0], bytecount_small);
-	HICON icon_small = CreateIconFromResource((PBYTE)&data_small.write[0], bytecount_small, TRUE, 0x00030000);
+
+	f->get_buffer((uint8_t *)&data_small[0], bytecount_small);
+
+	HICON icon_small = CreateIconFromResource((PBYTE)&data_small[0], bytecount_small, TRUE, 0x00030000);
+
 	ERR_FAIL_COND_MSG(!icon_small, "Could not create 16x16 @" + itos(small_icon_cc) + " icon, error: " + format_error_message(GetLastError()) + ".");
 
 	// Online tradition says to be sure last error is cleared and set the small icon first
@@ -2769,9 +2787,12 @@ void OS_Windows::set_icon(const Ref<Image> &p_icon) {
 
 	/* Create temporary bitmap buffer */
 	int icon_len = 40 + h * w * 4;
-	Vector<BYTE> v;
+
+	std::vector<BYTE> v;
+
 	v.resize(icon_len);
-	BYTE *icon_bmp = v.ptrw();
+
+	BYTE *icon_bmp = v.data();
 
 	encode_uint32(40, &icon_bmp[0]);
 	encode_uint32(w, &icon_bmp[4]);
@@ -3264,7 +3285,7 @@ OS_Windows::OS_Windows(HINSTANCE _hInstance) {
 	AudioDriverManager::add_driver(&driver_xaudio2);
 #endif
 
-	Vector<Logger *> loggers;
+	std::vector<Logger *> loggers;
 	loggers.push_back(memnew(WindowsTerminalLogger));
 	_set_logger(memnew(CompositeLogger(loggers)));
 }

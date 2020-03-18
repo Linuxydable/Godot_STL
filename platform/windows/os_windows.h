@@ -31,6 +31,8 @@
 #ifndef OS_WINDOWS_H
 #define OS_WINDOWS_H
 
+#include <vector>
+
 #include "camera_win.h"
 #include "context_gl_windows.h"
 #include "core/os/input.h"
@@ -151,7 +153,7 @@ class OS_Windows : public OS {
 
 	HCURSOR cursors[CURSOR_MAX] = { NULL };
 	CursorShape cursor_shape;
-	Map<CursorShape, Vector<Variant> > cursors_cache;
+	Map<CursorShape, std::vector<Variant> > cursors_cache;
 
 	InputDefault *input;
 	JoypadWindows *joypad;
