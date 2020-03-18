@@ -29,6 +29,7 @@
 /*************************************************************************/
 
 #include "grid_map_editor_plugin.h"
+
 #include "core/os/input.h"
 #include "editor/editor_scale.h"
 #include "editor/editor_settings.h"
@@ -121,14 +122,14 @@ void GridMapEditor::_menu_option(int p_option) {
 			if (input_action == INPUT_PASTE) {
 
 				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 1, 0), -M_PI_2);
+				r.rotate(Vector3(0, 1, 0), -Math_PI_2);
 				paste_indicator.orientation = r.get_orthogonal_index();
 				_update_paste_indicator();
 				break;
 			}
 
 			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 1, 0), -M_PI_2);
+			r.rotate(Vector3(0, 1, 0), -Math_PI_2);
 			cursor_rot = r.get_orthogonal_index();
 			_update_cursor_transform();
 		} break;
@@ -138,14 +139,14 @@ void GridMapEditor::_menu_option(int p_option) {
 			if (input_action == INPUT_PASTE) {
 
 				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(1, 0, 0), -M_PI_2);
+				r.rotate(Vector3(1, 0, 0), -Math_PI_2);
 				paste_indicator.orientation = r.get_orthogonal_index();
 				_update_paste_indicator();
 				break;
 			}
 
 			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(1, 0, 0), -M_PI_2);
+			r.rotate(Vector3(1, 0, 0), -Math_PI_2);
 			cursor_rot = r.get_orthogonal_index();
 			_update_cursor_transform();
 		} break;
@@ -155,14 +156,14 @@ void GridMapEditor::_menu_option(int p_option) {
 			if (input_action == INPUT_PASTE) {
 
 				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 0, 1), -M_PI_2);
+				r.rotate(Vector3(0, 0, 1), -Math_PI_2);
 				paste_indicator.orientation = r.get_orthogonal_index();
 				_update_paste_indicator();
 				break;
 			}
 
 			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 0, 1), -M_PI_2);
+			r.rotate(Vector3(0, 0, 1), -Math_PI_2);
 			cursor_rot = r.get_orthogonal_index();
 			_update_cursor_transform();
 		} break;
@@ -172,14 +173,14 @@ void GridMapEditor::_menu_option(int p_option) {
 			if (input_action == INPUT_PASTE) {
 
 				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 1, 0), M_PI_2);
+				r.rotate(Vector3(0, 1, 0), Math_PI_2);
 				paste_indicator.orientation = r.get_orthogonal_index();
 				_update_paste_indicator();
 				break;
 			}
 
 			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 1, 0), M_PI_2);
+			r.rotate(Vector3(0, 1, 0), Math_PI_2);
 			cursor_rot = r.get_orthogonal_index();
 			_update_cursor_transform();
 		} break;
@@ -189,14 +190,14 @@ void GridMapEditor::_menu_option(int p_option) {
 			if (input_action == INPUT_PASTE) {
 
 				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(1, 0, 0), M_PI_2);
+				r.rotate(Vector3(1, 0, 0), Math_PI_2);
 				paste_indicator.orientation = r.get_orthogonal_index();
 				_update_paste_indicator();
 				break;
 			}
 
 			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(1, 0, 0), M_PI_2);
+			r.rotate(Vector3(1, 0, 0), Math_PI_2);
 			cursor_rot = r.get_orthogonal_index();
 			_update_cursor_transform();
 		} break;
@@ -206,14 +207,14 @@ void GridMapEditor::_menu_option(int p_option) {
 			if (input_action == INPUT_PASTE) {
 
 				r.set_orthogonal_index(paste_indicator.orientation);
-				r.rotate(Vector3(0, 0, 1), M_PI_2);
+				r.rotate(Vector3(0, 0, 1), Math_PI_2);
 				paste_indicator.orientation = r.get_orthogonal_index();
 				_update_paste_indicator();
 				break;
 			}
 
 			r.set_orthogonal_index(cursor_rot);
-			r.rotate(Vector3(0, 0, 1), M_PI_2);
+			r.rotate(Vector3(0, 0, 1), Math_PI_2);
 			cursor_rot = r.get_orthogonal_index();
 			_update_cursor_transform();
 		} break;
