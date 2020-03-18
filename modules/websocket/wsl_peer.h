@@ -66,9 +66,9 @@ public:
 			valid = false;
 			is_server = false;
 			id = 1;
-			ctx = NULL;
-			obj = NULL;
-			peer = NULL;
+			ctx = nullptr;
+			obj = nullptr;
+			peer = nullptr;
 		}
 	};
 
