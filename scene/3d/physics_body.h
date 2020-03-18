@@ -305,8 +305,8 @@ private:
 	bool on_floor;
 	bool on_ceiling;
 	bool on_wall;
-	Vector<Collision> colliders;
-	Vector<Ref<KinematicCollision> > slide_colliders;
+	std::vector<Collision> colliders;
+	std::vector<Ref<KinematicCollision> > slide_colliders;
 	Ref<KinematicCollision> motion_cache;
 
 	_FORCE_INLINE_ bool _ignores_mode(PhysicsServer::BodyMode) const;
@@ -450,8 +450,8 @@ public:
 
 		HingeJointData() :
 				angular_limit_enabled(false),
-				angular_limit_upper(Math_PI * 0.5),
-				angular_limit_lower(-Math_PI * 0.5),
+				angular_limit_upper(M_PI_2),
+				angular_limit_lower(-M_PI_2),
 				angular_limit_bias(0.3),
 				angular_limit_softness(0.9),
 				angular_limit_relaxation(1.) {}
