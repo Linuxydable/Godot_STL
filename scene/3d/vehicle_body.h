@@ -31,6 +31,8 @@
 #ifndef VEHICLE_BODY_H
 #define VEHICLE_BODY_H
 
+#include <vector>
+
 #include "scene/3d/physics_body.h"
 
 class VehicleBody;
@@ -164,10 +166,10 @@ class VehicleBody : public RigidBody {
 
 	Set<RID> exclude;
 
-	Vector<Vector3> m_forwardWS;
-	Vector<Vector3> m_axle;
-	Vector<real_t> m_forwardImpulse;
-	Vector<real_t> m_sideImpulse;
+	std::vector<Vector3> m_forwardWS;
+	std::vector<Vector3> m_axle;
+	std::vector<real_t> m_forwardImpulse;
+	std::vector<real_t> m_sideImpulse;
 
 	struct btVehicleWheelContactPoint {
 		PhysicsDirectBodyState *m_s;
@@ -190,7 +192,7 @@ class VehicleBody : public RigidBody {
 	void _update_wheel(int p_idx, PhysicsDirectBodyState *s);
 
 	friend class VehicleWheel;
-	Vector<VehicleWheel *> wheels;
+	std::vector<VehicleWheel *> wheels;
 
 	static void _bind_methods();
 
