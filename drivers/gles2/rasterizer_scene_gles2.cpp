@@ -178,17 +178,17 @@ void RasterizerSceneGLES2::shadow_atlas_set_quadrant_subdivision(RID p_atlas, in
 		subdiv <<= 1;
 	}
 
-	subdiv = int(Math::sqrt((float)subdiv));
+	subdiv = uint32_t(Math::sqrt((float)subdiv));
 
-	if (shadow_atlas->quadrants[p_quadrant].shadows.size() == (int)subdiv)
+	if (shadow_atlas->quadrants[p_quadrant].shadows.size() == subdiv)
 		return;
 
 	// erase all data from the quadrant
-	for (int i = 0; i < shadow_atlas->quadrants[p_quadrant].shadows.size(); i++) {
-		if (shadow_atlas->quadrants[p_quadrant].shadows[i].owner.is_valid()) {
-			shadow_atlas->shadow_owners.erase(shadow_atlas->quadrants[p_quadrant].shadows[i].owner);
+	for (auto &&shadow : shadow_atlas->quadrants[p_quadrant].shadows) {
+		if (shadow.owner.is_valid()) {
+			shadow_atlas->shadow_owners.erase(shadow.owner);
 
-			LightInstance *li = light_instance_owner.getornull(shadow_atlas->quadrants[p_quadrant].shadows[i].owner);
+			LightInstance *li = light_instance_owner.getornull(shadow.owner);
 			ERR_CONTINUE(!li);
 			li->shadow_atlases.erase(p_atlas);
 		}
@@ -202,9 +202,9 @@ void RasterizerSceneGLES2::shadow_atlas_set_quadrant_subdivision(RID p_atlas, in
 
 	shadow_atlas->smallest_subdiv = 1 << 30;
 
-	for (int i = 0; i < 4; i++) {
-		if (shadow_atlas->quadrants[i].subdivision) {
-			shadow_atlas->smallest_subdiv = MIN(shadow_atlas->smallest_subdiv, shadow_atlas->quadrants[i].subdivision);
+	for (auto &&quadrant : shadow_atlas->quadrants) {
+		if (quadrant.subdivision) {
+			shadow_atlas->smallest_subdiv = MIN(shadow_atlas->smallest_subdiv, quadrant.subdivision);
 		}
 	}
 
@@ -218,10 +218,10 @@ void RasterizerSceneGLES2::shadow_atlas_set_quadrant_subdivision(RID p_atlas, in
 	do {
 		swaps = 0;
 
-		for (int i = 0; i < 3; i++) {
+		for (uint8_t i = 0; i < 3u; ++i) {
 			if (shadow_atlas->quadrants[shadow_atlas->size_order[i]].subdivision < shadow_atlas->quadrants[shadow_atlas->size_order[i + 1]].subdivision) {
 				SWAP(shadow_atlas->size_order[i], shadow_atlas->size_order[i + 1]);
-				swaps++;
+				++swaps;
 			}
 		}
 
@@ -230,7 +230,7 @@ void RasterizerSceneGLES2::shadow_atlas_set_quadrant_subdivision(RID p_atlas, in
 
 bool RasterizerSceneGLES2::_shadow_atlas_find_shadow(ShadowAtlas *shadow_atlas, int *p_in_quadrants, int p_quadrant_count, int p_current_subdiv, uint64_t p_tick, int &r_quadrant, int &r_shadow) {
 
-	for (int i = p_quadrant_count - 1; i >= 0; i--) {
+	for (int i = p_quadrant_count - 1; i >= 0; --i) {
 		int qidx = p_in_quadrants[i];
 
 		if (shadow_atlas->quadrants[qidx].subdivision == (uint32_t)p_current_subdiv) {
@@ -239,15 +239,16 @@ bool RasterizerSceneGLES2::_shadow_atlas_find_shadow(ShadowAtlas *shadow_atlas, 
 
 		// look for an empty space
 
-		int sc = shadow_atlas->quadrants[qidx].shadows.size();
+		auto sc = shadow_atlas->quadrants[qidx].shadows.size();
 
-		ShadowAtlas::Quadrant::Shadow *sarr = shadow_atlas->quadrants[qidx].shadows.ptrw();
+		ShadowAtlas::Quadrant::Shadow *sarr = shadow_atlas->quadrants[qidx].shadows.data();
 
+		// need update : can be better
 		int found_free_idx = -1; // found a free one
 		int found_used_idx = -1; // found an existing one, must steal it
 		uint64_t min_pass = 0; // pass of the existing one, try to use the least recently
 
-		for (int j = 0; j < sc; j++) {
+		for (decltype(sc) j = 0; j < sc; ++j) {
 			if (!sarr[j].owner.is_valid()) {
 				found_free_idx = j;
 				break;
@@ -305,12 +306,12 @@ bool RasterizerSceneGLES2::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 
 	int valid_quadrants[4];
 	int valid_quadrant_count = 0;
+	// need update : can be better?
 	int best_size = -1;
 	int best_subdiv = -1;
 
-	for (int i = 0; i < 4; i++) {
-		int q = shadow_atlas->size_order[i];
-		int sd = shadow_atlas->quadrants[q].subdivision;
+	for (auto &&q : shadow_atlas->size_order) {
+		auto sd = shadow_atlas->quadrants[q].subdivision;
 
 		if (sd == 0) {
 			continue;
@@ -323,7 +324,7 @@ bool RasterizerSceneGLES2::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 		}
 
 		valid_quadrants[valid_quadrant_count] = q;
-		valid_quadrant_count++;
+		++valid_quadrant_count;
 
 		best_subdiv = sd;
 
@@ -348,7 +349,7 @@ bool RasterizerSceneGLES2::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 		bool should_redraw = shadow_atlas->quadrants[q].shadows[s].version != p_light_version;
 
 		if (!should_realloc) {
-			shadow_atlas->quadrants[q].shadows.write[s].version = p_light_version;
+			shadow_atlas->quadrants[q].shadows[s].version = p_light_version;
 			return should_redraw;
 		}
 
@@ -360,7 +361,7 @@ bool RasterizerSceneGLES2::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 		if (_shadow_atlas_find_shadow(shadow_atlas, valid_quadrants, valid_quadrant_count, shadow_atlas->quadrants[q].subdivision, tick, new_quadrant, new_shadow)) {
 			// found a better place
 
-			ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows.write[new_shadow];
+			ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows[new_shadow];
 			if (sh->owner.is_valid()) {
 				// it is take but invalid, so we can take it
 
@@ -370,8 +371,8 @@ bool RasterizerSceneGLES2::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 			}
 
 			// erase previous
-			shadow_atlas->quadrants[q].shadows.write[s].version = 0;
-			shadow_atlas->quadrants[q].shadows.write[s].owner = RID();
+			shadow_atlas->quadrants[q].shadows[s].version = 0;
+			shadow_atlas->quadrants[q].shadows[s].owner = RID();
 
 			sh->owner = p_light_intance;
 			sh->alloc_tick = tick;
@@ -391,7 +392,7 @@ bool RasterizerSceneGLES2::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 
 		// no better place found, so we keep the current place
 
-		shadow_atlas->quadrants[q].shadows.write[s].version = p_light_version;
+		shadow_atlas->quadrants[q].shadows[s].version = p_light_version;
 
 		return should_redraw;
 	}
@@ -402,7 +403,7 @@ bool RasterizerSceneGLES2::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 	if (_shadow_atlas_find_shadow(shadow_atlas, valid_quadrants, valid_quadrant_count, -1, tick, new_quadrant, new_shadow)) {
 		// found a better place
 
-		ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows.write[new_shadow];
+		ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows[new_shadow];
 		if (sh->owner.is_valid()) {
 			// it is take but invalid, so we can take it
 
@@ -493,7 +494,7 @@ RID RasterizerSceneGLES2::reflection_probe_instance_create(RID p_probe) {
 
 	rpi->index = 0;
 
-	for (int i = 0; i < 6; i++) {
+	for (uint8_t i = 0; i < 6u; ++i) {
 		glGenFramebuffers(1, &rpi->fbo[i]);
 		glGenTextures(1, &rpi->color[i]);
 	}
@@ -632,7 +633,7 @@ bool RasterizerSceneGLES2::reflection_probe_instance_postprocess_step(RID p_inst
 		glDisable(GL_BLEND);
 		glDepthMask(GL_FALSE);
 
-		for (int i = 0; i < VS::ARRAY_MAX - 1; i++) {
+		for (uint8_t i = 0; i < VS::ARRAY_MAX - 1; ++i) {
 			glDisableVertexAttribArray(i);
 		}
 	}
@@ -642,7 +643,7 @@ bool RasterizerSceneGLES2::reflection_probe_instance_postprocess_step(RID p_inst
 	glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR); //use linear, no mipmaps so it does not read from what is being written to
 
 	//first of all, copy rendered textures to cubemap
-	for (int i = 0; i < 6; i++) {
+	for (uint8_t i = 0; i < 6u; ++i) {
 		glBindFramebuffer(GL_FRAMEBUFFER, rpi->fbo[i]);
 		glViewport(0, 0, size, size);
 		glCopyTexSubImage2D(_cube_side_enum[i], 0, 0, 0, 0, 0, size, size);
@@ -673,7 +674,7 @@ bool RasterizerSceneGLES2::reflection_probe_instance_postprocess_step(RID p_inst
 		glViewport(0, 0, size, size);
 		glActiveTexture(GL_TEXTURE0);
 
-		for (int i = 0; i < 6; i++) {
+		for (uint8_t i = 0; i < 6u; ++i) {
 
 			storage->bind_quad_array();
 			storage->shaders.cubemap_filter.set_uniform(CubemapFilterShaderGLES2::FACE_ID, i);
@@ -978,7 +979,7 @@ void RasterizerSceneGLES2::gi_probe_instance_set_bounds(RID p_probe, const Vecto
 
 void RasterizerSceneGLES2::_add_geometry(RasterizerStorageGLES2::Geometry *p_geometry, InstanceBase *p_instance, RasterizerStorageGLES2::GeometryOwner *p_owner, int p_material, bool p_depth_pass, bool p_shadow_pass) {
 
-	RasterizerStorageGLES2::Material *material = NULL;
+	RasterizerStorageGLES2::Material *material = nullptr;
 	RID material_src;
 
 	if (p_instance->material_override.is_valid()) {
@@ -993,7 +994,7 @@ void RasterizerSceneGLES2::_add_geometry(RasterizerStorageGLES2::Geometry *p_geo
 		material = storage->material_owner.getornull(material_src);
 
 		if (!material->shader || !material->shader->valid) {
-			material = NULL;
+			material = nullptr;
 		}
 	}
 
@@ -1110,13 +1111,13 @@ void RasterizerSceneGLES2::_add_geometry_with_material(RasterizerStorageGLES2::G
 			eo->use_accum_ptr = &eo->use_accum;
 		}
 
-		int rpsize = e->instance->reflection_probe_instances.size();
+		auto rpsize = e->instance->reflection_probe_instances.size();
 		if (rpsize > 0) {
 			bool first = true;
 			rpsize = MIN(rpsize, 2); //more than 2 per object are not supported, this keeps it stable
 
-			for (int i = 0; i < rpsize; i++) {
-				ReflectionProbeInstance *rpi = reflection_probe_instance_owner.getornull(e->instance->reflection_probe_instances[i]);
+			for (auto &&instance : e->instance->reflection_probe_instances) {
+				ReflectionProbeInstance *rpi = reflection_probe_instance_owner.getornull(instance);
 				if (rpi->last_pass != render_pass) {
 					continue;
 				}
@@ -1165,9 +1166,9 @@ void RasterizerSceneGLES2::_add_geometry_with_material(RasterizerStorageGLES2::G
 
 			//add omni / spots
 
-			for (int i = 0; i < e->instance->light_instances.size(); i++) {
+			for (auto &&instance : e->instance->light_instances) {
 
-				LightInstance *li = light_instance_owner.getornull(e->instance->light_instances[i]);
+				LightInstance *li = light_instance_owner.getornull(instance);
 
 				if (li->light_index >= render_light_instance_count || render_light_instances[li->light_index] != li) {
 					continue; // too many or light_index did not correspond to the light instances to be rendered
@@ -1251,14 +1252,14 @@ void RasterizerSceneGLES2::_fill_render_list(InstanceBase **p_cull_result, int p
 				RasterizerStorageGLES2::Mesh *mesh = storage->mesh_owner.getornull(instance->base);
 				ERR_CONTINUE(!mesh);
 
-				int num_surfaces = mesh->surfaces.size();
+				auto num_surfaces = mesh->surfaces.size();
 
-				for (int j = 0; j < num_surfaces; j++) {
+				for (decltype(num_surfaces) j = 0; j < num_surfaces; ++j) {
 					int material_index = instance->materials[j].is_valid() ? j : -1;
 
 					RasterizerStorageGLES2::Surface *surface = mesh->surfaces[j];
 
-					_add_geometry(surface, instance, NULL, material_index, p_depth_pass, p_shadow_pass);
+					_add_geometry(surface, instance, nullptr, material_index, p_depth_pass, p_shadow_pass);
 				}
 
 			} break;
@@ -1286,7 +1287,7 @@ void RasterizerSceneGLES2::_fill_render_list(InstanceBase **p_cull_result, int p
 				RasterizerStorageGLES2::Immediate *im = storage->immediate_owner.getptr(instance->base);
 				ERR_CONTINUE(!im);
 
-				_add_geometry(im, instance, NULL, -1, p_depth_pass, p_shadow_pass);
+				_add_geometry(im, instance, nullptr, -1, p_depth_pass, p_shadow_pass);
 
 			} break;
 
@@ -1366,16 +1367,16 @@ bool RasterizerSceneGLES2::_setup_material(RasterizerStorageGLES2::Material *p_m
 		} break;
 	}
 
-	int tc = p_material->textures.size();
-	const Pair<StringName, RID> *textures = p_material->textures.ptr();
+	auto tc = p_material->textures.size();
+	const Pair<StringName, RID> *textures = p_material->textures.data();
 
-	const ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = p_material->shader->texture_hints.ptr();
+	const ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = p_material->shader->texture_hints.data();
 
 	state.scene_shader.set_uniform(SceneShaderGLES2::SKELETON_TEXTURE_SIZE, p_skeleton_tex_size);
 
 	state.current_main_tex = 0;
 
-	for (int i = 0; i < tc; i++) {
+	for (decltype(tc) i = 0; i < tc; ++i) {
 
 		glActiveTexture(GL_TEXTURE0 + i);
 
@@ -1445,7 +1446,7 @@ void RasterizerSceneGLES2::_setup_geometry(RenderList::Element *p_element, Raste
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s->index_id);
 			}
 
-			for (int i = 0; i < VS::ARRAY_MAX - 1; i++) {
+			for (uint8_t i = 0; i < VS::ARRAY_MAX - 1; ++i) {
 				if (s->attribs[i].enabled) {
 					glEnableVertexAttribArray(i);
 					glVertexAttribPointer(s->attribs[i].index, s->attribs[i].size, s->attribs[i].type, s->attribs[i].normalized, s->attribs[i].stride, CAST_INT_TO_UCHAR_PTR(s->attribs[i].offset));
@@ -1607,7 +1608,7 @@ void RasterizerSceneGLES2::_setup_geometry(RenderList::Element *p_element, Raste
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, s->index_id);
 			}
 
-			for (int i = 0; i < VS::ARRAY_MAX - 1; i++) {
+			for (uint8_t i = 0; i < VS::ARRAY_MAX - 1; ++i) {
 				if (s->attribs[i].enabled) {
 					glEnableVertexAttribArray(i);
 					glVertexAttribPointer(s->attribs[i].index, s->attribs[i].size, s->attribs[i].type, s->attribs[i].normalized, s->attribs[i].stride, CAST_INT_TO_UCHAR_PTR(s->attribs[i].offset));
@@ -1698,7 +1699,7 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 
 			// drawing
 
-			const float *base_buffer = multi_mesh->data.ptr();
+			const float *base_buffer = multi_mesh->data.data();
 
 			for (int i = 0; i < amount; i++) {
 				const float *buffer = base_buffer + i * stride;
@@ -1794,7 +1795,7 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 
 				if (!c.normals.empty()) {
 					glEnableVertexAttribArray(VS::ARRAY_NORMAL);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.normals.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.normals.data());
 					glVertexAttribPointer(VS::ARRAY_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Vector3) * vertices;
 				} else {
@@ -1803,7 +1804,7 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 
 				if (!c.tangents.empty()) {
 					glEnableVertexAttribArray(VS::ARRAY_TANGENT);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Plane) * vertices, c.tangents.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Plane) * vertices, c.tangents.data());
 					glVertexAttribPointer(VS::ARRAY_TANGENT, 4, GL_FLOAT, GL_FALSE, sizeof(Plane), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Plane) * vertices;
 				} else {
@@ -1812,7 +1813,7 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 
 				if (!c.colors.empty()) {
 					glEnableVertexAttribArray(VS::ARRAY_COLOR);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Color) * vertices, c.colors.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Color) * vertices, c.colors.data());
 					glVertexAttribPointer(VS::ARRAY_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof(Color), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Color) * vertices;
 				} else {
@@ -1821,7 +1822,7 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 
 				if (!c.uvs.empty()) {
 					glEnableVertexAttribArray(VS::ARRAY_TEX_UV);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uvs.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uvs.data());
 					glVertexAttribPointer(VS::ARRAY_TEX_UV, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Vector2) * vertices;
 				} else {
@@ -1830,7 +1831,7 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 
 				if (!c.uv2s.empty()) {
 					glEnableVertexAttribArray(VS::ARRAY_TEX_UV2);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uv2s.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uv2s.data());
 					glVertexAttribPointer(VS::ARRAY_TEX_UV2, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Vector2) * vertices;
 				} else {
@@ -1838,7 +1839,7 @@ void RasterizerSceneGLES2::_render_geometry(RenderList::Element *p_element) {
 				}
 
 				glEnableVertexAttribArray(VS::ARRAY_VERTEX);
-				glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.vertices.ptr());
+				glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.vertices.data());
 				glVertexAttribPointer(VS::ARRAY_VERTEX, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 
 				glDrawArrays(gl_primitive[c.primitive], 0, c.vertices.size());
@@ -1970,7 +1971,7 @@ void RasterizerSceneGLES2::_setup_light(LightInstance *light, ShadowAtlas *shado
 
 			if (!state.render_no_shadows && light_ptr->shadow && directional_shadow.depth) {
 
-				int shadow_count = 0;
+				uint8_t shadow_count = 0;
 				Color split_offsets;
 
 				switch (light_ptr->directional_shadow_mode) {
@@ -1987,7 +1988,7 @@ void RasterizerSceneGLES2::_setup_light(LightInstance *light, ShadowAtlas *shado
 					} break;
 				}
 
-				for (int k = 0; k < shadow_count; k++) {
+				for (uint8_t k = 0; k < shadow_count; ++k) {
 
 					uint32_t x = light->directional_rect.position.x;
 					uint32_t y = light->directional_rect.position.y;
@@ -2238,19 +2239,19 @@ void RasterizerSceneGLES2::_render_render_list(RenderList::Element **p_elements,
 	bool prev_instancing = false;
 	bool prev_depth_prepass = false;
 	state.scene_shader.set_conditional(SceneShaderGLES2::SHADELESS, false);
-	RasterizerStorageGLES2::Material *prev_material = NULL;
-	RasterizerStorageGLES2::Geometry *prev_geometry = NULL;
-	RasterizerStorageGLES2::Skeleton *prev_skeleton = NULL;
-	RasterizerStorageGLES2::GeometryOwner *prev_owner = NULL;
+	RasterizerStorageGLES2::Material *prev_material = nullptr;
+	RasterizerStorageGLES2::Geometry *prev_geometry = nullptr;
+	RasterizerStorageGLES2::Skeleton *prev_skeleton = nullptr;
+	RasterizerStorageGLES2::GeometryOwner *prev_owner = nullptr;
 
 	Transform view_transform_inverse = p_view_transform.inverse();
 	CameraMatrix projection_inverse = p_projection.inverse();
 
 	bool prev_base_pass = false;
-	LightInstance *prev_light = NULL;
+	LightInstance *prev_light = nullptr;
 	bool prev_vertex_lit = false;
-	ReflectionProbeInstance *prev_refprobe_1 = NULL;
-	ReflectionProbeInstance *prev_refprobe_2 = NULL;
+	ReflectionProbeInstance *prev_refprobe_1 = nullptr;
+	ReflectionProbeInstance *prev_refprobe_2 = nullptr;
 
 	int prev_blend_mode = -2; //will always catch the first go
 
@@ -2278,7 +2279,7 @@ void RasterizerSceneGLES2::_render_render_list(RenderList::Element **p_elements,
 		using_fog = true;
 	}
 
-	RasterizerStorageGLES2::Texture *prev_lightmap = NULL;
+	RasterizerStorageGLES2::Texture *prev_lightmap = nullptr;
 	float lightmap_energy = 1.0;
 	bool prev_use_lightmap_capture = false;
 
@@ -2292,10 +2293,10 @@ void RasterizerSceneGLES2::_render_render_list(RenderList::Element **p_elements,
 		bool rebind = false;
 		bool accum_pass = *e->use_accum_ptr;
 		*e->use_accum_ptr = true; //set to accum for next time this is found
-		LightInstance *light = NULL;
-		ReflectionProbeInstance *refprobe_1 = NULL;
-		ReflectionProbeInstance *refprobe_2 = NULL;
-		RasterizerStorageGLES2::Texture *lightmap = NULL;
+		LightInstance *light = nullptr;
+		ReflectionProbeInstance *refprobe_1 = nullptr;
+		ReflectionProbeInstance *refprobe_2 = nullptr;
+		RasterizerStorageGLES2::Texture *lightmap = nullptr;
 		bool use_lightmap_capture = false;
 		bool rebind_light = false;
 		bool rebind_reflection = false;
@@ -2448,8 +2449,8 @@ void RasterizerSceneGLES2::_render_render_list(RenderList::Element **p_elements,
 			}
 
 			if (lightmap != prev_lightmap) {
-				state.scene_shader.set_conditional(SceneShaderGLES2::USE_LIGHTMAP, lightmap != NULL);
-				if (lightmap != NULL) {
+				state.scene_shader.set_conditional(SceneShaderGLES2::USE_LIGHTMAP, lightmap != nullptr);
+				if (lightmap != nullptr) {
 					glActiveTexture(GL_TEXTURE0 + storage->config.max_texture_image_units - 4);
 					glBindTexture(GL_TEXTURE_2D, lightmap->tex_id);
 				}
@@ -2604,7 +2605,7 @@ void RasterizerSceneGLES2::_render_render_list(RenderList::Element **p_elements,
 		state.scene_shader.set_uniform(SceneShaderGLES2::WORLD_TRANSFORM, e->instance->transform);
 
 		if (use_lightmap_capture) { //this is per instance, must be set always if present
-			glUniform4fv(state.scene_shader.get_uniform_location(SceneShaderGLES2::LIGHTMAP_CAPTURES), 12, (const GLfloat *)e->instance->lightmap_capture_data.ptr());
+			glUniform4fv(state.scene_shader.get_uniform_location(SceneShaderGLES2::LIGHTMAP_CAPTURES), 12, (const GLfloat *)e->instance->lightmap_capture_data.data());
 			state.scene_shader.set_uniform(SceneShaderGLES2::LIGHTMAP_CAPTURE_SKY, false);
 		}
 
@@ -2622,7 +2623,7 @@ void RasterizerSceneGLES2::_render_render_list(RenderList::Element **p_elements,
 		prev_use_lightmap_capture = use_lightmap_capture;
 	}
 
-	_setup_light_type(NULL, NULL); //clear light stuff
+	_setup_light_type(nullptr, nullptr); //clear light stuff
 	state.scene_shader.set_conditional(SceneShaderGLES2::USE_SKELETON, false);
 	state.scene_shader.set_conditional(SceneShaderGLES2::SHADELESS, false);
 	state.scene_shader.set_conditional(SceneShaderGLES2::BASE_PASS, false);
@@ -2976,7 +2977,7 @@ void RasterizerSceneGLES2::_post_process(Environment *env, const CameraMatrix &p
 
 	if (env->glow_enabled) {
 
-		for (int i = 0; i < VS::MAX_GLOW_LEVELS; i++) {
+		for (uint8_t i = 0; i < VS::MAX_GLOW_LEVELS; ++i) {
 			if (env->glow_levels & (1 << i)) {
 
 				if (i >= storage->frame.current_rt->mip_maps[1].sizes.size()) {
@@ -3669,7 +3670,7 @@ void RasterizerSceneGLES2::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 		uint32_t quadrant = (key >> ShadowAtlas::QUADRANT_SHIFT) & 0x03;
 		uint32_t shadow = key & ShadowAtlas::SHADOW_INDEX_MASK;
 
-		ERR_FAIL_INDEX((int)shadow, shadow_atlas->quadrants[quadrant].shadows.size());
+		ERR_FAIL_INDEX(shadow, shadow_atlas->quadrants[quadrant].shadows.size());
 
 		uint32_t quadrant_size = shadow_atlas->size >> 1;
 
@@ -3794,7 +3795,7 @@ void RasterizerSceneGLES2::render_shadow(RID p_light, RID p_shadow_atlas, int p_
 
 		glDisable(GL_CULL_FACE);
 
-		for (int i = 0; i < 2; i++) {
+		for (uint8_t i = 0; i < 2u; ++i) {
 			state.cube_to_dp_shader.set_uniform(CubeToDpShaderGLES2::Z_FLIP, i == 1);
 			state.cube_to_dp_shader.set_uniform(CubeToDpShaderGLES2::Z_NEAR, light_projection.get_z_near());
 			state.cube_to_dp_shader.set_uniform(CubeToDpShaderGLES2::Z_FAR, light_projection.get_z_far());
@@ -3855,7 +3856,7 @@ bool RasterizerSceneGLES2::free(RID p_rid) {
 			uint32_t q = (key >> ShadowAtlas::QUADRANT_SHIFT) & 0x3;
 			uint32_t s = key & ShadowAtlas::SHADOW_INDEX_MASK;
 
-			shadow_atlas->quadrants[q].shadows.write[s].owner = RID();
+			shadow_atlas->quadrants[q].shadows[s].owner = RID();
 			shadow_atlas->shadow_owners.erase(p_rid);
 		}
 
@@ -3872,7 +3873,7 @@ bool RasterizerSceneGLES2::free(RID p_rid) {
 
 		ReflectionProbeInstance *reflection_instance = reflection_probe_instance_owner.get(p_rid);
 
-		for (int i = 0; i < 6; i++) {
+		for (uint8_t i = 0; i < 6u; ++i) {
 			glDeleteFramebuffers(1, &reflection_instance->fbo[i]);
 			glDeleteTextures(1, &reflection_instance->color[i]);
 		}
@@ -3958,15 +3959,15 @@ void RasterizerSceneGLES2::initialize() {
 
 		glGenBuffers(1, &state.immediate_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, state.immediate_buffer);
-		glBufferData(GL_ARRAY_BUFFER, immediate_buffer_size * 1024, NULL, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, immediate_buffer_size * 1024, nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	// cubemaps for shadows
 	if (storage->config.support_shadow_cubemaps) { //not going to be used
-		int max_shadow_cubemap_sampler_size = 512;
+		constexpr uint32_t max_shadow_cubemap_sampler_size = 512;
 
-		int cube_size = max_shadow_cubemap_sampler_size;
+		uint32_t cube_size = max_shadow_cubemap_sampler_size;
 
 		glActiveTexture(GL_TEXTURE0);
 
@@ -3979,9 +3980,8 @@ void RasterizerSceneGLES2::initialize() {
 			glGenTextures(1, &cube.cubemap);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, cube.cubemap);
 
-			for (int i = 0; i < 6; i++) {
-
-				glTexImage2D(_cube_side_enum[i], 0, storage->config.depth_internalformat, cube_size, cube_size, 0, GL_DEPTH_COMPONENT, storage->config.depth_type, NULL);
+			for (auto &&e : _cube_side_enum) {
+				glTexImage2D(e, 0, storage->config.depth_internalformat, cube_size, cube_size, 0, GL_DEPTH_COMPONENT, storage->config.depth_type, nullptr);
 			}
 
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -3991,7 +3991,7 @@ void RasterizerSceneGLES2::initialize() {
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 			glGenFramebuffers(6, cube.fbo);
-			for (int i = 0; i < 6; i++) {
+			for (uint8_t i = 0; i < 6u; ++i) {
 
 				glBindFramebuffer(GL_FRAMEBUFFER, cube.fbo[i]);
 				glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, _cube_side_enum[i], cube.cubemap, 0);
