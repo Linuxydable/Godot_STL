@@ -81,21 +81,19 @@ bool WSLServer::PendingPeer::_parse_request(const std::vector<String> p_protocol
 	key = headers["sec-websocket-key"];
 	if (headers.has("sec-websocket-protocol")) {
 		std::vector<String> protos = headers["sec-websocket-protocol"].split(",");
-		for (auto &&pr : protos) {
-			// Check if we have the given protocol
-			for (auto &&p_pr : p_protocols) {
-				if (pr != p_pr)
-					continue;
-				protocol = pr;
-				break;
-			}
+
+		// Check if we have the given protocol
+		auto it_find = std::find_first_of(p_protocols.begin(), p_protocols.end(), protos.begin(), protos.end());
+
+		if (it_find != p_protocols.end()) {
 			// Found a protocol
-			if (protocol != "")
-				break;
+			protocol = *it_find;
+			return true;
 		}
-		if (protocol == "") // Invalid protocol(s) requested
-			return false;
-	} else if (p_protocols.size() > 0) // No protocol requested, but we need one
+
+		// Invalid protocol(s) requested
+		return false;
+	} else if (!p_protocols.empty()) // No protocol requested, but we need one
 		return false;
 	return true;
 }
@@ -133,8 +131,7 @@ Error WSLServer::PendingPeer::do_handshake(const std::vector<String> p_protocols
 				s += "Upgrade: websocket\r\n";
 				s += "Connection: Upgrade\r\n";
 				s += "Sec-WebSocket-Accept: " + WSLPeer::compute_key_response(key) + "\r\n";
-				if (protocol != "")
-					s += "Sec-WebSocket-Protocol: " + protocol + "\r\n";
+				s += "Sec-WebSocket-Protocol: " + protocol + "\r\n";
 				s += "\r\n";
 				response = s.utf8();
 				has_request = true;
@@ -158,6 +155,7 @@ Error WSLServer::PendingPeer::do_handshake(const std::vector<String> p_protocols
 
 Error WSLServer::listen(int p_port, const std::vector<String> p_protocols, bool gd_mp_api) {
 	ERR_FAIL_COND_V(is_listening(), ERR_ALREADY_IN_USE);
+	ERR_FAIL_COND_V_MSG(std::find(p_protocols.begin(), p_protocols.end(), "") != p_protocols.end(), FAILED, "p_protocols must not contain an empty string.");
 
 	_is_multiplayer = gd_mp_api;
 	_protocols.insert(_protocols.end(), p_protocols.begin(), p_protocols.end());
