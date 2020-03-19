@@ -144,21 +144,20 @@ void ShaderGLES3::unbind() {
 	active = NULL;
 }
 
-static void _display_error_with_code(const String &p_error, const Vector<const char *> &p_code) {
+static void _display_error_with_code(const String &p_error, const std::vector<const char *> &p_code) {
 
 	int line = 1;
 	String total_code;
 
-	for (int i = 0; i < p_code.size(); i++) {
-		total_code += String(p_code[i]);
+	for (auto &&code : p_code) {
+		total_code += String(code);
 	}
 
-	Vector<String> lines = String(total_code).split("\n");
+	std::vector<String> lines = String(total_code).split("\n");
 
-	for (int j = 0; j < lines.size(); j++) {
-
-		print_line(itos(line) + ": " + lines[j]);
-		line++;
+	for (auto &&l : lines) {
+		print_line(itos(line) + ": " + l);
+		++line;
 	}
 
 	ERR_PRINTS(p_error);
@@ -202,7 +201,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	v.ok = false;
 	/* SETUP CONDITIONALS */
 
-	Vector<const char *> strings;
+	std::vector<const char *> strings;
 #ifdef GLES_OVER_GL
 	strings.push_back("#version 330\n");
 	strings.push_back("#define GLES_OVER_GL\n");
@@ -210,12 +209,12 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	strings.push_back("#version 300 es\n");
 #endif
 
-	for (int i = 0; i < custom_defines.size(); i++) {
+	for (auto &&c_define : custom_defines) {
 
-		strings.push_back(custom_defines[i].get_data());
+		strings.push_back(c_define.get_data());
 	}
 
-	for (int j = 0; j < conditional_count; j++) {
+	for (int j = 0; j < conditional_count; ++j) {
 
 		bool enable = ((1 << j) & conditional_version.version);
 		strings.push_back(enable ? conditional_defines[j] : "");
@@ -231,12 +230,12 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	CharString code_globals;
 	CharString material_string;
 
-	CustomCode *cc = NULL;
+	CustomCode *cc = nullptr;
 
 	if (conditional_version.code_version > 0) {
 		//do custom code related stuff
 
-		ERR_FAIL_COND_V(!custom_code_map.has(conditional_version.code_version), NULL);
+		ERR_FAIL_COND_V(!custom_code_map.has(conditional_version.code_version), nullptr);
 		cc = &custom_code_map[conditional_version.code_version];
 		v.code_version = cc->version;
 	}
@@ -245,12 +244,12 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 
 	v.id = glCreateProgram();
 
-	ERR_FAIL_COND_V(v.id == 0, NULL);
+	ERR_FAIL_COND_V(v.id == 0, nullptr);
 
 	/* VERTEX SHADER */
 
 	if (cc) {
-		for (int i = 0; i < cc->custom_defines.size(); i++) {
+		for (decltype(cc->custom_defines.size()) i = 0; i < cc->custom_defines.size(); ++i) {
 
 			strings.push_back(cc->custom_defines[i].get_data());
 			DEBUG_PRINT("CD #" + itos(i) + ": " + String(cc->custom_defines[i]));
@@ -441,7 +440,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	glAttachShader(v.id, v.vert_id);
 
 	// bind attributes before linking
-	for (int i = 0; i < attribute_pair_count; i++) {
+	for (int i = 0; i < attribute_pair_count; ++i) {
 
 		glBindAttribLocation(v.id, attribute_pairs[i].index, attribute_pairs[i].name);
 	}
@@ -449,8 +448,8 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	//if feedback exists, set it up
 
 	if (feedback_count) {
-		Vector<const char *> feedback;
-		for (int i = 0; i < feedback_count; i++) {
+		std::vector<const char *> feedback;
+		for (int i = 0; i < feedback_count; ++i) {
 
 			if (feedbacks[i].conditional == -1 || (1 << feedbacks[i].conditional) & conditional_version.version) {
 				//conditional for this feedback is enabled
@@ -458,8 +457,8 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 			}
 		}
 
-		if (feedback.size()) {
-			glTransformFeedbackVaryings(v.id, feedback.size(), feedback.ptr(), GL_INTERLEAVED_ATTRIBS);
+		if (!feedback.empty()) {
+			glTransformFeedbackVaryings(v.id, feedback.size(), feedback.data(), GL_INTERLEAVED_ATTRIBS);
 		}
 	}
 
@@ -478,7 +477,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 			glDeleteShader(v.vert_id);
 			glDeleteProgram(v.id);
 			v.id = 0;
-			ERR_FAIL_COND_V(iloglen < 0, NULL);
+			ERR_FAIL_COND_V(iloglen < 0, nullptr);
 		}
 
 		if (iloglen == 0) {
@@ -530,7 +529,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	}
 
 	// assign uniform block bind points
-	for (int i = 0; i < ubo_count; i++) {
+	for (int i = 0; i < ubo_count; ++i) {
 
 		GLint loc = glGetUniformBlockIndex(v.id, ubo_pairs[i].name);
 		if (loc >= 0)
@@ -538,11 +537,11 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	}
 
 	if (cc) {
+		auto len = cc->texture_uniforms.size();
+		v.texture_uniform_locations.resize(len);
+		for (decltype(len) i = 0; i < len; ++i) {
 
-		v.texture_uniform_locations.resize(cc->texture_uniforms.size());
-		for (int i = 0; i < cc->texture_uniforms.size(); i++) {
-
-			v.texture_uniform_locations.write[i] = glGetUniformLocation(v.id, String(cc->texture_uniforms[i]).ascii().get_data());
+			v.texture_uniform_locations[i] = glGetUniformLocation(v.id, String(cc->texture_uniforms[i]).ascii().get_data());
 			glUniform1i(v.texture_uniform_locations[i], i + base_material_tex_index);
 		}
 	}
@@ -673,7 +672,7 @@ void ShaderGLES3::setup(const char **p_conditional_defines, int p_conditional_co
 
 void ShaderGLES3::finish() {
 
-	const VersionKey *V = NULL;
+	const VersionKey *V = nullptr;
 	while ((V = version_map.next(V))) {
 
 		Version &v = version_map[*V];
@@ -686,7 +685,7 @@ void ShaderGLES3::finish() {
 
 void ShaderGLES3::clear_caches() {
 
-	const VersionKey *V = NULL;
+	const VersionKey *V = nullptr;
 	while ((V = version_map.next(V))) {
 
 		Version &v = version_map[*V];
@@ -699,7 +698,7 @@ void ShaderGLES3::clear_caches() {
 	version_map.clear();
 
 	custom_code_map.clear();
-	version = NULL;
+	version = nullptr;
 	last_custom_code = 1;
 	uniforms_dirty = true;
 }
@@ -711,7 +710,7 @@ uint32_t ShaderGLES3::create_custom_shader() {
 	return last_custom_code++;
 }
 
-void ShaderGLES3::set_custom_shader_code(uint32_t p_code_id, const String &p_vertex, const String &p_vertex_globals, const String &p_fragment, const String &p_light, const String &p_fragment_globals, const String &p_uniforms, const Vector<StringName> &p_texture_uniforms, const Vector<CharString> &p_custom_defines) {
+void ShaderGLES3::set_custom_shader_code(uint32_t p_code_id, const String &p_vertex, const String &p_vertex_globals, const String &p_fragment, const String &p_light, const String &p_fragment_globals, const String &p_uniforms, const std::vector<StringName> &p_texture_uniforms, const std::vector<CharString> &p_custom_defines) {
 
 	ERR_FAIL_COND(!custom_code_map.has(p_code_id));
 	CustomCode *cc = &custom_code_map[p_code_id];
