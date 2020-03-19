@@ -54,7 +54,7 @@ class AudioDriverOpenSL : public AudioDriver {
 	int32_t *mixdown_buffer;
 	int last_free;
 
-	Vector<int16_t> rec_buffer;
+	std::vector<int16_t> rec_buffer;
 
 	SLPlayItf playItf;
 	SLRecordItf recordItf;

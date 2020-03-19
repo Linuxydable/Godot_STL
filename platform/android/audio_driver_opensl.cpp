@@ -206,13 +206,13 @@ void AudioDriverOpenSL::start() {
 
 void AudioDriverOpenSL::_record_buffer_callback(SLAndroidSimpleBufferQueueItf queueItf) {
 
-	for (int i = 0; i < rec_buffer.size(); i++) {
-		int32_t sample = rec_buffer[i] << 16;
+	for (auto &&b : rec_buffer) {
+		int32_t sample = b << 16;
 		capture_buffer_write(sample);
 		capture_buffer_write(sample); // call twice to convert to Stereo
 	}
 
-	SLresult res = (*recordBufferQueueItf)->Enqueue(recordBufferQueueItf, rec_buffer.ptrw(), rec_buffer.size() * sizeof(int16_t));
+	SLresult res = (*recordBufferQueueItf)->Enqueue(recordBufferQueueItf, rec_buffer.data(), rec_buffer.size() * sizeof(int16_t));
 	ERR_FAIL_COND(res != SL_RESULT_SUCCESS);
 }
 
@@ -282,7 +282,7 @@ Error AudioDriverOpenSL::capture_init_device() {
 	rec_buffer.resize(rec_buffer_frames);
 	capture_buffer_init(rec_buffer_frames);
 
-	res = (*recordBufferQueueItf)->Enqueue(recordBufferQueueItf, rec_buffer.ptrw(), rec_buffer.size() * sizeof(int16_t));
+	res = (*recordBufferQueueItf)->Enqueue(recordBufferQueueItf, rec_buffer.data(), rec_buffer.size() * sizeof(int16_t));
 	ERR_FAIL_COND_V(res != SL_RESULT_SUCCESS, ERR_CANT_OPEN);
 
 	res = (*recordItf)->SetRecordState(recordItf, SL_RECORDSTATE_RECORDING);
