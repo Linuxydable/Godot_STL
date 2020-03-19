@@ -64,7 +64,7 @@ public:
 			int end = pos + to_read;
 			end = MIN(end, size());
 			int total = end - pos;
-			const T *read = data.ptr();
+			const T *read = data.data();
 			for (int i = 0; i < total; i++) {
 				p_buf[dst++] = read[pos + i];
 			};
@@ -143,7 +143,7 @@ public:
 
 	Error write(const T &p_v) {
 		ERR_FAIL_COND_V(space_left() < 1, FAILED);
-		data.write[inc(write_pos, 1)] = p_v;
+		data[inc(write_pos, 1)] = p_v;
 		return OK;
 	};
 
@@ -161,8 +161,8 @@ public:
 			end = MIN(end, size());
 			int total = end - pos;
 
-			for (int i = 0; i < total; i++) {
-				data.write[pos + i] = p_buf[src++];
+			for (int i = 0; i < total; ++i) {
+				data[pos + i] = p_buf[src++];
 			};
 			to_write -= total;
 			pos = 0;
@@ -201,8 +201,8 @@ public:
 		int mask = new_size - 1;
 		data.resize(1 << p_power);
 		if (old_size < new_size && read_pos > write_pos) {
-			for (int i = 0; i < write_pos; i++) {
-				data.write[(old_size + i) & mask] = data[i];
+			for (int i = 0; i < write_pos; ++i) {
+				data[(old_size + i) & mask] = data[i];
 			};
 			write_pos = (old_size + write_pos) & mask;
 		} else {

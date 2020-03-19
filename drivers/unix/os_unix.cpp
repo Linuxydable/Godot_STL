@@ -286,7 +286,7 @@ Error OS_Unix::execute(const String &p_path, const List<String> &p_arguments, bo
 		String argss;
 		argss = "\"" + p_path + "\"";
 
-		for (int i = 0; i < p_arguments.size(); i++) {
+		for (int i = 0; i < p_arguments.size(); ++i) {
 
 			argss += String(" \"") + p_arguments[i] + "\"";
 		}
@@ -331,14 +331,17 @@ Error OS_Unix::execute(const String &p_path, const List<String> &p_arguments, bo
 			setsid();
 		}
 
-		Vector<CharString> cs;
+		auto len = p_arguments.size();
+		std::vector<CharString> cs;
+		cs.reserve(len + 1);
 		cs.push_back(p_path.utf8());
-		for (int i = 0; i < p_arguments.size(); i++)
+		for (int i = 0; i < len; ++i)
 			cs.push_back(p_arguments[i].utf8());
 
-		Vector<char *> args;
-		for (int i = 0; i < cs.size(); i++)
-			args.push_back((char *)cs[i].get_data());
+		std::vector<char *> args;
+		args.reserve(cs.size() + 1);
+		for (auto &&c : cs)
+			args.push_back((char *)c.get_data());
 		args.push_back(0);
 
 		execvp(p_path.utf8().get_data(), &args[0]);
@@ -576,7 +579,7 @@ void UnixTerminalLogger::log_error(const char *p_function, const char *p_file, i
 UnixTerminalLogger::~UnixTerminalLogger() {}
 
 OS_Unix::OS_Unix() {
-	Vector<Logger *> loggers;
+	std::vector<Logger *> loggers;
 	loggers.push_back(memnew(UnixTerminalLogger));
 	_set_logger(memnew(CompositeLogger(loggers)));
 }
