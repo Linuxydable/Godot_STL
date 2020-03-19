@@ -160,7 +160,7 @@ bool JavaClass::_call_method(JavaObject *p_instance, const StringName &p_method,
 
 	r_error.error = Variant::CallError::CALL_OK;
 
-	jvalue *argv = NULL;
+	jvalue *argv = nullptr;
 
 	if (method->param_types.size()) {
 
@@ -168,12 +168,12 @@ bool JavaClass::_call_method(JavaObject *p_instance, const StringName &p_method,
 	}
 
 	List<jobject> to_free;
-	for (int i = 0; i < method->param_types.size(); i++) {
+	for (decltype(method->param_types.size()) i = 0; i < method->param_types.size(); i++) {
 
 		switch (method->param_types[i]) {
 			case ARG_TYPE_VOID: {
 				//can't happen
-				argv[i].l = NULL; //I hope this works
+				argv[i].l = nullptr; //I hope this works
 			} break;
 
 			case ARG_TYPE_BOOLEAN: {
@@ -1079,7 +1079,7 @@ Ref<JavaClass> JavaClassWrapper::wrap(const String &p_class) {
 		String str_method = jstring_to_string(name, env);
 		env->DeleteLocalRef(name);
 
-		Vector<String> params;
+		std::vector<String> params;
 
 		jint mods = env->CallIntMethod(obj, getModifiers);
 
@@ -1150,7 +1150,7 @@ Ref<JavaClass> JavaClassWrapper::wrap(const String &p_class) {
 			if (E->get().param_types.size() != mi.param_types.size())
 				continue;
 			bool valid = true;
-			for (int j = 0; j < E->get().param_types.size(); j++) {
+			for (decltype(E->get().param_types.size()) j = 0; j < E->get().param_types.size(); j++) {
 
 				Variant::Type _new;
 				float new_l;

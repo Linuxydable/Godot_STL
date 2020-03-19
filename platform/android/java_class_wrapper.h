@@ -64,8 +64,8 @@ class JavaClass : public Reference {
 	struct MethodInfo {
 
 		bool _static;
-		Vector<uint32_t> param_types;
-		Vector<StringName> param_sigs;
+		std::vector<uint32_t> param_types;
+		std::vector<StringName> param_sigs;
 		uint32_t return_type;
 		jmethodID method;
 	};
