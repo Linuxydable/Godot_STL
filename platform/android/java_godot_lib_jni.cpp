@@ -403,7 +403,7 @@ class JNISingleton : public Object {
 
 		jmethodID method;
 		Variant::Type ret_type;
-		Vector<Variant::Type> argtypes;
+		std::vector<Variant::Type> argtypes;
 	};
 
 	jobject instance;
@@ -566,7 +566,7 @@ public:
 		instance = p_instance;
 	}
 
-	void add_method(const StringName &p_name, jmethodID p_method, const Vector<Variant::Type> &p_args, Variant::Type p_ret_type) {
+	void add_method(const StringName &p_name, jmethodID p_method, const std::vector<Variant::Type> &p_args, Variant::Type p_ret_type) {
 
 		MethodData md;
 		md.method = p_method;
@@ -576,7 +576,7 @@ public:
 	}
 
 	JNISingleton() {
-		instance = NULL;
+		instance = nullptr;
 	}
 };
 
@@ -668,7 +668,7 @@ static void _initialize_java_modules() {
 	if (modules == String()) {
 		return;
 	}
-	Vector<String> mods = modules.split(",", false);
+	std::vector<String> mods = modules.split(",", false);
 
 	if (mods.size()) {
 		jobject cls = godot_java->get_class_loader();
@@ -679,10 +679,7 @@ static void _initialize_java_modules() {
 		jclass classLoader = env->FindClass("java/lang/ClassLoader");
 		jmethodID findClass = env->GetMethodID(classLoader, "loadClass", "(Ljava/lang/String;)Ljava/lang/Class;");
 
-		for (int i = 0; i < mods.size(); i++) {
-
-			String m = mods[i];
-
+		for (auto &&m : mods) {
 			print_line("Loading Android module: " + m);
 			jstring strClassName = env->NewStringUTF(m.utf8().get_data());
 			jclass singletonClass = (jclass)env->CallObjectMethod(cls, findClass, strClassName);
@@ -807,7 +804,7 @@ JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_touch(JNIEnv *env, jo
 	if (step == 0)
 		return;
 
-	Vector<OS_Android::TouchPos> points;
+	std::vector<OS_Android::TouchPos> points;
 	for (int i = 0; i < count; i++) {
 
 		jint p[3];
@@ -1305,7 +1302,7 @@ JNIEXPORT void JNICALL Java_org_godotengine_godot_GodotLib_method(JNIEnv *env, j
 
 	String mname = jstring_to_string(name, env);
 	String retval = jstring_to_string(ret, env);
-	Vector<Variant::Type> types;
+	std::vector<Variant::Type> types;
 	String cs = "(";
 
 	int stringCount = env->GetArrayLength(args);

@@ -88,16 +88,17 @@ class EditorExportPlatformIOS : public EditorExportPlatform {
 	String _get_additional_plist_content();
 	String _get_linker_flags();
 	String _get_cpp_code();
-	void _fix_config_file(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &pfile, const IOSConfigData &p_config, bool p_debug);
+	void _fix_config_file(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &pfile, const IOSConfigData &p_config, bool p_debug);
 	Error _export_loading_screens(const Ref<EditorExportPreset> &p_preset, const String &p_dest_dir);
 	Error _export_icons(const Ref<EditorExportPreset> &p_preset, const String &p_iconset_dir);
 
-	Vector<ExportArchitecture> _get_supported_architectures();
-	Vector<String> _get_preset_architectures(const Ref<EditorExportPreset> &p_preset);
+	// need update : replace vector with array
+	std::vector<ExportArchitecture> _get_supported_architectures();
+	std::vector<String> _get_preset_architectures(const Ref<EditorExportPreset> &p_preset);
 
-	void _add_assets_to_project(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &p_project_data, const Vector<IOSExportAsset> &p_additional_assets);
-	Error _export_additional_assets(const String &p_out_dir, const Vector<String> &p_assets, bool p_is_framework, Vector<IOSExportAsset> &r_exported_assets);
-	Error _export_additional_assets(const String &p_out_dir, const Vector<SharedObject> &p_libraries, Vector<IOSExportAsset> &r_exported_assets);
+	void _add_assets_to_project(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &p_project_data, const std::vector<IOSExportAsset> &p_additional_assets);
+	Error _export_additional_assets(const String &p_out_dir, const std::vector<String> &p_assets, bool p_is_framework, std::vector<IOSExportAsset> &r_exported_assets);
+	Error _export_additional_assets(const String &p_out_dir, const std::vector<SharedObject> &p_libraries, std::vector<IOSExportAsset> &r_exported_assets);
 
 	bool is_package_name_valid(const String &p_package, String *r_error = NULL) const {
 
@@ -206,16 +207,14 @@ void EditorExportPlatformIOS::get_preset_features(const Ref<EditorExportPreset> 
 		}
 	}
 
-	Vector<String> architectures = _get_preset_architectures(p_preset);
-	for (int i = 0; i < architectures.size(); ++i) {
-		r_features->push_back(architectures[i]);
+	std::vector<String> architectures = _get_preset_architectures(p_preset);
+	for (auto &arch : architectures) {
+		r_features->push_back(arch);
 	}
 }
 
-Vector<EditorExportPlatformIOS::ExportArchitecture> EditorExportPlatformIOS::_get_supported_architectures() {
-	Vector<ExportArchitecture> archs;
-	archs.push_back(ExportArchitecture("armv7", true));
-	archs.push_back(ExportArchitecture("arm64", true));
+std::vector<EditorExportPlatformIOS::ExportArchitecture> EditorExportPlatformIOS::_get_supported_architectures() {
+	std::vector<ExportArchitecture> archs = { { "armv7", true }, { "arm64", true } };
 	return archs;
 }
 
@@ -291,13 +290,13 @@ void EditorExportPlatformIOS::get_export_options(List<ExportOption> *r_options) 
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, loading_screen_infos[i].preset_key, PROPERTY_HINT_FILE, "*.png"), ""));
 	}
 
-	Vector<ExportArchitecture> architectures = _get_supported_architectures();
-	for (int i = 0; i < architectures.size(); ++i) {
-		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "architectures/" + architectures[i].name), architectures[i].is_default));
+	std::vector<ExportArchitecture> architectures = _get_supported_architectures();
+	for (auto &&arch : architectures) {
+		r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "architectures/" + arch.name), arch.is_default));
 	}
 }
 
-void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &pfile, const IOSConfigData &p_config, bool p_debug) {
+void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &pfile, const IOSConfigData &p_config, bool p_debug) {
 	static const String export_method_string[] = {
 		"app-store",
 		"development",
@@ -306,62 +305,62 @@ void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_
 	};
 	String str;
 	String strnew;
-	str.parse_utf8((const char *)pfile.ptr(), pfile.size());
-	Vector<String> lines = str.split("\n");
-	for (int i = 0; i < lines.size(); i++) {
-		if (lines[i].find("$binary") != -1) {
-			strnew += lines[i].replace("$binary", p_config.binary_name) + "\n";
-		} else if (lines[i].find("$name") != -1) {
-			strnew += lines[i].replace("$name", p_config.pkg_name) + "\n";
-		} else if (lines[i].find("$info") != -1) {
-			strnew += lines[i].replace("$info", p_preset->get("application/info")) + "\n";
-		} else if (lines[i].find("$identifier") != -1) {
-			strnew += lines[i].replace("$identifier", p_preset->get("application/identifier")) + "\n";
-		} else if (lines[i].find("$short_version") != -1) {
-			strnew += lines[i].replace("$short_version", p_preset->get("application/short_version")) + "\n";
-		} else if (lines[i].find("$version") != -1) {
-			strnew += lines[i].replace("$version", p_preset->get("application/version")) + "\n";
-		} else if (lines[i].find("$signature") != -1) {
-			strnew += lines[i].replace("$signature", p_preset->get("application/signature")) + "\n";
-		} else if (lines[i].find("$copyright") != -1) {
-			strnew += lines[i].replace("$copyright", p_preset->get("application/copyright")) + "\n";
-		} else if (lines[i].find("$team_id") != -1) {
-			strnew += lines[i].replace("$team_id", p_preset->get("application/app_store_team_id")) + "\n";
-		} else if (lines[i].find("$export_method") != -1) {
+	str.parse_utf8((const char *)pfile.data(), pfile.size());
+	std::vector<String> lines = str.split("\n");
+	for (auto &&line : lines) {
+		if (line.find("$binary") != -1) {
+			strnew += line.replace("$binary", p_config.binary_name) + "\n";
+		} else if (line.find("$name") != -1) {
+			strnew += line.replace("$name", p_config.pkg_name) + "\n";
+		} else if (line.find("$info") != -1) {
+			strnew += line.replace("$info", p_preset->get("application/info")) + "\n";
+		} else if (line.find("$identifier") != -1) {
+			strnew += line.replace("$identifier", p_preset->get("application/identifier")) + "\n";
+		} else if (line.find("$short_version") != -1) {
+			strnew += line.replace("$short_version", p_preset->get("application/short_version")) + "\n";
+		} else if (line.find("$version") != -1) {
+			strnew += line.replace("$version", p_preset->get("application/version")) + "\n";
+		} else if (line.find("$signature") != -1) {
+			strnew += line.replace("$signature", p_preset->get("application/signature")) + "\n";
+		} else if (line.find("$copyright") != -1) {
+			strnew += line.replace("$copyright", p_preset->get("application/copyright")) + "\n";
+		} else if (line.find("$team_id") != -1) {
+			strnew += line.replace("$team_id", p_preset->get("application/app_store_team_id")) + "\n";
+		} else if (line.find("$export_method") != -1) {
 			int export_method = p_preset->get(p_debug ? "application/export_method_debug" : "application/export_method_release");
-			strnew += lines[i].replace("$export_method", export_method_string[export_method]) + "\n";
-		} else if (lines[i].find("$provisioning_profile_uuid_release") != -1) {
-			strnew += lines[i].replace("$provisioning_profile_uuid_release", p_preset->get("application/provisioning_profile_uuid_release")) + "\n";
-		} else if (lines[i].find("$provisioning_profile_uuid_debug") != -1) {
-			strnew += lines[i].replace("$provisioning_profile_uuid_debug", p_preset->get("application/provisioning_profile_uuid_debug")) + "\n";
-		} else if (lines[i].find("$provisioning_profile_uuid") != -1) {
+			strnew += line.replace("$export_method", export_method_string[export_method]) + "\n";
+		} else if (line.find("$provisioning_profile_uuid_release") != -1) {
+			strnew += line.replace("$provisioning_profile_uuid_release", p_preset->get("application/provisioning_profile_uuid_release")) + "\n";
+		} else if (line.find("$provisioning_profile_uuid_debug") != -1) {
+			strnew += line.replace("$provisioning_profile_uuid_debug", p_preset->get("application/provisioning_profile_uuid_debug")) + "\n";
+		} else if (line.find("$provisioning_profile_uuid") != -1) {
 			String uuid = p_debug ? p_preset->get("application/provisioning_profile_uuid_debug") : p_preset->get("application/provisioning_profile_uuid_release");
-			strnew += lines[i].replace("$provisioning_profile_uuid", uuid) + "\n";
-		} else if (lines[i].find("$code_sign_identity_debug") != -1) {
-			strnew += lines[i].replace("$code_sign_identity_debug", p_preset->get("application/code_sign_identity_debug")) + "\n";
-		} else if (lines[i].find("$code_sign_identity_release") != -1) {
-			strnew += lines[i].replace("$code_sign_identity_release", p_preset->get("application/code_sign_identity_release")) + "\n";
-		} else if (lines[i].find("$additional_plist_content") != -1) {
-			strnew += lines[i].replace("$additional_plist_content", p_config.plist_content) + "\n";
-		} else if (lines[i].find("$godot_archs") != -1) {
-			strnew += lines[i].replace("$godot_archs", p_config.architectures) + "\n";
-		} else if (lines[i].find("$linker_flags") != -1) {
-			strnew += lines[i].replace("$linker_flags", p_config.linker_flags) + "\n";
-		} else if (lines[i].find("$cpp_code") != -1) {
-			strnew += lines[i].replace("$cpp_code", p_config.cpp_code) + "\n";
-		} else if (lines[i].find("$access_wifi") != -1) {
+			strnew += line.replace("$provisioning_profile_uuid", uuid) + "\n";
+		} else if (line.find("$code_sign_identity_debug") != -1) {
+			strnew += line.replace("$code_sign_identity_debug", p_preset->get("application/code_sign_identity_debug")) + "\n";
+		} else if (line.find("$code_sign_identity_release") != -1) {
+			strnew += line.replace("$code_sign_identity_release", p_preset->get("application/code_sign_identity_release")) + "\n";
+		} else if (line.find("$additional_plist_content") != -1) {
+			strnew += line.replace("$additional_plist_content", p_config.plist_content) + "\n";
+		} else if (line.find("$godot_archs") != -1) {
+			strnew += line.replace("$godot_archs", p_config.architectures) + "\n";
+		} else if (line.find("$linker_flags") != -1) {
+			strnew += line.replace("$linker_flags", p_config.linker_flags) + "\n";
+		} else if (line.find("$cpp_code") != -1) {
+			strnew += line.replace("$cpp_code", p_config.cpp_code) + "\n";
+		} else if (line.find("$access_wifi") != -1) {
 			bool is_on = p_preset->get("capabilities/access_wifi");
-			strnew += lines[i].replace("$access_wifi", is_on ? "1" : "0") + "\n";
-		} else if (lines[i].find("$game_center") != -1) {
+			strnew += line.replace("$access_wifi", is_on ? "1" : "0") + "\n";
+		} else if (line.find("$game_center") != -1) {
 			bool is_on = p_preset->get("capabilities/game_center");
-			strnew += lines[i].replace("$game_center", is_on ? "1" : "0") + "\n";
-		} else if (lines[i].find("$in_app_purchases") != -1) {
+			strnew += line.replace("$game_center", is_on ? "1" : "0") + "\n";
+		} else if (line.find("$in_app_purchases") != -1) {
 			bool is_on = p_preset->get("capabilities/in_app_purchases");
-			strnew += lines[i].replace("$in_app_purchases", is_on ? "1" : "0") + "\n";
-		} else if (lines[i].find("$push_notifications") != -1) {
+			strnew += line.replace("$in_app_purchases", is_on ? "1" : "0") + "\n";
+		} else if (line.find("$push_notifications") != -1) {
 			bool is_on = p_preset->get("capabilities/push_notifications");
-			strnew += lines[i].replace("$push_notifications", is_on ? "1" : "0") + "\n";
-		} else if (lines[i].find("$required_device_capabilities") != -1) {
+			strnew += line.replace("$push_notifications", is_on ? "1" : "0") + "\n";
+		} else if (line.find("$required_device_capabilities") != -1) {
 			String capabilities;
 
 			// I've removed armv7 as we can run on 64bit only devices
@@ -378,8 +377,8 @@ void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_
 				capabilities += "<string>wifi</string>\n";
 			}
 
-			strnew += lines[i].replace("$required_device_capabilities", capabilities);
-		} else if (lines[i].find("$interface_orientations") != -1) {
+			strnew += line.replace("$required_device_capabilities", capabilities);
+		} else if (line.find("$interface_orientations") != -1) {
 			String orientations;
 
 			if ((bool)p_preset->get("orientation/portrait")) {
@@ -395,18 +394,18 @@ void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_
 				orientations += "<string>UIInterfaceOrientationPortraitUpsideDown</string>\n";
 			}
 
-			strnew += lines[i].replace("$interface_orientations", orientations);
-		} else if (lines[i].find("$camera_usage_description") != -1) {
+			strnew += line.replace("$interface_orientations", orientations);
+		} else if (line.find("$camera_usage_description") != -1) {
 			String description = p_preset->get("privacy/camera_usage_description");
-			strnew += lines[i].replace("$camera_usage_description", description) + "\n";
-		} else if (lines[i].find("$microphone_usage_description") != -1) {
+			strnew += line.replace("$camera_usage_description", description) + "\n";
+		} else if (line.find("$microphone_usage_description") != -1) {
 			String description = p_preset->get("privacy/microphone_usage_description");
-			strnew += lines[i].replace("$microphone_usage_description", description) + "\n";
-		} else if (lines[i].find("$photolibrary_usage_description") != -1) {
+			strnew += line.replace("$microphone_usage_description", description) + "\n";
+		} else if (line.find("$photolibrary_usage_description") != -1) {
 			String description = p_preset->get("privacy/photolibrary_usage_description");
-			strnew += lines[i].replace("$photolibrary_usage_description", description) + "\n";
+			strnew += line.replace("$photolibrary_usage_description", description) + "\n";
 		} else {
-			strnew += lines[i] + "\n";
+			strnew += line + "\n";
 		}
 	}
 
@@ -415,24 +414,24 @@ void EditorExportPlatformIOS::_fix_config_file(const Ref<EditorExportPreset> &p_
 	CharString cs = strnew.utf8();
 	pfile.resize(cs.size() - 1);
 	for (int i = 0; i < cs.size() - 1; i++) {
-		pfile.write[i] = cs[i];
+		pfile[i] = cs[i];
 	}
 }
 
 String EditorExportPlatformIOS::_get_additional_plist_content() {
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
 	String result;
-	for (int i = 0; i < export_plugins.size(); ++i) {
-		result += export_plugins[i]->get_ios_plist_content();
+	for (auto &&plugin : export_plugins) {
+		result += plugin->get_ios_plist_content();
 	}
 	return result;
 }
 
 String EditorExportPlatformIOS::_get_linker_flags() {
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
 	String result;
-	for (int i = 0; i < export_plugins.size(); ++i) {
-		String flags = export_plugins[i]->get_ios_linker_flags();
+	for (auto &&plugin : export_plugins) {
+		String flags = plugin->get_ios_linker_flags();
 		if (flags.length() == 0) continue;
 		if (result.length() > 0) {
 			result += ' ';
@@ -444,10 +443,10 @@ String EditorExportPlatformIOS::_get_linker_flags() {
 }
 
 String EditorExportPlatformIOS::_get_cpp_code() {
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
 	String result;
-	for (int i = 0; i < export_plugins.size(); ++i) {
-		result += export_plugins[i]->get_ios_cpp_code();
+	for (auto &&plugin : export_plugins) {
+		result += plugin->get_ios_cpp_code();
 	}
 	return result;
 }
@@ -558,7 +557,7 @@ Error EditorExportPlatformIOS::_export_loading_screens(const Ref<EditorExportPre
 }
 
 Error EditorExportPlatformIOS::_walk_dir_recursive(DirAccess *p_da, FileHandler p_handler, void *p_userdata) {
-	Vector<String> dirs;
+	std::vector<String> dirs;
 	String path;
 	String current_dir = p_da->get_current_dir();
 	p_da->list_dir_begin();
@@ -577,8 +576,7 @@ Error EditorExportPlatformIOS::_walk_dir_recursive(DirAccess *p_da, FileHandler 
 	}
 	p_da->list_dir_end();
 
-	for (int i = 0; i < dirs.size(); ++i) {
-		String dir = dirs[i];
+	for (auto &&dir : dirs) {
 		p_da->change_dir(dir);
 		Error err = _walk_dir_recursive(p_da, p_handler, p_userdata);
 		p_da->change_dir("..");
@@ -624,13 +622,13 @@ private:
 	}
 
 	static String _hex_pad(uint32_t num) {
-		Vector<char> ret;
+		std::vector<char> ret;
 		ret.resize(sizeof(num) * 2);
 		for (uint64_t i = 0; i < sizeof(num) * 2; ++i) {
 			uint8_t four_bits = (num >> (sizeof(num) * 8 - (i + 1) * 4)) & 0xF;
-			ret.write[i] = _hex_char(four_bits);
+			ret[i] = _hex_char(four_bits);
 		}
-		return String::utf8(ret.ptr(), ret.size());
+		return String::utf8(ret.data(), ret.size());
 	}
 
 public:
@@ -643,11 +641,11 @@ public:
 	}
 
 	PbxId &operator++() {
-		low_bits++;
+		++low_bits;
 		if (!low_bits) {
-			mid_bits++;
+			++mid_bits;
 			if (!mid_bits) {
-				high_bits++;
+				++high_bits;
 			}
 		}
 
@@ -656,17 +654,17 @@ public:
 };
 
 struct ExportLibsData {
-	Vector<String> lib_paths;
+	std::vector<String> lib_paths;
 	String dest_dir;
 };
 
-void EditorExportPlatformIOS::_add_assets_to_project(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &p_project_data, const Vector<IOSExportAsset> &p_additional_assets) {
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
-	Vector<String> frameworks;
-	for (int i = 0; i < export_plugins.size(); ++i) {
-		Vector<String> plugin_frameworks = export_plugins[i]->get_ios_frameworks();
-		for (int j = 0; j < plugin_frameworks.size(); ++j) {
-			frameworks.push_back(plugin_frameworks[j]);
+void EditorExportPlatformIOS::_add_assets_to_project(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &p_project_data, const std::vector<IOSExportAsset> &p_additional_assets) {
+	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	std::vector<String> frameworks;
+	for (auto &&plugin : export_plugins) {
+		std::vector<String> plugin_frameworks = plugin->get_ios_frameworks();
+		for (auto &&framework : plugin_frameworks) {
+			frameworks.push_back(framework);
 		}
 	}
 
@@ -681,10 +679,9 @@ void EditorExportPlatformIOS::_add_assets_to_project(const Ref<EditorExportPrese
 
 	const String file_info_format = String("$build_id = {isa = PBXBuildFile; fileRef = $ref_id; };\n") +
 									"$ref_id = {isa = PBXFileReference; lastKnownFileType = $file_type; name = $name; path = \"$file_path\"; sourceTree = \"<group>\"; };\n";
-	for (int i = 0; i < p_additional_assets.size(); ++i) {
+	for (auto &&asset : p_additional_assets) {
 		String build_id = (++current_id).str();
 		String ref_id = (++current_id).str();
-		const IOSExportAsset &asset = p_additional_assets[i];
 
 		String type;
 		if (asset.exported_path.ends_with(".framework")) {
@@ -741,7 +738,7 @@ void EditorExportPlatformIOS::_add_assets_to_project(const Ref<EditorExportPrese
 		pbx_files += file_info_format.format(format_dict, "$_");
 	}
 
-	String str = String::utf8((const char *)p_project_data.ptr(), p_project_data.size());
+	String str = String::utf8((const char *)p_project_data.data(), p_project_data.size());
 	str = str.replace("$additional_pbx_files", pbx_files);
 	str = str.replace("$additional_pbx_frameworks_build", pbx_frameworks_build);
 	str = str.replace("$additional_pbx_frameworks_refs", pbx_frameworks_refs);
@@ -751,11 +748,11 @@ void EditorExportPlatformIOS::_add_assets_to_project(const Ref<EditorExportPrese
 	CharString cs = str.utf8();
 	p_project_data.resize(cs.size() - 1);
 	for (int i = 0; i < cs.size() - 1; i++) {
-		p_project_data.write[i] = cs[i];
+		p_project_data[i] = cs[i];
 	}
 }
 
-Error EditorExportPlatformIOS::_export_additional_assets(const String &p_out_dir, const Vector<String> &p_assets, bool p_is_framework, Vector<IOSExportAsset> &r_exported_assets) {
+Error EditorExportPlatformIOS::_export_additional_assets(const String &p_out_dir, const std::vector<String> &p_assets, bool p_is_framework, std::vector<IOSExportAsset> &r_exported_assets) {
 	DirAccess *filesystem_da = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 	ERR_FAIL_COND_V_MSG(!filesystem_da, ERR_CANT_CREATE, "Cannot create DirAccess for path '" + p_out_dir + "'.");
 	for (int f_idx = 0; f_idx < p_assets.size(); ++f_idx) {
@@ -804,20 +801,20 @@ Error EditorExportPlatformIOS::_export_additional_assets(const String &p_out_dir
 	return OK;
 }
 
-Error EditorExportPlatformIOS::_export_additional_assets(const String &p_out_dir, const Vector<SharedObject> &p_libraries, Vector<IOSExportAsset> &r_exported_assets) {
-	Vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
-	for (int i = 0; i < export_plugins.size(); i++) {
-		Vector<String> frameworks = export_plugins[i]->get_ios_frameworks();
+Error EditorExportPlatformIOS::_export_additional_assets(const String &p_out_dir, const std::vector<SharedObject> &p_libraries, std::vector<IOSExportAsset> &r_exported_assets) {
+	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	for (auto &&plugin : export_plugins) {
+		std::vector<String> frameworks = plugin->get_ios_frameworks();
 		Error err = _export_additional_assets(p_out_dir, frameworks, true, r_exported_assets);
 		ERR_FAIL_COND_V(err, err);
-		Vector<String> ios_bundle_files = export_plugins[i]->get_ios_bundle_files();
+		std::vector<String> ios_bundle_files = plugin->get_ios_bundle_files();
 		err = _export_additional_assets(p_out_dir, ios_bundle_files, false, r_exported_assets);
 		ERR_FAIL_COND_V(err, err);
 	}
 
-	Vector<String> library_paths;
-	for (int i = 0; i < p_libraries.size(); ++i) {
-		library_paths.push_back(p_libraries[i].path);
+	std::vector<String> library_paths;
+	for (auto &&lib : p_libraries) {
+		library_paths.push_back(lib.path);
 	}
 	Error err = _export_additional_assets(p_out_dir, library_paths, true, r_exported_assets);
 	ERR_FAIL_COND_V(err, err);
@@ -825,13 +822,13 @@ Error EditorExportPlatformIOS::_export_additional_assets(const String &p_out_dir
 	return OK;
 }
 
-Vector<String> EditorExportPlatformIOS::_get_preset_architectures(const Ref<EditorExportPreset> &p_preset) {
-	Vector<ExportArchitecture> all_archs = _get_supported_architectures();
-	Vector<String> enabled_archs;
-	for (int i = 0; i < all_archs.size(); ++i) {
-		bool is_enabled = p_preset->get("architectures/" + all_archs[i].name);
+std::vector<String> EditorExportPlatformIOS::_get_preset_architectures(const Ref<EditorExportPreset> &p_preset) {
+	std::vector<ExportArchitecture> all_archs = _get_supported_architectures();
+	std::vector<String> enabled_archs;
+	for (auto &&arch : all_archs) {
+		bool is_enabled = p_preset->get("architectures/" + arch.name);
 		if (is_enabled) {
-			enabled_archs.push_back(all_archs[i].name);
+			enabled_archs.push_back(arch.name);
 		}
 	}
 	return enabled_archs;
@@ -896,7 +893,7 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 		return ERR_SKIP;
 	}
 	String pack_path = dest_dir + binary_name + ".pck";
-	Vector<SharedObject> libraries;
+	std::vector<SharedObject> libraries;
 	Error err = save_pack(p_preset, pack_path, &libraries);
 	if (err)
 		return err;
@@ -950,7 +947,7 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 	}
 
 	int ret = unzGoToFirstFile(src_pkg_zip);
-	Vector<uint8_t> project_file_data;
+	std::vector<uint8_t> project_file_data;
 	while (ret == UNZ_OK) {
 #if defined(OSX_ENABLED) || defined(X11_ENABLED)
 		bool is_execute = false;
@@ -959,17 +956,17 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 		//get filename
 		unz_file_info info;
 		char fname[16384];
-		ret = unzGetCurrentFileInfo(src_pkg_zip, &info, fname, 16384, NULL, 0, NULL, 0);
+		ret = unzGetCurrentFileInfo(src_pkg_zip, &info, fname, 16384, nullptr, 0, nullptr, 0);
 
 		String file = fname;
 
 		print_line("READ: " + file);
-		Vector<uint8_t> data;
+		std::vector<uint8_t> data;
 		data.resize(info.uncompressed_size);
 
 		//read
 		unzOpenCurrentFile(src_pkg_zip);
-		unzReadCurrentFile(src_pkg_zip, data.ptrw(), data.size());
+		unzReadCurrentFile(src_pkg_zip, data.data(), data.size());
 		unzCloseCurrentFile(src_pkg_zip);
 
 		//write
@@ -1025,7 +1022,7 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 				memdelete(tmp_app_path);
 				return ERR_CANT_CREATE;
 			};
-			f->store_buffer(data.ptr(), data.size());
+			f->store_buffer(data.data(), data.size());
 			f->close();
 			memdelete(f);
 
@@ -1067,7 +1064,7 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 		return err;
 
 	print_line("Exporting additional assets");
-	Vector<IOSExportAsset> assets;
+	std::vector<IOSExportAsset> assets;
 	_export_additional_assets(dest_dir + binary_name, libraries, assets);
 	_add_assets_to_project(p_preset, project_file_data, assets);
 	String project_file_name = dest_dir + binary_name + ".xcodeproj/project.pbxproj";
@@ -1076,7 +1073,7 @@ Error EditorExportPlatformIOS::export_project(const Ref<EditorExportPreset> &p_p
 		ERR_PRINTS("Can't write '" + project_file_name + "'.");
 		return ERR_CANT_CREATE;
 	};
-	f->store_buffer(project_file_data.ptr(), project_file_data.size());
+	f->store_buffer(project_file_data.data(), project_file_data.size());
 	f->close();
 	memdelete(f);
 

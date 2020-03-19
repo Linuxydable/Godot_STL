@@ -55,7 +55,7 @@
 
 #endif
 
-ShaderGLES2 *ShaderGLES2::active = NULL;
+ShaderGLES2 *ShaderGLES2::active = nullptr;
 
 //#define DEBUG_SHADER
 
@@ -103,27 +103,27 @@ bool ShaderGLES2::bind() {
 }
 
 void ShaderGLES2::unbind() {
-	version = NULL;
+	version = nullptr;
 	glUseProgram(0);
 	uniforms_dirty = true;
-	active = NULL;
+	active = nullptr;
 }
 
-static void _display_error_with_code(const String &p_error, const Vector<const char *> &p_code) {
+static void _display_error_with_code(const String &p_error, const std::vector<const char *> &p_code) {
 
 	int line = 1;
 	String total_code;
 
-	for (int i = 0; i < p_code.size(); i++) {
-		total_code += String(p_code[i]);
+	for (auto &&code : p_code) {
+		total_code += String(code);
 	}
 
-	Vector<String> lines = String(total_code).split("\n");
+	std::vector<String> lines = String(total_code).split("\n");
 
-	for (int j = 0; j < lines.size(); j++) {
+	for (auto &&l : lines) {
 
-		print_line(itos(line) + ": " + lines[j]);
-		line++;
+		print_line(itos(line) + ": " + l);
+		++line;
 	}
 
 	ERR_PRINTS(p_error);
@@ -168,7 +168,7 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 
 	v.ok = false;
 
-	Vector<const char *> strings;
+	std::vector<const char *> strings;
 
 #ifdef GLES_OVER_GL
 	strings.push_back("#version 120\n");
@@ -196,24 +196,24 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 	CharString code_string2;
 	CharString code_globals;
 
-	CustomCode *cc = NULL;
+	CustomCode *cc = nullptr;
 
 	if (conditional_version.code_version > 0) {
 		cc = custom_code_map.getptr(conditional_version.code_version);
 
-		ERR_FAIL_COND_V(!cc, NULL);
+		ERR_FAIL_COND_V(!cc, nullptr);
 		v.code_version = cc->version;
 	}
 
 	// program
 
 	v.id = glCreateProgram();
-	ERR_FAIL_COND_V(v.id == 0, NULL);
+	ERR_FAIL_COND_V(v.id == 0, nullptr);
 
 	if (cc) {
-		for (int i = 0; i < cc->custom_defines.size(); i++) {
-			strings.push_back(cc->custom_defines.write[i]);
-			DEBUG_PRINT("CD #" + itos(i) + ": " + String(cc->custom_defines[i].get_data()));
+		for (auto &&c_define : cc->custom_defines) {
+			strings.push_back(c_define);
+			DEBUG_PRINT("CD #" + itos(i) + ": " + String(c_define.get_data()));
 		}
 	}
 
@@ -244,7 +244,7 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 #endif
 
 	v.vert_id = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(v.vert_id, strings.size(), &strings[0], NULL);
+	glShaderSource(v.vert_id, strings.size(), &strings[0], nullptr);
 	glCompileShader(v.vert_id);
 
 	GLint status;
@@ -320,7 +320,7 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 #endif
 
 	v.frag_id = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(v.frag_id, strings.size(), &strings[0], NULL);
+	glShaderSource(v.frag_id, strings.size(), &strings[0], nullptr);
 	glCompileShader(v.frag_id);
 
 	glGetShaderiv(v.frag_id, GL_COMPILE_STATUS, &status);
@@ -431,14 +431,14 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 
 	if (cc) {
 		// uniforms
-		for (int i = 0; i < cc->custom_uniforms.size(); i++) {
-			String native_uniform_name = _mkid(cc->custom_uniforms[i]);
+		for (auto &&uniform : cc->custom_uniforms) {
+			String native_uniform_name = _mkid(uniform);
 			GLint location = glGetUniformLocation(v.id, (native_uniform_name).ascii().get_data());
-			v.custom_uniform_locations[cc->custom_uniforms[i]] = location;
+			v.custom_uniform_locations[uniform] = location;
 		}
 
 		// textures
-		for (int i = 0; i < cc->texture_uniforms.size(); i++) {
+		for (decltype(cc->texture_uniforms.size()) i = 0; i < cc->texture_uniforms.size(); ++i) {
 			String native_uniform_name = _mkid(cc->texture_uniforms[i]);
 			GLint location = glGetUniformLocation(v.id, (native_uniform_name).ascii().get_data());
 			v.custom_uniform_locations[cc->texture_uniforms[i]] = location;
@@ -553,7 +553,7 @@ void ShaderGLES2::setup(
 }
 
 void ShaderGLES2::finish() {
-	const VersionKey *V = NULL;
+	const VersionKey *V = nullptr;
 
 	while ((V = version_map.next(V))) {
 		Version &v = version_map[*V];
@@ -565,7 +565,7 @@ void ShaderGLES2::finish() {
 }
 
 void ShaderGLES2::clear_caches() {
-	const VersionKey *V = NULL;
+	const VersionKey *V = nullptr;
 
 	while ((V = version_map.next(V))) {
 		Version &v = version_map[*V];
@@ -578,7 +578,7 @@ void ShaderGLES2::clear_caches() {
 	version_map.clear();
 
 	custom_code_map.clear();
-	version = NULL;
+	version = nullptr;
 	last_custom_code = 1;
 	uniforms_dirty = true;
 }
@@ -595,9 +595,9 @@ void ShaderGLES2::set_custom_shader_code(uint32_t p_code_id,
 		const String &p_fragment,
 		const String &p_light,
 		const String &p_fragment_globals,
-		const Vector<StringName> &p_uniforms,
-		const Vector<StringName> &p_texture_uniforms,
-		const Vector<CharString> &p_custom_defines) {
+		const std::vector<StringName> &p_uniforms,
+		const std::vector<StringName> &p_texture_uniforms,
+		const std::vector<CharString> &p_custom_defines) {
 	CustomCode *cc = custom_code_map.getptr(p_code_id);
 	ERR_FAIL_COND(!cc);
 
@@ -609,7 +609,7 @@ void ShaderGLES2::set_custom_shader_code(uint32_t p_code_id,
 	cc->custom_uniforms = p_uniforms;
 	cc->custom_defines = p_custom_defines;
 	cc->texture_uniforms = p_texture_uniforms;
-	cc->version++;
+	++cc->version;
 }
 
 void ShaderGLES2::set_custom_shader(uint32_t p_code_id) {
@@ -720,10 +720,10 @@ void ShaderGLES2::use_material(void *p_material) {
 				case ShaderLanguage::TYPE_IVEC3:
 				case ShaderLanguage::TYPE_UVEC3: {
 					Array r = V->get();
-					const int count = 3;
+					const uint8_t count = 3;
 					if (r.size() == count) {
 						int values[count];
-						for (int i = 0; i < count; i++) {
+						for (uint8_t i = 0; i < count; ++i) {
 							values[i] = r[i];
 						}
 						glUniform3i(location, values[0], values[1], values[2]);
@@ -734,10 +734,10 @@ void ShaderGLES2::use_material(void *p_material) {
 				case ShaderLanguage::TYPE_IVEC4:
 				case ShaderLanguage::TYPE_UVEC4: {
 					Array r = V->get();
-					const int count = 4;
+					const uint8_t count = 4;
 					if (r.size() == count) {
 						int values[count];
-						for (int i = 0; i < count; i++) {
+						for (uint8_t i = 0; i < count; ++i) {
 							values[i] = r[i];
 						}
 						glUniform4i(location, values[0], values[1], values[2], values[3]);
@@ -839,7 +839,7 @@ void ShaderGLES2::use_material(void *p_material) {
 				} break;
 			}
 		} else if (E->get().default_value.size()) {
-			const Vector<ShaderLanguage::ConstantNode::Value> &values = E->get().default_value;
+			const std::vector<ShaderLanguage::ConstantNode::Value> &values = E->get().default_value;
 			switch (E->get().type) {
 				case ShaderLanguage::TYPE_BOOL: {
 					glUniform1i(location, values[0].boolean);
@@ -1093,7 +1093,7 @@ void ShaderGLES2::use_material(void *p_material) {
 }
 
 ShaderGLES2::ShaderGLES2() {
-	version = NULL;
+	version = nullptr;
 	last_custom_code = 1;
 	uniforms_dirty = true;
 }

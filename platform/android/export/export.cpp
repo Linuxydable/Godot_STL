@@ -228,7 +228,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		EditorProgress *ep;
 	};
 
-	Vector<Device> devices;
+	std::vector<Device> devices;
 	volatile bool devices_changed;
 	Mutex *device_lock;
 	Thread *device_thread;
@@ -249,17 +249,16 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 				int ec;
 				OS::get_singleton()->execute(adb, args, true, NULL, &devices, &ec);
 
-				Vector<String> ds = devices.split("\n");
-				Vector<String> ldevices;
-				for (int i = 1; i < ds.size(); i++) {
+				std::vector<String> ds = devices.split("\n");
+				std::vector<String> ldevices;
 
-					String d = ds[i];
+				std::for_each(ds.begin() + 1, ds.end(), [&ldevices](String &d) {
 					int dpos = d.find("device");
 					if (dpos == -1)
-						continue;
+						return;
 					d = d.substr(0, dpos).strip_edges();
 					ldevices.push_back(d);
-				}
+				});
 
 				ea->device_lock->lock();
 
@@ -270,28 +269,31 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 					different = true;
 				} else {
 
-					for (int i = 0; i < ea->devices.size(); i++) {
-
-						if (ea->devices[i].id != ldevices[i]) {
-							different = true;
-							break;
+					auto it_find = std::find_first_of(ea->devices.begin(), ea->devices.end(), ldevices.begin(), ldevices.end(), [](const Device &d, const String &str) {
+						if (d.id != str) {
+							return true;
 						}
+						return false;
+					});
+
+					if (it_find != ea->devices.end()) {
+						different = true;
 					}
 				}
 
 				if (different) {
 
-					Vector<Device> ndevices;
+					std::vector<Device> ndevices;
 
-					for (int i = 0; i < ldevices.size(); i++) {
+					for (auto &&ldevice : ldevices) {
 
 						Device d;
-						d.id = ldevices[i];
-						for (int j = 0; j < ea->devices.size(); j++) {
-							if (ea->devices[j].id == ldevices[i]) {
-								d.description = ea->devices[j].description;
-								d.name = ea->devices[j].name;
-								d.api_level = ea->devices[j].api_level;
+						d.id = ldevice;
+						for (auto &&device : ea->devices) {
+							if (device.id == ldevice) {
+								d.description = device.description;
+								d.name = device.name;
+								d.api_level = device.api_level;
 							}
 						}
 
@@ -305,19 +307,18 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 							int ec2;
 							String dp;
 
-							OS::get_singleton()->execute(adb, args, true, NULL, &dp, &ec2);
+							OS::get_singleton()->execute(adb, args, true, nullptr, &dp, &ec2);
 
-							Vector<String> props = dp.split("\n");
+							std::vector<String> props = dp.split("\n");
 							String vendor;
 							String device;
 							d.description + "Device ID: " + d.id + "\n";
 							d.api_level = 0;
-							for (int j = 0; j < props.size(); j++) {
+							for (auto &&p : props) {
 
 								// got information by `shell cat /system/build.prop` before and its format is "property=value"
 								// it's now changed to use `shell getporp` because of permission issue with Android 8.0 and above
 								// its format is "[property]: [value]" so changed it as like build.prop
-								String p = props[j];
 								p = p.replace("]: ", "=");
 								p = p.replace("[", "");
 								p = p.replace("]", "");
@@ -486,7 +487,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		return true;
 	}
 
-	static bool _should_compress_asset(const String &p_path, const Vector<uint8_t> &p_data) {
+	static bool _should_compress_asset(const String &p_path, const std::vector<uint8_t> &p_data) {
 
 		/*
 		 *  By not compressing files with little or not benefit in doing so,
@@ -512,7 +513,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 			".scn", // Binary scenes are usually already compressed
 			".stex", // Streamable textures are usually already compressed
 			// Trailer for easier processing
-			NULL
+			nullptr
 		};
 
 		for (const char **ext = unconditional_compress_ext; *ext; ++ext) {
@@ -552,29 +553,26 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		return zipfi;
 	}
 
-	static Vector<String> get_abis() {
-		Vector<String> abis;
-		abis.push_back("armeabi-v7a");
-		abis.push_back("arm64-v8a");
-		abis.push_back("x86");
-		abis.push_back("x86_64");
+	// need update : replace vector with array
+	static std::vector<String> get_abis() {
+		std::vector<String> abis = { "armeabi-v7a", "arm64-v8a", "x86", "x86_64" };
 		return abis;
 	}
 
-	static Error store_in_apk(APKExportData *ed, const String &p_path, const Vector<uint8_t> &p_data, int compression_method = Z_DEFLATED) {
+	static Error store_in_apk(APKExportData *ed, const String &p_path, const std::vector<uint8_t> &p_data, int compression_method = Z_DEFLATED) {
 		zip_fileinfo zipfi = get_zip_fileinfo();
 		zipOpenNewFileInZip(ed->apk,
 				p_path.utf8().get_data(),
 				&zipfi,
-				NULL,
+				nullptr,
 				0,
-				NULL,
+				nullptr,
 				0,
-				NULL,
+				nullptr,
 				compression_method,
 				Z_DEFAULT_COMPRESSION);
 
-		zipWriteInFileInZip(ed->apk, p_data.ptr(), p_data.size());
+		zipWriteInFileInZip(ed->apk, p_data.data(), p_data.size());
 		zipCloseFileInZip(ed->apk);
 
 		return OK;
@@ -587,16 +585,16 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 			return FAILED;
 		}
 		APKExportData *ed = (APKExportData *)p_userdata;
-		Vector<String> abis = get_abis();
+		std::vector<String> abis = get_abis();
 		bool exported = false;
-		for (int i = 0; i < p_so.tags.size(); ++i) {
+		for (auto &&tag : p_so.tags) {
 			// shared objects can be fat (compatible with multiple ABIs)
-			int abi_index = abis.find(p_so.tags[i]);
-			if (abi_index != -1) {
+			auto it_find = std::find(abis.begin(), abis.end(), tag);
+			if (it_find != abis.end()) {
 				exported = true;
-				String abi = abis[abi_index];
+				String abi = *it_find;
 				String dst_path = String("lib").plus_file(abi).plus_file(p_so.path.get_file());
-				Vector<uint8_t> array = FileAccess::get_file_as_array(p_so.path);
+				std::vector<uint8_t> array = FileAccess::get_file_as_array(p_so.path);
 				Error store_err = store_in_apk(ed, dst_path, array);
 				ERR_FAIL_COND_V_MSG(store_err, store_err, "Cannot store in apk file '" + dst_path + "'.");
 			}
@@ -610,7 +608,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		return OK;
 	}
 
-	static Error save_apk_file(void *p_userdata, const String &p_path, const Vector<uint8_t> &p_data, int p_file, int p_total) {
+	static Error save_apk_file(void *p_userdata, const String &p_path, const std::vector<uint8_t> &p_data, int p_file, int p_total) {
 		APKExportData *ed = (APKExportData *)p_userdata;
 		String dst_path = p_path.replace_first("res://", "assets/");
 
@@ -621,11 +619,11 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		return OK;
 	}
 
-	static Error ignore_apk_file(void *p_userdata, const String &p_path, const Vector<uint8_t> &p_data, int p_file, int p_total) {
+	static Error ignore_apk_file(void *p_userdata, const String &p_path, const std::vector<uint8_t> &p_data, int p_file, int p_total) {
 		return OK;
 	}
 
-	void _fix_manifest(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &p_manifest, bool p_give_internet) {
+	void _fix_manifest(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &p_manifest, bool p_give_internet) {
 
 		// Leaving the unused types commented because looking these constants up
 		// again later would be annoying
@@ -639,7 +637,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		// const int CHUNK_XML_TEXT = 0x00100104;
 		const int UTF8_FLAG = 0x00000100;
 
-		Vector<String> string_table;
+		std::vector<String> string_table;
 
 		uint32_t ofs = 8;
 
@@ -651,7 +649,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		//uint32_t styles_offset = 0;
 		uint32_t string_table_begins = 0;
 		uint32_t string_table_ends = 0;
-		Vector<uint8_t> stable_extra;
+		std::vector<uint8_t> stable_extra;
 
 		String version_name = p_preset->get("version/name");
 		int version_code = p_preset->get("version/code");
@@ -668,7 +666,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 		int xr_mode_index = p_preset->get("graphics/xr_mode");
 
-		Vector<String> perms;
+		std::vector<String> perms;
 
 		const char **aperms = android_perms;
 		while (*aperms) {
@@ -689,7 +687,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		}
 
 		if (p_give_internet) {
-			if (perms.find("android.permission.INTERNET") == -1)
+			if (std::find(perms.begin(), perms.end(), "android.permission.INTERNET") == perms.end())
 				perms.push_back("android.permission.INTERNET");
 		}
 
@@ -732,15 +730,15 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 						} else {
 							uint32_t len = decode_uint16(&p_manifest[string_at]);
-							Vector<CharType> ucstring;
+							std::vector<CharType> ucstring;
 							ucstring.resize(len + 1);
 							for (uint32_t j = 0; j < len; j++) {
 								uint16_t c = decode_uint16(&p_manifest[string_at + 2 + 2 * j]);
-								ucstring.write[j] = c;
+								ucstring[j] = c;
 							}
 							string_end = MAX(string_at + 2 + 2 * len, string_end);
-							ucstring.write[len] = 0;
-							string_table.write[i] = ucstring.ptr();
+							ucstring[len] = 0;
+							string_table[i] = ucstring.data();
 						}
 					}
 
@@ -772,52 +770,52 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 						//replace project information
 						if (tname == "manifest" && attrname == "package") {
-							string_table.write[attr_value] = get_package_name(package_name);
+							string_table[attr_value] = get_package_name(package_name);
 						}
 
 						if (tname == "manifest" && attrname == "versionCode") {
-							encode_uint32(version_code, &p_manifest.write[iofs + 16]);
+							encode_uint32(version_code, &p_manifest[iofs + 16]);
 						}
 
 						if (tname == "manifest" && attrname == "versionName") {
 							if (attr_value == 0xFFFFFFFF) {
 								WARN_PRINT("Version name in a resource, should be plain text");
 							} else
-								string_table.write[attr_value] = version_name;
+								string_table[attr_value] = version_name;
 						}
 
 						if (tname == "instrumentation" && attrname == "targetPackage") {
-							string_table.write[attr_value] = get_package_name(package_name);
+							string_table[attr_value] = get_package_name(package_name);
 						}
 
 						if (tname == "activity" && attrname == "screenOrientation") {
 
-							encode_uint32(orientation == 0 ? 0 : 1, &p_manifest.write[iofs + 16]);
+							encode_uint32(orientation == 0 ? 0 : 1, &p_manifest[iofs + 16]);
 						}
 
 						if (tname == "supports-screens") {
 
 							if (attrname == "smallScreens") {
 
-								encode_uint32(screen_support_small ? 0xFFFFFFFF : 0, &p_manifest.write[iofs + 16]);
+								encode_uint32(screen_support_small ? 0xFFFFFFFF : 0, &p_manifest[iofs + 16]);
 
 							} else if (attrname == "normalScreens") {
 
-								encode_uint32(screen_support_normal ? 0xFFFFFFFF : 0, &p_manifest.write[iofs + 16]);
+								encode_uint32(screen_support_normal ? 0xFFFFFFFF : 0, &p_manifest[iofs + 16]);
 
 							} else if (attrname == "largeScreens") {
 
-								encode_uint32(screen_support_large ? 0xFFFFFFFF : 0, &p_manifest.write[iofs + 16]);
+								encode_uint32(screen_support_large ? 0xFFFFFFFF : 0, &p_manifest[iofs + 16]);
 
 							} else if (attrname == "xlargeScreens") {
 
-								encode_uint32(screen_support_xlarge ? 0xFFFFFFFF : 0, &p_manifest.write[iofs + 16]);
+								encode_uint32(screen_support_xlarge ? 0xFFFFFFFF : 0, &p_manifest[iofs + 16]);
 							}
 						}
 
 						if (tname == "uses-feature" && attrname == "glEsVersion") {
 
-							encode_uint32(min_gles3 ? 0x00030000 : 0x00020000, &p_manifest.write[iofs + 16]);
+							encode_uint32(min_gles3 ? 0x00030000 : 0x00020000, &p_manifest[iofs + 16]);
 						}
 
 						// FIXME: `attr_value != 0xFFFFFFFF` below added as a stopgap measure for GH-32553,
@@ -825,14 +823,14 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 						if (tname == "meta-data" && attrname == "name" && value == "xr_mode_metadata_name") {
 							// Update the meta-data 'android:name' attribute based on the selected XR mode.
 							if (xr_mode_index == 1 /* XRMode.OVR */) {
-								string_table.write[attr_value] = "com.samsung.android.vr.application.mode";
+								string_table[attr_value] = "com.samsung.android.vr.application.mode";
 							}
 						}
 
 						if (tname == "meta-data" && attrname == "value" && value == "xr_mode_metadata_value") {
 							// Update the meta-data 'android:value' attribute based on the selected XR mode.
 							if (xr_mode_index == 1 /* XRMode.OVR */) {
-								string_table.write[attr_value] = "vr_only";
+								string_table[attr_value] = "vr_only";
 							}
 						}
 
@@ -854,38 +852,43 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 						ofs += 24; // skip over end tag
 
 						// save manifest ending so we can restore it
-						Vector<uint8_t> manifest_end;
+						std::vector<uint8_t> manifest_end;
 						uint32_t manifest_cur_size = p_manifest.size();
 
 						manifest_end.resize(p_manifest.size() - ofs);
-						memcpy(manifest_end.ptrw(), &p_manifest[ofs], manifest_end.size());
+						memcpy(manifest_end.data(), &p_manifest[ofs], manifest_end.size());
 
-						int32_t attr_name_string = string_table.find("name");
-						ERR_FAIL_COND_MSG(attr_name_string == -1, "Template does not have 'name' attribute.");
+						auto it_attr_name_string = std::find(string_table.begin(), string_table.end(), "name");
+						ERR_FAIL_COND_MSG(it_attr_name_string == string_table.end(), "Template does not have 'name' attribute.");
+						uint32_t attr_name_string = std::distance(string_table.begin(), it_attr_name_string);
 
-						int32_t ns_android_string = string_table.find("http://schemas.android.com/apk/res/android");
-						if (ns_android_string == -1) {
+						auto it_ns_android_string = std::find(string_table.begin(), string_table.end(), "http://schemas.android.com/apk/res/android");
+						if (it_ns_android_string == string_table.end()) {
 							string_table.push_back("http://schemas.android.com/apk/res/android");
-							ns_android_string = string_table.size() - 1;
+							it_ns_android_string = string_table.end() - 1;
 						}
+						uint32_t ns_android_string = std::distance(string_table.begin(), it_ns_android_string);
 
-						int32_t attr_uses_permission_string = string_table.find("uses-feature");
-						if (attr_uses_permission_string == -1) {
+						auto it_attr_uses_permission_string = std::find(string_table.begin(), string_table.end(), "uses-feature");
+						if (it_attr_uses_permission_string == string_table.end()) {
 							string_table.push_back("uses-feature");
-							attr_uses_permission_string = string_table.size() - 1;
+							it_attr_uses_permission_string = string_table.end() - 1;
 						}
+						int32_t attr_uses_permission_string = std::distance(string_table.begin(), it_attr_uses_permission_string);
 
-						int32_t attr_required_string = string_table.find("required");
-						if (attr_required_string == -1) {
+						auto it_attr_required_string = std::find(string_table.begin(), string_table.end(), "required");
+						if (it_attr_required_string == string_table.end()) {
 							string_table.push_back("required");
-							attr_required_string = string_table.size() - 1;
+							it_attr_required_string = string_table.end() - 1;
 						}
+						int32_t attr_required_string = std::distance(string_table.begin(), it_attr_required_string);
 
-						int32_t attr_version_string = string_table.find("version");
-						if (attr_version_string == -1) {
+						auto it_attr_version_string = std::find(string_table.begin(), string_table.end(), "version");
+						if (it_attr_version_string == string_table.end()) {
 							string_table.push_back("version");
-							attr_version_string = string_table.size() - 1;
+							it_attr_version_string = string_table.end() - 1;
 						}
+						int32_t attr_version_string = std::distance(string_table.begin(), it_attr_version_string);
 
 						String required_value_string;
 						if (dof_index == 1) {
@@ -895,160 +898,168 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 						} else {
 							ERR_FAIL_MSG("Unknown DoF index: " + itos(dof_index) + ".");
 						}
-						int32_t required_value = string_table.find(required_value_string);
-						if (required_value == -1) {
+
+						auto it_required_value = std::find(string_table.begin(), string_table.end(), required_value_string);
+						if (it_required_value == string_table.end()) {
 							string_table.push_back(required_value_string);
-							required_value = string_table.size() - 1;
+							it_required_value = string_table.end() - 1;
 						}
+						int32_t required_value = std::distance(string_table.begin(), it_required_value);
 
-						int32_t version_value = string_table.find("1");
-						if (version_value == -1) {
+						auto it_version_value = std::find(string_table.begin(), string_table.end(), "1");
+						if (it_version_value == string_table.end()) {
 							string_table.push_back("1");
-							version_value = string_table.size() - 1;
+							it_version_value = string_table.end() - 1;
 						}
+						int32_t version_value = std::distance(string_table.begin(), it_version_value);
 
-						int32_t feature_string = string_table.find("android.hardware.vr.headtracking");
-						if (feature_string == -1) {
+						auto it_feature_string = std::find(string_table.begin(), string_table.end(), "android.hardware.vr.headtracking");
+						if (it_feature_string == string_table.end()) {
 							string_table.push_back("android.hardware.vr.headtracking");
-							feature_string = string_table.size() - 1;
+							it_feature_string = string_table.end() - 1;
 						}
+						int32_t feature_string = std::distance(string_table.begin(), it_feature_string);
 
 						{
 							manifest_cur_size += 96 + 20; // node and three attrs + end node
 							p_manifest.resize(manifest_cur_size);
 
 							// start tag
-							encode_uint16(0x102, &p_manifest.write[ofs]); // type
-							encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
-							encode_uint32(96, &p_manifest.write[ofs + 4]); // size
-							encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
-							encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
-							encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
-							encode_uint32(attr_uses_permission_string, &p_manifest.write[ofs + 20]); // name
-							encode_uint16(20, &p_manifest.write[ofs + 24]); // attr_start
-							encode_uint16(20, &p_manifest.write[ofs + 26]); // attr_size
-							encode_uint16(3, &p_manifest.write[ofs + 28]); // num_attrs
-							encode_uint16(0, &p_manifest.write[ofs + 30]); // id_index
-							encode_uint16(0, &p_manifest.write[ofs + 32]); // class_index
-							encode_uint16(0, &p_manifest.write[ofs + 34]); // style_index
+							encode_uint16(0x102, &p_manifest[ofs]); // type
+							encode_uint16(16, &p_manifest[ofs + 2]); // headersize
+							encode_uint32(96, &p_manifest[ofs + 4]); // size
+							encode_uint32(0, &p_manifest[ofs + 8]); // lineno
+							encode_uint32(-1, &p_manifest[ofs + 12]); // comment
+							encode_uint32(-1, &p_manifest[ofs + 16]); // ns
+							encode_uint32(attr_uses_permission_string, &p_manifest[ofs + 20]); // name
+							encode_uint16(20, &p_manifest[ofs + 24]); // attr_start
+							encode_uint16(20, &p_manifest[ofs + 26]); // attr_size
+							encode_uint16(3, &p_manifest[ofs + 28]); // num_attrs
+							encode_uint16(0, &p_manifest[ofs + 30]); // id_index
+							encode_uint16(0, &p_manifest[ofs + 32]); // class_index
+							encode_uint16(0, &p_manifest[ofs + 34]); // style_index
 
 							// android:name attribute
-							encode_uint32(ns_android_string, &p_manifest.write[ofs + 36]); // ns
-							encode_uint32(attr_name_string, &p_manifest.write[ofs + 40]); // 'name'
-							encode_uint32(feature_string, &p_manifest.write[ofs + 44]); // raw_value
-							encode_uint16(8, &p_manifest.write[ofs + 48]); // typedvalue_size
-							p_manifest.write[ofs + 50] = 0; // typedvalue_always0
-							p_manifest.write[ofs + 51] = 0x03; // typedvalue_type (string)
-							encode_uint32(feature_string, &p_manifest.write[ofs + 52]); // typedvalue reference
+							encode_uint32(ns_android_string, &p_manifest[ofs + 36]); // ns
+							encode_uint32(attr_name_string, &p_manifest[ofs + 40]); // 'name'
+							encode_uint32(feature_string, &p_manifest[ofs + 44]); // raw_value
+							encode_uint16(8, &p_manifest[ofs + 48]); // typedvalue_size
+							p_manifest[ofs + 50] = 0; // typedvalue_always0
+							p_manifest[ofs + 51] = 0x03; // typedvalue_type (string)
+							encode_uint32(feature_string, &p_manifest[ofs + 52]); // typedvalue reference
 
 							// android:required attribute
-							encode_uint32(ns_android_string, &p_manifest.write[ofs + 56]); // ns
-							encode_uint32(attr_required_string, &p_manifest.write[ofs + 60]); // 'name'
-							encode_uint32(required_value, &p_manifest.write[ofs + 64]); // raw_value
-							encode_uint16(8, &p_manifest.write[ofs + 68]); // typedvalue_size
-							p_manifest.write[ofs + 70] = 0; // typedvalue_always0
-							p_manifest.write[ofs + 71] = 0x03; // typedvalue_type (string)
-							encode_uint32(required_value, &p_manifest.write[ofs + 72]); // typedvalue reference
+							encode_uint32(ns_android_string, &p_manifest[ofs + 56]); // ns
+							encode_uint32(attr_required_string, &p_manifest[ofs + 60]); // 'name'
+							encode_uint32(required_value, &p_manifest[ofs + 64]); // raw_value
+							encode_uint16(8, &p_manifest[ofs + 68]); // typedvalue_size
+							p_manifest[ofs + 70] = 0; // typedvalue_always0
+							p_manifest[ofs + 71] = 0x03; // typedvalue_type (string)
+							encode_uint32(required_value, &p_manifest[ofs + 72]); // typedvalue reference
 
 							// android:version attribute
-							encode_uint32(ns_android_string, &p_manifest.write[ofs + 76]); // ns
-							encode_uint32(attr_version_string, &p_manifest.write[ofs + 80]); // 'name'
-							encode_uint32(version_value, &p_manifest.write[ofs + 84]); // raw_value
-							encode_uint16(8, &p_manifest.write[ofs + 88]); // typedvalue_size
-							p_manifest.write[ofs + 90] = 0; // typedvalue_always0
-							p_manifest.write[ofs + 91] = 0x03; // typedvalue_type (string)
-							encode_uint32(version_value, &p_manifest.write[ofs + 92]); // typedvalue reference
+							encode_uint32(ns_android_string, &p_manifest[ofs + 76]); // ns
+							encode_uint32(attr_version_string, &p_manifest[ofs + 80]); // 'name'
+							encode_uint32(version_value, &p_manifest[ofs + 84]); // raw_value
+							encode_uint16(8, &p_manifest[ofs + 88]); // typedvalue_size
+							p_manifest[ofs + 90] = 0; // typedvalue_always0
+							p_manifest[ofs + 91] = 0x03; // typedvalue_type (string)
+							encode_uint32(version_value, &p_manifest[ofs + 92]); // typedvalue reference
 
 							ofs += 96;
 
 							// end tag
-							encode_uint16(0x103, &p_manifest.write[ofs]); // type
-							encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
-							encode_uint32(24, &p_manifest.write[ofs + 4]); // size
-							encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
-							encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
-							encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
-							encode_uint32(attr_uses_permission_string, &p_manifest.write[ofs + 20]); // name
+							encode_uint16(0x103, &p_manifest[ofs]); // type
+							encode_uint16(16, &p_manifest[ofs + 2]); // headersize
+							encode_uint32(24, &p_manifest[ofs + 4]); // size
+							encode_uint32(0, &p_manifest[ofs + 8]); // lineno
+							encode_uint32(-1, &p_manifest[ofs + 12]); // comment
+							encode_uint32(-1, &p_manifest[ofs + 16]); // ns
+							encode_uint32(attr_uses_permission_string, &p_manifest[ofs + 20]); // name
 
 							ofs += 24;
 						}
-						memcpy(&p_manifest.write[ofs], manifest_end.ptr(), manifest_end.size());
+						memcpy(&p_manifest[ofs], manifest_end.data(), manifest_end.size());
 						ofs -= 24; // go back over back end
 					}
 					if (tname == "manifest") {
 
 						// save manifest ending so we can restore it
-						Vector<uint8_t> manifest_end;
+						std::vector<uint8_t> manifest_end;
 						uint32_t manifest_cur_size = p_manifest.size();
 
 						manifest_end.resize(p_manifest.size() - ofs);
-						memcpy(manifest_end.ptrw(), &p_manifest[ofs], manifest_end.size());
+						memcpy(manifest_end.data(), &p_manifest[ofs], manifest_end.size());
 
-						int32_t attr_name_string = string_table.find("name");
-						ERR_FAIL_COND_MSG(attr_name_string == -1, "Template does not have 'name' attribute.");
+						auto it_attr_name_string = std::find(string_table.begin(), string_table.end(), "name");
+						ERR_FAIL_COND_MSG(it_attr_name_string == string_table.end(), "Template does not have 'name' attribute.");
+						int32_t attr_name_string = std::distance(string_table.begin(), it_attr_name_string);
 
-						int32_t ns_android_string = string_table.find("android");
-						ERR_FAIL_COND_MSG(ns_android_string == -1, "Template does not have 'android' namespace.");
+						auto it_ns_android_string = std::find(string_table.begin(), string_table.end(), "android");
+						ERR_FAIL_COND_MSG(it_ns_android_string == string_table.end(), "Template does not have 'android' namespace.");
+						int32_t ns_android_string = std::distance(string_table.begin(), it_ns_android_string);
 
-						int32_t attr_uses_permission_string = string_table.find("uses-permission");
-						if (attr_uses_permission_string == -1) {
+						auto it_attr_uses_permission_string = std::find(string_table.begin(), string_table.end(), "uses-permission");
+						if (it_attr_uses_permission_string == string_table.end()) {
 							string_table.push_back("uses-permission");
-							attr_uses_permission_string = string_table.size() - 1;
+							it_attr_uses_permission_string = string_table.end() - 1;
 						}
+						int32_t attr_uses_permission_string = std::distance(string_table.begin(), it_attr_uses_permission_string);
 
-						for (int i = 0; i < perms.size(); ++i) {
-							print_line("Adding permission " + perms[i]);
+						for (auto &&perm : perms) {
+							print_line("Adding permission " + perm);
 
 							manifest_cur_size += 56 + 24; // node + end node
 							p_manifest.resize(manifest_cur_size);
 
 							// Add permission to the string pool
-							int32_t perm_string = string_table.find(perms[i]);
-							if (perm_string == -1) {
-								string_table.push_back(perms[i]);
-								perm_string = string_table.size() - 1;
+							int32_t perm_string;
+							auto it_perm_string = std::find(string_table.begin(), string_table.end(), perm);
+							if (it_perm_string == string_table.end()) {
+								string_table.push_back(perm);
+								it_perm_string = string_table.end() - 1;
 							}
 
 							// start tag
-							encode_uint16(0x102, &p_manifest.write[ofs]); // type
-							encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
-							encode_uint32(56, &p_manifest.write[ofs + 4]); // size
-							encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
-							encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
-							encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
-							encode_uint32(attr_uses_permission_string, &p_manifest.write[ofs + 20]); // name
-							encode_uint16(20, &p_manifest.write[ofs + 24]); // attr_start
-							encode_uint16(20, &p_manifest.write[ofs + 26]); // attr_size
-							encode_uint16(1, &p_manifest.write[ofs + 28]); // num_attrs
-							encode_uint16(0, &p_manifest.write[ofs + 30]); // id_index
-							encode_uint16(0, &p_manifest.write[ofs + 32]); // class_index
-							encode_uint16(0, &p_manifest.write[ofs + 34]); // style_index
+							encode_uint16(0x102, &p_manifest[ofs]); // type
+							encode_uint16(16, &p_manifest[ofs + 2]); // headersize
+							encode_uint32(56, &p_manifest[ofs + 4]); // size
+							encode_uint32(0, &p_manifest[ofs + 8]); // lineno
+							encode_uint32(-1, &p_manifest[ofs + 12]); // comment
+							encode_uint32(-1, &p_manifest[ofs + 16]); // ns
+							encode_uint32(attr_uses_permission_string, &p_manifest[ofs + 20]); // name
+							encode_uint16(20, &p_manifest[ofs + 24]); // attr_start
+							encode_uint16(20, &p_manifest[ofs + 26]); // attr_size
+							encode_uint16(1, &p_manifest[ofs + 28]); // num_attrs
+							encode_uint16(0, &p_manifest[ofs + 30]); // id_index
+							encode_uint16(0, &p_manifest[ofs + 32]); // class_index
+							encode_uint16(0, &p_manifest[ofs + 34]); // style_index
 
 							// attribute
-							encode_uint32(ns_android_string, &p_manifest.write[ofs + 36]); // ns
-							encode_uint32(attr_name_string, &p_manifest.write[ofs + 40]); // 'name'
-							encode_uint32(perm_string, &p_manifest.write[ofs + 44]); // raw_value
-							encode_uint16(8, &p_manifest.write[ofs + 48]); // typedvalue_size
-							p_manifest.write[ofs + 50] = 0; // typedvalue_always0
-							p_manifest.write[ofs + 51] = 0x03; // typedvalue_type (string)
-							encode_uint32(perm_string, &p_manifest.write[ofs + 52]); // typedvalue reference
+							encode_uint32(ns_android_string, &p_manifest[ofs + 36]); // ns
+							encode_uint32(attr_name_string, &p_manifest[ofs + 40]); // 'name'
+							encode_uint32(perm_string, &p_manifest[ofs + 44]); // raw_value
+							encode_uint16(8, &p_manifest[ofs + 48]); // typedvalue_size
+							p_manifest[ofs + 50] = 0; // typedvalue_always0
+							p_manifest[ofs + 51] = 0x03; // typedvalue_type (string)
+							encode_uint32(perm_string, &p_manifest[ofs + 52]); // typedvalue reference
 
 							ofs += 56;
 
 							// end tag
-							encode_uint16(0x103, &p_manifest.write[ofs]); // type
-							encode_uint16(16, &p_manifest.write[ofs + 2]); // headersize
-							encode_uint32(24, &p_manifest.write[ofs + 4]); // size
-							encode_uint32(0, &p_manifest.write[ofs + 8]); // lineno
-							encode_uint32(-1, &p_manifest.write[ofs + 12]); // comment
-							encode_uint32(-1, &p_manifest.write[ofs + 16]); // ns
-							encode_uint32(attr_uses_permission_string, &p_manifest.write[ofs + 20]); // name
+							encode_uint16(0x103, &p_manifest[ofs]); // type
+							encode_uint16(16, &p_manifest[ofs + 2]); // headersize
+							encode_uint32(24, &p_manifest[ofs + 4]); // size
+							encode_uint32(0, &p_manifest[ofs + 8]); // lineno
+							encode_uint32(-1, &p_manifest[ofs + 12]); // comment
+							encode_uint32(-1, &p_manifest[ofs + 16]); // ns
+							encode_uint32(attr_uses_permission_string, &p_manifest[ofs + 20]); // name
 
 							ofs += 24;
 						}
 
 						// copy footer back in
-						memcpy(&p_manifest.write[ofs], manifest_end.ptr(), manifest_end.size());
+						memcpy(&p_manifest[ofs], manifest_end.data(), manifest_end.size());
 					}
 				} break;
 			}
@@ -1058,27 +1069,21 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 		//create new andriodmanifest binary
 
-		Vector<uint8_t> ret;
+		std::vector<uint8_t> ret;
 		ret.resize(string_table_begins + string_table.size() * 4);
 
-		for (uint32_t i = 0; i < string_table_begins; i++) {
-
-			ret.write[i] = p_manifest[i];
-		}
+		std::copy_n(p_manifest.begin(), std::distance(p_manifest.begin(), p_manifest.begin() + string_table_begins), ret.begin());
 
 		ofs = 0;
-		for (int i = 0; i < string_table.size(); i++) {
-
-			encode_uint32(ofs, &ret.write[string_table_begins + i * 4]);
+		for (decltype(string_table.size()) i = 0; i < string_table.size(); ++i) {
+			encode_uint32(ofs, &ret[string_table_begins + i * 4]);
 			ofs += string_table[i].length() * 2 + 2 + 2;
 		}
 
 		ret.resize(ret.size() + ofs);
 		string_data_offset = ret.size() - ofs;
-		uint8_t *chars = &ret.write[string_data_offset];
-		for (int i = 0; i < string_table.size(); i++) {
-
-			String s = string_table[i];
+		uint8_t *chars = &ret[string_data_offset];
+		for (auto &&s : string_table) {
 			encode_uint16(s.length(), chars);
 			chars += 2;
 			for (int j = 0; j < s.length(); j++) {
@@ -1089,8 +1094,8 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 			chars += 2;
 		}
 
-		for (int i = 0; i < stable_extra.size(); i++) {
-			ret.push_back(stable_extra[i]);
+		for (auto &&e : stable_extra) {
+			ret.push_back(e);
 		}
 
 		//pad
@@ -1101,16 +1106,16 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 		uint32_t extra = (p_manifest.size() - string_table_ends);
 		ret.resize(new_stable_end + extra);
-		for (uint32_t i = 0; i < extra; i++)
-			ret.write[new_stable_end + i] = p_manifest[string_table_ends + i];
+		for (uint32_t i = 0; i < extra; ++i)
+			ret[new_stable_end + i] = p_manifest[string_table_ends + i];
 
 		while (ret.size() % 4)
 			ret.push_back(0);
-		encode_uint32(ret.size(), &ret.write[4]); //update new file size
+		encode_uint32(ret.size(), &ret[4]); //update new file size
 
-		encode_uint32(new_stable_end - 8, &ret.write[12]); //update new string table size
-		encode_uint32(string_table.size(), &ret.write[16]); //update new number of strings
-		encode_uint32(string_data_offset - 8, &ret.write[28]); //update new string data offset
+		encode_uint32(new_stable_end - 8, &ret[12]); //update new string table size
+		encode_uint32(string_table.size(), &ret[16]); //update new number of strings
+		encode_uint32(string_data_offset - 8, &ret[28]); //update new string data offset
 
 		p_manifest = ret;
 	}
@@ -1129,14 +1134,15 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 
 		if (p_utf8) {
 
-			Vector<uint8_t> str8;
+			std::vector<uint8_t> str8;
 			str8.resize(len + 1);
 			for (uint32_t i = 0; i < len; i++) {
-				str8.write[i] = p_bytes[offset + i];
+				str8[i] = p_bytes[offset + i];
 			}
-			str8.write[len] = 0;
+
+			str8[len] = 0;
 			String str;
-			str.parse_utf8((const char *)str8.ptr());
+			str.parse_utf8((const char *)str8.data());
 			return str;
 		} else {
 
@@ -1150,7 +1156,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 			return str;
 		}
 	}
-	void _fix_resources(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &p_manifest) {
+	void _fix_resources(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &p_manifest) {
 
 		const int UTF8_FLAG = 0x00000100;
 
@@ -1159,7 +1165,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		uint32_t string_flags = decode_uint32(&p_manifest[28]);
 		const uint32_t string_table_begins = 40;
 
-		Vector<String> string_table;
+		std::vector<String> string_table;
 
 		String package_name = p_preset->get("package/name");
 
@@ -1192,24 +1198,23 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		}
 
 		//write a new string table, but use 16 bits
-		Vector<uint8_t> ret;
+		std::vector<uint8_t> ret;
 		ret.resize(string_table_begins + string_table.size() * 4);
 
 		for (uint32_t i = 0; i < string_table_begins; i++) {
-
-			ret.write[i] = p_manifest[i];
+			ret[i] = p_manifest[i];
 		}
 
 		int ofs = 0;
-		for (int i = 0; i < string_table.size(); i++) {
+		for (decltype(string_table.size()) i = 0; i < string_table.size(); ++i) {
 
-			encode_uint32(ofs, &ret.write[string_table_begins + i * 4]);
+			encode_uint32(ofs, &ret[string_table_begins + i * 4]);
 			ofs += string_table[i].length() * 2 + 2 + 2;
 		}
 
 		ret.resize(ret.size() + ofs);
-		uint8_t *chars = &ret.write[ret.size() - ofs];
-		for (int i = 0; i < string_table.size(); i++) {
+		uint8_t *chars = &ret[ret.size() - ofs];
+		for (decltype(string_table.size()) i = 0; i < string_table.size(); i++) {
 
 			String s = string_table[i];
 			encode_uint16(s.length(), chars);
@@ -1227,38 +1232,38 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 			ret.push_back(0);
 
 		//change flags to not use utf8
-		encode_uint32(string_flags & ~0x100, &ret.write[28]);
+		encode_uint32(string_flags & ~0x100, &ret[28]);
 		//change length
-		encode_uint32(ret.size() - 12, &ret.write[16]);
+		encode_uint32(ret.size() - 12, &ret[16]);
 		//append the rest...
 		int rest_from = 12 + string_block_len;
 		int rest_to = ret.size();
 		int rest_len = (p_manifest.size() - rest_from);
 		ret.resize(ret.size() + (p_manifest.size() - rest_from));
 		for (int i = 0; i < rest_len; i++) {
-			ret.write[rest_to + i] = p_manifest[rest_from + i];
+			ret[rest_to + i] = p_manifest[rest_from + i];
 		}
 		//finally update the size
-		encode_uint32(ret.size(), &ret.write[4]);
+		encode_uint32(ret.size(), &ret[4]);
 
 		p_manifest = ret;
 		//printf("end\n");
 	}
 
-	static Vector<String> get_enabled_abis(const Ref<EditorExportPreset> &p_preset) {
-		Vector<String> abis = get_abis();
-		Vector<String> enabled_abis;
-		for (int i = 0; i < abis.size(); ++i) {
-			bool is_enabled = p_preset->get("architectures/" + abis[i]);
+	static std::vector<String> get_enabled_abis(const Ref<EditorExportPreset> &p_preset) {
+		std::vector<String> abis = get_abis();
+		std::vector<String> enabled_abis;
+		for (auto &&abi : abis) {
+			bool is_enabled = p_preset->get("architectures/" + abi);
 			if (is_enabled) {
-				enabled_abis.push_back(abis[i]);
+				enabled_abis.push_back(abi);
 			}
 		}
 		return enabled_abis;
 	}
 
 public:
-	typedef Error (*EditorExportSaveFunction)(void *p_userdata, const String &p_path, const Vector<uint8_t> &p_data, int p_file, int p_total);
+	typedef Error (*EditorExportSaveFunction)(void *p_userdata, const String &p_path, const std::vector<uint8_t> &p_data, int p_file, int p_total);
 
 public:
 	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) {
@@ -1273,9 +1278,9 @@ public:
 			}
 		}
 
-		Vector<String> abis = get_enabled_abis(p_preset);
-		for (int i = 0; i < abis.size(); ++i) {
-			r_features->push_back(abis[i]);
+		std::vector<String> abis = get_enabled_abis(p_preset);
+		for (auto &&abi : abis) {
+			r_features->push_back(abi);
 		}
 	}
 
@@ -1316,9 +1321,8 @@ public:
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "apk_expansion/SALT"), ""));
 		r_options->push_back(ExportOption(PropertyInfo(Variant::STRING, "apk_expansion/public_key", PROPERTY_HINT_MULTILINE_TEXT), ""));
 
-		Vector<String> abis = get_abis();
-		for (int i = 0; i < abis.size(); ++i) {
-			String abi = abis[i];
+		std::vector<String> abis = get_abis();
+		for (auto &&abi : abis) {
 			bool is_default = (abi == "armeabi-v7a" || abi == "arm64-v8a");
 			r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "architectures/" + abi), is_default));
 		}
@@ -2059,25 +2063,25 @@ public:
 		String release_username = p_preset->get("keystore/release_user");
 		String release_password = p_preset->get("keystore/release_password");
 
-		Vector<String> enabled_abis = get_enabled_abis(p_preset);
+		std::vector<String> enabled_abis = get_enabled_abis(p_preset);
 
 		while (ret == UNZ_OK) {
 
 			//get filename
 			unz_file_info info;
 			char fname[16384];
-			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16384, NULL, 0, NULL, 0);
+			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16384, nullptr, 0, nullptr, 0);
 
 			bool skip = false;
 
 			String file = fname;
 
-			Vector<uint8_t> data;
+			std::vector<uint8_t> data;
 			data.resize(info.uncompressed_size);
 
 			//read
 			unzOpenCurrentFile(pkg);
-			unzReadCurrentFile(pkg, data.ptrw(), data.size());
+			unzReadCurrentFile(pkg, data.data(), data.size());
 			unzCloseCurrentFile(pkg);
 
 			//write
@@ -2100,7 +2104,7 @@ public:
 						FileAccess *f = FileAccess::open(icon_path, FileAccess::READ);
 						if (f) {
 							data.resize(f->get_len());
-							f->get_buffer(data.ptrw(), data.size());
+							f->get_buffer(data.data(), data.size());
 							memdelete(f);
 							found = true;
 							break;
@@ -2114,7 +2118,7 @@ public:
 						FileAccess *f = FileAccess::open(appicon, FileAccess::READ);
 						if (f) {
 							data.resize(f->get_len());
-							f->get_buffer(data.ptrw(), data.size());
+							f->get_buffer(data.data(), data.size());
 							memdelete(f);
 						}
 					}
@@ -2123,8 +2127,8 @@ public:
 
 			if (file.ends_with(".so")) {
 				bool enabled = false;
-				for (int i = 0; i < enabled_abis.size(); ++i) {
-					if (file.begins_with("lib/" + enabled_abis[i] + "/")) {
+				for (auto &&abi : enabled_abis) {
+					if (file.begins_with("lib/" + abi + "/")) {
 						enabled = true;
 						break;
 					}
@@ -2157,7 +2161,7 @@ public:
 						uncompressed ? 0 : Z_DEFLATED,
 						Z_DEFAULT_COMPRESSION);
 
-				zipWriteInFileInZip(unaligned_apk, data.ptr(), data.size());
+				zipWriteInFileInZip(unaligned_apk, data.data(), data.size());
 				zipCloseFileInZip(unaligned_apk);
 			}
 
@@ -2168,13 +2172,13 @@ public:
 			CLEANUP_AND_RETURN(ERR_SKIP);
 		}
 		Error err = OK;
-		Vector<String> cl = cmdline.strip_edges().split(" ");
-		for (int i = 0; i < cl.size(); i++) {
-			if (cl[i].strip_edges().length() == 0) {
-				cl.remove(i);
-				i--;
+		std::vector<String> cl = cmdline.strip_edges().split(" ");
+		std::remove_if(cl.begin(), cl.end(), [](const String &str) {
+			if (str.strip_edges().length() == 0) {
+				return true;
 			}
-		}
+			return false;
+		});
 
 		gen_export_flags(cl, p_flags);
 
@@ -2223,7 +2227,7 @@ public:
 			for (uint64_t i = 0; i < sizeof(launcher_icons) / sizeof(launcher_icons[0]); ++i) {
 				String icon_path = String(p_preset->get(launcher_icons[i].option_id)).strip_edges();
 				if (icon_path != "" && icon_path.ends_with(".png") && FileAccess::exists(icon_path)) {
-					Vector<uint8_t> data = FileAccess::get_file_as_array(icon_path);
+					std::vector<uint8_t> data = FileAccess::get_file_as_array(icon_path);
 					store_in_apk(&ed, launcher_icons[i].export_path, data);
 				}
 			}
@@ -2248,10 +2252,10 @@ public:
 
 		if (cl.size()) {
 			//add comandline
-			Vector<uint8_t> clf;
+			std::vector<uint8_t> clf;
 			clf.resize(4);
-			encode_uint32(cl.size(), &clf.write[0]);
-			for (int i = 0; i < cl.size(); i++) {
+			encode_uint32(cl.size(), &clf.front());
+			for (decltype(cl.size()) i = 0; i < cl.size(); ++i) {
 
 				print_line(itos(i) + " param: " + cl[i]);
 				CharString txt = cl[i].utf8();
@@ -2260,8 +2264,8 @@ public:
 				if (!length)
 					continue;
 				clf.resize(base + 4 + length);
-				encode_uint32(length, &clf.write[base]);
-				copymem(&clf.write[base + 4], txt.ptr(), length);
+				encode_uint32(length, &clf[base]);
+				copymem(&clf[base + 4], txt.ptr(), length);
 			}
 
 			zip_fileinfo zipfi = get_zip_fileinfo();
@@ -2269,19 +2273,19 @@ public:
 			zipOpenNewFileInZip(unaligned_apk,
 					"assets/_cl_",
 					&zipfi,
-					NULL,
+					nullptr,
 					0,
-					NULL,
+					nullptr,
 					0,
-					NULL,
+					nullptr,
 					0, // No compress (little size gain and potentially slower startup)
 					Z_DEFAULT_COMPRESSION);
 
-			zipWriteInFileInZip(unaligned_apk, clf.ptr(), clf.size());
+			zipWriteInFileInZip(unaligned_apk, clf.data(), clf.size());
 			zipCloseFileInZip(unaligned_apk);
 		}
 
-		zipClose(unaligned_apk, NULL);
+		zipClose(unaligned_apk, nullptr);
 		unzClose(pkg);
 
 		if (err != OK) {
@@ -2406,18 +2410,18 @@ public:
 
 			char fname[16384];
 			char extra[16384];
-			ret = unzGetCurrentFileInfo(tmp_unaligned, &info, fname, 16384, extra, 16384 - ZIP_ALIGNMENT, NULL, 0);
+			ret = unzGetCurrentFileInfo(tmp_unaligned, &info, fname, 16384, extra, 16384 - ZIP_ALIGNMENT, nullptr, 0);
 
 			String file = fname;
 
-			Vector<uint8_t> data;
+			std::vector<uint8_t> data;
 			data.resize(info.compressed_size);
 
 			// read
 			int method, level;
 			unzOpenCurrentFile2(tmp_unaligned, &method, &level, 1); // raw read
 			long file_offset = unzGetCurrentFileZStreamPos64(tmp_unaligned);
-			unzReadCurrentFile(tmp_unaligned, data.ptrw(), data.size());
+			unzReadCurrentFile(tmp_unaligned, data.data(), data.size());
 			unzCloseCurrentFile(tmp_unaligned);
 
 			// align
@@ -2438,13 +2442,13 @@ public:
 					&zipfi,
 					extra,
 					info.size_file_extra + padding,
-					NULL,
+					nullptr,
 					0,
-					NULL,
+					nullptr,
 					method,
 					level,
 					1); // raw write
-			zipWriteInFileInZip(final_apk, data.ptr(), data.size());
+			zipWriteInFileInZip(final_apk, data.data(), data.size());
 			zipCloseFileInZipRaw(final_apk, info.uncompressed_size, info.crc);
 
 			bias += padding;
@@ -2452,7 +2456,7 @@ public:
 			ret = unzGoToNextFile(tmp_unaligned);
 		}
 
-		zipClose(final_apk, NULL);
+		zipClose(final_apk, nullptr);
 		unzClose(tmp_unaligned);
 
 		CLEANUP_AND_RETURN(OK);

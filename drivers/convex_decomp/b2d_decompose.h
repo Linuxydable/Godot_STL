@@ -32,8 +32,7 @@
 #define B2D_DECOMPOSE_H
 
 #include "core/math/vector2.h"
-#include "core/vector.h"
 
-Vector<Vector<Vector2> > b2d_decompose(const Vector<Vector2> &p_polygon);
+std::vector<std::vector<Vector2> > b2d_decompose(const std::vector<Vector2> &p_polygon);
 
 #endif // B2D_DECOMPOSE_H

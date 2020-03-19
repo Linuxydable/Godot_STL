@@ -720,6 +720,7 @@ public:
 	virtual uint32_t mesh_surface_get_format(RID p_mesh, int p_surface) const;
 	virtual VS::PrimitiveType mesh_surface_get_primitive_type(RID p_mesh, int p_surface) const;
 
+	// need update : int to const unsigned& p_surface
 	virtual AABB mesh_surface_get_aabb(RID p_mesh, int p_surface) const;
 	virtual std::vector<PoolVector<uint8_t> > mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const;
 	virtual std::vector<AABB> mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const;
