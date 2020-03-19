@@ -34,10 +34,10 @@
 
 namespace b2ConvexDecomp {
 
-void add_to_res(Vector<Vector<Vector2> > &res, const b2Polygon &p_poly) {
+void add_to_res(std::vector<std::vector<Vector2> > &res, const b2Polygon &p_poly) {
 
-	Vector<Vector2> arr;
-	for (int i = 0; i < p_poly.nVertices; i++) {
+	std::vector<Vector2> arr;
+	for (decltype(p_poly.nVertices) i = 0; i < p_poly.nVertices; ++i) {
 
 		arr.push_back(Vector2(p_poly.x[i], p_poly.y[i]));
 	}
@@ -45,14 +45,15 @@ void add_to_res(Vector<Vector<Vector2> > &res, const b2Polygon &p_poly) {
 	res.push_back(arr);
 }
 
-static Vector<Vector<Vector2> > _b2d_decompose(const Vector<Vector2> &p_polygon) {
+static std::vector<std::vector<Vector2> > _b2d_decompose(const std::vector<Vector2> &p_polygon) {
 
-	Vector<Vector<Vector2> > res;
+	std::vector<std::vector<Vector2> > res;
 	if (p_polygon.size() < 3)
 		return res;
 
 	b2Vec2 *polys = memnew_arr(b2Vec2, p_polygon.size());
-	for (int i = 0; i < p_polygon.size(); i++)
+
+	for (decltype(p_polygon.size()) i = 0; i < p_polygon.size(); ++i)
 		polys[i] = b2Vec2(p_polygon[i].x, p_polygon[i].y);
 
 	b2Polygon *p = new b2Polygon(polys, p_polygon.size());
@@ -156,7 +157,7 @@ static Vector<Vector<Vector2> > _b2d_decompose(const Vector<Vector2> &p_polygon)
 }
 } // namespace b2ConvexDecomp
 
-Vector<Vector<Vector2> > b2d_decompose(const Vector<Vector2> &p_polygon) {
+std::vector<std::vector<Vector2> > b2d_decompose(const std::vector<Vector2> &p_polygon) {
 
 	return b2ConvexDecomp::_b2d_decompose(p_polygon);
 }
