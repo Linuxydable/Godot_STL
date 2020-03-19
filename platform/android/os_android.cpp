@@ -356,38 +356,37 @@ void OS_Android::process_event(Ref<InputEvent> p_event) {
 	input->parse_input_event(p_event);
 }
 
-void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos> &p_points) {
+void OS_Android::process_touch(int p_what, int p_pointer, const std::vector<TouchPos> &p_points) {
 
 	switch (p_what) {
 		case 0: { //gesture begin
 
 			if (touch.size()) {
 				//end all if exist
-				for (int i = 0; i < touch.size(); i++) {
-
+				for (auto &&pos : touch) {
 					Ref<InputEventScreenTouch> ev;
 					ev.instance();
-					ev->set_index(touch[i].id);
+					ev->set_index(pos.id);
 					ev->set_pressed(false);
-					ev->set_position(touch[i].pos);
+					ev->set_position(pos.pos);
 					input->parse_input_event(ev);
 				}
 			}
 
 			touch.resize(p_points.size());
-			for (int i = 0; i < p_points.size(); i++) {
-				touch.write[i].id = p_points[i].id;
-				touch.write[i].pos = p_points[i].pos;
+			for (decltype(p_points.size()) i = 0; i < p_points.size(); ++i) {
+				touch[i].id = p_points[i].id;
+				touch[i].pos = p_points[i].pos;
 			}
 
 			//send touch
-			for (int i = 0; i < touch.size(); i++) {
+			for (auto &&pos : touch) {
 
 				Ref<InputEventScreenTouch> ev;
 				ev.instance();
-				ev->set_index(touch[i].id);
+				ev->set_index(pos.id);
 				ev->set_pressed(true);
-				ev->set_position(touch[i].pos);
+				ev->set_position(pos.pos);
 				input->parse_input_event(ev);
 			}
 
@@ -396,29 +395,27 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 
 			ERR_FAIL_COND(touch.size() != p_points.size());
 
-			for (int i = 0; i < touch.size(); i++) {
+			for (auto &&p : touch) {
 
-				int idx = -1;
-				for (int j = 0; j < p_points.size(); j++) {
-
-					if (touch[i].id == p_points[j].id) {
-						idx = j;
-						break;
+				auto it_find = std::find_if(p_points.begin(), p_points.end(), [&p](const TouchPos &point) {
+					if (p.id == point.id) {
+						return true;
 					}
-				}
+					return false;
+				});
 
-				ERR_CONTINUE(idx == -1);
+				ERR_CONTINUE(it_find == p_points.end());
 
-				if (touch[i].pos == p_points[idx].pos)
+				if (p.pos == it_find->pos)
 					continue; //no move unncesearily
 
 				Ref<InputEventScreenDrag> ev;
 				ev.instance();
-				ev->set_index(touch[i].id);
-				ev->set_position(p_points[idx].pos);
-				ev->set_relative(p_points[idx].pos - touch[i].pos);
+				ev->set_index(p.id);
+				ev->set_position(it_find->pos);
+				ev->set_relative(it_find->pos - p.pos);
 				input->parse_input_event(ev);
-				touch.write[i].pos = p_points[idx].pos;
+				p.pos = it_find->pos;
 			}
 
 		} break;
@@ -426,13 +423,13 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 
 			if (touch.size()) {
 				//end all if exist
-				for (int i = 0; i < touch.size(); i++) {
+				for (auto &&pos : touch) {
 
 					Ref<InputEventScreenTouch> ev;
 					ev.instance();
-					ev->set_index(touch[i].id);
+					ev->set_index(pos.id);
 					ev->set_pressed(false);
-					ev->set_position(touch[i].pos);
+					ev->set_position(pos.pos);
 					input->parse_input_event(ev);
 				}
 				touch.clear();
@@ -440,9 +437,9 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 		} break;
 		case 3: { // add touch
 
-			for (int i = 0; i < p_points.size(); i++) {
-				if (p_points[i].id == p_pointer) {
-					TouchPos tp = p_points[i];
+			for (auto &&pos : p_points) {
+				if (pos.id == p_pointer) {
+					TouchPos tp = pos;
 					touch.push_back(tp);
 
 					Ref<InputEventScreenTouch> ev;
@@ -459,17 +456,15 @@ void OS_Android::process_touch(int p_what, int p_pointer, const Vector<TouchPos>
 		} break;
 		case 4: { // remove touch
 
-			for (int i = 0; i < touch.size(); i++) {
+			for (decltype(touch.size()) i = 0; i < touch.size(); ++i) {
 				if (touch[i].id == p_pointer) {
-
 					Ref<InputEventScreenTouch> ev;
 					ev.instance();
 					ev->set_index(touch[i].id);
 					ev->set_pressed(false);
 					ev->set_position(touch[i].pos);
 					input->parse_input_event(ev);
-					touch.remove(i);
-
+					touch.erase(touch.begin() + i);
 					break;
 				}
 			}
@@ -758,7 +753,7 @@ OS_Android::OS_Android(GodotJavaWrapper *p_godot_java, GodotIOJavaWrapper *p_god
 	godot_java = p_godot_java;
 	godot_io_java = p_godot_io_java;
 
-	Vector<Logger *> loggers;
+	std::vector<Logger *> loggers;
 	loggers.push_back(memnew(AndroidLogger));
 	_set_logger(memnew(CompositeLogger(loggers)));
 

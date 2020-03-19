@@ -69,7 +69,7 @@ public:
 	};
 
 private:
-	Vector<TouchPos> touch;
+	std::vector<TouchPos> touch;
 	Point2 hover_prev_pos; // needed to calculate the relative position on hover events
 
 	bool use_gl2;
@@ -186,7 +186,7 @@ public:
 	void process_gravity(const Vector3 &p_gravity);
 	void process_magnetometer(const Vector3 &p_magnetometer);
 	void process_gyroscope(const Vector3 &p_gyroscope);
-	void process_touch(int p_what, int p_pointer, const Vector<TouchPos> &p_points);
+	void process_touch(int p_what, int p_pointer, const std::vector<TouchPos> &p_points);
 	void process_hover(int p_type, Point2 p_pos);
 	void process_joy_event(JoypadEvent p_event);
 	void process_event(Ref<InputEvent> p_event);
