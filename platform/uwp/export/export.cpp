@@ -119,7 +119,7 @@ class AppxPackager {
 		bool compressed;
 		size_t compressed_size;
 		size_t uncompressed_size;
-		Vector<BlockHash> hashes;
+		std::vector<BlockHash> hashes;
 		uLong file_crc32;
 		ZPOS64_T zip_offset;
 
@@ -137,11 +137,11 @@ class AppxPackager {
 
 	Set<String> mime_types;
 
-	Vector<FileMeta> file_metadata;
+	std::vector<FileMeta> file_metadata;
 
 	ZPOS64_T central_dir_offset;
 	ZPOS64_T end_of_central_dir_offset;
-	Vector<uint8_t> central_dir_data;
+	std::vector<uint8_t> central_dir_data;
 
 	String hash_block(const uint8_t *p_block_data, size_t p_block_len);
 
@@ -176,9 +176,9 @@ class AppxPackager {
 		return p_val.length();
 	}
 
-	Vector<uint8_t> make_file_header(FileMeta p_file_meta);
+	std::vector<uint8_t> make_file_header(FileMeta p_file_meta);
 	void store_central_dir_header(const FileMeta &p_file, bool p_do_hash = true);
-	Vector<uint8_t> make_end_of_central_record();
+	std::vector<uint8_t> make_end_of_central_record();
 
 	String content_type(String p_extension);
 
@@ -214,18 +214,16 @@ void AppxPackager::make_block_map(const String &p_path) {
 	tmp_file->store_string("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
 	tmp_file->store_string("<BlockMap xmlns=\"http://schemas.microsoft.com/appx/2010/blockmap\" HashMethod=\"http://www.w3.org/2001/04/xmlenc#sha256\">");
 
-	for (int i = 0; i < file_metadata.size(); i++) {
-
-		FileMeta file = file_metadata[i];
+	for (auto &&file : file_metadata) {
 
 		tmp_file->store_string(
 				"<File Name=\"" + file.name.replace("/", "\\") + "\" Size=\"" + itos(file.uncompressed_size) + "\" LfhSize=\"" + itos(file.lfh_size) + "\">");
 
-		for (int j = 0; j < file.hashes.size(); j++) {
+		for (auto &&hash : file.hashes) {
 
-			tmp_file->store_string("<Block Hash=\"" + file.hashes[j].base64_hash + "\" ");
+			tmp_file->store_string("<Block Hash=\"" + hash.base64_hash + "\" ");
 			if (file.compressed)
-				tmp_file->store_string("Size=\"" + itos(file.hashes[j].compressed_size) + "\" ");
+				tmp_file->store_string("Size=\"" + itos(hash.compressed_size) + "\" ");
 			tmp_file->store_string("/>");
 		}
 
@@ -261,9 +259,9 @@ void AppxPackager::make_content_types(const String &p_path) {
 
 	Map<String, String> types;
 
-	for (int i = 0; i < file_metadata.size(); i++) {
+	for (auto &&file : file_metadata) {
 
-		String ext = file_metadata[i].name.get_extension();
+		String ext = file.name.get_extension();
 
 		if (types.has(ext)) continue;
 
@@ -287,44 +285,44 @@ void AppxPackager::make_content_types(const String &p_path) {
 	memdelete(tmp_file);
 }
 
-Vector<uint8_t> AppxPackager::make_file_header(FileMeta p_file_meta) {
+std::vector<uint8_t> AppxPackager::make_file_header(FileMeta p_file_meta) {
 
-	Vector<uint8_t> buf;
+	std::vector<uint8_t> buf;
 	buf.resize(BASE_FILE_HEADER_SIZE + p_file_meta.name.length());
 
 	int offs = 0;
 	// Write magic
-	offs += buf_put_int32(FILE_HEADER_MAGIC, &buf.write[offs]);
+	offs += buf_put_int32(FILE_HEADER_MAGIC, &buf[offs]);
 
 	// Version
-	offs += buf_put_int16(ZIP_VERSION, &buf.write[offs]);
+	offs += buf_put_int16(ZIP_VERSION, &buf[offs]);
 
 	// Special flag
-	offs += buf_put_int16(GENERAL_PURPOSE, &buf.write[offs]);
+	offs += buf_put_int16(GENERAL_PURPOSE, &buf[offs]);
 
 	// Compression
-	offs += buf_put_int16(p_file_meta.compressed ? Z_DEFLATED : 0, &buf.write[offs]);
+	offs += buf_put_int16(p_file_meta.compressed ? Z_DEFLATED : 0, &buf[offs]);
 
 	// File date and time
-	offs += buf_put_int32(0, &buf.write[offs]);
+	offs += buf_put_int32(0, &buf[offs]);
 
 	// CRC-32
-	offs += buf_put_int32(p_file_meta.file_crc32, &buf.write[offs]);
+	offs += buf_put_int32(p_file_meta.file_crc32, &buf[offs]);
 
 	// Compressed size
-	offs += buf_put_int32(p_file_meta.compressed_size, &buf.write[offs]);
+	offs += buf_put_int32(p_file_meta.compressed_size, &buf[offs]);
 
 	// Uncompressed size
-	offs += buf_put_int32(p_file_meta.uncompressed_size, &buf.write[offs]);
+	offs += buf_put_int32(p_file_meta.uncompressed_size, &buf[offs]);
 
 	// File name length
-	offs += buf_put_int16(p_file_meta.name.length(), &buf.write[offs]);
+	offs += buf_put_int16(p_file_meta.name.length(), &buf[offs]);
 
 	// Extra data length
-	offs += buf_put_int16(0, &buf.write[offs]);
+	offs += buf_put_int16(0, &buf[offs]);
 
 	// File name
-	offs += buf_put_string(p_file_meta.name, &buf.write[offs]);
+	offs += buf_put_string(p_file_meta.name, &buf[offs]);
 
 	// Done!
 	return buf;
@@ -332,120 +330,120 @@ Vector<uint8_t> AppxPackager::make_file_header(FileMeta p_file_meta) {
 
 void AppxPackager::store_central_dir_header(const FileMeta &p_file, bool p_do_hash) {
 
-	Vector<uint8_t> &buf = central_dir_data;
+	std::vector<uint8_t> &buf = central_dir_data;
 	int offs = buf.size();
 	buf.resize(buf.size() + BASE_CENTRAL_DIR_SIZE + p_file.name.length());
 
 	// Write magic
-	offs += buf_put_int32(CENTRAL_DIR_MAGIC, &buf.write[offs]);
+	offs += buf_put_int32(CENTRAL_DIR_MAGIC, &buf[offs]);
 
 	// ZIP versions
-	offs += buf_put_int16(ZIP_ARCHIVE_VERSION, &buf.write[offs]);
-	offs += buf_put_int16(ZIP_VERSION, &buf.write[offs]);
+	offs += buf_put_int16(ZIP_ARCHIVE_VERSION, &buf[offs]);
+	offs += buf_put_int16(ZIP_VERSION, &buf[offs]);
 
 	// General purpose flag
-	offs += buf_put_int16(GENERAL_PURPOSE, &buf.write[offs]);
+	offs += buf_put_int16(GENERAL_PURPOSE, &buf[offs]);
 
 	// Compression
-	offs += buf_put_int16(p_file.compressed ? Z_DEFLATED : 0, &buf.write[offs]);
+	offs += buf_put_int16(p_file.compressed ? Z_DEFLATED : 0, &buf[offs]);
 
 	// Modification date/time
-	offs += buf_put_int32(0, &buf.write[offs]);
+	offs += buf_put_int32(0, &buf[offs]);
 
 	// Crc-32
-	offs += buf_put_int32(p_file.file_crc32, &buf.write[offs]);
+	offs += buf_put_int32(p_file.file_crc32, &buf[offs]);
 
 	// File sizes
-	offs += buf_put_int32(p_file.compressed_size, &buf.write[offs]);
-	offs += buf_put_int32(p_file.uncompressed_size, &buf.write[offs]);
+	offs += buf_put_int32(p_file.compressed_size, &buf[offs]);
+	offs += buf_put_int32(p_file.uncompressed_size, &buf[offs]);
 
 	// File name length
-	offs += buf_put_int16(p_file.name.length(), &buf.write[offs]);
+	offs += buf_put_int16(p_file.name.length(), &buf[offs]);
 
 	// Extra field length
-	offs += buf_put_int16(0, &buf.write[offs]);
+	offs += buf_put_int16(0, &buf[offs]);
 
 	// Comment length
-	offs += buf_put_int16(0, &buf.write[offs]);
+	offs += buf_put_int16(0, &buf[offs]);
 
 	// Disk number start, internal/external file attributes
-	for (int i = 0; i < 8; i++) {
-		buf.write[offs++] = 0;
+	for (uint8_t i = 0; i < 8u; ++i) {
+		buf[offs++] = 0;
 	}
 
 	// Relative offset
-	offs += buf_put_int32(p_file.zip_offset, &buf.write[offs]);
+	offs += buf_put_int32(p_file.zip_offset, &buf[offs]);
 
 	// File name
-	offs += buf_put_string(p_file.name, &buf.write[offs]);
+	offs += buf_put_string(p_file.name, &buf[offs]);
 
 	// Done!
 }
 
-Vector<uint8_t> AppxPackager::make_end_of_central_record() {
+std::vector<uint8_t> AppxPackager::make_end_of_central_record() {
 
-	Vector<uint8_t> buf;
+	std::vector<uint8_t> buf;
 	buf.resize(ZIP64_END_OF_CENTRAL_DIR_SIZE + 12 + END_OF_CENTRAL_DIR_SIZE); // Size plus magic
 
 	int offs = 0;
 
 	// Write magic
-	offs += buf_put_int32(ZIP64_END_OF_CENTRAL_DIR_MAGIC, &buf.write[offs]);
+	offs += buf_put_int32(ZIP64_END_OF_CENTRAL_DIR_MAGIC, &buf[offs]);
 
 	// Size of this record
-	offs += buf_put_int64(ZIP64_END_OF_CENTRAL_DIR_SIZE, &buf.write[offs]);
+	offs += buf_put_int64(ZIP64_END_OF_CENTRAL_DIR_SIZE, &buf[offs]);
 
 	// Version (yes, twice)
-	offs += buf_put_int16(ZIP_ARCHIVE_VERSION, &buf.write[offs]);
-	offs += buf_put_int16(ZIP_ARCHIVE_VERSION, &buf.write[offs]);
+	offs += buf_put_int16(ZIP_ARCHIVE_VERSION, &buf[offs]);
+	offs += buf_put_int16(ZIP_ARCHIVE_VERSION, &buf[offs]);
 
 	// Disk number
-	for (int i = 0; i < 8; i++) {
-		buf.write[offs++] = 0;
+	for (uint8_t i = 0; i < 8u; ++i) {
+		buf[offs++] = 0;
 	}
 
 	// Number of entries (total and per disk)
-	offs += buf_put_int64(file_metadata.size(), &buf.write[offs]);
-	offs += buf_put_int64(file_metadata.size(), &buf.write[offs]);
+	offs += buf_put_int64(file_metadata.size(), &buf[offs]);
+	offs += buf_put_int64(file_metadata.size(), &buf[offs]);
 
 	// Size of central dir
-	offs += buf_put_int64(central_dir_data.size(), &buf.write[offs]);
+	offs += buf_put_int64(central_dir_data.size(), &buf[offs]);
 
 	// Central dir offset
-	offs += buf_put_int64(central_dir_offset, &buf.write[offs]);
+	offs += buf_put_int64(central_dir_offset, &buf[offs]);
 
 	////// ZIP64 locator
 
 	// Write magic for zip64 central dir locator
-	offs += buf_put_int32(ZIP64_END_DIR_LOCATOR_MAGIC, &buf.write[offs]);
+	offs += buf_put_int32(ZIP64_END_DIR_LOCATOR_MAGIC, &buf[offs]);
 
 	// Disk number
-	for (int i = 0; i < 4; i++) {
-		buf.write[offs++] = 0;
+	for (uint8_t i = 0; i < 4u; ++i) {
+		buf[offs++] = 0;
 	}
 
 	// Relative offset
-	offs += buf_put_int64(end_of_central_dir_offset, &buf.write[offs]);
+	offs += buf_put_int64(end_of_central_dir_offset, &buf[offs]);
 
 	// Number of disks
-	offs += buf_put_int32(1, &buf.write[offs]);
+	offs += buf_put_int32(1, &buf[offs]);
 
 	/////// End of zip directory
 
 	// Write magic for end central dir
-	offs += buf_put_int32(END_OF_CENTRAL_DIR_MAGIC, &buf.write[offs]);
+	offs += buf_put_int32(END_OF_CENTRAL_DIR_MAGIC, &buf[offs]);
 
 	// Dummy stuff for Zip64
-	for (int i = 0; i < 4; i++) {
-		buf.write[offs++] = 0x0;
+	for (uint8_t i = 0; i < 4u; i++) {
+		buf[offs++] = 0x0;
 	}
-	for (int i = 0; i < 12; i++) {
-		buf.write[offs++] = 0xFF;
+	for (uint8_t i = 0; i < 12u; ++i) {
+		buf[offs++] = 0xFF;
 	}
 
 	// Size of comments
-	for (int i = 0; i < 2; i++) {
-		buf.write[offs++] = 0;
+	for (uint8_t i = 0; i < 2u; ++i) {
+		buf[offs++] = 0;
 	}
 
 	// Done!
@@ -453,7 +451,6 @@ Vector<uint8_t> AppxPackager::make_end_of_central_record() {
 }
 
 void AppxPackager::init(FileAccess *p_fa) {
-
 	package = p_fa;
 	central_dir_offset = 0;
 	end_of_central_dir_offset = 0;
@@ -474,14 +471,14 @@ Error AppxPackager::add_file(String p_file_name, const uint8_t *p_buffer, size_t
 	meta.compressed = p_compress;
 	meta.zip_offset = package->get_position();
 
-	Vector<uint8_t> file_buffer;
+	std::vector<uint8_t> file_buffer;
 
 	// Data for compression
 	z_stream strm;
-	FileAccess *strm_f = NULL;
-	Vector<uint8_t> strm_in;
+	FileAccess *strm_f = nullptr;
+	std::vector<uint8_t> strm_in;
 	strm_in.resize(BLOCK_SIZE);
-	Vector<uint8_t> strm_out;
+	std::vector<uint8_t> strm_out;
 
 	if (p_compress) {
 
@@ -501,18 +498,18 @@ Error AppxPackager::add_file(String p_file_name, const uint8_t *p_buffer, size_t
 		size_t block_size = (p_len - step) > BLOCK_SIZE ? (size_t)BLOCK_SIZE : (p_len - step);
 
 		for (uint64_t i = 0; i < block_size; i++) {
-			strm_in.write[i] = p_buffer[step + i];
+			strm_in[i] = p_buffer[step + i];
 		}
 
 		BlockHash bh;
-		bh.base64_hash = hash_block(strm_in.ptr(), block_size);
+		bh.base64_hash = hash_block(strm_in.data(), block_size);
 
 		if (p_compress) {
 
 			strm.avail_in = block_size;
 			strm.avail_out = strm_out.size();
-			strm.next_in = (uint8_t *)strm_in.ptr();
-			strm.next_out = strm_out.ptrw();
+			strm.next_in = (uint8_t *)strm_in.data();
+			strm.next_out = strm_out.data();
 
 			int total_out_before = strm.total_out;
 
@@ -525,14 +522,14 @@ Error AppxPackager::add_file(String p_file_name, const uint8_t *p_buffer, size_t
 			int start = file_buffer.size();
 			file_buffer.resize(file_buffer.size() + bh.compressed_size);
 			for (uint64_t i = 0; i < bh.compressed_size; i++)
-				file_buffer.write[start + i] = strm_out[i];
+				file_buffer[start + i] = strm_out[i];
 		} else {
 			bh.compressed_size = block_size;
 			//package->store_buffer(strm_in.ptr(), block_size);
 			int start = file_buffer.size();
 			file_buffer.resize(file_buffer.size() + block_size);
 			for (uint64_t i = 0; i < bh.compressed_size; i++)
-				file_buffer.write[start + i] = strm_in[i];
+				file_buffer[start + i] = strm_in[i];
 		}
 
 		meta.hashes.push_back(bh);
@@ -544,8 +541,8 @@ Error AppxPackager::add_file(String p_file_name, const uint8_t *p_buffer, size_t
 
 		strm.avail_in = 0;
 		strm.avail_out = strm_out.size();
-		strm.next_in = (uint8_t *)strm_in.ptr();
-		strm.next_out = strm_out.ptrw();
+		strm.next_in = (uint8_t *)strm_in.data();
+		strm.next_out = strm_out.data();
 
 		int total_out_before = strm.total_out;
 
@@ -555,7 +552,7 @@ Error AppxPackager::add_file(String p_file_name, const uint8_t *p_buffer, size_t
 		int start = file_buffer.size();
 		file_buffer.resize(file_buffer.size() + (strm.total_out - total_out_before));
 		for (uint64_t i = 0; i < (strm.total_out - total_out_before); i++)
-			file_buffer.write[start + i] = strm_out[i];
+			file_buffer[start + i] = strm_out[i];
 
 		deflateEnd(&strm);
 		meta.compressed_size = strm.total_out;
@@ -571,12 +568,12 @@ Error AppxPackager::add_file(String p_file_name, const uint8_t *p_buffer, size_t
 	meta.file_crc32 = crc;
 
 	// Create file header
-	Vector<uint8_t> file_header = make_file_header(meta);
+	std::vector<uint8_t> file_header = make_file_header(meta);
 	meta.lfh_size = file_header.size();
 
 	// Store the header and file;
-	package->store_buffer(file_header.ptr(), file_header.size());
-	package->store_buffer(file_buffer.ptr(), file_buffer.size());
+	package->store_buffer(file_header.data(), file_header.size());
+	package->store_buffer(file_buffer.data(), file_buffer.size());
 
 	file_metadata.push_back(meta);
 
@@ -592,12 +589,12 @@ void AppxPackager::finish() {
 	make_block_map(tmp_blockmap_file_path);
 
 	FileAccess *blockmap_file = FileAccess::open(tmp_blockmap_file_path, FileAccess::READ);
-	Vector<uint8_t> blockmap_buffer;
+	std::vector<uint8_t> blockmap_buffer;
 	blockmap_buffer.resize(blockmap_file->get_len());
 
-	blockmap_file->get_buffer(blockmap_buffer.ptrw(), blockmap_buffer.size());
+	blockmap_file->get_buffer(blockmap_buffer.data(), blockmap_buffer.size());
 
-	add_file("AppxBlockMap.xml", blockmap_buffer.ptr(), blockmap_buffer.size(), -1, -1, true);
+	add_file("AppxBlockMap.xml", blockmap_buffer.data(), blockmap_buffer.size(), -1, -1, true);
 
 	blockmap_file->close();
 	memdelete(blockmap_file);
@@ -610,12 +607,12 @@ void AppxPackager::finish() {
 	make_content_types(tmp_content_types_file_path);
 
 	FileAccess *types_file = FileAccess::open(tmp_content_types_file_path, FileAccess::READ);
-	Vector<uint8_t> types_buffer;
+	std::vector<uint8_t> types_buffer;
 	types_buffer.resize(types_file->get_len());
 
-	types_file->get_buffer(types_buffer.ptrw(), types_buffer.size());
+	types_file->get_buffer(types_buffer.data(), types_buffer.size());
 
-	add_file("[Content_Types].xml", types_buffer.ptr(), types_buffer.size(), -1, -1, true);
+	add_file("[Content_Types].xml", types_buffer.data(), types_buffer.size(), -1, -1, true);
 
 	types_file->close();
 	memdelete(types_file);
@@ -625,23 +622,23 @@ void AppxPackager::finish() {
 	DirAccess::remove_file_or_error(tmp_content_types_file_path);
 
 	// Pre-process central directory before signing
-	for (int i = 0; i < file_metadata.size(); i++) {
-		store_central_dir_header(file_metadata[i]);
+	for (auto &&meta : file_metadata) {
+		store_central_dir_header(meta);
 	}
 
 	// Write central directory
 	EditorNode::progress_task_step("export", "Finishing package...", 6);
 	central_dir_offset = package->get_position();
-	package->store_buffer(central_dir_data.ptr(), central_dir_data.size());
+	package->store_buffer(central_dir_data.data(), central_dir_data.size());
 
 	// End record
 	end_of_central_dir_offset = package->get_position();
-	Vector<uint8_t> end_record = make_end_of_central_record();
-	package->store_buffer(end_record.ptr(), end_record.size());
+	std::vector<uint8_t> end_record = make_end_of_central_record();
+	package->store_buffer(end_record.data(), end_record.size());
 
 	package->close();
 	memdelete(package);
-	package = NULL;
+	package = nullptr;
 }
 
 AppxPackager::AppxPackager() {}
@@ -670,7 +667,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 		static const char *invalid_names[] = {
 			"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
 			"COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
-			NULL
+			nullptr
 		};
 
 		const char **t = invalid_names;
@@ -684,10 +681,10 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 
 	bool _valid_guid(const String &p_guid) const {
 
-		Vector<String> parts = p_guid.split("-");
+		std::vector<String> parts = p_guid.split("-");
 
 		if (parts.size() != 5) return false;
-		if (parts[0].length() != 8) return false;
+		if (parts.front().length() != 8) return false;
 		for (int i = 1; i < 4; i++)
 			if (parts[i].length() != 4) return false;
 		if (parts[4].length() != 12) return false;
@@ -726,7 +723,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 			"snow", "springGreen", "steelBlue", "tan", "teal", "thistle",
 			"tomato", "transparent", "turquoise", "violet", "wheat", "white",
 			"whiteSmoke", "yellow", "yellowGreen",
-			NULL
+			nullptr
 		};
 
 		const char **color = valid_colors;
@@ -751,8 +748,8 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 		bool valid_w = false;
 		bool valid_h = false;
 
+		// need update : useless loop
 		for (int i = 0; i < 1; i++) {
-
 			int w = ceil(p_width * scales[i]);
 			int h = ceil(p_height * scales[i]);
 
@@ -765,9 +762,9 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 		return valid_w && valid_h;
 	}
 
-	Vector<uint8_t> _fix_manifest(const Ref<EditorExportPreset> &p_preset, const Vector<uint8_t> &p_template, bool p_give_internet) const {
+	std::vector<uint8_t> _fix_manifest(const Ref<EditorExportPreset> &p_preset, const std::vector<uint8_t> &p_template, bool p_give_internet) const {
 
-		String result = String::utf8((const char *)p_template.ptr(), p_template.size());
+		String result = String::utf8((const char *)p_template.data(), p_template.size());
 
 		result = result.replace("$godot_version$", VERSION_FULL_NAME);
 
@@ -864,34 +861,34 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 
 		result = result.replace("$capabilities_place$", capabilities_string);
 
-		Vector<uint8_t> r_ret;
+		std::vector<uint8_t> r_ret;
 		r_ret.resize(result.length());
 
 		for (int i = 0; i < result.length(); i++)
-			r_ret.write[i] = result.utf8().get(i);
+			r_ret[i] = result.utf8().get(i);
 
 		return r_ret;
 	}
 
-	Vector<uint8_t> _get_image_data(const Ref<EditorExportPreset> &p_preset, const String &p_path) {
+	std::vector<uint8_t> _get_image_data(const Ref<EditorExportPreset> &p_preset, const String &p_path) {
 
-		Vector<uint8_t> data;
-		StreamTexture *image = NULL;
+		std::vector<uint8_t> data;
+		StreamTexture *image = nullptr;
 
 		if (p_path.find("StoreLogo") != -1) {
-			image = p_preset->get("images/store_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/store_logo")));
+			image = p_preset->get("images/store_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/store_logo")));
 		} else if (p_path.find("Square44x44Logo") != -1) {
-			image = p_preset->get("images/square44x44_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square44x44_logo")));
+			image = p_preset->get("images/square44x44_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square44x44_logo")));
 		} else if (p_path.find("Square71x71Logo") != -1) {
-			image = p_preset->get("images/square71x71_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square71x71_logo")));
+			image = p_preset->get("images/square71x71_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square71x71_logo")));
 		} else if (p_path.find("Square150x150Logo") != -1) {
-			image = p_preset->get("images/square150x150_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square150x150_logo")));
+			image = p_preset->get("images/square150x150_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square150x150_logo")));
 		} else if (p_path.find("Square310x310Logo") != -1) {
-			image = p_preset->get("images/square310x310_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square310x310_logo")));
+			image = p_preset->get("images/square310x310_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square310x310_logo")));
 		} else if (p_path.find("Wide310x150Logo") != -1) {
-			image = p_preset->get("images/wide310x150_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/wide310x150_logo")));
+			image = p_preset->get("images/wide310x150_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/wide310x150_logo")));
 		} else if (p_path.find("SplashScreen") != -1) {
-			image = p_preset->get("images/splash_screen").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/splash_screen")));
+			image = p_preset->get("images/splash_screen").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/splash_screen")));
 		} else {
 			ERR_PRINT("Unable to load logo");
 		}
@@ -922,7 +919,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 		}
 
 		data.resize(f->get_len());
-		f->get_buffer(data.ptrw(), data.size());
+		f->get_buffer(data.data(), data.size());
 
 		f->close();
 		memdelete(f);
@@ -931,7 +928,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 		return data;
 	}
 
-	static bool _should_compress_asset(const String &p_path, const Vector<uint8_t> &p_data) {
+	static bool _should_compress_asset(const String &p_path, const std::vector<uint8_t> &p_data) {
 
 		/* TODO: This was copied verbatim from Android export. It should be
 		* refactored to the parent class and also be used for .zip export.
@@ -982,12 +979,12 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 		return true;
 	}
 
-	static Error save_appx_file(void *p_userdata, const String &p_path, const Vector<uint8_t> &p_data, int p_file, int p_total) {
+	static Error save_appx_file(void *p_userdata, const String &p_path, const std::vector<uint8_t> &p_data, int p_file, int p_total) {
 
 		AppxPackager *packager = (AppxPackager *)p_userdata;
 		String dst_path = p_path.replace_first("res://", "game/");
 
-		return packager->add_file(dst_path, p_data.ptr(), p_data.size(), p_file, p_total, _should_compress_asset(p_path, p_data));
+		return packager->add_file(dst_path, p_data.data(), p_data.size(), p_file, p_total, _should_compress_asset(p_path, p_data));
 	}
 
 public:
@@ -1286,7 +1283,7 @@ public:
 			// get file name
 			unz_file_info info;
 			char fname[16834];
-			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16834, NULL, 0, NULL, 0);
+			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16834, nullptr, 0, nullptr, 0);
 
 			String path = fname;
 
@@ -1296,7 +1293,7 @@ public:
 				continue;
 			}
 
-			Vector<uint8_t> data;
+			std::vector<uint8_t> data;
 			bool do_read = true;
 
 			if (path.begins_with("Assets/")) {
@@ -1311,7 +1308,7 @@ public:
 			if (do_read) {
 				data.resize(info.uncompressed_size);
 				unzOpenCurrentFile(pkg);
-				unzReadCurrentFile(pkg, data.ptrw(), data.size());
+				unzReadCurrentFile(pkg, data.data(), data.size());
 				unzCloseCurrentFile(pkg);
 			}
 
@@ -1322,7 +1319,7 @@ public:
 
 			print_line("ADDING: " + path);
 
-			err = packager.add_file(path, data.ptr(), data.size(), template_file_no++, template_files_amount, _should_compress_asset(path, data));
+			err = packager.add_file(path, data.data(), data.size(), template_file_no++, template_files_amount, _should_compress_asset(path, data));
 			if (err != OK) {
 				return err;
 			}
@@ -1336,13 +1333,14 @@ public:
 			return ERR_SKIP;
 		}
 
-		Vector<String> cl = ((String)p_preset->get("command_line/extra_args")).strip_edges().split(" ");
-		for (int i = 0; i < cl.size(); i++) {
-			if (cl[i].strip_edges().length() == 0) {
-				cl.remove(i);
-				i--;
+		std::vector<String> cl = ((String)p_preset->get("command_line/extra_args")).strip_edges().split(" ");
+
+		std::remove_if(cl.begin(), cl.end(), [](const String &str) {
+			if (str.strip_edges().length() == 0) {
+				return true;
 			}
-		}
+			return false;
+		});
 
 		if (!(p_flags & DEBUG_FLAG_DUMB_CLIENT)) {
 			cl.push_back("--path");
@@ -1352,23 +1350,23 @@ public:
 		gen_export_flags(cl, p_flags);
 
 		// Command line file
-		Vector<uint8_t> clf;
+		std::vector<uint8_t> clf;
 
 		// Argc
 		clf.resize(4);
-		encode_uint32(cl.size(), clf.ptrw());
+		encode_uint32(cl.size(), clf.data());
 
-		for (int i = 0; i < cl.size(); i++) {
+		for (decltype(cl.size()) i = 0; i < cl.size(); ++i) {
 
 			CharString txt = cl[i].utf8();
 			int base = clf.size();
 			clf.resize(base + 4 + txt.length());
-			encode_uint32(txt.length(), &clf.write[base]);
-			copymem(&clf.write[base + 4], txt.ptr(), txt.length());
+			encode_uint32(txt.length(), &clf[base]);
+			copymem(&clf[base + 4], txt.ptr(), txt.length());
 			print_line(itos(i) + " param: " + cl[i]);
 		}
 
-		err = packager.add_file("__cl__.cl", clf.ptr(), clf.size(), -1, -1, false);
+		err = packager.add_file("__cl__.cl", clf.data(), clf.size(), -1, -1, false);
 		if (err != OK) {
 			return err;
 		}
