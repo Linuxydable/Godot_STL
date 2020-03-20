@@ -186,14 +186,17 @@ void ConnectDialog::_add_bind() {
  * Remove parameter bind from connection.
  */
 void ConnectDialog::_remove_bind() {
-
 	String st = bind_editor->get_selected_path();
+
 	if (st == "")
 		return;
+
 	int idx = st.get_slice("/", 1).to_int() - 1;
 
 	ERR_FAIL_INDEX(idx, cdbinds->params.size());
-	cdbinds->params.remove(idx);
+
+	cdbinds->params.erase(cdbinds->params.begin() + idx);
+
 	cdbinds->notify_changed();
 }
 
