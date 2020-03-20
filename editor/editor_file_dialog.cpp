@@ -1463,7 +1463,7 @@ void EditorFileDialog::_save_to_recent() {
 	int count = 0;
 	bool res = dir.begins_with("res://");
 
-	std::remove_if(recent.begin(), recent.end(), [&dir, &count, &res](const String &str) {
+	std::remove_if(recent.begin(), recent.end(), [&](const String &str) {
 		bool cres = str.begins_with("res://");
 		if (str == dir || (res == cres && count > max)) {
 			return true;
