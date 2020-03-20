@@ -864,7 +864,7 @@ void EditorInspectorPlugin::add_custom_control(Control *control) {
 
 void EditorInspectorPlugin::add_property_editor(const String &p_for_property, Control *p_prop) {
 
-	ERR_FAIL_COND(Object::cast_to<EditorProperty>(p_prop) == NULL);
+	ERR_FAIL_COND(Object::cast_to<EditorProperty>(p_prop) == nullptr);
 
 	AddedEditor ae;
 	ae.properties.push_back(p_for_property);
@@ -872,7 +872,7 @@ void EditorInspectorPlugin::add_property_editor(const String &p_for_property, Co
 	added_editors.push_back(ae);
 }
 
-void EditorInspectorPlugin::add_property_editor_for_multiple_properties(const String &p_label, const Vector<String> &p_properties, Control *p_prop) {
+void EditorInspectorPlugin::add_property_editor_for_multiple_properties(const String &p_label, const std::vector<String> &p_properties, Control *p_prop) {
 
 	AddedEditor ae;
 	ae.properties = p_properties;
@@ -1347,8 +1347,7 @@ void EditorInspector::_parse_added_editors(VBoxContainer *current_vbox, Ref<Edit
 					ep->set_label(F->get().label);
 				}
 
-				for (int i = 0; i < F->get().properties.size(); i++) {
-					String prop = F->get().properties[i];
+				for (auto &&prop : F->get().properties) {
 
 					if (!editor_property_map.has(prop)) {
 						editor_property_map[prop] = List<EditorProperty *>();
@@ -1444,7 +1443,7 @@ void EditorInspector::update_tree() {
 	String filter = search_box ? search_box->get_text() : "";
 	String group;
 	String group_base;
-	VBoxContainer *category_vbox = NULL;
+	VBoxContainer *category_vbox = nullptr;
 
 	List<PropertyInfo>
 			plist;
@@ -1668,9 +1667,9 @@ void EditorInspector::update_tree() {
 				DocData *dd = EditorHelp::get_doc_data();
 				Map<String, DocData::ClassDoc>::Element *F = dd->class_list.find(classname);
 				while (F && descr == String()) {
-					for (int i = 0; i < F->get().properties.size(); i++) {
-						if (F->get().properties[i].name == propname.operator String()) {
-							descr = F->get().properties[i].description.strip_edges();
+					for (auto &&prop : F->get().properties) {
+						if (prop.name == propname.operator String()) {
+							descr = prop.description.strip_edges();
 							break;
 						}
 					}
@@ -1701,11 +1700,11 @@ void EditorInspector::update_tree() {
 					//set all this before the control gets the ENTER_TREE notification
 					ep->object = object;
 
-					if (F->get().properties.size()) {
+					if (!F->get().properties.empty()) {
 
 						if (F->get().properties.size() == 1) {
 							//since it's one, associate:
-							ep->property = F->get().properties[0];
+							ep->property = F->get().properties.front();
 							ep->property_usage = p.usage;
 							//and set label?
 						}
@@ -1716,8 +1715,7 @@ void EditorInspector::update_tree() {
 							//use existin one
 							ep->set_label(name);
 						}
-						for (int i = 0; i < F->get().properties.size(); i++) {
-							String prop = F->get().properties[i];
+						for (auto &&prop : F->get().properties) {
 
 							if (!editor_property_map.has(prop)) {
 								editor_property_map[prop] = List<EditorProperty *>();
@@ -2041,18 +2039,19 @@ void EditorInspector::_property_changed_update_all(const String &p_path, const V
 	update_tree();
 }
 
-void EditorInspector::_multiple_properties_changed(Vector<String> p_paths, Array p_values) {
+void EditorInspector::_multiple_properties_changed(std::vector<String> p_paths, Array p_values) {
 
 	ERR_FAIL_COND(p_paths.size() == 0 || p_values.size() == 0);
 	ERR_FAIL_COND(p_paths.size() != p_values.size());
 	String names;
-	for (int i = 0; i < p_paths.size(); i++) {
-		if (i > 0)
-			names += ",";
-		names += p_paths[i];
-	}
+	names += p_paths.front();
+	std::for_each(p_paths.begin() + 1, p_paths.end(), [&names](const String &path) {
+		names += ",";
+		names += path;
+	});
+
 	undo_redo->create_action(TTR("Set Multiple:") + " " + names, UndoRedo::MERGE_ENDS);
-	for (int i = 0; i < p_paths.size(); i++) {
+	for (decltype(p_paths.size()) i = 0; i < p_paths.size(); ++i) {
 		_edit_set(p_paths[i], p_values[i], false, "");
 		if (restart_request_props.has(p_paths[i])) {
 			emit_signal("restart_requested");
