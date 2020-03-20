@@ -574,7 +574,7 @@ void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &
 	int order = ProjectSettings::get_singleton()->get_order("autoload/" + name);
 
 	AutoLoadInfo aux;
-	List<AutoLoadInfo>::Element *E = NULL;
+	List<AutoLoadInfo>::Element *E = nullptr;
 
 	if (!move_to_back) {
 		aux.order = order;
@@ -584,8 +584,7 @@ void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &
 	Dictionary drop_data = p_data;
 	PoolStringArray autoloads = drop_data["autoloads"];
 
-	Vector<int> orders;
-	orders.resize(autoload_cache.size());
+	std::vector<int> orders(autoload_cache.size());
 
 	for (int i = 0; i < autoloads.size(); i++) {
 		aux.order = ProjectSettings::get_singleton()->get_order("autoload/" + autoloads[i]);
@@ -606,10 +605,10 @@ void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &
 	int i = 0;
 
 	for (List<AutoLoadInfo>::Element *F = autoload_cache.front(); F; F = F->next()) {
-		orders.write[i++] = F->get().order;
+		orders[i++] = F->get().order;
 	}
 
-	orders.sort();
+	std::sort(orders.begin(), orders.end());
 
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
@@ -782,9 +781,9 @@ EditorAutoloadSettings::EditorAutoloadSettings() {
 			}
 		}
 
-		if (!info.is_singleton && !info.in_editor && info.node != NULL) {
+		if (!info.is_singleton && !info.in_editor && info.node != nullptr) {
 			memdelete(info.node);
-			info.node = NULL;
+			info.node = nullptr;
 		}
 	}
 
