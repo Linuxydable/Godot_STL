@@ -111,7 +111,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		Quat rotation;
 		Vector3 scale;
 
-		Vector<int> children;
+		std::vector<int> children;
 
 		GLTFNodeIndex fake_joint_parent;
 
@@ -182,11 +182,11 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 
 	struct GLTFSkeleton {
 		// The *synthesized* skeletons joints
-		Vector<GLTFNodeIndex> joints;
+		std::vector<GLTFNodeIndex> joints;
 
 		// The roots of the skeleton. If there are multiple, each root must have the same parent
 		// (ie roots are siblings)
-		Vector<GLTFNodeIndex> roots;
+		std::vector<GLTFNodeIndex> roots;
 
 		// The created Skeleton for the scene
 		Skeleton *godot_skeleton;
@@ -205,22 +205,22 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		// The "skeleton" property defined in the gltf spec. -1 = Scene Root
 		GLTFNodeIndex skin_root;
 
-		Vector<GLTFNodeIndex> joints_original;
-		Vector<Transform> inverse_binds;
+		std::vector<GLTFNodeIndex> joints_original;
+		std::vector<Transform> inverse_binds;
 
 		// Note: joints + non_joints should form a complete subtree, or subtrees with a common parent
 
 		// All nodes that are skins that are caught in-between the original joints
 		// (inclusive of joints_original)
-		Vector<GLTFNodeIndex> joints;
+		std::vector<GLTFNodeIndex> joints;
 
 		// All Nodes that are caught in-between skin joint nodes, and are not defined
 		// as joints by any skin
-		Vector<GLTFNodeIndex> non_joints;
+		std::vector<GLTFNodeIndex> non_joints;
 
 		// The roots of the skin. In the case of multiple roots, their parent *must*
 		// be the same (the roots must be siblings)
-		Vector<GLTFNodeIndex> roots;
+		std::vector<GLTFNodeIndex> roots;
 
 		// The GLTF Skeleton this Skin points to (after we determine skeletons)
 		GLTFSkeletonIndex skeleton;
@@ -240,7 +240,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 
 	struct GLTFMesh {
 		Ref<ArrayMesh> mesh;
-		Vector<float> blend_weights;
+		std::vector<float> blend_weights;
 	};
 
 	struct GLTFCamera {
@@ -270,8 +270,8 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		template <class T>
 		struct Channel {
 			Interpolation interpolation;
-			Vector<float> times;
-			Vector<T> values;
+			std::vector<float> times;
+			std::vector<T> values;
 		};
 
 		struct Track {
@@ -279,7 +279,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 			Channel<Vector3> translation_track;
 			Channel<Quat> rotation_track;
 			Channel<Vector3> scale_track;
-			Vector<Channel<float> > weight_tracks;
+			std::vector<Channel<float> > weight_tracks;
 		};
 
 		String name;
@@ -292,35 +292,35 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		Dictionary json;
 		int major_version;
 		int minor_version;
-		Vector<uint8_t> glb_data;
+		std::vector<uint8_t> glb_data;
 
-		Vector<GLTFNode *> nodes;
-		Vector<Vector<uint8_t> > buffers;
-		Vector<GLTFBufferView> buffer_views;
-		Vector<GLTFAccessor> accessors;
+		std::vector<GLTFNode *> nodes;
+		std::vector<std::vector<uint8_t> > buffers;
+		std::vector<GLTFBufferView> buffer_views;
+		std::vector<GLTFAccessor> accessors;
 
-		Vector<GLTFMesh> meshes; //meshes are loaded directly, no reason not to.
-		Vector<Ref<Material> > materials;
+		std::vector<GLTFMesh> meshes; //meshes are loaded directly, no reason not to.
+		std::vector<Ref<Material> > materials;
 
 		String scene_name;
-		Vector<int> root_nodes;
+		std::vector<int> root_nodes;
 
-		Vector<GLTFTexture> textures;
-		Vector<Ref<Texture> > images;
+		std::vector<GLTFTexture> textures;
+		std::vector<Ref<Texture> > images;
 
-		Vector<GLTFSkin> skins;
-		Vector<GLTFCamera> cameras;
+		std::vector<GLTFSkin> skins;
+		std::vector<GLTFCamera> cameras;
 
 		Set<String> unique_names;
 
-		Vector<GLTFSkeleton> skeletons;
-		Vector<GLTFAnimation> animations;
+		std::vector<GLTFSkeleton> skeletons;
+		std::vector<GLTFAnimation> animations;
 
 		Map<GLTFNodeIndex, Node *> scene_nodes;
 
 		~GLTFState() {
-			for (int i = 0; i < nodes.size(); i++) {
-				memdelete(nodes[i]);
+			for (auto &&node : nodes) {
+				memdelete(node);
 			}
 		}
 	};
@@ -347,16 +347,16 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	Error _parse_accessors(GLTFState &state);
 	Error _decode_buffer_view(GLTFState &state, double *dst, const GLTFBufferViewIndex p_buffer_view, const int skip_every, const int skip_bytes, const int element_size, const int count, const GLTFType type, const int component_count, const int component_type, const int component_size, const bool normalized, const int byte_offset, const bool for_vertex);
 
-	Vector<double> _decode_accessor(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<double> _decode_accessor(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	PoolVector<float> _decode_accessor_as_floats(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	PoolVector<int> _decode_accessor_as_ints(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	PoolVector<Vector2> _decode_accessor_as_vec2(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	PoolVector<Vector3> _decode_accessor_as_vec3(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	PoolVector<Color> _decode_accessor_as_color(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	Vector<Quat> _decode_accessor_as_quat(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	Vector<Transform2D> _decode_accessor_as_xform2d(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	Vector<Basis> _decode_accessor_as_basis(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	Vector<Transform> _decode_accessor_as_xform(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<Quat> _decode_accessor_as_quat(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<Transform2D> _decode_accessor_as_xform2d(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<Basis> _decode_accessor_as_basis(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<Transform> _decode_accessor_as_xform(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 
 	Error _parse_meshes(GLTFState &state);
 	Error _parse_images(GLTFState &state, const String &p_base_path);
@@ -364,7 +364,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 
 	Error _parse_materials(GLTFState &state);
 
-	GLTFNodeIndex _find_highest_node(GLTFState &state, const Vector<GLTFNodeIndex> &subset);
+	GLTFNodeIndex _find_highest_node(GLTFState &state, const std::vector<GLTFNodeIndex> &subset);
 
 	bool _capture_nodes_in_skin(GLTFState &state, GLTFSkin &skin, const GLTFNodeIndex node_index);
 	void _capture_nodes_for_multirooted_skin(GLTFState &state, GLTFSkin &skin);
@@ -373,7 +373,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	Error _parse_skins(GLTFState &state);
 
 	Error _determine_skeletons(GLTFState &state);
-	Error _reparent_non_joint_skeleton_subtrees(GLTFState &state, GLTFSkeleton &skeleton, const Vector<GLTFNodeIndex> &non_joints);
+	Error _reparent_non_joint_skeleton_subtrees(GLTFState &state, GLTFSkeleton &skeleton, const std::vector<GLTFNodeIndex> &non_joints);
 	Error _reparent_to_fake_joint(GLTFState &state, GLTFSkeleton &skeleton, const GLTFNodeIndex node_index);
 	Error _determine_skeleton_roots(GLTFState &state, const GLTFSkeletonIndex skel_i);
 
@@ -401,7 +401,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	void _assign_scene_names(GLTFState &state);
 
 	template <class T>
-	T _interpolate_track(const Vector<float> &p_times, const Vector<T> &p_values, const float p_time, const GLTFAnimation::Interpolation p_interp);
+	T _interpolate_track(const std::vector<float> &p_times, const std::vector<T> &p_values, const float p_time, const GLTFAnimation::Interpolation p_interp);
 
 	void _import_animation(GLTFState &state, AnimationPlayer *ap, const GLTFAnimationIndex index, const int bake_fps);
 

@@ -185,6 +185,7 @@ public:
 	void remove_custom_type(const String &p_type);
 	const Map<String, std::vector<CustomType> > &get_custom_types() const { return custom_types; }
 
+	// need update : int to const unsigned& p_at_pos, p_idx, p_to_idx
 	int add_edited_scene(int p_at_pos);
 	void move_edited_scene_index(int p_idx, int p_to_idx);
 	void remove_scene(int p_idx);

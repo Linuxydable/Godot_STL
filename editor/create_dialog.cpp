@@ -370,10 +370,10 @@ void CreateDialog::_update_search() {
 		if (EditorNode::get_editor_data().get_custom_types().has(type) && ClassDB::is_parent_class(type, base_type)) {
 			//there are custom types based on this... cool.
 
-			const Vector<EditorData::CustomType> &ct = EditorNode::get_editor_data().get_custom_types()[type];
-			for (int i = 0; i < ct.size(); i++) {
+			const std::vector<EditorData::CustomType> &ct = EditorNode::get_editor_data().get_custom_types()[type];
+			for (auto &&t : ct) {
 
-				bool show = search_box->get_text().is_subsequence_ofi(ct[i].name);
+				bool show = search_box->get_text().is_subsequence_ofi(t.name);
 
 				if (!show)
 					continue;
@@ -389,12 +389,12 @@ void CreateDialog::_update_search() {
 
 				TreeItem *item = search_options->create_item(ti);
 				item->set_metadata(0, type);
-				item->set_text(0, ct[i].name);
-				if (ct[i].icon.is_valid()) {
-					item->set_icon(0, ct[i].icon);
+				item->set_text(0, t.name);
+				if (t.icon.is_valid()) {
+					item->set_icon(0, t.icon);
 				}
 
-				if (!to_select || ct[i].name == search_box->get_text()) {
+				if (!to_select || t.name == search_box->get_text()) {
 					to_select = item;
 				}
 			}
@@ -409,10 +409,10 @@ void CreateDialog::_update_search() {
 		to_select->select(0);
 		search_options->scroll_to_item(to_select);
 		favorite->set_disabled(false);
-		favorite->set_pressed(favorite_list.find(to_select->get_text(0)) != -1);
+		favorite->set_pressed(std::find(favorite_list.begin(), favorite_list.end(), to_select->get_text(0)) != favorite_list.end());
 	}
 
-	get_ok()->set_disabled(root->get_children() == NULL);
+	get_ok()->set_disabled(root->get_children() == nullptr);
 }
 
 void CreateDialog::_confirmed() {
@@ -545,7 +545,7 @@ void CreateDialog::_item_selected() {
 	String name = item->get_text(0);
 
 	favorite->set_disabled(false);
-	favorite->set_pressed(favorite_list.find(name) != -1);
+	favorite->set_pressed(std::find(favorite_list.begin(), favorite_list.end(), name) != favorite_list.end());
 
 	if (!EditorHelp::get_doc_data()->class_list.has(name))
 		return;
@@ -563,11 +563,12 @@ void CreateDialog::_favorite_toggled() {
 
 	String name = item->get_text(0);
 
-	if (favorite_list.find(name) == -1) {
+	auto it_find = std::find(favorite_list.begin(), favorite_list.end(), name);
+	if (it_find == favorite_list.end()) {
 		favorite_list.push_back(name);
 		favorite->set_pressed(true);
 	} else {
-		favorite_list.erase(name);
+		favorite_list.erase(it_find);
 		favorite->set_pressed(false);
 	}
 
@@ -580,8 +581,7 @@ void CreateDialog::_save_favorite_list() {
 
 	if (f) {
 
-		for (int i = 0; i < favorite_list.size(); i++) {
-			String l = favorite_list[i];
+		for (auto &&l : favorite_list) {
 			String name = l.split(" ")[0];
 			if (!(ClassDB::class_exists(name) || ScriptServer::is_global_class(name)))
 				continue;
@@ -595,8 +595,7 @@ void CreateDialog::_update_favorite_list() {
 
 	favorites->clear();
 	TreeItem *root = favorites->create_item();
-	for (int i = 0; i < favorite_list.size(); i++) {
-		String l = favorite_list[i];
+	for (auto &&l : favorite_list) {
 		String name = l.split(" ")[0];
 		if (!(ClassDB::class_exists(name) || ScriptServer::is_global_class(name)))
 			continue;
@@ -681,31 +680,37 @@ void CreateDialog::drop_data_fw(const Point2 &p_point, const Variant &p_data, Co
 	String drop_at = ti->get_text(0);
 	int ds = favorites->get_drop_section_at_position(p_point);
 
-	int drop_idx = favorite_list.find(drop_at);
-	if (drop_idx < 0)
+	auto it_find = std::find(favorite_list.begin(), favorite_list.end(), drop_at);
+
+	if (it_find == favorite_list.end())
 		return;
+
+	auto drop_idx = std::distance(favorite_list.begin(), it_find);
 
 	String type = d["class"];
 
-	int from_idx = favorite_list.find(type);
-	if (from_idx < 0)
+	it_find = std::find(favorite_list.begin(), favorite_list.end(), type);
+
+	if (it_find == favorite_list.end())
 		return;
+
+	auto from_idx = std::distance(favorite_list.begin(), it_find);
 
 	if (drop_idx == from_idx) {
 		ds = -1; //cause it will be gone
 	} else if (drop_idx > from_idx) {
-		drop_idx--;
+		--drop_idx;
 	}
 
-	favorite_list.remove(from_idx);
+	favorite_list.erase(it_find);
 
 	if (ds < 0) {
-		favorite_list.insert(drop_idx, type);
+		favorite_list.insert(favorite_list.begin() + drop_idx, type);
 	} else {
 		if (drop_idx >= favorite_list.size() - 1) {
 			favorite_list.push_back(type);
 		} else {
-			favorite_list.insert(drop_idx + 1, type);
+			favorite_list.insert(favorite_list.begin() + drop_idx + 1, type);
 		}
 	}
 
