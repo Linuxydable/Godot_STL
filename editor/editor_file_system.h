@@ -86,6 +86,8 @@ public:
 	String get_path() const;
 
 	int get_subdir_count() const;
+
+	// need update : int to const unsigned& p_idx
 	EditorFileSystemDirectory *get_subdir(int p_idx);
 	int get_file_count() const;
 	String get_file(int p_idx) const;
