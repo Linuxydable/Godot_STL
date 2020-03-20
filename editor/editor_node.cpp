@@ -403,7 +403,7 @@ void EditorNode::_notification(int p_what) {
 				bottom_panel->add_style_override("panel", gui_base->get_stylebox("BottomPanelDebuggerOverride", "EditorStyles"));
 
 			// update_icons
-			for (int i = 0; i < singleton->main_editor_buttons.size(); i++) {
+			for (decltype(singleton->main_editor_buttons.size()) i = 0; i < singleton->main_editor_buttons.size(); i++) {
 
 				ToolButton *tb = singleton->main_editor_buttons[i];
 				EditorPlugin *p_editor = singleton->editor_table[i];
@@ -629,7 +629,7 @@ void EditorNode::_editor_select_next() {
 		if (editor == editor_table.size() - 1) {
 			editor = 0;
 		} else {
-			editor++;
+			++editor;
 		}
 	} while (main_editor_buttons[editor]->is_visible());
 
@@ -1775,9 +1775,9 @@ void EditorNode::_edit_current() {
 
 		EditorPlugin *main_plugin = editor_data.get_editor(current_obj);
 
-		for (int i = 0; i < editor_table.size(); i++) {
+		for (decltype(editor_table.size()) i = 0; i < editor_table.size(); ++i) {
 			if (editor_table[i] == main_plugin && !main_editor_buttons[i]->is_visible()) {
-				main_plugin = NULL; //if button is not visible, then no plugin active
+				main_plugin = nullptr; //if button is not visible, then no plugin active
 			}
 		}
 
@@ -1806,8 +1806,7 @@ void EditorNode::_edit_current() {
 						editor_data.get_editor_plugin(i)->notify_main_screen_changed(editor_plugin_screen->get_name());
 					}
 
-					for (int i = 0; i < editor_table.size(); i++) {
-
+					for (decltype(editor_table.size()) i = 0; i < editor_table.size(); ++i) {
 						main_editor_buttons[i]->set_pressed(editor_table[i] == main_plugin);
 					}
 				}
@@ -2309,7 +2308,7 @@ void EditorNode::_menu_option_confirm(int p_option, bool p_confirmed) {
 			stop_button->set_disabled(true);
 
 			if (bool(EDITOR_GET("run/output/always_close_output_on_stop"))) {
-				for (int i = 0; i < bottom_panel_items.size(); i++) {
+				for (decltype(bottom_panel_items.size()) i = 0; i < bottom_panel_items.size(); ++i) {
 					if (bottom_panel_items[i].control == log) {
 						_bottom_panel_switch(false, i);
 						break;
@@ -2779,7 +2778,7 @@ void EditorNode::_editor_select(int p_which) {
 
 	selecting = true;
 
-	for (int i = 0; i < main_editor_buttons.size(); i++) {
+	for (decltype(main_editor_buttons.size()) i = 0; i < main_editor_buttons.size(); ++i) {
 		main_editor_buttons[i]->set_pressed(i == p_which);
 	}
 
@@ -2816,7 +2815,7 @@ void EditorNode::_editor_select(int p_which) {
 void EditorNode::select_editor_by_name(const String &p_name) {
 	ERR_FAIL_COND(p_name == "");
 
-	for (int i = 0; i < main_editor_buttons.size(); i++) {
+	for (decltype(main_editor_buttons.size()) i = 0; i < main_editor_buttons.size(); ++i) {
 		if (main_editor_buttons[i]->get_text() == p_name) {
 			_editor_select(i);
 			return;
@@ -2859,7 +2858,7 @@ void EditorNode::remove_editor_plugin(EditorPlugin *p_editor, bool p_config_chan
 
 	if (p_editor->has_main_screen()) {
 
-		for (int i = 0; i < singleton->main_editor_buttons.size(); i++) {
+		for (decltype(singleton->main_editor_buttons.size()) i = 0; i < singleton->main_editor_buttons.size(); ++i) {
 
 			if (p_editor->get_name() == singleton->main_editor_buttons[i]->get_text()) {
 
@@ -2868,19 +2867,30 @@ void EditorNode::remove_editor_plugin(EditorPlugin *p_editor, bool p_config_chan
 				}
 
 				memdelete(singleton->main_editor_buttons[i]);
-				singleton->main_editor_buttons.remove(i);
+				singleton->main_editor_buttons.erase(singleton->main_editor_buttons.begin() + i);
 
 				break;
 			}
 		}
 
-		singleton->editor_table.erase(p_editor);
+		auto it_find = std::find(singleton->editor_table.begin(), singleton->editor_table.end(), p_editor);
+
+		if (it_find != singleton->editor_table.end()) {
+			singleton->editor_table.erase(it_find);
+		}
 	}
 	p_editor->make_visible(false);
 	p_editor->clear();
 	if (p_config_changed)
 		p_editor->disable_plugin();
-	singleton->editor_plugins_over->get_plugins_list().erase(p_editor);
+
+	auto &plugins_list = singleton->editor_plugins_over->get_plugins_list();
+	auto it_find = std::find(plugins_list.begin(), plugins_list.end(), p_editor);
+
+	if (it_find != plugins_list.end()) {
+		singleton->editor_plugins_over->get_plugins_list().erase(it_find);
+	}
+
 	singleton->remove_child(p_editor);
 	singleton->editor_data.remove_editor_plugin(p_editor);
 	singleton->get_editor_plugins_force_input_forwarding()->remove_plugin(p_editor);
@@ -3050,9 +3060,15 @@ void EditorNode::set_edited_scene(Node *p_scene) {
 
 int EditorNode::_get_current_main_editor() {
 
-	for (int i = 0; i < editor_table.size(); i++) {
-		if (editor_table[i] == editor_plugin_screen)
-			return i;
+	auto it_find = std::find_if(editor_table.begin(), editor_table.end(), [this](const EditorPlugin *plugin) {
+		if (plugin == editor_plugin_screen) {
+			return true;
+		}
+		return false;
+	});
+
+	if (it_find != editor_table.end()) {
+		return std::distance(editor_table.begin(), it_find);
 	}
 
 	return 0;
@@ -3071,17 +3087,22 @@ Dictionary EditorNode::_get_main_scene_state() {
 
 void EditorNode::_set_main_scene_state(Dictionary p_state, Node *p_for_scene) {
 
-	if (get_edited_scene() != p_for_scene && p_for_scene != NULL)
+	if (get_edited_scene() != p_for_scene && p_for_scene != nullptr)
 		return; //not for this scene
 
 	changing_scene = false;
 
-	int current = -1;
-	for (int i = 0; i < editor_table.size(); i++) {
-		if (editor_plugin_screen == editor_table[i]) {
-			current = i;
-			break;
+	auto it_find = std::find_if(editor_table.begin(), editor_table.end(), [this](const EditorPlugin *plugin) {
+		if (plugin == editor_plugin_screen) {
+			return true;
 		}
+		return false;
+	});
+
+	int current = -1;
+
+	if (it_find != editor_table.end()) {
+		current = std::distance(editor_table.begin(), it_find);
 	}
 
 	if (p_state.has("editor_index")) {
@@ -3579,7 +3600,7 @@ void EditorNode::stop_child_process() {
 }
 
 Ref<Script> EditorNode::get_object_custom_type_base(const Object *p_object) const {
-	ERR_FAIL_COND_V(!p_object, NULL);
+	ERR_FAIL_COND_V(!p_object, nullptr);
 
 	Ref<Script> script = p_object->get_script();
 
@@ -3632,10 +3653,6 @@ StringName EditorNode::get_object_custom_type_name(const Object *p_object) const
 
 		StringName name, base;
 
-		const std::vector<EditorData::CustomType> &types;
-
-		std::vector<EditorData::CustomType>::iterator it_find;
-
 		while (base_script.is_valid()) {
 			name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
 
@@ -3646,18 +3663,18 @@ StringName EditorNode::get_object_custom_type_name(const Object *p_object) const
 			base = base_script->get_instance_base_type();
 
 			if(base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base) ){
-				types = EditorNode::get_editor_data().get_custom_types()[base];
+				const std::vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
 
-				it_find = std::find_if(types.begin(), types.end(),
-					[&](const EditorData::CustomType& type){
-						if(type.script == base_script){
-							return true;
-						}
-						return false;
-					});
+				auto it_find = std::find_if(types.begin(), types.end(),
+						[&](const EditorData::CustomType &type) {
+							if (type.script == base_script) {
+								return true;
+							}
+							return false;
+						});
 
-				if(it_find != types.end() ){
-					return (*it_find).name;
+				if (it_find != types.end()) {
+					return it_find->name;
 				}
 			}
 			base_script = base_script->get_base_script();
@@ -3678,11 +3695,8 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 	if (script.is_valid()) {
 		Ref<Script> base_script = script;
 
-		StringName name, icon_path, base;
-
-		const std::vector<EditorData::CustomType>& types;
-
-		std::vector<EditorData::CustomType>::iterator it_find;
+		StringName name, base;
+		String icon_path;
 
 		while (base_script.is_valid()) {
 			name = EditorNode::get_editor_data().script_class_get_name(base_script->get_path());
@@ -3696,18 +3710,18 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 			base = base_script->get_instance_base_type();
 
 			if(base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base) ){
-				types = EditorNode::get_editor_data().get_custom_types()[base];
+				const std::vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
 
-				it_find = std::find_if(types.begin(), types.end(),
-					[&](const EditorData::CustomType& type){
-						if(type.script == base_script && type.icon.is_valid() ){
-							return true;
-						}
-						return false;
-					});
+				auto it_find = std::find_if(types.begin(), types.end(),
+						[&](const EditorData::CustomType &type) {
+							if (type.script == base_script && type.icon.is_valid()) {
+								return true;
+							}
+							return false;
+						});
 
-				if(it_find != types.end() ){
-					return (*it_find).icon;
+				if (it_find != types.end()) {
+					return it_find->icon;
 				}
 			}
 
@@ -3767,22 +3781,18 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 
 	const Map<String, std::vector<EditorData::CustomType> > &p_map = EditorNode::get_editor_data().get_custom_types();
 
-	const std::vector<EditorData::CustomType>& ct;
+	for (const Map<String, std::vector<EditorData::CustomType> >::Element *E = p_map.front(); E; E = E->next()) {
+		const std::vector<EditorData::CustomType> &ct = E->value();
 
-	std::vector<EditorData::CustomType>::iterator it_find;
+		auto it_find = std::find_if(ct.begin(), ct.end(),
+				[&](const EditorData::CustomType &type) {
+					if (type.name == p_class && type.icon.is_valid()) {
+						return true;
+					}
+					return false;
+				});
 
-	for(const Map<String, std::vector<EditorData::CustomType> >::Element *E = p_map.front(); E; E = E->next() ){
-		ct = E->value();
-
-		it_find = std::find_if(ct.begin(), ct.end(),
-			[&](const EditorData::CustomType& type){
-				if(type.name == p_class && type.icon.is_valid() ){
-					return true;
-				}
-				return false;
-			});
-
-		if(it_find != ct.end() ){
+		if (it_find != ct.end()) {
 			return (*it_find).icon;
 		}
 	}
@@ -3790,7 +3800,7 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 	if (p_fallback.length() && gui_base->has_icon(p_fallback, "EditorIcons"))
 		return gui_base->get_icon(p_fallback, "EditorIcons");
 
-	return NULL;
+	return nullptr;
 }
 
 void EditorNode::progress_add_task(const String &p_task, const String &p_label, int p_steps, bool p_can_cancel) {
@@ -3974,7 +3984,7 @@ void EditorNode::_dock_select_input(const Ref<InputEvent> &p_input) {
 			dock_slot[nrect]->show();
 			dock_select->update();
 
-			for (int i = 0; i < vsplits.size(); i++) {
+			for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i) {
 				bool in_use = dock_slot[i * 2 + 0]->get_tab_count() || dock_slot[i * 2 + 1]->get_tab_count();
 				if (in_use)
 					vsplits[i]->show();
@@ -4156,14 +4166,14 @@ void EditorNode::_save_docks_to_config(Ref<ConfigFile> p_layout, const String &p
 	p_layout->set_value(p_section, "dock_filesystem_display_mode", filesystem_dock->get_display_mode());
 	p_layout->set_value(p_section, "dock_filesystem_file_list_display_mode", filesystem_dock->get_file_list_display_mode());
 
-	for (int i = 0; i < vsplits.size(); i++) {
+	for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i) {
 
 		if (vsplits[i]->is_visible_in_tree()) {
 			p_layout->set_value(p_section, "dock_split_" + itos(i + 1), vsplits[i]->get_split_offset());
 		}
 	}
 
-	for (int i = 0; i < hsplits.size(); i++) {
+	for (decltype(hsplits.size()) i = 0; i < hsplits.size(); ++i) {
 
 		p_layout->set_value(p_section, "dock_hsplit_" + itos(i + 1), hsplits[i]->get_split_offset());
 	}
@@ -4214,18 +4224,18 @@ void EditorNode::_update_dock_slots_visibility() {
 
 	if (!docks_visible) {
 
-		for (int i = 0; i < DOCK_SLOT_MAX; i++) {
-			dock_slot[i]->hide();
+		for (auto &&slot : dock_slot) {
+			slot->hide();
 		}
 
-		for (int i = 0; i < vsplits.size(); i++) {
-			vsplits[i]->hide();
+		for (auto &&split : vsplits) {
+			split->hide();
 		}
 
 		right_hsplit->hide();
 		bottom_panel->hide();
 	} else {
-		for (int i = 0; i < DOCK_SLOT_MAX; i++) {
+		for (uint8_t i = 0; i < DOCK_SLOT_MAX; ++i) {
 
 			int tabs_visible = 0;
 			for (int j = 0; j < dock_slot[i]->get_tab_count(); j++) {
@@ -4239,7 +4249,7 @@ void EditorNode::_update_dock_slots_visibility() {
 				dock_slot[i]->hide();
 		}
 
-		for (int i = 0; i < vsplits.size(); i++) {
+		for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i) {
 			bool in_use = dock_slot[i * 2 + 0]->get_tab_count() || dock_slot[i * 2 + 1]->get_tab_count();
 			if (in_use)
 				vsplits[i]->show();
@@ -4268,26 +4278,26 @@ void EditorNode::_dock_tab_changed(int p_tab) {
 
 	if (!docks_visible) {
 
-		for (int i = 0; i < DOCK_SLOT_MAX; i++) {
-			dock_slot[i]->hide();
+		for (auto &&slot : dock_slot) {
+			slot->hide();
 		}
 
-		for (int i = 0; i < vsplits.size(); i++) {
-			vsplits[i]->hide();
+		for (auto &&split : vsplits) {
+			split->hide();
 		}
 
 		right_hsplit->hide();
 		bottom_panel->hide();
 	} else {
-		for (int i = 0; i < DOCK_SLOT_MAX; i++) {
+		for (auto &&slot : dock_slot) {
 
-			if (dock_slot[i]->get_tab_count())
-				dock_slot[i]->show();
+			if (slot->get_tab_count())
+				slot->show();
 			else
-				dock_slot[i]->hide();
+				slot->hide();
 		}
 
-		for (int i = 0; i < vsplits.size(); i++) {
+		for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i) {
 			bool in_use = dock_slot[i * 2 + 0]->get_tab_count() || dock_slot[i * 2 + 1]->get_tab_count();
 			if (in_use)
 				vsplits[i]->show();
@@ -4305,19 +4315,19 @@ void EditorNode::_dock_tab_changed(int p_tab) {
 
 void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String &p_section) {
 
-	for (int i = 0; i < DOCK_SLOT_MAX; i++) {
+	for (uint8_t i = 0; i < DOCK_SLOT_MAX; ++i) {
 
 		if (!p_layout->has_section_key(p_section, "dock_" + itos(i + 1)))
 			continue;
 
 		std::vector<String> names = String(p_layout->get_value(p_section, "dock_" + itos(i + 1))).split(",");
 
-		for(auto&& name : names){
+		for (auto &&name : names) {
 			// need_update
 			//find it, in a horribly inefficient way
 			int atidx = -1;
-			Control *node = NULL;
-			for (int k = 0; k < DOCK_SLOT_MAX; k++) {
+			Control *node = nullptr;
+			for (uint8_t k = 0; k < DOCK_SLOT_MAX; ++k) {
 				if (!dock_slot[k]->has_node(name))
 					continue;
 				node = Object::cast_to<Control>(dock_slot[k]->get_node(name));
@@ -4359,7 +4369,7 @@ void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String 
 		filesystem_dock->set_file_list_display_mode(dock_filesystem_file_list_display_mode);
 	}
 
-	for (int i = 0; i < vsplits.size(); i++) {
+	for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i) {
 
 		if (!p_layout->has_section_key(p_section, "dock_split_" + itos(i + 1)))
 			continue;
@@ -4368,14 +4378,14 @@ void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String 
 		vsplits[i]->set_split_offset(ofs);
 	}
 
-	for (int i = 0; i < hsplits.size(); i++) {
+	for (decltype(hsplits.size()) i = 0; i < hsplits.size(); ++i) {
 		if (!p_layout->has_section_key(p_section, "dock_hsplit_" + itos(i + 1)))
 			continue;
 		int ofs = p_layout->get_value(p_section, "dock_hsplit_" + itos(i + 1));
 		hsplits[i]->set_split_offset(ofs);
 	}
 
-	for (int i = 0; i < vsplits.size(); i++) {
+	for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i) {
 		bool in_use = dock_slot[i * 2 + 0]->get_tab_count() || dock_slot[i * 2 + 1]->get_tab_count();
 		if (in_use)
 			vsplits[i]->show();
@@ -4388,10 +4398,9 @@ void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String 
 	else
 		right_hsplit->hide();
 
-	for (int i = 0; i < DOCK_SLOT_MAX; i++) {
-
-		if (dock_slot[i]->is_visible() && dock_slot[i]->get_tab_count()) {
-			dock_slot[i]->set_current_tab(0);
+	for (auto &&slot : dock_slot) {
+		if (slot->is_visible() && slot->get_tab_count()) {
+			slot->set_current_tab(0);
 		}
 	}
 }
@@ -4717,8 +4726,8 @@ ToolButton *EditorNode::add_bottom_panel_item(String p_text, Control *p_item) {
 
 bool EditorNode::are_bottom_panels_hidden() const {
 
-	for (int i = 0; i < bottom_panel_items.size(); i++) {
-		if (bottom_panel_items[i].button->is_pressed())
+	for (auto &&item : bottom_panel_items) {
+		if (item.button->is_pressed())
 			return false;
 	}
 
@@ -4727,7 +4736,7 @@ bool EditorNode::are_bottom_panels_hidden() const {
 
 void EditorNode::hide_bottom_panel() {
 
-	for (int i = 0; i < bottom_panel_items.size(); i++) {
+	for (decltype(bottom_panel_items.size()) i = 0; i < bottom_panel_items.size(); ++i) {
 
 		if (bottom_panel_items[i].control->is_visible()) {
 			_bottom_panel_switch(false, i);
@@ -4738,7 +4747,7 @@ void EditorNode::hide_bottom_panel() {
 
 void EditorNode::make_bottom_panel_item_visible(Control *p_item) {
 
-	for (int i = 0; i < bottom_panel_items.size(); i++) {
+	for (decltype(bottom_panel_items.size()) i = 0; i < bottom_panel_items.size(); ++i) {
 
 		if (bottom_panel_items[i].control == p_item) {
 			_bottom_panel_switch(true, i);
@@ -4749,16 +4758,16 @@ void EditorNode::make_bottom_panel_item_visible(Control *p_item) {
 
 void EditorNode::raise_bottom_panel_item(Control *p_item) {
 
-	for (int i = 0; i < bottom_panel_items.size(); i++) {
+	for (auto &&item : bottom_panel_items) {
 
-		if (bottom_panel_items[i].control == p_item) {
-			bottom_panel_items[i].button->raise();
-			SWAP(bottom_panel_items.write[i], bottom_panel_items.write[bottom_panel_items.size() - 1]);
+		if (item.control == p_item) {
+			item.button->raise();
+			SWAP(item, bottom_panel_items[bottom_panel_items.size() - 1]);
 			break;
 		}
 	}
 
-	for (int i = 0; i < bottom_panel_items.size(); i++) {
+	for (decltype(bottom_panel_items.size()) i = 0; i < bottom_panel_items.size(); ++i) {
 		bottom_panel_items[i].button->disconnect("toggled", this, "_bottom_panel_switch");
 		bottom_panel_items[i].button->connect("toggled", this, "_bottom_panel_switch", varray(i));
 	}
@@ -4766,7 +4775,7 @@ void EditorNode::raise_bottom_panel_item(Control *p_item) {
 
 void EditorNode::remove_bottom_panel_item(Control *p_item) {
 
-	for (int i = 0; i < bottom_panel_items.size(); i++) {
+	for (decltype(bottom_panel_items.size()) i = 0; i < bottom_panel_items.size(); ++i) {
 
 		if (bottom_panel_items[i].control == p_item) {
 			if (p_item->is_visible_in_tree()) {
@@ -4775,12 +4784,12 @@ void EditorNode::remove_bottom_panel_item(Control *p_item) {
 			bottom_panel_vb->remove_child(bottom_panel_items[i].control);
 			bottom_panel_hb_editors->remove_child(bottom_panel_items[i].button);
 			memdelete(bottom_panel_items[i].button);
-			bottom_panel_items.remove(i);
+
 			break;
 		}
 	}
 
-	for (int i = 0; i < bottom_panel_items.size(); i++) {
+	for (decltype(bottom_panel_items.size()) i = 0; i < bottom_panel_items.size(); ++i) {
 		bottom_panel_items[i].button->disconnect("toggled", this, "_bottom_panel_switch");
 		bottom_panel_items[i].button->connect("toggled", this, "_bottom_panel_switch", varray(i));
 	}
@@ -4795,7 +4804,7 @@ void EditorNode::_bottom_panel_switch(bool p_enable, int p_idx) {
 	}
 
 	if (p_enable) {
-		for (int i = 0; i < bottom_panel_items.size(); i++) {
+		for (decltype(bottom_panel_items.size()) i = 0; i < bottom_panel_items.size(); ++i) {
 
 			bottom_panel_items[i].button->set_pressed(i == p_idx);
 			bottom_panel_items[i].control->set_visible(i == p_idx);
@@ -4838,11 +4847,17 @@ void EditorNode::_toggle_distraction_free_mode() {
 
 	if (EditorSettings::get_singleton()->get("interface/editor/separate_distraction_mode")) {
 		int screen = -1;
-		for (int i = 0; i < editor_table.size(); i++) {
-			if (editor_plugin_screen == editor_table[i]) {
-				screen = i;
-				break;
+
+		auto it_find = std::find_if(editor_table.begin(), editor_table.end(), [this](const EditorPlugin *plugin) {
+			if (editor_plugin_screen == plugin) {
+				return true;
 			}
+
+			return false;
+		});
+
+		if (it_find != editor_table.end()) {
+			screen = std::distance(editor_table.begin(), it_find);
 		}
 
 		if (screen == EDITOR_SCRIPT) {
@@ -4882,12 +4897,17 @@ void EditorNode::add_control_to_dock(DockSlot p_slot, Control *p_control) {
 
 void EditorNode::remove_control_from_dock(Control *p_control) {
 
-	Control *dock = NULL;
-	for (int i = 0; i < DOCK_SLOT_MAX; i++) {
-		if (p_control->get_parent() == dock_slot[i]) {
-			dock = dock_slot[i];
-			break;
+	Control *dock = nullptr;
+
+	auto it_find = std::find_if(std::begin(dock_slot), std::end(dock_slot), [&](const TabContainer *slot) {
+		if (p_control->get_parent() == slot) {
+			return true;
 		}
+		return false;
+	});
+
+	if (it_find != std::end(dock_slot)) {
+		dock = *it_find;
 	}
 
 	ERR_FAIL_COND_MSG(!dock, "Control was not in dock.");
@@ -4958,8 +4978,8 @@ Variant EditorNode::drag_files_and_dirs(const std::vector<String> &p_paths, Cont
 	decltype(p_paths.size() ) max_rows = 6;
 
 	// Don't waste a row to say "1 more file" - list it instead.
-	std::vector<String>::iterator num_rows = p_paths.size() > max_rows ? p_paths.begin()+max_rows : p_paths.end(); 
-	
+	auto num_rows = p_paths.size() > max_rows ? (p_paths.begin() + max_rows) : p_paths.end();
+
 	VBoxContainer *vbox = memnew(VBoxContainer);
 
 	{
@@ -4997,12 +5017,14 @@ Variant EditorNode::drag_files_and_dirs(const std::vector<String> &p_paths, Cont
 	if(p_paths.end() > num_rows){
 		Label *label = memnew(Label);
 
+		auto dist = std::distance(p_paths.begin(), num_rows);
+
 		if (has_file && has_folder) {
-			label->set_text(vformat(TTR("%d more files or folders"), p_paths.size() - num_rows));
+			label->set_text(vformat(TTR("%d more files or folders"), p_paths.size() - dist));
 		} else if (has_folder) {
-			label->set_text(vformat(TTR("%d more folders"), p_paths.size() - num_rows));
+			label->set_text(vformat(TTR("%d more folders"), p_paths.size() - dist));
 		} else {
-			label->set_text(vformat(TTR("%d more files"), p_paths.size() - num_rows));
+			label->set_text(vformat(TTR("%d more files"), p_paths.size() - dist));
 		}
 
 		vbox->add_child(label);
@@ -5087,9 +5109,8 @@ void EditorNode::_add_dropped_files_recursive(const std::vector<String> &p_files
 	DirAccessRef dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
 	std::vector<String> just_copy = String("ttf,otf").split(",");
 
-	for (int i = 0; i < p_files.size(); i++) {
+	for (auto &&from : p_files) {
 
-		String from = p_files[i];
 		String to = to_path.plus_file(from.get_file());
 
 		if (dir->dir_exists(from)) {
@@ -5118,7 +5139,7 @@ void EditorNode::_add_dropped_files_recursive(const std::vector<String> &p_files
 			continue;
 		}
 
-		if (!ResourceFormatImporter::get_singleton()->can_be_imported(from) && (just_copy.find(from.get_extension().to_lower()) == -1)) {
+		if (!ResourceFormatImporter::get_singleton()->can_be_imported(from) && (std::find(just_copy.begin(), just_copy.end(), from.get_extension().to_lower()) == just_copy.end())) {
 			continue;
 		}
 		dir->copy(from, to);
@@ -5259,16 +5280,21 @@ void EditorNode::add_resource_conversion_plugin(const Ref<EditorResourceConversi
 }
 
 void EditorNode::remove_resource_conversion_plugin(const Ref<EditorResourceConversionPlugin> &p_plugin) {
-	resource_conversion_plugins.erase(p_plugin);
+
+	auto it_find = std::find(resource_conversion_plugins.begin(), resource_conversion_plugins.end(), p_plugin);
+
+	if (it_find != resource_conversion_plugins.end()) {
+		resource_conversion_plugins.erase(it_find);
+	}
 }
 
 std::vector<Ref<EditorResourceConversionPlugin> > EditorNode::find_resource_conversion_plugin(const Ref<Resource> &p_for_resource) {
 
 	std::vector<Ref<EditorResourceConversionPlugin> > ret;
 
-	for (int i = 0; i < resource_conversion_plugins.size(); i++) {
-		if (resource_conversion_plugins[i].is_valid() && resource_conversion_plugins[i]->handles(p_for_resource)) {
-			ret.push_back(resource_conversion_plugins[i]);
+	for (auto &&plugin : resource_conversion_plugins) {
+		if (plugin.is_valid() && plugin->handles(p_for_resource)) {
+			ret.push_back(plugin);
 		}
 	}
 
@@ -5847,7 +5873,7 @@ EditorNode::EditorNode() {
 	hsplits.push_back(main_hsplit);
 	hsplits.push_back(right_hsplit);
 
-	for (int i = 0; i < vsplits.size(); i++) {
+	for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i) {
 		vsplits[i]->connect("dragged", this, "_dock_split_dragged");
 		hsplits[i]->connect("dragged", this, "_dock_split_dragged");
 	}
@@ -6428,7 +6454,7 @@ EditorNode::EditorNode() {
 	default_layout->set_value(docks_section, "dock_4", "FileSystem");
 	default_layout->set_value(docks_section, "dock_5", "Inspector,Node");
 
-	for (int i = 0; i < vsplits.size(); i++)
+	for (decltype(vsplits.size()) i = 0; i < vsplits.size(); ++i)
 		default_layout->set_value(docks_section, "dock_split_" + itos(i + 1), 0);
 	default_layout->set_value(docks_section, "dock_hsplit_1", 0);
 	default_layout->set_value(docks_section, "dock_hsplit_2", 70 * EDSCALE);
@@ -6750,8 +6776,8 @@ EditorNode::EditorNode() {
 	pick_main_scene->get_ok()->set_text(TTR("Select"));
 	pick_main_scene->connect("confirmed", this, "_menu_option", varray(SETTINGS_PICK_MAIN_SCENE));
 
-	for (int i = 0; i < _init_callbacks.size(); i++)
-		_init_callbacks[i]();
+	for (auto &&callback : _init_callbacks)
+		callback();
 
 	editor_data.add_edited_scene(-1);
 	editor_data.set_edited_scene(0);
@@ -6766,8 +6792,8 @@ EditorNode::EditorNode() {
 			addons = ProjectSettings::get_singleton()->get("editor_plugins/enabled");
 		}
 
-		for (int i = 0; i < addons.size(); i++) {
-			set_addon_plugin_enabled(addons[i], true);
+		for (auto &&addon : addons) {
+			set_addon_plugin_enabled(addon, true);
 		}
 		_initializing_addons = false;
 	}
@@ -6828,15 +6854,15 @@ EditorNode::~EditorNode() {
 
 void EditorPluginList::make_visible(bool p_visible) {
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		plugins_list[i]->make_visible(p_visible);
+	for (auto &&plugin : plugins_list) {
+		plugin->make_visible(p_visible);
 	}
 }
 
 void EditorPluginList::edit(Object *p_object) {
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		plugins_list[i]->edit(p_object);
+	for (auto &&plugin : plugins_list) {
+		plugin->edit(p_object);
 	}
 }
 
@@ -6844,8 +6870,8 @@ bool EditorPluginList::forward_gui_input(const Ref<InputEvent> &p_event) {
 
 	bool discard = false;
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		if (plugins_list[i]->forward_canvas_gui_input(p_event)) {
+	for (auto &&plugin : plugins_list) {
+		if (plugin->forward_canvas_gui_input(p_event)) {
 			discard = true;
 		}
 	}
@@ -6856,12 +6882,12 @@ bool EditorPluginList::forward_gui_input(const Ref<InputEvent> &p_event) {
 bool EditorPluginList::forward_spatial_gui_input(Camera *p_camera, const Ref<InputEvent> &p_event, bool serve_when_force_input_enabled) {
 	bool discard = false;
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		if ((!serve_when_force_input_enabled) && plugins_list[i]->is_input_event_forwarding_always_enabled()) {
+	for (auto &&plugin : plugins_list) {
+		if ((!serve_when_force_input_enabled) && plugin->is_input_event_forwarding_always_enabled()) {
 			continue;
 		}
 
-		if (plugins_list[i]->forward_spatial_gui_input(p_camera, p_event)) {
+		if (plugin->forward_spatial_gui_input(p_camera, p_event)) {
 			discard = true;
 		}
 	}
@@ -6871,29 +6897,29 @@ bool EditorPluginList::forward_spatial_gui_input(Camera *p_camera, const Ref<Inp
 
 void EditorPluginList::forward_canvas_draw_over_viewport(Control *p_overlay) {
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		plugins_list[i]->forward_canvas_draw_over_viewport(p_overlay);
+	for (auto &&plugin : plugins_list) {
+		plugin->forward_canvas_draw_over_viewport(p_overlay);
 	}
 }
 
 void EditorPluginList::forward_canvas_force_draw_over_viewport(Control *p_overlay) {
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		plugins_list[i]->forward_canvas_force_draw_over_viewport(p_overlay);
+	for (auto &&plugin : plugins_list) {
+		plugin->forward_canvas_force_draw_over_viewport(p_overlay);
 	}
 }
 
 void EditorPluginList::forward_spatial_draw_over_viewport(Control *p_overlay) {
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		plugins_list[i]->forward_spatial_draw_over_viewport(p_overlay);
+	for (auto &&plugin : plugins_list) {
+		plugin->forward_spatial_draw_over_viewport(p_overlay);
 	}
 }
 
 void EditorPluginList::forward_spatial_force_draw_over_viewport(Control *p_overlay) {
 
-	for (int i = 0; i < plugins_list.size(); i++) {
-		plugins_list[i]->forward_spatial_force_draw_over_viewport(p_overlay);
+	for (auto &&plugin : plugins_list) {
+		plugin->forward_spatial_force_draw_over_viewport(p_overlay);
 	}
 }
 
@@ -6902,7 +6928,12 @@ void EditorPluginList::add_plugin(EditorPlugin *p_plugin) {
 }
 
 void EditorPluginList::remove_plugin(EditorPlugin *p_plugin) {
-	plugins_list.erase(p_plugin);
+
+	auto it_find = std::find(plugins_list.begin(), plugins_list.end(), p_plugin);
+
+	if (it_find != plugins_list.end()) {
+		plugins_list.erase(it_find);
+	}
 }
 
 bool EditorPluginList::empty() {
