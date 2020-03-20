@@ -30,6 +30,9 @@
 
 #include "editor_plugin_settings.h"
 
+#include <vector>
+#include <algorithm>
+
 #include "core/io/config_file.h"
 #include "core/os/file_access.h"
 #include "core/os/main_loop.h"
@@ -66,7 +69,7 @@ void EditorPluginSettings::update_plugins() {
 
 	String d = da->get_next();
 
-	Vector<String> plugins;
+	std::vector<String> plugins;
 
 	while (d != String()) {
 
@@ -84,13 +87,14 @@ void EditorPluginSettings::update_plugins() {
 	da->list_dir_end();
 	memdelete(da);
 
-	plugins.sort();
+	std::sort(plugins.begin(), plugins.end());
 
-	for (int i = 0; i < plugins.size(); i++) {
-
+	for (auto&& plugin : plugins) {
 		Ref<ConfigFile> cf;
+
 		cf.instance();
-		String path = "res://addons/" + plugins[i] + "/plugin.cfg";
+
+		String path = "res://addons/" + plugin + "/plugin.cfg";
 
 		Error err2 = cf->load(path);
 
@@ -121,7 +125,6 @@ void EditorPluginSettings::update_plugins() {
 			}
 
 			if (!key_missing) {
-				String d2 = plugins[i];
 				String name = cf->get_value("plugin", "name");
 				String author = cf->get_value("plugin", "author");
 				String version = cf->get_value("plugin", "version");
@@ -131,7 +134,7 @@ void EditorPluginSettings::update_plugins() {
 				TreeItem *item = plugin_list->create_item(root);
 				item->set_text(0, name);
 				item->set_tooltip(0, TTR("Name:") + " " + name + "\n" + TTR("Path:") + " " + path + "\n" + TTR("Main Script:") + " " + script + "\n" + TTR("Description:") + " " + description);
-				item->set_metadata(0, d2);
+				item->set_metadata(0, plugin);
 				item->set_text(1, version);
 				item->set_metadata(1, script);
 				item->set_text(2, author);
@@ -142,7 +145,7 @@ void EditorPluginSettings::update_plugins() {
 				item->set_editable(3, true);
 				item->add_button(4, get_icon("Edit", "EditorIcons"), BUTTON_PLUGIN_EDIT, false, TTR("Edit Plugin"));
 
-				if (EditorNode::get_singleton()->is_addon_plugin_enabled(d2)) {
+				if (EditorNode::get_singleton()->is_addon_plugin_enabled(plugin)) {
 					item->set_custom_color(3, get_color("success_color", "Editor"));
 					item->set_range(3, 1);
 				} else {
