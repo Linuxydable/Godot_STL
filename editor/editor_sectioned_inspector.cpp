@@ -29,7 +29,11 @@
 /*************************************************************************/
 
 #include "editor_sectioned_inspector.h"
+
+#include <vector>
+
 #include "editor_scale.h"
+
 class SectionedInspectorFilter : public Object {
 
 	GDCLASS(SectionedInspectorFilter, Object);
@@ -249,7 +253,7 @@ void SectionedInspector::update_category_list() {
 		if (sp == -1)
 			pi.name = "global/" + pi.name;
 
-		Vector<String> sectionarr = pi.name.split("/");
+		std::vector<String> sectionarr = pi.name.split("/");
 		String metasection;
 
 		if (!filter.empty() && !filter.is_subsequence_ofi(sectionarr[sectionarr.size() - 1].capitalize()))
