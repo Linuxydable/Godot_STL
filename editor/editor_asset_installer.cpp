@@ -223,7 +223,7 @@ void EditorAssetInstaller::ok_pressed() {
 
 	int ret = unzGoToFirstFile(pkg);
 
-	Vector<String> failed_files;
+	std::vector<String> failed_files;
 
 	ProgressDialog::get_singleton()->add_task("uncompress", TTR("Uncompressing Assets"), status_map.size());
 
@@ -259,17 +259,17 @@ void EditorAssetInstaller::ok_pressed() {
 
 			} else {
 
-				Vector<uint8_t> data;
+				std::vector<uint8_t> data;
 				data.resize(info.uncompressed_size);
 
 				//read
 				unzOpenCurrentFile(pkg);
-				unzReadCurrentFile(pkg, data.ptrw(), data.size());
+				unzReadCurrentFile(pkg, data.data(), data.size());
 				unzCloseCurrentFile(pkg);
 
 				FileAccess *f = FileAccess::open(path, FileAccess::WRITE);
 				if (f) {
-					f->store_buffer(data.ptr(), data.size());
+					f->store_buffer(data.data(), data.size());
 					memdelete(f);
 				} else {
 					failed_files.push_back(path);
@@ -286,20 +286,20 @@ void EditorAssetInstaller::ok_pressed() {
 	ProgressDialog::get_singleton()->end_task("uncompress");
 	unzClose(pkg);
 
-	if (failed_files.size()) {
+	if (!failed_files.empty()) {
 		String msg = "The following files failed extraction from package:\n\n";
-		for (int i = 0; i < failed_files.size(); i++) {
-
+		auto len = failed_files.size();
+		for (decltype(len) i = 0; i < len; ++i) {
 			if (i > 15) {
-				msg += "\nAnd " + itos(failed_files.size() - i) + " more files.";
+				msg += "\nAnd " + itos(len - i) + " more files.";
 				break;
 			}
 			msg += failed_files[i];
 		}
-		if (EditorNode::get_singleton() != NULL)
+		if (EditorNode::get_singleton() != nullptr)
 			EditorNode::get_singleton()->show_warning(msg);
 	} else {
-		if (EditorNode::get_singleton() != NULL)
+		if (EditorNode::get_singleton() != nullptr)
 			EditorNode::get_singleton()->show_warning(TTR("Package installed successfully!"), TTR("Success!"));
 	}
 	EditorFileSystem::get_singleton()->scan_changes();
