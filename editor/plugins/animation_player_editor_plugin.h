@@ -31,6 +31,8 @@
 #ifndef ANIMATION_PLAYER_EDITOR_PLUGIN_H
 #define ANIMATION_PLAYER_EDITOR_PLUGIN_H
 
+#include <vector>
+
 #include "editor/editor_node.h"
 #include "editor/editor_plugin.h"
 #include "scene/animation/animation_player.h"
@@ -151,8 +153,8 @@ class AnimationPlayerEditor : public VBoxContainer {
 		int64_t last_frame;
 		int can_overlay;
 		Size2 capture_size;
-		Vector<RID> captures;
-		Vector<bool> captures_valid;
+		std::vector<RID> captures;
+		std::vector<bool> captures_valid;
 		struct {
 			RID canvas;
 			RID canvas_item;
