@@ -30,6 +30,8 @@
 
 #include "editor_run.h"
 
+#include <vector>
+
 #include "core/project_settings.h"
 #include "editor_settings.h"
 
@@ -172,9 +174,10 @@ Error EditorRun::run(const String &p_scene, const String &p_custom_args, const L
 	}
 
 	if (p_custom_args != "") {
-		Vector<String> cargs = p_custom_args.split(" ", false);
-		for (int i = 0; i < cargs.size(); i++) {
-			args.push_back(cargs[i].replace(" ", "%20"));
+		std::vector<String> cargs = p_custom_args.split(" ", false);
+
+		for (auto&& carg : cargs) {
+			args.push_back(carg.replace(" ", "%20"));
 		}
 	}
 
