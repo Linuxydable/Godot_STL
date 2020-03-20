@@ -59,8 +59,8 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(2);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
 	return md;
 }
 
@@ -69,9 +69,9 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(3);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
 	return md;
 }
 
@@ -80,10 +80,10 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(4);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
 	return md;
 }
 
@@ -92,11 +92,11 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(5);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
 	return md;
 }
 
@@ -105,12 +105,12 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(6);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
 	return md;
 }
 
@@ -119,13 +119,13 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(7);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
-	md.args.write[6] = StaticCString::create(p_arg7);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
 	return md;
 }
 
@@ -134,14 +134,14 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(8);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
-	md.args.write[6] = StaticCString::create(p_arg7);
-	md.args.write[7] = StaticCString::create(p_arg8);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
+	md.args[7] = StaticCString::create(p_arg8);
 	return md;
 }
 
@@ -150,15 +150,15 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(9);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
-	md.args.write[6] = StaticCString::create(p_arg7);
-	md.args.write[7] = StaticCString::create(p_arg8);
-	md.args.write[8] = StaticCString::create(p_arg9);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
+	md.args[7] = StaticCString::create(p_arg8);
+	md.args[8] = StaticCString::create(p_arg9);
 	return md;
 }
 
@@ -167,16 +167,16 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(10);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
-	md.args.write[6] = StaticCString::create(p_arg7);
-	md.args.write[7] = StaticCString::create(p_arg8);
-	md.args.write[8] = StaticCString::create(p_arg9);
-	md.args.write[9] = StaticCString::create(p_arg10);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
+	md.args[7] = StaticCString::create(p_arg8);
+	md.args[8] = StaticCString::create(p_arg9);
+	md.args[9] = StaticCString::create(p_arg10);
 	return md;
 }
 
@@ -185,17 +185,17 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(11);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
-	md.args.write[6] = StaticCString::create(p_arg7);
-	md.args.write[7] = StaticCString::create(p_arg8);
-	md.args.write[8] = StaticCString::create(p_arg9);
-	md.args.write[9] = StaticCString::create(p_arg10);
-	md.args.write[10] = StaticCString::create(p_arg11);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
+	md.args[7] = StaticCString::create(p_arg8);
+	md.args[8] = StaticCString::create(p_arg9);
+	md.args[9] = StaticCString::create(p_arg10);
+	md.args[10] = StaticCString::create(p_arg11);
 	return md;
 }
 
@@ -204,18 +204,18 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(12);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
-	md.args.write[6] = StaticCString::create(p_arg7);
-	md.args.write[7] = StaticCString::create(p_arg8);
-	md.args.write[8] = StaticCString::create(p_arg9);
-	md.args.write[9] = StaticCString::create(p_arg10);
-	md.args.write[10] = StaticCString::create(p_arg11);
-	md.args.write[11] = StaticCString::create(p_arg12);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
+	md.args[7] = StaticCString::create(p_arg8);
+	md.args[8] = StaticCString::create(p_arg9);
+	md.args[9] = StaticCString::create(p_arg10);
+	md.args[10] = StaticCString::create(p_arg11);
+	md.args[11] = StaticCString::create(p_arg12);
 	return md;
 }
 
@@ -224,19 +224,19 @@ MethodDefinition D_METHOD(const char *p_name, const char *p_arg1, const char *p_
 	MethodDefinition md;
 	md.name = StaticCString::create(p_name);
 	md.args.resize(13);
-	md.args.write[0] = StaticCString::create(p_arg1);
-	md.args.write[1] = StaticCString::create(p_arg2);
-	md.args.write[2] = StaticCString::create(p_arg3);
-	md.args.write[3] = StaticCString::create(p_arg4);
-	md.args.write[4] = StaticCString::create(p_arg5);
-	md.args.write[5] = StaticCString::create(p_arg6);
-	md.args.write[6] = StaticCString::create(p_arg7);
-	md.args.write[7] = StaticCString::create(p_arg8);
-	md.args.write[8] = StaticCString::create(p_arg9);
-	md.args.write[9] = StaticCString::create(p_arg10);
-	md.args.write[10] = StaticCString::create(p_arg11);
-	md.args.write[11] = StaticCString::create(p_arg12);
-	md.args.write[12] = StaticCString::create(p_arg13);
+	md.args[0] = StaticCString::create(p_arg1);
+	md.args[1] = StaticCString::create(p_arg2);
+	md.args[2] = StaticCString::create(p_arg3);
+	md.args[3] = StaticCString::create(p_arg4);
+	md.args[4] = StaticCString::create(p_arg5);
+	md.args[5] = StaticCString::create(p_arg6);
+	md.args[6] = StaticCString::create(p_arg7);
+	md.args[7] = StaticCString::create(p_arg8);
+	md.args[8] = StaticCString::create(p_arg9);
+	md.args[9] = StaticCString::create(p_arg10);
+	md.args[10] = StaticCString::create(p_arg11);
+	md.args[11] = StaticCString::create(p_arg12);
+	md.args[12] = StaticCString::create(p_arg13);
 	return md;
 }
 
@@ -763,7 +763,7 @@ StringName ClassDB::get_integer_constant_enum(const StringName &p_class, const S
 
 	while (type) {
 
-		const StringName *k = NULL;
+		const StringName *k = nullptr;
 		while ((k = type->enum_map.next(k))) {
 
 			List<StringName> &constants_list = type->enum_map.get(*k);
@@ -1251,12 +1251,11 @@ MethodBind *ClassDB::bind_methodfi(uint32_t p_flags, MethodBind *p_bind, const c
 
 	type->method_map[mdname] = p_bind;
 
-	Vector<Variant> defvals;
+	std::vector<Variant> defvals(p_defcount);
 
-	defvals.resize(p_defcount);
-	for (int i = 0; i < p_defcount; i++) {
+	for (decltype(defvals.size()) i = 0; i < defvals.size(); ++i) {
 
-		defvals.write[i] = *p_defs[p_defcount - i - 1];
+		defvals[i] = *p_defs[p_defcount - i - 1];
 	}
 
 	p_bind->set_default_arguments(defvals);

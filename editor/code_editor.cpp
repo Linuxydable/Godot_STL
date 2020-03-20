@@ -1391,9 +1391,9 @@ void CodeTextEditor::set_edit_state(const Variant &p_state) {
 	}
 
 	if (state.has("folded_lines")) {
-		Vector<int> folded_lines = state["folded_lines"];
-		for (int i = 0; i < folded_lines.size(); i++) {
-			text_editor->fold_line(folded_lines[i]);
+		std::vector<int> folded_lines = state["folded_lines"];
+		for (auto &&line : folded_lines) {
+			text_editor->fold_line(line);
 		}
 	}
 
@@ -1715,12 +1715,7 @@ CodeTextEditor::CodeTextEditor() {
 	text_editor->connect("cursor_changed", this, "_line_col_changed");
 	text_editor->connect("text_changed", this, "_text_changed");
 	text_editor->connect("request_completion", this, "_complete_request");
-	Vector<String> cs;
-	cs.push_back(".");
-	cs.push_back(",");
-	cs.push_back("(");
-	cs.push_back("=");
-	cs.push_back("$");
+	std::vector<String> cs{ ".", ",", "(", "=", "$" };
 	text_editor->set_completion(true, cs);
 	idle->connect("timeout", this, "_text_changed_idle_timeout");
 
