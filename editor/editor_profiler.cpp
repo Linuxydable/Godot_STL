@@ -30,16 +30,19 @@
 
 #include "editor_profiler.h"
 
+#include <algorithm>
+#include <vector>
+
 #include "core/os/os.h"
 #include "editor_scale.h"
 #include "editor_settings.h"
 
 void EditorProfiler::_make_metric_ptrs(Metric &m) {
+	for (auto &&categorie : m.categories) {
+		m.category_ptrs[categorie.signature] = &categorie;
 
-	for (int i = 0; i < m.categories.size(); i++) {
-		m.category_ptrs[m.categories[i].signature] = &m.categories.write[i];
-		for (int j = 0; j < m.categories[i].items.size(); j++) {
-			m.item_ptrs[m.categories[i].items[j].signature] = &m.categories.write[i].items.write[j];
+		for (auto &&item : categorie.items) {
+			m.item_ptrs[item.signature] = &item;
 		}
 	}
 }
@@ -50,8 +53,8 @@ void EditorProfiler::add_frame_metric(const Metric &p_metric, bool p_final) {
 	if (last_metric >= frame_metrics.size())
 		last_metric = 0;
 
-	frame_metrics.write[last_metric] = p_metric;
-	_make_metric_ptrs(frame_metrics.write[last_metric]);
+	frame_metrics[last_metric] = p_metric;
+	_make_metric_ptrs(frame_metrics[last_metric]);
 
 	updating_frame = true;
 	cursor_metric_edit->set_max(frame_metrics[last_metric].frame_number);
@@ -219,22 +222,21 @@ void EditorProfiler::_update_plot() {
 		highest *= 1.2; //leave some upper room
 		graph_height = highest;
 
-		Vector<int> columnv;
-		columnv.resize(h * 4);
+		std::vector<int> columnv;
 
-		int *column = columnv.ptrw();
+		columnv.resize(h * 4);
 
 		Map<StringName, int> plot_prev;
 		//Map<StringName,int> plot_max;
 
 		for (int i = 0; i < w; i++) {
 
-			for (int j = 0; j < h * 4; j++) {
-				column[j] = 0;
-			}
+			std::fill(columnv.begin(), columnv.end(), 0);
 
 			int current = i * frame_metrics.size() / w;
+
 			int next = (i + 1) * frame_metrics.size() / w;
+
 			if (next > frame_metrics.size()) {
 				next = frame_metrics.size();
 			}
@@ -311,25 +313,25 @@ void EditorProfiler::_update_plot() {
 
 				for (int j = prev_plot; j <= plot_pos; j++) {
 
-					column[j * 4 + 0] += Math::fast_ftoi(CLAMP(col.r * 255, 0, 255));
-					column[j * 4 + 1] += Math::fast_ftoi(CLAMP(col.g * 255, 0, 255));
-					column[j * 4 + 2] += Math::fast_ftoi(CLAMP(col.b * 255, 0, 255));
-					column[j * 4 + 3] += 1;
+					columnv[j * 4 + 0] += Math::fast_ftoi(CLAMP(col.r * 255, 0, 255));
+					columnv[j * 4 + 1] += Math::fast_ftoi(CLAMP(col.g * 255, 0, 255));
+					columnv[j * 4 + 2] += Math::fast_ftoi(CLAMP(col.b * 255, 0, 255));
+					columnv[j * 4 + 3] += 1;
 				}
 			}
 
 			for (int j = 0; j < h * 4; j += 4) {
 
-				int a = column[j + 3];
+				int a = columnv[j + 3];
 				if (a > 0) {
-					column[j + 0] /= a;
-					column[j + 1] /= a;
-					column[j + 2] /= a;
+					columnv[j + 0] /= a;
+					columnv[j + 1] /= a;
+					columnv[j + 2] /= a;
 				}
 
-				uint8_t r = uint8_t(column[j + 0]);
-				uint8_t g = uint8_t(column[j + 1]);
-				uint8_t b = uint8_t(column[j + 2]);
+				uint8_t r = uint8_t(columnv[j + 0]);
+				uint8_t g = uint8_t(columnv[j + 1]);
+				uint8_t b = uint8_t(columnv[j + 2]);
 
 				int widx = ((j >> 2) * w + i) * 4;
 				wr[widx + 0] = r;
@@ -621,36 +623,32 @@ bool EditorProfiler::is_profiling() {
 	return activate->is_pressed();
 }
 
-Vector<Vector<String> > EditorProfiler::get_data_as_csv() const {
-	Vector<Vector<String> > res;
+std::vector<std::vector<String> > EditorProfiler::get_data_as_csv() const {
+	std::vector<std::vector<String> > res;
 
 	if (frame_metrics.empty()) {
 		return res;
 	}
 
 	// signatures
-	Vector<String> signatures;
-	const Vector<EditorProfiler::Metric::Category> &categories = frame_metrics[0].categories;
+	std::vector<String> signatures;
 
-	for (int j = 0; j < categories.size(); j++) {
+	for (auto &&categorie : frame_metrics[0].categories) {
+		signatures.push_back(categorie.signature);
 
-		const EditorProfiler::Metric::Category &c = categories[j];
-		signatures.push_back(c.signature);
-
-		for (int k = 0; k < c.items.size(); k++) {
-			signatures.push_back(c.items[k].signature);
-		}
+		signatures.insert(signatures.end(), categorie.items.begin(), categorie.items.end());
 	}
+
 	res.push_back(signatures);
 
 	// values
-	Vector<String> values;
+	std::vector<String> values;
+
 	values.resize(signatures.size());
 
 	int index = last_metric;
 
 	for (int i = 0; i < frame_metrics.size(); i++) {
-
 		++index;
 
 		if (index >= frame_metrics.size()) {
@@ -660,18 +658,17 @@ Vector<Vector<String> > EditorProfiler::get_data_as_csv() const {
 		if (!frame_metrics[index].valid) {
 			continue;
 		}
+
 		int it = 0;
-		const Vector<EditorProfiler::Metric::Category> &frame_cat = frame_metrics[index].categories;
 
-		for (int j = 0; j < frame_cat.size(); j++) {
+		for (auto&& categorie : frame_metrics[index].categories) {
+			values[it++] = String::num_real(categorie.total_time);
 
-			const EditorProfiler::Metric::Category &c = frame_cat[j];
-			values.write[it++] = String::num_real(c.total_time);
-
-			for (int k = 0; k < c.items.size(); k++) {
-				values.write[it++] = String::num_real(c.items[k].total);
+			for (auto&& item : categorie.items) {
+				values[it++] = String::num_real(item.total);
 			}
 		}
+
 		res.push_back(values);
 	}
 
