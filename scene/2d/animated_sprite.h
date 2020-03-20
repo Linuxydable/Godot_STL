@@ -31,6 +31,8 @@
 #ifndef ANIMATED_SPRITE_H
 #define ANIMATED_SPRITE_H
 
+#include <vector>
+
 #include "scene/2d/node_2d.h"
 #include "scene/resources/texture.h"
 
@@ -42,7 +44,7 @@ class SpriteFrames : public Resource {
 
 		float speed;
 		bool loop;
-		Vector<Ref<Texture> > frames;
+		std::vector<Ref<Texture> > frames;
 
 		Anim() {
 			loop = true;
@@ -60,7 +62,7 @@ class SpriteFrames : public Resource {
 	Array _get_animations() const;
 	void _set_animations(const Array &p_animations);
 
-	Vector<String> _get_animation_list() const;
+	std::vector<String> _get_animation_list() const;
 
 protected:
 	static void _bind_methods();
@@ -72,7 +74,7 @@ public:
 	void rename_animation(const StringName &p_prev, const StringName &p_next);
 
 	void get_animation_list(List<StringName> *r_animations) const;
-	Vector<String> get_animation_names() const;
+	std::vector<String> get_animation_names() const;
 
 	void set_animation_speed(const StringName &p_anim, float p_fps);
 	float get_animation_speed(const StringName &p_anim) const;
@@ -113,7 +115,7 @@ public:
 		ERR_FAIL_COND(p_idx < 0);
 		if (p_idx >= E->get().frames.size())
 			return;
-		E->get().frames.write[p_idx] = p_frame;
+		E->get().frames[p_idx] = p_frame;
 	}
 	void remove_frame(const StringName &p_anim, int p_idx);
 	void clear(const StringName &p_anim);
