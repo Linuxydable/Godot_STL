@@ -43,8 +43,9 @@ void SkeletonIKEditorPlugin::_play() {
 	if (play_btn->is_pressed()) {
 
 		initial_bone_poses.resize(skeleton_ik->get_parent_skeleton()->get_bone_count());
-		for (int i = 0; i < skeleton_ik->get_parent_skeleton()->get_bone_count(); ++i) {
-			initial_bone_poses.write[i] = skeleton_ik->get_parent_skeleton()->get_bone_pose(i);
+		auto bone_count = skeleton_ik->get_parent_skeleton()->get_bone_count();
+		for (decltype(bone_count) i = 0; i < bone_count; ++i) {
+			initial_bone_poses[i] = skeleton_ik->get_parent_skeleton()->get_bone_pose(i);
 		}
 
 		skeleton_ik->start();
@@ -54,7 +55,8 @@ void SkeletonIKEditorPlugin::_play() {
 		if (initial_bone_poses.size() != skeleton_ik->get_parent_skeleton()->get_bone_count())
 			return;
 
-		for (int i = 0; i < skeleton_ik->get_parent_skeleton()->get_bone_count(); ++i) {
+		auto bone_count = skeleton_ik->get_parent_skeleton()->get_bone_count();
+		for (decltype(bone_count) i = 0; i < bone_count; ++i) {
 			skeleton_ik->get_parent_skeleton()->set_bone_pose(i, initial_bone_poses[i]);
 		}
 	}
