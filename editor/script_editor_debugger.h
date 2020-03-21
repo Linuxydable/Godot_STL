@@ -127,9 +127,9 @@ class ScriptEditorDebugger : public Control {
 	Button *dobreak;
 	Button *docontinue;
 
-	List<Vector<float> > perf_history;
-	Vector<float> perf_max;
-	Vector<TreeItem *> perf_items;
+	List<std::vector<float> > perf_history;
+	std::vector<float> perf_max;
+	std::vector<TreeItem *> perf_items;
 
 	Map<int, String> profiler_signature;
 
