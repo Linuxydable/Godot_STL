@@ -180,7 +180,7 @@ void ImportDock::_update_options(const Ref<ConfigFile> &p_config) {
 	}
 }
 
-void ImportDock::set_edit_multiple_paths0(const Ref<ConfigFile>& config, const Map<String, Dictionary>& value_frequency){
+void ImportDock::set_edit_multiple_paths0(const Ref<ConfigFile> &config, Map<String, Dictionary> &value_frequency) {
 	List<String> keys;
 
 	config->get_section_keys("params", &keys);
@@ -232,7 +232,7 @@ void ImportDock::set_edit_multiple_paths(const std::vector<String> &p_paths) {
 
 		it++;
 
-		for(; it!=p_paths.end(); it++){
+		for (; it != p_paths.end(); it++) {
 			// need_update : maybe a bug or memory leak when creating new instance...
 			config.instance();
 
@@ -426,16 +426,16 @@ void ImportDock::_reimport_attempt() {
 
 	bool need_restart = false;
 	bool used_in_resources = false;
-	for (int i = 0; i < params->paths.size(); i++) {
+	for (auto &&path : params->paths) {
 		Ref<ConfigFile> config;
 		config.instance();
-		Error err = config->load(params->paths[i] + ".import");
+		Error err = config->load(path + ".import");
 		ERR_CONTINUE(err != OK);
 
 		String imported_with = config->get_value("remap", "importer");
 		if (imported_with != params->importer->get_importer_name()) {
 			need_restart = true;
-			if (_find_owners(EditorFileSystem::get_singleton()->get_filesystem(), params->paths[i])) {
+			if (_find_owners(EditorFileSystem::get_singleton()->get_filesystem(), path)) {
 				used_in_resources = true;
 			}
 		}
@@ -460,11 +460,10 @@ void ImportDock::_reimport_and_restart() {
 
 void ImportDock::_reimport() {
 
-	for (int i = 0; i < params->paths.size(); i++) {
-
+	for (auto &&path : params->paths) {
 		Ref<ConfigFile> config;
 		config.instance();
-		Error err = config->load(params->paths[i] + ".import");
+		Error err = config->load(path + ".import");
 		ERR_CONTINUE(err != OK);
 
 		String importer_name = params->importer->get_importer_name();
@@ -499,7 +498,7 @@ void ImportDock::_reimport() {
 			config->set_value("remap", "group_file", Variant()); //clear group file if unused
 		}
 
-		config->save(params->paths[i] + ".import");
+		config->save(path + ".import");
 	}
 
 	EditorFileSystem::get_singleton()->reimport_files(params->paths);
