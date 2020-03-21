@@ -588,13 +588,13 @@ private:
 
 					if (!failed_files.empty()) {
 						String msg = TTR("The following files failed extraction from package:") + "\n\n";
-						
+
 						// need_update : 15 => define constant
-						for(auto it_failed_files = failed_files.begin(); it_failed_files != failed_files.begin() + 15; ++it_failed_files){
+						for (auto it_failed_files = failed_files.begin(); it_failed_files != failed_files.begin() + 15; ++it_failed_files) {
 							msg += *it_failed_files + "\n";
 						}
 
-						if(failed_files.size() > 15){
+						if (failed_files.size() > 15) {
 							msg += "And " + itos(failed_files.size() - 15) + " more files.";
 						}
 
@@ -1052,7 +1052,7 @@ private:
 	void toggle_select(int p_index);
 	void create_project_item_control(int p_index);
 
-	void remove_project_0(const Item& project, bool p_update_settings = true);
+	void remove_project_0(const Item &project, bool p_update_settings = true);
 
 	void remove_project(int p_index, bool p_update_settings);
 
@@ -1111,16 +1111,16 @@ void ProjectList::update_icons_async() {
 	set_process(true);
 }
 
-void ProjectList::_notification(int p_what){
-	if(p_what == NOTIFICATION_PROCESS){
+void ProjectList::_notification(int p_what) {
+	if (p_what == NOTIFICATION_PROCESS) {
 		// Load icons as a coroutine to speed up launch when you have hundreds of projects
-		if(_icon_load_index < _projects.size() ){
+		if (_icon_load_index < _projects.size()) {
 			if (_projects[_icon_load_index].control->icon_needs_reload) {
 				load_project_icon(_icon_load_index);
 			}
 
 			_icon_load_index++;
-		}else{
+		} else {
 			set_process(false);
 		}
 	}
@@ -1132,14 +1132,14 @@ void ProjectList::load_project_icon(int p_index) {
 
 	Ref<Texture> icon;
 
-	if(_projects[p_index].icon != ""){
+	if (_projects[p_index].icon != "") {
 		Ref<Image> img;
 
 		img.instance();
 
 		Error err = img->load(_projects[p_index].icon.replace_first("res://", _projects[p_index].path + "/"));
 
-		if(err == OK){
+		if (err == OK) {
 			img->resize(default_icon->get_width(), default_icon->get_height(), Image::INTERPOLATE_LANCZOS);
 
 			Ref<ImageTexture> it = memnew(ImageTexture);
@@ -1150,7 +1150,7 @@ void ProjectList::load_project_icon(int p_index) {
 		}
 	}
 
-	if(icon.is_null() ){
+	if (icon.is_null()) {
 		icon = default_icon;
 	}
 
@@ -1212,7 +1212,7 @@ void ProjectList::load_projects() {
 	// If you have 150 projects, it may read through 150 files on your disk at once + load 150 icons.
 
 	// Clear whole list
-	for(auto project : _projects){
+	for (auto project : _projects) {
 		CRASH_COND(project.control == NULL);
 		memdelete(project.control); // Why not queue_free()?
 	}
@@ -1378,7 +1378,7 @@ void ProjectList::sort_projects() {
 	sorter.compare.order_option = _order_option;
 	sorter.sort(_projects.data(), _projects.size());
 
-	for(auto project : _projects){
+	for (auto project : _projects) {
 		bool visible = true;
 		if (_search_term != "") {
 
@@ -1398,9 +1398,9 @@ void ProjectList::sort_projects() {
 		project.control->set_visible(visible);
 	}
 
-	for(auto it_projects = _projects.begin(); it_projects != _projects.end(); ++it_projects){
-		if( (*it_projects).control->is_visible() ){
-			(*it_projects).control->get_parent()->move_child( (*it_projects).control, std::distance(_projects.begin(), it_projects) );
+	for (auto it_projects = _projects.begin(); it_projects != _projects.end(); ++it_projects) {
+		if ((*it_projects).control->is_visible()) {
+			(*it_projects).control->get_parent()->move_child((*it_projects).control, std::distance(_projects.begin(), it_projects));
 		}
 	}
 
@@ -1416,15 +1416,15 @@ const Set<String> &ProjectList::get_selected_project_keys() const {
 std::vector<ProjectList::Item> ProjectList::get_selected_projects() const {
 	std::vector<Item> items;
 
-	if(_selected_project_keys.size() == 0){
+	if (_selected_project_keys.size() == 0) {
 		return items;
 	}
 
-	items.reserve(_selected_project_keys.size() );
+	items.reserve(_selected_project_keys.size());
 
-	for(auto&& project : _projects){
-		if(_selected_project_keys.has(project.project_key) ){
-			items.push_back(project)
+	for (auto &&project : _projects) {
+		if (_selected_project_keys.has(project.project_key)) {
+			items.push_back(project);
 		}
 	}
 
@@ -1453,33 +1453,32 @@ int ProjectList::get_single_selected_index() const {
 
 	String key;
 
-	if(_selected_project_keys.size() == 1){
+	if (_selected_project_keys.size() == 1) {
 		// Only one selected
 		key = _selected_project_keys.front()->get();
-	}else{
+	} else {
 		// Multiple selected, consider the last clicked one as "main"
 		key = _last_clicked;
 	}
 
 	auto it_projects = std::find_if(_projects.begin(), _projects.end(),
-		[&](Item&& project){
-			if(project.project_key == key){
-				return true;
-			}
-			return false;
-		}
-	);
+			[&](Item &&project) {
+				if (project.project_key == key) {
+					return true;
+				}
+				return false;
+			});
 
 	// need_update : rewrite this function and try to not use std::distance
-	if(it_projects != _projects.end() ){
-		return std::distance(_projects.begin(), _projects.end() );
+	if (it_projects != _projects.end()) {
+		return std::distance(_projects.begin(), _projects.end());
 	}
 
 	return 0;
 }
 
 // remove not entirly to use it with std::erase(range)
-void ProjectList::remove_project_0(const Item& project, bool p_update_settings){
+void ProjectList::remove_project_0(const Item &project, bool p_update_settings) {
 	_selected_project_keys.erase(project.project_key);
 
 	if (_last_clicked == project.project_key) {
@@ -1488,7 +1487,7 @@ void ProjectList::remove_project_0(const Item& project, bool p_update_settings){
 
 	memdelete(project.control);
 
-	if(p_update_settings){
+	if (p_update_settings) {
 		EditorSettings::get_singleton()->erase("projects/" + project.project_key);
 
 		EditorSettings::get_singleton()->erase("favorite_projects/" + project.project_key);
@@ -1500,22 +1499,21 @@ void ProjectList::remove_project_0(const Item& project, bool p_update_settings){
 void ProjectList::remove_project(int p_index, bool p_update_settings) {
 	remove_project_0(_projects[p_index], p_update_settings);
 
-	_projects.remove(_projects.begin() + p_index);
+	_projects.erase(_projects.begin() + p_index);
 }
 
 bool ProjectList::is_any_project_missing() const {
 	return std::find_if(_projects.begin(), _projects.end(),
-		[](Item&& project){
-			if(project.missing){
-				return true;
-			}
-			return false;
-		}
-	) != _projects.end();
+				   [](Item &&project) {
+					   if (project.missing) {
+						   return true;
+					   }
+					   return false;
+				   }) != _projects.end();
 }
 
-void ProjectList::erase_missing_projects(){
-	if(_projects.empty() ){
+void ProjectList::erase_missing_projects() {
+	if (_projects.empty()) {
 		// need_update : return some message
 		return;
 	}
@@ -1524,17 +1522,17 @@ void ProjectList::erase_missing_projects(){
 
 	int remaining_count = 0;
 
-	std::erase(std::remove_if(_projects.begin(), _projects.end(),
-		[&](Item&& project){
-			if(project.missing){
-				remove_project_0(project);
-				++deleted_count;
-				return true;
-			}
-			++remaining_count;
-			return false;
-		}
-	), _projects.end() );
+	_projects.erase(std::remove_if(_projects.begin(), _projects.end(),
+							[&](Item &&project) {
+								if (project.missing) {
+									remove_project_0(project);
+									++deleted_count;
+									return true;
+								}
+								++remaining_count;
+								return false;
+							}),
+			_projects.end());
 
 	// need_update : not use print_line, use std::cout
 	// need_update : not use itos, use to_string
@@ -1645,7 +1643,7 @@ void ProjectList::select_range(int p_begin, int p_end) {
 }
 
 void ProjectList::toggle_select(int p_index) {
-	Item &item = _projects.write[p_index];
+	Item &item = _projects[p_index];
 	if (_selected_project_keys.has(item.project_key)) {
 		_selected_project_keys.erase(item.project_key);
 	} else {
@@ -1655,23 +1653,23 @@ void ProjectList::toggle_select(int p_index) {
 }
 
 void ProjectList::erase_selected_projects() {
-
 	if (_selected_project_keys.size() == 0) {
 		return;
 	}
 
-	for (int i = 0; i < _projects.size(); ++i) {
-		Item &item = _projects.write[i];
-		if (_selected_project_keys.has(item.project_key) && item.control->is_visible()) {
+	_projects.erase(std::remove_if(_projects.begin(), _projects.end(),
+		[&](const Item& item) {
+			if (_selected_project_keys.has(item.project_key) && item.control->is_visible()) {
+				EditorSettings::get_singleton()->erase("projects/" + item.project_key);
+				EditorSettings::get_singleton()->erase("favorite_projects/" + item.project_key);
 
-			EditorSettings::get_singleton()->erase("projects/" + item.project_key);
-			EditorSettings::get_singleton()->erase("favorite_projects/" + item.project_key);
+				memdelete(item.control);
+				return true;
+			}
 
-			memdelete(item.control);
-			_projects.remove(i);
-			--i;
+			return false;
 		}
-	}
+	));
 
 	EditorSettings::get_singleton()->save();
 
@@ -1735,7 +1733,7 @@ void ProjectList::_favorite_pressed(Node *p_hb) {
 	ProjectListItemControl *control = Object::cast_to<ProjectListItemControl>(p_hb);
 
 	int index = control->get_index();
-	Item item = _projects.write[index]; // Take copy
+	Item item = _projects[index]; // Take copy
 
 	item.favorite = !item.favorite;
 
@@ -1746,14 +1744,14 @@ void ProjectList::_favorite_pressed(Node *p_hb) {
 	}
 	EditorSettings::get_singleton()->save();
 
-	_projects.write[index] = item;
+	_projects[index] = item;
 
 	control->set_is_favorite(item.favorite);
 
 	sort_projects();
 
 	if (item.favorite) {
-		for (int i = 0; i < _projects.size(); ++i) {
+		for (decltype(_projects.size()) i = 0; i < _projects.size(); ++i) {
 			if (_projects[i].project_key == item.project_key) {
 				ensure_project_visible(i);
 				break;
