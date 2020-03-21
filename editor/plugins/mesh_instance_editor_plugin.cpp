@@ -39,7 +39,7 @@
 void MeshInstanceEditor::_node_removed(Node *p_node) {
 
 	if (p_node == node) {
-		node = NULL;
+		node = nullptr;
 		options->hide();
 	}
 }
@@ -165,7 +165,7 @@ void MeshInstanceEditor::_menu_option(int p_option) {
 				return;
 			}
 
-			Vector<Ref<Shape> > shapes = mesh->convex_decompose();
+			std::vector<Ref<Shape> > shapes = mesh->convex_decompose();
 
 			if (!shapes.size()) {
 				err_dialog->set_text(TTR("Failed creating shapes!"));
@@ -176,10 +176,10 @@ void MeshInstanceEditor::_menu_option(int p_option) {
 
 			ur->create_action(TTR("Create Convex Shape(s)"));
 
-			for (int i = 0; i < shapes.size(); i++) {
+			for (auto &&shape : shapes) {
 
 				CollisionShape *cshape = memnew(CollisionShape);
-				cshape->set_shape(shapes[i]);
+				cshape->set_shape(shape);
 
 				Node *owner = node->get_owner();
 
@@ -321,7 +321,7 @@ void MeshInstanceEditor::_create_uv_lines(int p_layer) {
 
 		for (int j = 0; j < ic; j += 3) {
 
-			for (int k = 0; k < 3; k++) {
+			for (uint8_t k = 0; k < 3u; ++k) {
 
 				MeshInstanceEditorEdgeSort edge;
 				if (use_indices) {
@@ -347,7 +347,7 @@ void MeshInstanceEditor::_create_uv_lines(int p_layer) {
 
 void MeshInstanceEditor::_debug_uv_draw() {
 
-	if (uv_lines.size() == 0)
+	if (uv_lines.empty())
 		return;
 
 	debug_uv->set_clip_contents(true);
@@ -480,7 +480,7 @@ void MeshInstanceEditorPlugin::make_visible(bool p_visible) {
 	} else {
 
 		mesh_editor->options->hide();
-		mesh_editor->edit(NULL);
+		mesh_editor->edit(nullptr);
 	}
 }
 
