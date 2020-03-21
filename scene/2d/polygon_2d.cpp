@@ -81,7 +81,7 @@ bool Polygon2D::_edit_use_rect() const {
 
 bool Polygon2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
 
-	Vector<Vector2> polygon2d = Variant(polygon);
+	std::vector<Vector2> polygon2d = Variant(polygon);
 	if (internal_vertices > 0) {
 		polygon2d.resize(polygon2d.size() - internal_vertices);
 	}
@@ -128,10 +128,10 @@ void Polygon2D::_notification(int p_what) {
 				current_skeleton_id = new_skeleton_id;
 			}
 
-			Vector<Vector2> points;
-			Vector<Vector2> uvs;
-			Vector<int> bones;
-			Vector<float> weights;
+			std::vector<Vector2> points;
+			std::vector<Vector2> uvs;
+			std::vector<int> bones;
+			std::vector<float> weights;
 
 			int len = polygon.size();
 			if ((invert || polygons.size() == 0) && internal_vertices > 0) {
@@ -148,7 +148,7 @@ void Polygon2D::_notification(int p_what) {
 
 				PoolVector<Vector2>::Read polyr = polygon.read();
 				for (int i = 0; i < len; i++) {
-					points.write[i] = polyr[i] + offset;
+					points[i] = polyr[i] + offset;
 				}
 			}
 
@@ -188,18 +188,16 @@ void Polygon2D::_notification(int p_what) {
 					SWAP(ep[1], ep[4]);
 					SWAP(ep[2], ep[3]);
 					SWAP(ep[5], ep[0]);
-					SWAP(ep[6], points.write[highest_idx]);
+					SWAP(ep[6], points[highest_idx]);
 				}
 
 				points.resize(points.size() + 7);
 				for (int i = points.size() - 1; i >= highest_idx + 7; i--) {
-
-					points.write[i] = points[i - 7];
+					points[i] = points[i - 7];
 				}
 
-				for (int i = 0; i < 7; i++) {
-
-					points.write[highest_idx + i + 1] = ep[i];
+				for (uint8_t i = 0; i < 7u; ++i) {
+					points[highest_idx + i + 1] = ep[i];
 				}
 
 				len = points.size();
@@ -218,12 +216,12 @@ void Polygon2D::_notification(int p_what) {
 					PoolVector<Vector2>::Read uvr = uv.read();
 
 					for (int i = 0; i < len; i++) {
-						uvs.write[i] = texmat.xform(uvr[i]) / tex_size;
+						uvs[i] = texmat.xform(uvr[i]) / tex_size;
 					}
 
 				} else {
 					for (int i = 0; i < len; i++) {
-						uvs.write[i] = texmat.xform(points[i]) / tex_size;
+						uvs[i] = texmat.xform(points[i]) / tex_size;
 					}
 				}
 			}
@@ -234,36 +232,36 @@ void Polygon2D::_notification(int p_what) {
 				bones.resize(vc * 4);
 				weights.resize(vc * 4);
 
-				int *bonesw = bones.ptrw();
-				float *weightsw = weights.ptrw();
+				int *bonesw = bones.data();
+				float *weightsw = weights.data();
 
 				for (int i = 0; i < vc * 4; i++) {
 					bonesw[i] = 0;
 					weightsw[i] = 0;
 				}
 
-				for (int i = 0; i < bone_weights.size(); i++) {
-					if (bone_weights[i].weights.size() != points.size()) {
+				for (auto &&b_weight : bone_weights) {
+					if (b_weight.weights.size() != points.size()) {
 						continue; //different number of vertices, sorry not using.
 					}
-					if (!skeleton_node->has_node(bone_weights[i].path)) {
+					if (!skeleton_node->has_node(b_weight.path)) {
 						continue; //node does not exist
 					}
-					Bone2D *bone = Object::cast_to<Bone2D>(skeleton_node->get_node(bone_weights[i].path));
+					Bone2D *bone = Object::cast_to<Bone2D>(skeleton_node->get_node(b_weight.path));
 					if (!bone) {
 						continue;
 					}
 
 					int bone_index = bone->get_index_in_skeleton();
-					PoolVector<float>::Read r = bone_weights[i].weights.read();
+					PoolVector<float>::Read r = b_weight.weights.read();
 					for (int j = 0; j < vc; j++) {
 						if (r[j] == 0.0)
 							continue; //weight is unpainted, skip
 						//find an index with a weight
-						for (int k = 0; k < 4; k++) {
+						for (uint8_t k = 0; k < 4u; ++k) {
 							if (weightsw[j * 4 + k] < r[j]) {
 								//this is less than this weight, insert weight!
-								for (int l = 3; l > k; l--) {
+								for (uint8_t l = 3; l > k; --l) {
 									weightsw[j * 4 + l] = weightsw[j * 4 + l - 1];
 									bonesw[j * 4 + l] = bonesw[j * 4 + l - 1];
 								}
@@ -278,41 +276,41 @@ void Polygon2D::_notification(int p_what) {
 				//normalize the weights
 				for (int i = 0; i < vc; i++) {
 					float tw = 0;
-					for (int j = 0; j < 4; j++) {
+					for (uint8_t j = 0; j < 4u; ++j) {
 						tw += weightsw[i * 4 + j];
 					}
 					if (tw == 0)
 						continue; //unpainted, do nothing
 
 					//normalize
-					for (int j = 0; j < 4; j++) {
+					for (uint8_t j = 0; j < 4u; ++j) {
 						weightsw[i * 4 + j] /= tw;
 					}
 				}
 			}
 
-			Vector<Color> colors;
+			std::vector<Color> colors;
 			if (vertex_colors.size() == points.size()) {
 				colors.resize(len);
 				PoolVector<Color>::Read color_r = vertex_colors.read();
 				for (int i = 0; i < len; i++) {
-					colors.write[i] = color_r[i];
+					colors[i] = color_r[i];
 				}
 			} else {
 				colors.push_back(color);
 			}
 
-			//			Vector<int> indices = Geometry::triangulate_polygon(points);
+			//			std::vector<int> indices = Geometry::triangulate_polygon(points);
 			//			VS::get_singleton()->canvas_item_add_triangle_array(get_canvas_item(), indices, points, colors, uvs, texture.is_valid() ? texture->get_rid() : RID());
 
 			if (invert || polygons.size() == 0) {
-				Vector<int> indices = Geometry::triangulate_polygon(points);
+				std::vector<int> indices = Geometry::triangulate_polygon(points);
 				if (indices.size()) {
 					VS::get_singleton()->canvas_item_add_triangle_array(get_canvas_item(), indices, points, colors, uvs, bones, weights, texture.is_valid() ? texture->get_rid() : RID());
 				}
 			} else {
 				//draw individual polygons
-				Vector<int> total_indices;
+				std::vector<int> total_indices;
 				for (int i = 0; i < polygons.size(); i++) {
 					PoolVector<int> src_indices = polygons[i];
 					int ic = src_indices.size();
@@ -320,21 +318,21 @@ void Polygon2D::_notification(int p_what) {
 						continue;
 					PoolVector<int>::Read r = src_indices.read();
 
-					Vector<Vector2> tmp_points;
+					std::vector<Vector2> tmp_points;
 					tmp_points.resize(ic);
 
 					for (int j = 0; j < ic; j++) {
 						int idx = r[j];
 						ERR_CONTINUE(idx < 0 || idx >= points.size());
-						tmp_points.write[j] = points[r[j]];
+						tmp_points[j] = points[r[j]];
 					}
-					Vector<int> indices = Geometry::triangulate_polygon(tmp_points);
+					std::vector<int> indices = Geometry::triangulate_polygon(tmp_points);
 					int ic2 = indices.size();
-					const int *r2 = indices.ptr();
+					const int *r2 = indices.data();
 
 					int bic = total_indices.size();
 					total_indices.resize(bic + ic2);
-					int *w2 = total_indices.ptrw();
+					int *w2 = total_indices.data();
 
 					for (int j = 0; j < ic2; j++) {
 						w2[j + bic] = r[r2[j]];
@@ -347,13 +345,13 @@ void Polygon2D::_notification(int p_what) {
 
 #if 0
 				//use splits
-				Vector<int> loop;
+				std::vector<int> loop;
 				int sc = splits.size();
 				PoolVector<int>::Read r = splits.read();
 
 
 				print_line("has splits, amount " + itos(splits.size()));
-				Vector<Vector<int> > loops;
+				std::vector<std::vector<int> > loops;
 
 				// find a point that can be used to begin, must not be in a split, and have to the left and right the same one
 				// like this one -> x---o
@@ -513,16 +511,16 @@ void Polygon2D::_notification(int p_what) {
 				print_line("total loops: " + itos(loops.size()));
 
 				if (loops.size()) { //loops found
-					Vector<int> indices;
+					std::vector<int> indices;
 
 					for (int i = 0; i < loops.size(); i++) {
-						Vector<int> loop = loops[i];
-						Vector<Vector2> vertices;
+						std::vector<int> loop = loops[i];
+						std::vector<Vector2> vertices;
 						vertices.resize(loop.size());
 						for (int j = 0; j < vertices.size(); j++) {
 							vertices.write[j] = points[loop[j]];
 						}
-						Vector<int> sub_indices = Geometry::triangulate_polygon(vertices);
+						std::vector<int> sub_indices = Geometry::triangulate_polygon(vertices);
 						int from = indices.size();
 						indices.resize(from + sub_indices.size());
 						for (int j = 0; j < sub_indices.size(); j++) {
@@ -724,7 +722,7 @@ PoolVector<float> Polygon2D::get_bone_weights(int p_index) const {
 void Polygon2D::erase_bone(int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, bone_weights.size());
-	bone_weights.remove(p_idx);
+	bone_weights.erase(bone_weights.begin() + p_idx);
 }
 
 void Polygon2D::clear_bones() {
@@ -733,20 +731,20 @@ void Polygon2D::clear_bones() {
 
 void Polygon2D::set_bone_weights(int p_index, const PoolVector<float> &p_weights) {
 	ERR_FAIL_INDEX(p_index, bone_weights.size());
-	bone_weights.write[p_index].weights = p_weights;
+	bone_weights[p_index].weights = p_weights;
 	update();
 }
 void Polygon2D::set_bone_path(int p_index, const NodePath &p_path) {
 	ERR_FAIL_INDEX(p_index, bone_weights.size());
-	bone_weights.write[p_index].path = p_path;
+	bone_weights[p_index].path = p_path;
 	update();
 }
 
 Array Polygon2D::_get_bones() const {
 	Array bones;
-	for (int i = 0; i < get_bone_count(); i++) {
-		bones.push_back(get_bone_path(i));
-		bones.push_back(get_bone_weights(i));
+	for (auto &&b_weight : bone_weights) {
+		bones.push_back(b_weight.path);
+		bones.push_back(b_weight.weights);
 	}
 	return bones;
 }

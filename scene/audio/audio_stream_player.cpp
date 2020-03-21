@@ -68,8 +68,8 @@ void AudioStreamPlayer::_mix_to_bus(const AudioFrame *p_frames, int p_amount) {
 void AudioStreamPlayer::_mix_internal(bool p_fadeout) {
 
 	//get data
-	AudioFrame *buffer = mix_buffer.ptrw();
-	int buffer_size = mix_buffer.size();
+	AudioFrame *buffer = mix_buffer.data();
+	auto buffer_size = mix_buffer.size();
 
 	if (p_fadeout) {
 		// Short fadeout ramp
@@ -83,7 +83,7 @@ void AudioStreamPlayer::_mix_internal(bool p_fadeout) {
 	float vol = Math::db2linear(mix_volume_db);
 	float vol_inc = (Math::db2linear(target_volume) - vol) / float(buffer_size);
 
-	for (int i = 0; i < buffer_size; i++) {
+	for (decltype(buffer_size) i = 0; i < buffer_size; ++i) {
 		buffer[i] *= vol;
 		vol += vol_inc;
 	}
@@ -97,7 +97,7 @@ void AudioStreamPlayer::_mix_internal(bool p_fadeout) {
 void AudioStreamPlayer::_mix_audio() {
 
 	if (use_fadeout) {
-		_mix_to_bus(fadeout_buffer.ptr(), fadeout_buffer.size());
+		_mix_to_bus(fadeout_buffer.data(), fadeout_buffer.size());
 		use_fadeout = false;
 	}
 
@@ -180,9 +180,7 @@ void AudioStreamPlayer::set_stream(Ref<AudioStream> p_stream) {
 	if (active && stream_playback.is_valid() && !stream_paused) {
 		//changing streams out of the blue is not a great idea, but at least
 		//lets try to somehow avoid a click
-
-		AudioFrame *buffer = fadeout_buffer.ptrw();
-		int buffer_size = fadeout_buffer.size();
+		auto buffer_size = fadeout_buffer.size();
 
 		stream_playback->mix(buffer, pitch_scale, buffer_size);
 
@@ -191,8 +189,8 @@ void AudioStreamPlayer::set_stream(Ref<AudioStream> p_stream) {
 		float vol = Math::db2linear(mix_volume_db);
 		float vol_inc = (Math::db2linear(target_volume) - vol) / float(buffer_size);
 
-		for (int i = 0; i < buffer_size; i++) {
-			buffer[i] *= vol;
+		for (auto &&buf : fadeout_buffer) {
+			buf *= vol;
 			vol += vol_inc;
 		}
 

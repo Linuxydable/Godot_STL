@@ -39,10 +39,10 @@ class NavigationPolygon : public Resource {
 
 	PoolVector<Vector2> vertices;
 	struct Polygon {
-		Vector<int> indices;
+		std::vector<int> indices;
 	};
-	Vector<Polygon> polygons;
-	Vector<PoolVector<Vector2> > outlines;
+	std::vector<Polygon> polygons;
+	std::vector<PoolVector<Vector2> > outlines;
 
 	mutable Rect2 item_rect;
 	mutable bool rect_cache_dirty;
@@ -63,7 +63,7 @@ public:
 	void set_vertices(const PoolVector<Vector2> &p_vertices);
 	PoolVector<Vector2> get_vertices() const;
 
-	void add_polygon(const Vector<int> &p_polygon);
+	void add_polygon(const std::vector<int> &p_polygon);
 	int get_polygon_count() const;
 
 	void add_outline(const PoolVector<Vector2> &p_outline);
@@ -76,7 +76,7 @@ public:
 	void clear_outlines();
 	void make_polygons_from_outlines();
 
-	Vector<int> get_polygon(int p_idx);
+	std::vector<int> get_polygon(int p_idx);
 	void clear_polygons();
 
 	NavigationPolygon();

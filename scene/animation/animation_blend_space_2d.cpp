@@ -66,10 +66,10 @@ void AnimationNodeBlendSpace2D::add_blend_point(const Ref<AnimationRootNode> &p_
 		for (int i = blend_points_used - 1; i > p_at_index; i--) {
 			blend_points[i] = blend_points[i - 1];
 		}
-		for (int i = 0; i < triangles.size(); i++) {
+		for (auto &&triangle : triangles) {
 			for (int j = 0; j < 3; j++) {
-				if (triangles[i].points[j] >= p_at_index) {
-					triangles.write[i].points[j]++;
+				if (triangle.points[j] >= p_at_index) {
+					triangle.points[j]++;
 				}
 			}
 		}
@@ -122,20 +122,33 @@ void AnimationNodeBlendSpace2D::remove_blend_point(int p_point) {
 				erase = true;
 				break;
 			} else if (triangles[i].points[j] > p_point) {
-				triangles.write[i].points[j]--;
+				triangles[i].points[j]--;
 			}
 		}
 		if (erase) {
 			triangles.remove(i);
-
-			i--;
+			--i;
 		}
 	}
+
+	std::remove_if(triangles.begin(), triangles.end(), [&](const BlendTriangle &triangle) {
+		auto it_find = std::find_if(std::begin(triangle.points), std::end(triangle.points), [&](int &point) {
+			if (point == p_point) {
+				return true;
+			} else if (point > p_point) {
+				--point;
+			}
+		});
+
+		if (it_find != std::end(triangle.points)) {
+			return true;
+		}
+	});
 
 	for (int i = p_point; i < blend_points_used - 1; i++) {
 		blend_points[i] = blend_points[i + 1];
 	}
-	blend_points_used--;
+	--blend_points_used;
 	emit_signal("tree_changed");
 }
 
@@ -158,16 +171,16 @@ bool AnimationNodeBlendSpace2D::has_triangle(int p_x, int p_y, int p_z) const {
 	SortArray<int> sort;
 	sort.sort(t.points, 3);
 
-	for (int i = 0; i < triangles.size(); i++) {
+	for (auto &&triangle : triangles) {
 		bool all_equal = true;
-		for (int j = 0; j < 3; j++) {
-			if (triangles[i].points[j] != t.points[j]) {
+		for (uint8_t j = 0; j < 3u; ++j) {
+			if (triangle.points[j] != t.points[j]) {
 				all_equal = false;
 				break;
 			}
 		}
-		if (all_equal)
-			return true;
+
+		if (all_equal) return true;
 	}
 
 	return false;
@@ -189,10 +202,10 @@ void AnimationNodeBlendSpace2D::add_triangle(int p_x, int p_y, int p_z, int p_at
 	SortArray<int> sort;
 	sort.sort(t.points, 3);
 
-	for (int i = 0; i < triangles.size(); i++) {
+	for (auto &&triangle : triangles) {
 		bool all_equal = true;
-		for (int j = 0; j < 3; j++) {
-			if (triangles[i].points[j] != t.points[j]) {
+		for (uint8_t j = 0; j < 3u; ++j) {
+			if (triangle.points[j] != t.points[j]) {
 				all_equal = false;
 				break;
 			}
@@ -203,7 +216,7 @@ void AnimationNodeBlendSpace2D::add_triangle(int p_x, int p_y, int p_z, int p_at
 	if (p_at_index == -1 || p_at_index == triangles.size()) {
 		triangles.push_back(t);
 	} else {
-		triangles.insert(p_at_index, t);
+		triangles.insert(triangles.begin() + p_at_index, t);
 	}
 }
 int AnimationNodeBlendSpace2D::get_triangle_point(int p_triangle, int p_point) {
@@ -217,7 +230,11 @@ int AnimationNodeBlendSpace2D::get_triangle_point(int p_triangle, int p_point) {
 void AnimationNodeBlendSpace2D::remove_triangle(int p_triangle) {
 	ERR_FAIL_INDEX(p_triangle, triangles.size());
 
-	triangles.remove(p_triangle);
+	auto it_find = std::find(triangles.begin(), triangles.end(), p_triangle);
+
+	if (it_find != triangles.end()) {
+		triangles.erase(it_find);
+	}
 }
 
 int AnimationNodeBlendSpace2D::get_triangle_count() const {
@@ -281,27 +298,27 @@ void AnimationNodeBlendSpace2D::_add_blend_point(int p_index, const Ref<Animatio
 	}
 }
 
-void AnimationNodeBlendSpace2D::_set_triangles(const Vector<int> &p_triangles) {
+void AnimationNodeBlendSpace2D::_set_triangles(const std::vector<int> &p_triangles) {
 
 	if (auto_triangles)
 		return;
 	ERR_FAIL_COND(p_triangles.size() % 3 != 0);
-	for (int i = 0; i < p_triangles.size(); i += 3) {
+	for (decltype(p_triangles.size()) i = 0; i < p_triangles.size(); i += 3) {
 		add_triangle(p_triangles[i + 0], p_triangles[i + 1], p_triangles[i + 2]);
 	}
 }
 
-Vector<int> AnimationNodeBlendSpace2D::_get_triangles() const {
+std::vector<int> AnimationNodeBlendSpace2D::_get_triangles() const {
 
-	Vector<int> t;
+	std::vector<int> t;
 	if (auto_triangles && trianges_dirty)
 		return t;
 
 	t.resize(triangles.size() * 3);
-	for (int i = 0; i < triangles.size(); i++) {
-		t.write[i * 3 + 0] = triangles[i].points[0];
-		t.write[i * 3 + 1] = triangles[i].points[1];
-		t.write[i * 3 + 2] = triangles[i].points[2];
+	for (decltype(triangles.size()) i = 0; i < triangles.size(); ++i) {
+		t[i * 3 + 0] = triangles[i].points[0];
+		t[i * 3 + 1] = triangles[i].points[1];
+		t[i * 3 + 2] = triangles[i].points[2];
 	}
 	return t;
 }
@@ -327,16 +344,16 @@ void AnimationNodeBlendSpace2D::_update_triangles() {
 		return;
 	}
 
-	Vector<Vector2> points;
-	points.resize(blend_points_used);
+	std::vector<Vector2> points(blend_points_used);
+
 	for (int i = 0; i < blend_points_used; i++) {
-		points.write[i] = blend_points[i].position;
+		points[i] = blend_points[i].position;
 	}
 
-	Vector<Delaunay2D::Triangle> triangles = Delaunay2D::triangulate(points);
+	std::vector<Delaunay2D::Triangle> triangles = Delaunay2D::triangulate(points);
 
-	for (int i = 0; i < triangles.size(); i++) {
-		add_triangle(triangles[i].points[0], triangles[i].points[1], triangles[i].points[2]);
+	for (auto &&triangle : triangles) {
+		add_triangle(triangle.points[0], triangle.points[1], triangle.points[2]);
 	}
 	emit_signal("triangles_updated");
 }
@@ -345,13 +362,13 @@ Vector2 AnimationNodeBlendSpace2D::get_closest_point(const Vector2 &p_point) {
 
 	_update_triangles();
 
-	if (triangles.size() == 0)
+	if (triangles.empty())
 		return Vector2();
 
 	Vector2 best_point;
 	bool first = true;
 
-	for (int i = 0; i < triangles.size(); i++) {
+	for (decltype(triangles.size()) i = 0; i < triangles.size(); ++i) {
 		Vector2 points[3];
 		for (int j = 0; j < 3; j++) {
 			points[j] = get_blend_point_position(get_triangle_point(i, j));
@@ -362,7 +379,7 @@ Vector2 AnimationNodeBlendSpace2D::get_closest_point(const Vector2 &p_point) {
 			return p_point;
 		}
 
-		for (int j = 0; j < 3; j++) {
+		for (uint8_t j = 0; j < 3u; ++j) {
 			Vector2 s[2] = {
 				points[j],
 				points[(j + 1) % 3]
@@ -443,7 +460,7 @@ float AnimationNodeBlendSpace2D::process(float p_time, bool p_seek) {
 		int blend_triangle = -1;
 		float blend_weights[3] = { 0, 0, 0 };
 
-		for (int i = 0; i < triangles.size(); i++) {
+		for (decltype(triangles.size()) i = 0; i < triangles.size(); ++i) {
 			Vector2 points[3];
 			for (int j = 0; j < 3; j++) {
 				points[j] = get_blend_point_position(get_triangle_point(i, j));
@@ -456,7 +473,7 @@ float AnimationNodeBlendSpace2D::process(float p_time, bool p_seek) {
 				break;
 			}
 
-			for (int j = 0; j < 3; j++) {
+			for (uint8_t j = 0; j < 3u; ++j) {
 				Vector2 s[2] = {
 					points[j],
 					points[(j + 1) % 3]
@@ -494,7 +511,7 @@ float AnimationNodeBlendSpace2D::process(float p_time, bool p_seek) {
 		for (int i = 0; i < blend_points_used; i++) {
 
 			bool found = false;
-			for (int j = 0; j < 3; j++) {
+			for (uint8_t j = 0; j < 3u; ++j) {
 				if (i == triangle_points[j]) {
 					//blend with the given weight
 					float t = blend_node(blend_points[i].name, blend_points[i].node, p_time, p_seek, blend_weights[j], FILTER_IGNORE, false);
@@ -644,7 +661,7 @@ void AnimationNodeBlendSpace2D::_bind_methods() {
 
 	ADD_PROPERTY(PropertyInfo(Variant::BOOL, "auto_triangles", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR), "set_auto_triangles", "get_auto_triangles");
 
-	for (int i = 0; i < MAX_BLEND_POINTS; i++) {
+	for (uint8_t i = 0; i < MAX_BLEND_POINTS; ++i) {
 		ADD_PROPERTYI(PropertyInfo(Variant::OBJECT, "blend_point_" + itos(i) + "/node", PROPERTY_HINT_RESOURCE_TYPE, "AnimationRootNode", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "_add_blend_point", "get_blend_point_node", i);
 		ADD_PROPERTYI(PropertyInfo(Variant::VECTOR2, "blend_point_" + itos(i) + "/pos", PROPERTY_HINT_NONE, "", PROPERTY_USAGE_NOEDITOR | PROPERTY_USAGE_INTERNAL), "set_blend_point_position", "get_blend_point_position", i);
 	}
@@ -666,7 +683,7 @@ void AnimationNodeBlendSpace2D::_bind_methods() {
 
 AnimationNodeBlendSpace2D::AnimationNodeBlendSpace2D() {
 
-	for (int i = 0; i < MAX_BLEND_POINTS; i++) {
+	for (uint8_t i = 0; i < MAX_BLEND_POINTS; ++i) {
 		blend_points[i].name = itos(i);
 	}
 	auto_triangles = true;

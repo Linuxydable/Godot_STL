@@ -58,9 +58,9 @@ class AnimationTreeEditor : public VBoxContainer {
 	AnimationTree *tree;
 	PanelContainer *editor_base;
 
-	Vector<String> button_path;
-	Vector<String> edited_path;
-	Vector<AnimationTreeNodeEditorPlugin *> editors;
+	std::vector<String> button_path;
+	std::vector<String> edited_path;
+	std::vector<AnimationTreeNodeEditorPlugin *> editors;
 
 	void _update_path();
 	void _about_to_show_root();
@@ -68,7 +68,7 @@ class AnimationTreeEditor : public VBoxContainer {
 
 	void _path_button_pressed(int p_path);
 
-	static Vector<String> get_animation_list();
+	static std::vector<String> get_animation_list();
 
 protected:
 	void _notification(int p_what);
@@ -85,8 +85,8 @@ public:
 
 	bool can_edit(const Ref<AnimationNode> &p_node) const;
 
-	void edit_path(const Vector<String> &p_path);
-	Vector<String> get_edited_path() const;
+	void edit_path(const std::vector<String> &p_path);
+	std::vector<String> get_edited_path() const;
 
 	void enter_editor(const String &p_path = "");
 	static AnimationTreeEditor *get_singleton() { return singleton; }

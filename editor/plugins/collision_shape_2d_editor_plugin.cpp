@@ -329,19 +329,22 @@ bool CollisionShape2DEditor::forward_canvas_gui_input(const Ref<InputEvent> &p_e
 
 		if (mb->get_button_index() == BUTTON_LEFT) {
 			if (mb->is_pressed()) {
-				for (int i = 0; i < handles.size(); i++) {
-					if (xform.xform(handles[i]).distance_to(gpoint) < 8) {
-						edit_handle = i;
 
-						break;
+				auto it_find = std::find_if(handles.begin(), handles.end(), [&](const Point2 &handle) {
+					if (xform.xform(handle).distance_to(gpoint) < 8) {
+						return true;
 					}
-				}
+					return false;
+				});
 
-				if (edit_handle == -1) {
+				if (it_find == handles.end()) {
+					edit_handle = -1;
 					pressed = false;
 
 					return false;
 				}
+
+				edit_handle = std::distance(handles.begin(), it_find);
 
 				original = get_handle_value(edit_handle);
 				pressed = true;
@@ -501,9 +504,9 @@ void CollisionShape2DEditor::forward_canvas_draw_over_viewport(Control *p_overla
 
 			handles.resize(3);
 			Vector2 ext = shape->get_extents();
-			handles.write[0] = Point2(ext.x, 0);
-			handles.write[1] = Point2(0, -ext.y);
-			handles.write[2] = Point2(ext.x, -ext.y);
+			handles[0] = Point2(ext.x, 0);
+			handles[1] = Point2(0, -ext.y);
+			handles[2] = Point2(ext.x, -ext.y);
 
 			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
 			p_overlay->draw_texture(h, gt.xform(handles[1]) - size);
@@ -515,8 +518,8 @@ void CollisionShape2DEditor::forward_canvas_draw_over_viewport(Control *p_overla
 			Ref<SegmentShape2D> shape = node->get_shape();
 
 			handles.resize(2);
-			handles.write[0] = shape->get_a();
-			handles.write[1] = shape->get_b();
+			handles[0] = shape->get_a();
+			handles[1] = shape->get_b();
 
 			p_overlay->draw_texture(h, gt.xform(handles[0]) - size);
 			p_overlay->draw_texture(h, gt.xform(handles[1]) - size);

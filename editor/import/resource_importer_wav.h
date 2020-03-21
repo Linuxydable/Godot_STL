@@ -49,7 +49,7 @@ public:
 	virtual void get_import_options(List<ImportOption> *r_options, int p_preset = 0) const;
 	virtual bool get_option_visibility(const String &p_option, const Map<StringName, Variant> &p_options) const;
 
-	static void _compress_ima_adpcm(const Vector<float> &p_data, PoolVector<uint8_t> &dst_data) {
+	static void _compress_ima_adpcm(const std::vector<float> &p_data, PoolVector<uint8_t> &dst_data) {
 		/*p_sample_data->data = (void*)malloc(len);
 		xm_s8 *dataptr=(xm_s8*)p_sample_data->data;*/
 
@@ -70,18 +70,18 @@ public:
 			-1, -1, -1, -1, 2, 4, 6, 8
 		};
 
-		int datalen = p_data.size();
-		int datamax = datalen;
+		auto datalen = p_data.size();
+		auto datamax = datalen;
 		if (datalen & 1)
-			datalen++;
+			++datalen;
 
 		dst_data.resize(datalen / 2 + 4);
 		PoolVector<uint8_t>::Write w = dst_data.write();
 
-		int i, step_idx = 0, prev = 0;
+		int step_idx = 0, prev = 0;
 		uint8_t *out = w.ptr();
 		//int16_t xm_prev=0;
-		const float *in = p_data.ptr();
+		const float *in = p_data.data();
 
 		/* initial value is zero */
 		*(out++) = 0;
@@ -91,7 +91,7 @@ public:
 		/* unused */
 		*(out++) = 0;
 
-		for (i = 0; i < datalen; i++) {
+		for (decltype(datalen) i = 0; i < datalen; i++) {
 			int step, diff, vpdiff, mask;
 			uint8_t nibble;
 			int16_t xm_sample;
@@ -154,7 +154,7 @@ public:
 
 			if (i & 1) {
 				*out |= nibble << 4;
-				out++;
+				++out;
 			} else {
 				*out = nibble;
 			}

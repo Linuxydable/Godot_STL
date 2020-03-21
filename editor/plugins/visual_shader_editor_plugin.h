@@ -148,7 +148,7 @@ class VisualShaderEditor : public VBoxContainer {
 		}
 	};
 
-	Vector<AddOption> add_options;
+	std::vector<AddOption> add_options;
 	int texture_node_option_idx;
 	int custom_node_option_idx;
 	List<String> keyword_list;
@@ -213,7 +213,7 @@ class VisualShaderEditor : public VBoxContainer {
 	void _copy_nodes();
 	void _paste_nodes();
 
-	Vector<Ref<VisualShaderNodePlugin> > plugins;
+	std::vector<Ref<VisualShaderNodePlugin> > plugins;
 
 	void _mode_selected(int p_id);
 	void _rebuild();
@@ -308,7 +308,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	void setup(const Vector<String> &p_options);
+	void setup(const std::vector<String> &p_options);
 	virtual void update_property();
 	void set_option_button_clip(bool p_enable);
 	EditorPropertyShaderMode();

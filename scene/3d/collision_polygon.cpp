@@ -41,27 +41,27 @@ void CollisionPolygon::_build_polygon() {
 
 	parent->shape_owner_clear_shapes(owner_id);
 
-	if (polygon.size() == 0)
+	if (polygon.empty())
 		return;
 
-	Vector<Vector<Vector2> > decomp = Geometry::decompose_polygon(polygon);
-	if (decomp.size() == 0)
+	std::vector<std::vector<Vector2> > decomp = Geometry::decompose_polygon(polygon);
+	if (decomp.empty())
 		return;
 
 	//here comes the sun, lalalala
 	//decompose concave into multiple convex polygons and add them
 
-	for (int i = 0; i < decomp.size(); i++) {
+	for (auto &&vec : decomp) {
 		Ref<ConvexPolygonShape> convex = memnew(ConvexPolygonShape);
 		PoolVector<Vector3> cp;
-		int cs = decomp[i].size();
+		auto cs = vec.size();
 		cp.resize(cs * 2);
 		{
 			PoolVector<Vector3>::Write w = cp.write();
 			int idx = 0;
-			for (int j = 0; j < cs; j++) {
+			for (decltype(cs) j = 0; j < cs; ++j) {
 
-				Vector2 d = decomp[i][j];
+				Vector2 d = vec[j];
 				w[idx++] = Vector3(d.x, d.y, depth * 0.5);
 				w[idx++] = Vector3(d.x, d.y, -depth * 0.5);
 			}
@@ -117,7 +117,7 @@ void CollisionPolygon::_notification(int p_what) {
 	}
 }
 
-void CollisionPolygon::set_polygon(const Vector<Point2> &p_polygon) {
+void CollisionPolygon::set_polygon(const std::vector<Point2> &p_polygon) {
 
 	polygon = p_polygon;
 	if (parent) {
@@ -127,7 +127,7 @@ void CollisionPolygon::set_polygon(const Vector<Point2> &p_polygon) {
 	update_gizmo();
 }
 
-Vector<Point2> CollisionPolygon::get_polygon() const {
+std::vector<Point2> CollisionPolygon::get_polygon() const {
 
 	return polygon;
 }

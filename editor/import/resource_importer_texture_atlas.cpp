@@ -112,8 +112,7 @@ static void _plot_triangle(Vector2 *vertices, const Vector2 &p_offset, bool p_tr
 	int x[3];
 	int y[3];
 
-	for (int j = 0; j < 3; j++) {
-
+	for (uint8_t j = 0; j < 3u; ++j) {
 		x[j] = vertices[j].x;
 		y[j] = vertices[j].y;
 	}
@@ -196,15 +195,15 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 
 	ERR_FAIL_COND_V(p_source_file_options.size() == 0, ERR_BUG); //should never happen
 
-	Vector<EditorAtlasPacker::Chart> charts;
-	Vector<PackData> pack_data_files;
+	std::vector<EditorAtlasPacker::Chart> charts;
+	std::vector<PackData> pack_data_files;
 
 	pack_data_files.resize(p_source_file_options.size());
 
 	int idx = 0;
 	for (const Map<String, Map<StringName, Variant> >::Element *E = p_source_file_options.front(); E; E = E->next(), idx++) {
 
-		PackData &pack_data = pack_data_files.write[idx];
+		PackData &pack_data = pack_data_files[idx];
 		const String &source = E->key();
 		const Map<StringName, Variant> &options = E->get();
 
@@ -251,16 +250,16 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 			Ref<BitMap> bit_map;
 			bit_map.instance();
 			bit_map->create_from_image_alpha(image);
-			Vector<Vector<Vector2> > polygons = bit_map->clip_opaque_to_polygons(Rect2(0, 0, image->get_width(), image->get_height()));
+			std::vector<std::vector<Vector2> > polygons = bit_map->clip_opaque_to_polygons(Rect2(0, 0, image->get_width(), image->get_height()));
 
-			for (int j = 0; j < polygons.size(); j++) {
+			for (auto &&polygon : polygons) {
 
 				EditorAtlasPacker::Chart chart;
-				chart.vertices = polygons[j];
+				chart.vertices = polygon;
 				chart.can_transpose = true;
 
-				Vector<int> poly = Geometry::triangulate_polygon(polygons[j]);
-				for (int i = 0; i < poly.size(); i += 3) {
+				std::vector<int> poly = Geometry::triangulate_polygon(polygon);
+				for (decltype(poly.size()) i = 0; i < poly.size(); i += 3) {
 
 					EditorAtlasPacker::Chart::Face f;
 					f.vertex[0] = poly[i + 0];
@@ -272,7 +271,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 				pack_data.chart_pieces.push_back(charts.size());
 				charts.push_back(chart);
 
-				pack_data.chart_vertices.push_back(polygons[j]);
+				pack_data.chart_vertices.push_back(polygon);
 			}
 		}
 	}
@@ -288,16 +287,14 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 
 	new_atlas->lock();
 
-	for (int i = 0; i < pack_data_files.size(); i++) {
-
-		PackData &pack_data = pack_data_files.write[i];
+	for (auto &&pack_data : pack_data_files) {
 		pack_data.image->lock();
-		for (int j = 0; j < pack_data.chart_pieces.size(); j++) {
-			const EditorAtlasPacker::Chart &chart = charts[pack_data.chart_pieces[j]];
-			for (int k = 0; k < chart.faces.size(); k++) {
+		for (auto &&c_piece : pack_data.chart_pieces) {
+			const EditorAtlasPacker::Chart &chart = charts[c_piece];
+			for (auto &&c_face : chart.faces) {
 				Vector2 positions[3];
-				for (int l = 0; l < 3; l++) {
-					int vertex_idx = chart.faces[k].vertex[l];
+				for (uint8_t l = 0; l < 3u; ++l) {
+					int vertex_idx = c_face.vertex[l];
 					positions[l] = chart.vertices[vertex_idx];
 				}
 
@@ -329,7 +326,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 	idx = 0;
 	for (const Map<String, Map<StringName, Variant> >::Element *E = p_source_file_options.front(); E; E = E->next(), idx++) {
 
-		PackData &pack_data = pack_data_files.write[idx];
+		PackData &pack_data = pack_data_files[idx];
 
 		Ref<Texture> texture;
 
@@ -348,13 +345,13 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 			Ref<ArrayMesh> mesh;
 			mesh.instance();
 
-			for (int i = 0; i < pack_data.chart_pieces.size(); i++) {
-				const EditorAtlasPacker::Chart &chart = charts[pack_data.chart_pieces[i]];
+			for (auto &&c_piece : pack_data.chart_pieces) {
+				const EditorAtlasPacker::Chart &chart = charts[c_piece];
 				PoolVector<Vector2> vertices;
 				PoolVector<int> indices;
 				PoolVector<Vector2> uvs;
-				int vc = chart.vertices.size();
-				int fc = chart.faces.size();
+				auto vc = chart.vertices.size();
+				auto fc = chart.faces.size();
 				vertices.resize(vc);
 				uvs.resize(vc);
 				indices.resize(fc * 3);
@@ -364,7 +361,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 					PoolVector<int>::Write iw = indices.write();
 					PoolVector<Vector2>::Write uvw = uvs.write();
 
-					for (int j = 0; j < vc; j++) {
+					for (decltype(vc) j = 0; j < vc; ++j) {
 						vw[j] = chart.vertices[j];
 						Vector2 uv = chart.vertices[j];
 						if (chart.transposed) {
@@ -375,7 +372,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 						uvw[j] = uv;
 					}
 
-					for (int j = 0; j < fc; j++) {
+					for (decltype(fc) j = 0; j < fc; ++j) {
 						iw[j * 3 + 0] = chart.faces[j].vertex[0];
 						iw[j * 3 + 1] = chart.faces[j].vertex[1];
 						iw[j * 3 + 2] = chart.faces[j].vertex[2];

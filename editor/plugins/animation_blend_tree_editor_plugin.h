@@ -61,7 +61,7 @@ class AnimationNodeBlendTreeEditor : public AnimationTreeNodeEditorPlugin {
 	CheckBox *filter_enabled;
 
 	Map<StringName, ProgressBar *> animations;
-	Vector<EditorProperty *> visible_properties;
+	std::vector<EditorProperty *> visible_properties;
 
 	void _update_graph();
 
@@ -75,7 +75,7 @@ class AnimationNodeBlendTreeEditor : public AnimationTreeNodeEditorPlugin {
 		}
 	};
 
-	Vector<AddOption> add_options;
+	std::vector<AddOption> add_options;
 
 	void _add_node(int p_idx);
 	void _update_options_menu();
