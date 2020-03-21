@@ -333,9 +333,8 @@ void TextEditor::ensure_focus() {
 	code_editor->get_text_edit()->grab_focus();
 }
 
-Vector<String> TextEditor::get_functions() {
-
-	return Vector<String>();
+std::vector<String> TextEditor::get_functions() {
+	return std::vector<String>{};
 }
 
 bool TextEditor::show_members_overview() {
