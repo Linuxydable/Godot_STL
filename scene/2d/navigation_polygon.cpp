@@ -42,8 +42,7 @@ Rect2 NavigationPolygon::_edit_get_rect() const {
 		item_rect = Rect2();
 		bool first = true;
 
-		for (int i = 0; i < outlines.size(); i++) {
-			const PoolVector<Vector2> &outline = outlines[i];
+		for (auto &&outline : outlines) {
 			const int outline_size = outline.size();
 			if (outline_size < 3)
 				continue;
@@ -65,8 +64,7 @@ Rect2 NavigationPolygon::_edit_get_rect() const {
 
 bool NavigationPolygon::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
 
-	for (int i = 0; i < outlines.size(); i++) {
-		const PoolVector<Vector2> &outline = outlines[i];
+	for (auto &&outline : outlines) {
 		const int outline_size = outline.size();
 		if (outline_size < 3)
 			continue;
@@ -90,8 +88,8 @@ PoolVector<Vector2> NavigationPolygon::get_vertices() const {
 void NavigationPolygon::_set_polygons(const Array &p_array) {
 
 	polygons.resize(p_array.size());
-	for (int i = 0; i < p_array.size(); i++) {
-		polygons.write[i].indices = p_array[i];
+	for (decltype(p_array.size()) i = 0; i < p_array.size(); ++i) {
+		polygons[i].indices = p_array[i];
 	}
 }
 
@@ -110,7 +108,7 @@ void NavigationPolygon::_set_outlines(const Array &p_array) {
 
 	outlines.resize(p_array.size());
 	for (int i = 0; i < p_array.size(); i++) {
-		outlines.write[i] = p_array[i];
+		outlines[i] = p_array[i];
 	}
 	rect_cache_dirty = true;
 }
@@ -126,7 +124,7 @@ Array NavigationPolygon::_get_outlines() const {
 	return ret;
 }
 
-void NavigationPolygon::add_polygon(const Vector<int> &p_polygon) {
+void NavigationPolygon::add_polygon(const std::vector<int> &p_polygon) {
 
 	Polygon polygon;
 	polygon.indices = p_polygon;
@@ -135,7 +133,7 @@ void NavigationPolygon::add_polygon(const Vector<int> &p_polygon) {
 
 void NavigationPolygon::add_outline_at_index(const PoolVector<Vector2> &p_outline, int p_index) {
 
-	outlines.insert(p_index, p_outline);
+	outlines.insert(outlines.begin() + p_index, p_outline);
 	rect_cache_dirty = true;
 }
 
@@ -143,9 +141,9 @@ int NavigationPolygon::get_polygon_count() const {
 
 	return polygons.size();
 }
-Vector<int> NavigationPolygon::get_polygon(int p_idx) {
+std::vector<int> NavigationPolygon::get_polygon(int p_idx) {
 
-	ERR_FAIL_INDEX_V(p_idx, polygons.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_idx, polygons.size(), std::vector<int>());
 	return polygons[p_idx].indices;
 }
 void NavigationPolygon::clear_polygons() {
@@ -166,14 +164,14 @@ int NavigationPolygon::get_outline_count() const {
 
 void NavigationPolygon::set_outline(int p_idx, const PoolVector<Vector2> &p_outline) {
 	ERR_FAIL_INDEX(p_idx, outlines.size());
-	outlines.write[p_idx] = p_outline;
+	outlines[p_idx] = p_outline;
 	rect_cache_dirty = true;
 }
 
 void NavigationPolygon::remove_outline(int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, outlines.size());
-	outlines.remove(p_idx);
+	outlines.erase(outlines.begin() + p_idx);
 	rect_cache_dirty = true;
 }
 
@@ -193,9 +191,7 @@ void NavigationPolygon::make_polygons_from_outlines() {
 
 	Vector2 outside_point(-1e10, -1e10);
 
-	for (int i = 0; i < outlines.size(); i++) {
-
-		PoolVector<Vector2> ol = outlines[i];
+	for (auto &&ol : outlines) {
 		int olsize = ol.size();
 		if (olsize < 3)
 			continue;
@@ -208,7 +204,7 @@ void NavigationPolygon::make_polygons_from_outlines() {
 
 	outside_point += Vector2(0.7239784, 0.819238); //avoid precision issues
 
-	for (int i = 0; i < outlines.size(); i++) {
+	for (decltype(outlines.size()) i = 0; i < outlines.size(); ++i) {
 
 		PoolVector<Vector2> ol = outlines[i];
 		int olsize = ol.size();
@@ -218,7 +214,7 @@ void NavigationPolygon::make_polygons_from_outlines() {
 
 		int interscount = 0;
 		//test if this is an outer outline
-		for (int k = 0; k < outlines.size(); k++) {
+		for (decltype(outlines.size()) k = 0; k < outlines.size(); ++k) {
 
 			if (i == k)
 				continue; //no self intersect
@@ -230,8 +226,7 @@ void NavigationPolygon::make_polygons_from_outlines() {
 			PoolVector<Vector2>::Read r2 = ol2.read();
 
 			for (int l = 0; l < olsize2; l++) {
-
-				if (Geometry::segment_intersects_segment_2d(r[0], outside_point, r2[l], r2[(l + 1) % olsize2], NULL)) {
+				if (Geometry::segment_intersects_segment_2d(r[0], outside_point, r2[l], r2[(l + 1) % olsize2], nullptr)) {
 					interscount++;
 				}
 			}
@@ -423,24 +418,23 @@ void NavigationPolygonInstance::_notification(int p_what) {
 				} else {
 					color = get_tree()->get_debug_navigation_disabled_color();
 				}
-				Vector<Color> colors;
-				Vector<Vector2> vertices;
-				vertices.resize(vsize);
-				colors.resize(vsize);
+				std::vector<Color> colors(vsize);
+				std::vector<Vector2> vertices(vsize);
+
 				{
 					PoolVector<Vector2>::Read vr = verts.read();
 					for (int i = 0; i < vsize; i++) {
-						vertices.write[i] = vr[i];
-						colors.write[i] = color;
+						vertices[i] = vr[i];
+						colors[i] = color;
 					}
 				}
 
-				Vector<int> indices;
+				std::vector<int> indices;
 
 				for (int i = 0; i < navpoly->get_polygon_count(); i++) {
-					Vector<int> polygon = navpoly->get_polygon(i);
+					std::vector<int> polygon = navpoly->get_polygon(i);
 
-					for (int j = 2; j < polygon.size(); j++) {
+					for (int j = 2; j < polygon.size(); ++j) {
 
 						int kofs[3] = { 0, j - 1, j };
 						for (int k = 0; k < 3; k++) {
