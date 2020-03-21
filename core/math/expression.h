@@ -127,7 +127,7 @@ private:
 		}
 	};
 
-	Vector<Input> inputs;
+	std::vector<Input> inputs;
 	Variant::Type output_type;
 
 	String expression;
@@ -292,7 +292,7 @@ private:
 
 	struct ConstructorNode : public ENode {
 		Variant::Type data_type;
-		Vector<ENode *> arguments;
+		std::vector<ENode *> arguments;
 
 		ConstructorNode() {
 			type = TYPE_CONSTRUCTOR;
@@ -302,7 +302,7 @@ private:
 	struct CallNode : public ENode {
 		ENode *base;
 		StringName method;
-		Vector<ENode *> arguments;
+		std::vector<ENode *> arguments;
 
 		CallNode() {
 			type = TYPE_CALL;
@@ -310,14 +310,14 @@ private:
 	};
 
 	struct ArrayNode : public ENode {
-		Vector<ENode *> array;
+		std::vector<ENode *> array;
 		ArrayNode() {
 			type = TYPE_ARRAY;
 		}
 	};
 
 	struct DictionaryNode : public ENode {
-		Vector<ENode *> dict;
+		std::vector<ENode *> dict;
 		DictionaryNode() {
 			type = TYPE_DICTIONARY;
 		}
@@ -325,7 +325,7 @@ private:
 
 	struct BuiltinFuncNode : public ENode {
 		BuiltinFunc func;
-		Vector<ENode *> arguments;
+		std::vector<ENode *> arguments;
 		BuiltinFuncNode() {
 			type = TYPE_BUILTIN_FUNC;
 		}
@@ -342,7 +342,7 @@ private:
 	ENode *root;
 	ENode *nodes;
 
-	Vector<String> input_names;
+	std::vector<String> input_names;
 
 	bool execution_error;
 	bool _execute(const Array &p_inputs, Object *p_instance, Expression::ENode *p_node, Variant &r_ret, String &r_error_str);
@@ -351,7 +351,7 @@ protected:
 	static void _bind_methods();
 
 public:
-	Error parse(const String &p_expression, const Vector<String> &p_input_names = Vector<String>());
+	Error parse(const String &p_expression, const std::vector<String> &p_input_names = std::vector<String>());
 	Variant execute(Array p_inputs, Object *p_base = NULL, bool p_show_error = true);
 	bool has_execute_failed() const;
 	String get_error_text() const;
