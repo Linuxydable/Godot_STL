@@ -168,7 +168,7 @@ void FindInFiles::_iterate() {
 
 		// Scan folders first so we can build a list of files and have progress info later
 
-		PoolStringArray &folders_to_scan = _folders_stack.write[_folders_stack.size() - 1];
+		PoolStringArray &folders_to_scan = _folders_stack.back();
 
 		if (folders_to_scan.size() != 0) {
 			// Scan one folder below
@@ -763,7 +763,7 @@ void FindInFilesPanel::_on_replace_all_clicked() {
 		TreeItem *file_item = E->value();
 		String fpath = file_item->get_metadata(0);
 
-		Vector<Result> locations;
+		std::vector<Result> locations;
 		for (TreeItem *item = file_item->get_children(); item; item = item->get_next()) {
 
 			if (!item->is_checked(0))
@@ -801,11 +801,11 @@ public:
 			if (c == '\n') {
 				_line_buffer.push_back(c);
 				_line_buffer.push_back(0);
-				return String::utf8(_line_buffer.ptr());
+				return String::utf8(_line_buffer.data());
 
 			} else if (c == '\0') {
 				_line_buffer.push_back(c);
-				return String::utf8(_line_buffer.ptr());
+				return String::utf8(_line_buffer.data());
 
 			} else if (c != '\r') {
 				_line_buffer.push_back(c);
@@ -815,14 +815,14 @@ public:
 		}
 
 		_line_buffer.push_back(0);
-		return String::utf8(_line_buffer.ptr());
+		return String::utf8(_line_buffer.data());
 	}
 
 private:
-	Vector<char> _line_buffer;
+	std::vector<char> _line_buffer;
 };
 
-void FindInFilesPanel::apply_replaces_in_file(String fpath, const Vector<Result> &locations, String new_text) {
+void FindInFilesPanel::apply_replaces_in_file(String fpath, const std::vector<Result> &locations, String new_text) {
 
 	// If the file is already open, I assume the editor will reload it.
 	// If there are unsaved changes, the user will be asked on focus,
@@ -841,9 +841,8 @@ void FindInFilesPanel::apply_replaces_in_file(String fpath, const Vector<Result>
 
 	int offset = 0;
 
-	for (int i = 0; i < locations.size(); ++i) {
-
-		int repl_line_number = locations[i].line_number;
+	for (auto &&location : locations) {
+		int repl_line_number = location.line_number;
 
 		while (current_line < repl_line_number) {
 			buffer += line;
@@ -852,8 +851,8 @@ void FindInFilesPanel::apply_replaces_in_file(String fpath, const Vector<Result>
 			offset = 0;
 		}
 
-		int repl_begin = locations[i].begin + offset;
-		int repl_end = locations[i].end + offset;
+		int repl_begin = location.begin + offset;
+		int repl_end = location.end + offset;
 
 		int _;
 		if (!find_next(line, search_text, repl_begin, _finder->is_match_case(), _finder->is_whole_words(), _, _)) {
