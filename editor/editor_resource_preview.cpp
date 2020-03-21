@@ -156,32 +156,32 @@ void EditorResourcePreview::_generate_preview(Ref<ImageTexture> &r_texture, Ref<
 	r_texture = Ref<ImageTexture>();
 	r_small_texture = Ref<ImageTexture>();
 
-	for (int i = 0; i < preview_generators.size(); i++) {
-		if (!preview_generators[i]->handles(type))
+	for (auto &&p_generator : preview_generators) {
+		if (!p_generator->handles(type))
 			continue;
 
 		Ref<Texture> generated;
 		if (p_item.resource.is_valid()) {
-			generated = preview_generators[i]->generate(p_item.resource, Vector2(thumbnail_size, thumbnail_size));
+			generated = p_generator->generate(p_item.resource, Vector2(thumbnail_size, thumbnail_size));
 		} else {
-			generated = preview_generators[i]->generate_from_path(p_item.path, Vector2(thumbnail_size, thumbnail_size));
+			generated = p_generator->generate_from_path(p_item.path, Vector2(thumbnail_size, thumbnail_size));
 		}
 		r_texture = generated;
 
 		int small_thumbnail_size = EditorNode::get_singleton()->get_theme_base()->get_icon("Object", "EditorIcons")->get_width(); // Kind of a workaround to retrieve the default icon size
 		small_thumbnail_size *= EDSCALE;
 
-		if (preview_generators[i]->can_generate_small_preview()) {
+		if (p_generator->can_generate_small_preview()) {
 			Ref<Texture> generated_small;
 			if (p_item.resource.is_valid()) {
-				generated_small = preview_generators[i]->generate(p_item.resource, Vector2(small_thumbnail_size, small_thumbnail_size));
+				generated_small = p_generator->generate(p_item.resource, Vector2(small_thumbnail_size, small_thumbnail_size));
 			} else {
-				generated_small = preview_generators[i]->generate_from_path(p_item.path, Vector2(small_thumbnail_size, small_thumbnail_size));
+				generated_small = p_generator->generate_from_path(p_item.path, Vector2(small_thumbnail_size, small_thumbnail_size));
 			}
 			r_small_texture = generated_small;
 		}
 
-		if (!r_small_texture.is_valid() && r_texture.is_valid() && preview_generators[i]->generate_small_preview_automatically()) {
+		if (!r_small_texture.is_valid() && r_texture.is_valid() && p_generator->generate_small_preview_automatically()) {
 			Ref<Image> small_image = r_texture->get_data();
 			small_image = small_image->duplicate();
 			small_image->resize(small_thumbnail_size, small_thumbnail_size, Image::INTERPOLATE_CUBIC);
@@ -407,7 +407,11 @@ void EditorResourcePreview::add_preview_generator(const Ref<EditorResourcePrevie
 
 void EditorResourcePreview::remove_preview_generator(const Ref<EditorResourcePreviewGenerator> &p_generator) {
 
-	preview_generators.erase(p_generator);
+	auto it_find = std::find(preview_generators.begin(), preview_generators.end(), p_generator);
+
+	if (it_find != preview_generators.end()) {
+		preview_generators.erase(it_find);
+	}
 }
 
 EditorResourcePreview *EditorResourcePreview::get_singleton() {
