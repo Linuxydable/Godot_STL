@@ -55,100 +55,86 @@ void DocData::merge_from(const DocData &p_data) {
 		c.brief_description = cf.brief_description;
 		c.tutorials = cf.tutorials;
 
-		for (int i = 0; i < c.methods.size(); i++) {
-
-			MethodDoc &m = c.methods.write[i];
-
-			for (int j = 0; j < cf.methods.size(); j++) {
-
-				if (cf.methods[j].name != m.name)
+		for (auto &&m : c.methods) {
+			for (auto &&m_doc : cf.methods) {
+				if (m_doc.name != m.name)
 					continue;
-				if (cf.methods[j].arguments.size() != m.arguments.size())
+				if (m_doc.arguments.size() != m.arguments.size())
 					continue;
 				// since polymorphic functions are allowed we need to check the type of
 				// the arguments so we make sure they are different.
-				int arg_count = cf.methods[j].arguments.size();
-				Vector<bool> arg_used;
-				arg_used.resize(arg_count);
-				for (int l = 0; l < arg_count; ++l)
-					arg_used.write[l] = false;
+				auto arg_count = m_doc.arguments.size();
+				std::vector<bool> arg_used(arg_count);
+
+				for (auto &&b : arg_used)
+					b = false;
 				// also there is no guarantee that argument ordering will match, so we
 				// have to check one by one so we make sure we have an exact match
-				for (int k = 0; k < arg_count; ++k) {
-					for (int l = 0; l < arg_count; ++l)
-						if (cf.methods[j].arguments[k].type == m.arguments[l].type && !arg_used[l]) {
-							arg_used.write[l] = true;
+				for (auto &&arg : m_doc.arguments) {
+					for (decltype(arg_count) l = 0; l < arg_count; ++l)
+						if (arg.type == m.arguments[l].type && !arg_used[l]) {
+							arg_used[l] = true;
 							break;
 						}
 				}
 				bool not_the_same = false;
-				for (int l = 0; l < arg_count; ++l)
-					if (!arg_used[l]) // at least one of the arguments was different
+				for (auto &&b : arg_used) {
+					if (!b) // at least one of the arguments was different
 						not_the_same = true;
+				}
+
 				if (not_the_same)
 					continue;
 
-				const MethodDoc &mf = cf.methods[j];
+				const MethodDoc &mf = m_doc;
 
 				m.description = mf.description;
 				break;
 			}
 		}
 
-		for (int i = 0; i < c.signals.size(); i++) {
+		for (auto &&m : c.signals) {
+			for (auto &&signal : cf.signals) {
 
-			MethodDoc &m = c.signals.write[i];
-
-			for (int j = 0; j < cf.signals.size(); j++) {
-
-				if (cf.signals[j].name != m.name)
+				if (signal.name != m.name)
 					continue;
-				const MethodDoc &mf = cf.signals[j];
+				const MethodDoc &mf = signal;
 
 				m.description = mf.description;
 				break;
 			}
 		}
 
-		for (int i = 0; i < c.constants.size(); i++) {
-
-			ConstantDoc &m = c.constants.write[i];
-
-			for (int j = 0; j < cf.constants.size(); j++) {
-
-				if (cf.constants[j].name != m.name)
+		for (auto &&m : c.constants) {
+			for (auto &&constant : cf.constants) {
+				if (constant.name != m.name)
 					continue;
-				const ConstantDoc &mf = cf.constants[j];
+
+				const ConstantDoc &mf = constant;
 
 				m.description = mf.description;
 				break;
 			}
 		}
 
-		for (int i = 0; i < c.properties.size(); i++) {
-
-			PropertyDoc &p = c.properties.write[i];
-
-			for (int j = 0; j < cf.properties.size(); j++) {
-
-				if (cf.properties[j].name != p.name)
+		for (auto &&p : c.properties) {
+			for (auto &&prop : cf.properties) {
+				if (prop.name != p.name)
 					continue;
-				const PropertyDoc &pf = cf.properties[j];
+
+				const PropertyDoc &pf = prop;
 
 				p.description = pf.description;
 				break;
 			}
 		}
 
-		for (int i = 0; i < c.theme_properties.size(); i++) {
-
-			PropertyDoc &p = c.theme_properties.write[i];
-
-			for (int j = 0; j < cf.theme_properties.size(); j++) {
-
-				if (cf.theme_properties[j].name != p.name)
+		for (auto &&p : c.theme_properties) {
+			for (auto &&prop : cf.theme_properties) {
+				if (prop.name != p.name)
 					continue;
-				const PropertyDoc &pf = cf.theme_properties[j];
+
+				const PropertyDoc &pf = prop;
 
 				p.description = pf.description;
 				break;
@@ -693,7 +679,7 @@ void DocData::generate(bool p_basic_types) {
 	}
 }
 
-static Error _parse_methods(Ref<XMLParser> &parser, Vector<DocData::MethodDoc> &methods) {
+static Error _parse_methods(Ref<XMLParser> &parser, std::vector<DocData::MethodDoc> &methods) {
 
 	String section = parser->get_node_name();
 	String element = section.substr(0, section.length() - 1);
@@ -1043,18 +1029,15 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 		_write_string(f, 2, c.description.strip_edges().xml_escape());
 		_write_string(f, 1, "</description>");
 		_write_string(f, 1, "<tutorials>");
-		for (int i = 0; i < c.tutorials.size(); i++) {
-			_write_string(f, 2, "<link>" + c.tutorials.get(i).xml_escape() + "</link>");
+		for (auto &&tutorial : c.tutorials) {
+			_write_string(f, 2, "<link>" + tutorial.xml_escape() + "</link>");
 		}
 		_write_string(f, 1, "</tutorials>");
 		_write_string(f, 1, "<methods>");
 
-		c.methods.sort();
+		std::sort(c.methods.begin(), c.methods.end());
 
-		for (int i = 0; i < c.methods.size(); i++) {
-
-			const MethodDoc &m = c.methods[i];
-
+		for (auto &&m : c.methods) {
 			String qualifiers;
 			if (m.qualifiers != "")
 				qualifiers += " qualifiers=\"" + m.qualifiers.xml_escape() + "\"";
@@ -1100,21 +1083,20 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 		if (c.properties.size()) {
 			_write_string(f, 1, "<members>");
 
-			c.properties.sort();
+			std::sort(c.properties.begin(), c.properties.end());
 
-			for (int i = 0; i < c.properties.size(); i++) {
-
+			for (auto &&prop : c.properties) {
 				String additional_attributes;
-				if (c.properties[i].enumeration != String()) {
-					additional_attributes += " enum=\"" + c.properties[i].enumeration + "\"";
+				if (prop.enumeration != String()) {
+					additional_attributes += " enum=\"" + prop.enumeration + "\"";
 				}
-				if (c.properties[i].default_value != String()) {
-					additional_attributes += " default=\"" + c.properties[i].default_value.xml_escape(true) + "\"";
+				if (prop.default_value != String()) {
+					additional_attributes += " default=\"" + prop.default_value.xml_escape(true) + "\"";
 				}
 
-				const PropertyDoc &p = c.properties[i];
+				const PropertyDoc &p = prop;
 
-				if (c.properties[i].overridden) {
+				if (prop.overridden) {
 					_write_string(f, 2, "<member name=\"" + p.name + "\" type=\"" + p.type + "\" setter=\"" + p.setter + "\" getter=\"" + p.getter + "\" override=\"true\"" + additional_attributes + " />");
 				} else {
 					_write_string(f, 2, "<member name=\"" + p.name + "\" type=\"" + p.type + "\" setter=\"" + p.setter + "\" getter=\"" + p.getter + "\"" + additional_attributes + ">");
@@ -1125,16 +1107,13 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 			_write_string(f, 1, "</members>");
 		}
 
-		if (c.signals.size()) {
-
-			c.signals.sort();
+		if (!c.signals.empty()) {
+			std::sort(c.signals.begin(), c.signals.end());
 
 			_write_string(f, 1, "<signals>");
-			for (int i = 0; i < c.signals.size(); i++) {
-
-				const MethodDoc &m = c.signals[i];
+			for (auto &&m : c.signals) {
 				_write_string(f, 2, "<signal name=\"" + m.name + "\">");
-				for (int j = 0; j < m.arguments.size(); j++) {
+				for (decltype(m.arguments.size()) j = 0; j < m.arguments.size(); ++j) {
 
 					const ArgumentDoc &a = m.arguments[j];
 					_write_string(f, 3, "<argument index=\"" + itos(j) + "\" name=\"" + a.name.xml_escape() + "\" type=\"" + a.type.xml_escape() + "\">");
@@ -1153,9 +1132,7 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 		_write_string(f, 1, "<constants>");
 
-		for (int i = 0; i < c.constants.size(); i++) {
-
-			const ConstantDoc &k = c.constants[i];
+		for (auto &&k : c.constants) {
 			if (k.enumeration != String()) {
 				_write_string(f, 2, "<constant name=\"" + k.name + "\" value=\"" + k.value + "\" enum=\"" + k.enumeration + "\">");
 			} else {
@@ -1167,15 +1144,12 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 		_write_string(f, 1, "</constants>");
 
-		if (c.theme_properties.size()) {
+		if (!c.theme_properties.empty()) {
 
-			c.theme_properties.sort();
+			std::sort(c.theme_properties.begin(), c.theme_properties.end());
 
 			_write_string(f, 1, "<theme_items>");
-			for (int i = 0; i < c.theme_properties.size(); i++) {
-
-				const PropertyDoc &p = c.theme_properties[i];
-
+			for (auto &&p : c.theme_properties) {
 				if (p.default_value != "")
 					_write_string(f, 2, "<theme_item name=\"" + p.name + "\" type=\"" + p.type + "\" default=\"" + p.default_value.xml_escape(true) + "\">");
 				else
@@ -1196,9 +1170,8 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 Error DocData::load_compressed(const uint8_t *p_data, int p_compressed_size, int p_uncompressed_size) {
 
-	Vector<uint8_t> data;
-	data.resize(p_uncompressed_size);
-	Compression::decompress(data.ptrw(), p_uncompressed_size, p_data, p_compressed_size, Compression::MODE_DEFLATE);
+	std::vector<uint8_t> data(p_uncompressed_size);
+	Compression::decompress(data.data(), p_uncompressed_size, p_data, p_compressed_size, Compression::MODE_DEFLATE);
 	class_list.clear();
 
 	Ref<XMLParser> parser = memnew(XMLParser);
