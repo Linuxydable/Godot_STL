@@ -1523,7 +1523,7 @@ void ProjectList::erase_missing_projects() {
 	int remaining_count = 0;
 
 	_projects.erase(std::remove_if(_projects.begin(), _projects.end(),
-							[&](Item &&project) {
+							[&](const Item& project) {
 								if (project.missing) {
 									remove_project_0(project);
 									++deleted_count;
