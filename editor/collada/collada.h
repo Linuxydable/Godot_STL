@@ -297,8 +297,8 @@ public:
 		std::vector<Weight> weights;
 
 		void fix_weights() {
+			std::sort(weights.begin(), weights.end());
 
-			weights.sort();
 			if (weights.size() > 4) {
 				//cap to 4 and make weights add up 1
 				weights.resize(4);
@@ -325,7 +325,7 @@ public:
 
 									if (weights.size() == p_vert.weights.size()) {
 
-										for (int i = 0; i < weights.size(); i++) {
+										for (decltype(weights.size()) i = 0; i < weights.size(); ++i) {
 											if (weights[i].bone_idx != p_vert.weights[i].bone_idx)
 												return weights[i].bone_idx < p_vert.weights[i].bone_idx;
 
@@ -408,8 +408,8 @@ public:
 			ignore_anim = false;
 		}
 		virtual ~Node() {
-			for (int i = 0; i < children.size(); i++)
-				memdelete(children[i]);
+			for (auto &&child : children)
+				memdelete(child);
 		};
 	};
 
@@ -463,8 +463,8 @@ public:
 		std::vector<Node *> root_nodes;
 
 		~VisualScene() {
-			for (int i = 0; i < root_nodes.size(); i++)
-				memdelete(root_nodes[i]);
+			for (auto &&node : root_nodes)
+				memdelete(node);
 		}
 	};
 
