@@ -53,16 +53,16 @@ void Navigation2D::_navpoly_link(int p_id) {
 		Polygon &p = P->get();
 		p.owner = &nm;
 
-		Vector<int> poly = nm.navpoly->get_polygon(i);
-		int plen = poly.size();
-		const int *indices = poly.ptr();
+		std::vector<int> poly = nm.navpoly->get_polygon(i);
+		auto plen = poly.size();
+		const int *indices = poly.data();
 		bool valid = true;
 		p.edges.resize(plen);
 
 		Vector2 center;
 		float sum = 0;
 
-		for (int j = 0; j < plen; j++) {
+		for (decltype(plen) j = 0; j < plen; ++j) {
 
 			int idx = indices[j];
 			if (idx < 0 || idx >= len) {
@@ -74,7 +74,7 @@ void Navigation2D::_navpoly_link(int p_id) {
 			Vector2 ep = nm.xform.xform(r[idx]);
 			center += ep;
 			e.point = _get_point(ep);
-			p.edges.write[j] = e;
+			p.edges[j] = e;
 
 			int idxn = indices[(j + 1) % plen];
 			if (idxn < 0 || idxn >= len) {
@@ -98,7 +98,7 @@ void Navigation2D::_navpoly_link(int p_id) {
 
 		//connect
 
-		for (int j = 0; j < plen; j++) {
+		for (decltype(plen) j = 0; j < plen; ++j) {
 
 			int next = (j + 1) % plen;
 			EdgeKey ek(p.edges[j].point, p.edges[next].point);
@@ -118,16 +118,16 @@ void Navigation2D::_navpoly_link(int p_id) {
 					ConnectionPending pending;
 					pending.polygon = &p;
 					pending.edge = j;
-					p.edges.write[j].P = C->get().pending.push_back(pending);
+					p.edges[j].P = C->get().pending.push_back(pending);
 					continue;
 				}
 
 				C->get().B = &p;
 				C->get().B_edge = j;
-				C->get().A->edges.write[C->get().A_edge].C = &p;
-				C->get().A->edges.write[C->get().A_edge].C_edge = j;
-				p.edges.write[j].C = C->get().A;
-				p.edges.write[j].C_edge = C->get().A_edge;
+				C->get().A->edges[C->get().A_edge].C = &p;
+				C->get().A->edges[C->get().A_edge].C_edge = j;
+				p.edges[j].C = C->get().A;
+				p.edges[j].C_edge = C->get().A_edge;
 				//connection successful.
 			}
 		}
@@ -146,10 +146,10 @@ void Navigation2D::_navpoly_unlink(int p_id) {
 
 		Polygon &p = E->get();
 
-		int ec = p.edges.size();
-		Polygon::Edge *edges = p.edges.ptrw();
+		auto ec = p.edges.size();
+		Polygon::Edge *edges = p.edges.data();
 
-		for (int i = 0; i < ec; i++) {
+		for (decltype(ec) i = 0; i < ec; ++i) {
 			int next = (i + 1) % ec;
 
 			EdgeKey ek(edges[i].point, edges[next].point);
@@ -163,10 +163,10 @@ void Navigation2D::_navpoly_unlink(int p_id) {
 			} else if (C->get().B) {
 				//disconnect
 
-				C->get().B->edges.write[C->get().B_edge].C = NULL;
-				C->get().B->edges.write[C->get().B_edge].C_edge = -1;
-				C->get().A->edges.write[C->get().A_edge].C = NULL;
-				C->get().A->edges.write[C->get().A_edge].C_edge = -1;
+				C->get().B->edges[C->get().B_edge].C = NULL;
+				C->get().B->edges[C->get().B_edge].C_edge = -1;
+				C->get().A->edges[C->get().A_edge].C = NULL;
+				C->get().A->edges[C->get().A_edge].C_edge = -1;
 
 				if (C->get().A == &E->get()) {
 
@@ -183,11 +183,11 @@ void Navigation2D::_navpoly_unlink(int p_id) {
 
 					C->get().B = cp.polygon;
 					C->get().B_edge = cp.edge;
-					C->get().A->edges.write[C->get().A_edge].C = cp.polygon;
-					C->get().A->edges.write[C->get().A_edge].C_edge = cp.edge;
-					cp.polygon->edges.write[cp.edge].C = C->get().A;
-					cp.polygon->edges.write[cp.edge].C_edge = C->get().A_edge;
-					cp.polygon->edges.write[cp.edge].P = NULL;
+					C->get().A->edges[C->get().A_edge].C = cp.polygon;
+					C->get().A->edges[C->get().A_edge].C_edge = cp.edge;
+					cp.polygon->edges[cp.edge].C = C->get().A;
+					cp.polygon->edges[cp.edge].C_edge = C->get().A_edge;
+					cp.polygon->edges[cp.edge].P = NULL;
 				}
 
 			} else {
@@ -234,7 +234,7 @@ void Navigation2D::navpoly_remove(int p_id) {
 	navpoly_map.erase(p_id);
 }
 
-Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vector2 &p_end, bool p_optimize) {
+std::vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vector2 &p_end, bool p_optimize) {
 
 	Polygon *begin_poly = NULL;
 	Polygon *end_poly = NULL;
@@ -253,7 +253,7 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 
 			Polygon &p = F->get();
 			if (begin_d || end_d) {
-				for (int i = 2; i < p.edges.size(); i++) {
+				for (decltype(p.edges.size()) i = 2; i < p.edges.size(); ++i) {
 
 					if (begin_d > 0) {
 
@@ -328,15 +328,15 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 
 	if (!begin_poly || !end_poly) {
 
-		return Vector<Vector2>(); //no path
+		return std::vector<Vector2>(); //no path
 	}
 
 	if (begin_poly == end_poly) {
 
-		Vector<Vector2> path;
+		std::vector<Vector2> path;
 		path.resize(2);
-		path.write[0] = begin_point;
-		path.write[1] = end_point;
+		path[0] = begin_point;
+		path[1] = end_point;
 		return path;
 	}
 
@@ -346,7 +346,7 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 
 	begin_poly->entry = p_start;
 
-	for (int i = 0; i < begin_poly->edges.size(); i++) {
+	for (decltype(begin_poly->edges.size()) i = 0; i < begin_poly->edges.size(); ++i) {
 
 		if (begin_poly->edges[i].C) {
 
@@ -378,7 +378,7 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 		}
 		//check open list
 
-		List<Polygon *>::Element *least_cost_poly = NULL;
+		List<Polygon *>::Element *least_cost_poly = nullptr;
 		float least_cost = 1e30;
 
 		//this could be faster (cache previous results)
@@ -389,12 +389,12 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 			float cost = p->distance;
 
 #ifdef USE_ENTRY_POINT
-			int es = p->edges.size();
+			auto es = p->edges.size();
 
 			float shortest_distance = 1e30;
 
-			for (int i = 0; i < es; i++) {
-				Polygon::Edge &e = p->edges.write[i];
+			for (decltype(es) i = 0; i < es; ++i) {
+				Polygon::Edge &e = p->edges[i];
 
 				if (!e.C)
 					continue;
@@ -422,11 +422,10 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 
 		Polygon *p = least_cost_poly->get();
 		//open the neighbours for search
-		int es = p->edges.size();
+		auto es = p->edges.size();
 
-		for (int i = 0; i < es; i++) {
-
-			Polygon::Edge &e = p->edges.write[i];
+		for (decltype(es) i = 0; i < es; ++i) {
+			Polygon::Edge &e = p->edges[i];
 
 			if (!e.C)
 				continue;
@@ -484,7 +483,7 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 
 	if (found_route) {
 
-		Vector<Vector2> path;
+		std::vector<Vector2> path;
 
 		if (p_optimize) {
 			//string pulling
@@ -598,21 +597,21 @@ Vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const Vect
 		if (!path.size() || !Math::is_zero_approx(path[path.size() - 1].distance_squared_to(begin_point))) {
 			path.push_back(begin_point); // Add the begin point
 		} else {
-			path.write[path.size() - 1] = begin_point; // Replace first midpoint by the exact begin point
+			path.back() = begin_point; // Replace first midpoint by the exact begin point
 		}
 
-		path.invert();
+		std::reverse(path.begin(), path.end());
 
 		if (path.size() <= 1 || !Math::is_zero_approx(path[path.size() - 1].distance_squared_to(end_point))) {
 			path.push_back(end_point); // Add the end point
 		} else {
-			path.write[path.size() - 1] = end_point; // Replace last midpoint by the exact end point
+			path.back() = end_point; // Replace last midpoint by the exact end point
 		}
 
 		return path;
 	}
 
-	return Vector<Vector2>();
+	return std::vector<Vector2>();
 }
 
 Vector2 Navigation2D::get_closest_point(const Vector2 &p_point) {
@@ -627,10 +626,9 @@ Vector2 Navigation2D::get_closest_point(const Vector2 &p_point) {
 		for (List<Polygon>::Element *F = E->get().polygons.front(); F; F = F->next()) {
 
 			Polygon &p = F->get();
-			for (int i = 2; i < p.edges.size(); i++) {
+			for (decltype(p.edges.size()) i = 2; i < p.edges.size(); ++i) {
 
 				if (Geometry::is_point_in_triangle(p_point, _get_vertex(p.edges[0].point), _get_vertex(p.edges[i - 1].point), _get_vertex(p.edges[i].point))) {
-
 					return p_point; //inside triangle, nothing else to discuss
 				}
 			}
@@ -679,10 +677,9 @@ Object *Navigation2D::get_closest_point_owner(const Vector2 &p_point) {
 		for (List<Polygon>::Element *F = E->get().polygons.front(); F; F = F->next()) {
 
 			Polygon &p = F->get();
-			for (int i = 2; i < p.edges.size(); i++) {
+			for (decltype(p.edges.size()) i = 2; i < p.edges.size(); ++i) {
 
 				if (Geometry::is_point_in_triangle(p_point, _get_vertex(p.edges[0].point), _get_vertex(p.edges[i - 1].point), _get_vertex(p.edges[i].point))) {
-
 					return E->get().owner;
 				}
 			}

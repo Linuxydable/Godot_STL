@@ -82,8 +82,8 @@ private:
 	// State
 	bool _searching;
 	String _current_dir;
-	Vector<PoolStringArray> _folders_stack;
-	Vector<String> _files_to_scan;
+	std::vector<PoolStringArray> _folders_stack;
+	std::vector<String> _files_to_scan;
 	int _initial_files_count;
 };
 
@@ -177,7 +177,7 @@ private:
 		float draw_width;
 	};
 
-	void apply_replaces_in_file(String fpath, const Vector<Result> &locations, String new_text);
+	void apply_replaces_in_file(String fpath, const std::vector<Result> &locations, String new_text);
 	void update_replace_buttons();
 	String get_replace_text();
 

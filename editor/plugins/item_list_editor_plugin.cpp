@@ -314,29 +314,38 @@ void ItemListEditor::edit(Node *p_item_list) {
 		return;
 	}
 
-	for (int i = 0; i < item_plugins.size(); i++) {
-		if (item_plugins[i]->handles(p_item_list)) {
-
-			item_plugins[i]->set_object(p_item_list);
-			property_editor->edit(item_plugins[i]);
+	auto it_find = std::find_if(item_plugins.begin(), item_plugins.end(), [&](const ItemListPlugin *plugin) {
+		if (plugin->handles(p_item_list)) {
+			plugin->set_object(p_item_list);
+			property_editor->edit(plugin);
 
 			toolbar_button->set_icon(EditorNode::get_singleton()->get_object_icon(item_list, ""));
-
-			selected_idx = i;
-			return;
+			return true;
 		}
-	}
+		return false;
+	});
 
 	selected_idx = -1;
-	property_editor->edit(NULL);
+
+	if (it_find != item_plugins.end()) {
+		selected_idx = std::distance(item_plugins.begin(), it_find);
+		return;
+	}
+
+	property_editor->edit(nullptr);
 }
 
 bool ItemListEditor::handles(Object *p_object) const {
 
-	for (int i = 0; i < item_plugins.size(); i++) {
-		if (item_plugins[i]->handles(p_object)) {
+	auto it_find = std::find_if(item_plugins.begin(), item_plugins.end(), [&](const ItemListPlugin *plugin) {
+		if (plugin->handles(p_object)) {
 			return true;
 		}
+		return false;
+	});
+
+	if (it_find != item_plugins.end()) {
+		return true;
 	}
 
 	return false;
@@ -391,8 +400,8 @@ ItemListEditor::ItemListEditor() {
 
 ItemListEditor::~ItemListEditor() {
 
-	for (int i = 0; i < item_plugins.size(); i++)
-		memdelete(item_plugins[i]);
+	for (auto &&plugin : item_plugins)
+		memdelete(plugin);
 }
 
 void ItemListEditorPlugin::edit(Object *p_object) {

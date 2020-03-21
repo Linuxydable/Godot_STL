@@ -66,12 +66,13 @@ void Bone2D::_notification(int p_what) {
 
 	if (p_what == NOTIFICATION_EXIT_TREE) {
 		if (skeleton) {
-			for (int i = 0; i < skeleton->bones.size(); i++) {
+			for (decltype(skeleton->bones.size()) i = 0; i < skeleton->bones.size(); ++i) {
 				if (skeleton->bones[i].bone == this) {
-					skeleton->bones.remove(i);
+					skeleton->bones.erase(skeleton->bones.begin() + i);
 					break;
 				}
 			}
+
 			skeleton->_make_bone_setup_dirty();
 			skeleton = NULL;
 		}
@@ -188,16 +189,16 @@ void Skeleton2D::_update_bone_setup() {
 	bone_setup_dirty = false;
 	VS::get_singleton()->skeleton_allocate(skeleton, bones.size(), true);
 
-	bones.sort(); //sorty so they are always in the same order/index
+	std::sort(bones.begin(), bones.end()); //sorty so they are always in the same order/index
 
-	for (int i = 0; i < bones.size(); i++) {
-		bones.write[i].rest_inverse = bones[i].bone->get_skeleton_rest().affine_inverse(); //bind pose
-		bones.write[i].bone->skeleton_index = i;
+	for (decltype(bones.size()) i = 0; i < bones.size(); ++i) {
+		bones[i].rest_inverse = bones[i].bone->get_skeleton_rest().affine_inverse(); //bind pose
+		bones[i].bone->skeleton_index = i;
 		Bone2D *parent_bone = Object::cast_to<Bone2D>(bones[i].bone->get_parent());
 		if (parent_bone) {
-			bones.write[i].parent_index = parent_bone->skeleton_index;
+			bones[i].parent_index = parent_bone->skeleton_index;
 		} else {
-			bones.write[i].parent_index = -1;
+			bones[i].parent_index = -1;
 		}
 	}
 
@@ -227,18 +228,16 @@ void Skeleton2D::_update_transform() {
 
 	transform_dirty = false;
 
-	for (int i = 0; i < bones.size(); i++) {
-
+	for (decltype(bones.size()) i = 0; i < bones.size(); ++i) {
 		ERR_CONTINUE(bones[i].parent_index >= i);
 		if (bones[i].parent_index >= 0) {
-			bones.write[i].accum_transform = bones[bones[i].parent_index].accum_transform * bones[i].bone->get_transform();
+			bones[i].accum_transform = bones[bones[i].parent_index].accum_transform * bones[i].bone->get_transform();
 		} else {
-			bones.write[i].accum_transform = bones[i].bone->get_transform();
+			bones[i].accum_transform = bones[i].bone->get_transform();
 		}
 	}
 
-	for (int i = 0; i < bones.size(); i++) {
-
+	for (decltype(bones.size()) i = 0; i < bones.size(); ++i) {
 		Transform2D final_xform = bones[i].accum_transform * bones[i].rest_inverse;
 		VS::get_singleton()->skeleton_bone_set_transform_2d(skeleton, i, final_xform);
 	}

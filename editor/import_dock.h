@@ -70,7 +70,7 @@ class ImportDock : public VBoxContainer {
 	void _reimport_and_restart();
 	void _reimport();
 
-	void set_edit_multiple_paths0(const Ref<ConfigFile>&);
+	void set_edit_multiple_paths0(const Ref<ConfigFile> &, Map<String, Dictionary> &value_frequency);
 
 	enum {
 		ITEM_SET_AS_DEFAULT = 100,

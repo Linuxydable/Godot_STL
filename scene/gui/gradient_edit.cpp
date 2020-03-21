@@ -61,7 +61,7 @@ int GradientEdit::_get_point_from_pos(int x) {
 	int result = -1;
 	int total_w = get_size().width - get_size().height - SPACING;
 	float min_distance = 1e20;
-	for (int i = 0; i < points.size(); i++) {
+	for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 		//Check if we clicked at point
 		float distance = ABS(x - points[i].offset * total_w);
 		float min = (POINT_WIDTH / 2 * 1.7); //make it easier to grab
@@ -99,7 +99,7 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 
 	if (k.is_valid() && k->is_pressed() && k->get_scancode() == KEY_DELETE && grabbed != -1) {
 
-		points.remove(grabbed);
+		points.erase(points.begin() + grabbed);
 		grabbed = -1;
 		grabbing = false;
 		update();
@@ -119,7 +119,7 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 	if (mb.is_valid() && mb->get_button_index() == 2 && mb->is_pressed()) {
 		grabbed = _get_point_from_pos(mb->get_position().x);
 		if (grabbed != -1) {
-			points.remove(grabbed);
+			points.erase(points.begin() + grabbed);
 			grabbed = -1;
 			grabbing = false;
 			update();
@@ -140,12 +140,17 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			newPoint.offset = CLAMP(x / float(total_w), 0, 1);
 
 			points.push_back(newPoint);
-			points.sort();
-			for (int i = 0; i < points.size(); ++i) {
-				if (points[i].offset == newPoint.offset) {
-					grabbed = i;
-					break;
+			std::sort(points.begin(), points.end());
+
+			auto it_find = std::find_if(points.begin(), points.end(), [&](const Gradient::Point &point) {
+				if (point.offset == newPoint.offset) {
+					return true;
 				}
+				return false;
+			});
+
+			if (it_find != points.end()) {
+				grabbed = std::distance(points.begin(), it_find);
 			}
 
 			emit_signal("ramp_changed");
@@ -182,7 +187,7 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 		Gradient::Point next;
 
 		int pos = -1;
-		for (int i = 0; i < points.size(); i++) {
+		for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 			if (points[i].offset < newPoint.offset)
 				pos = i;
 		}
@@ -211,12 +216,17 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 		newPoint.color = prev.color.linear_interpolate(next.color, (newPoint.offset - prev.offset) / (next.offset - prev.offset));
 
 		points.push_back(newPoint);
-		points.sort();
-		for (int i = 0; i < points.size(); i++) {
-			if (points[i].offset == newPoint.offset) {
-				grabbed = i;
-				break;
+		std::sort(points.begin(), points.end());
+
+		auto it_find = std::find_if(points.begin(), points.end(), [&](const Gradient::Point &point) {
+			if (point.offset == newPoint.offset) {
+				return true;
 			}
+			return false;
+		});
+
+		if (it_find != points.end()) {
+			grabbed = std::distance(points.begin(), it_find);
 		}
 
 		emit_signal("ramp_changed");
@@ -251,7 +261,7 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			float smallest_ofs = snap_threshold;
 			bool found = false;
 			int nearest_point = 0;
-			for (int i = 0; i < points.size(); ++i) {
+			for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 				if (i != grabbed) {
 					float temp_ofs = ABS(points[i].offset - newofs);
 					if (temp_ofs < smallest_ofs) {
@@ -273,7 +283,7 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 		}
 
 		bool valid = true;
-		for (int i = 0; i < points.size(); i++) {
+		for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 
 			if (points[i].offset == newofs && i != grabbed) {
 				valid = false;
@@ -283,14 +293,18 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 		if (!valid)
 			return;
 
-		points.write[grabbed].offset = newofs;
+		points[grabbed].offset = newofs;
+		std::sort(points.begin(), points.end());
 
-		points.sort();
-		for (int i = 0; i < points.size(); i++) {
-			if (points[i].offset == newofs) {
-				grabbed = i;
-				break;
+		auto it_find = std::find_if(points.begin(), points.end(), [&](const Gradient::Point &point) {
+			if (point.offset == newofs) {
+				return true;
 			}
+			return false;
+		});
+
+		if (it_find != points.end()) {
+			grabbed = std::distance(points.begin(), it_find);
 		}
 
 		emit_signal("ramp_changed");
@@ -327,7 +341,7 @@ void GradientEdit::_notification(int p_what) {
 		else
 			prev.color = points[0].color; //Extend color of first point to the beginning.
 
-		for (int i = -1; i < points.size(); i++) {
+		for (int i = -1; i < points.size(); ++i) {
 
 			Gradient::Point next;
 			//If there is no next point
@@ -361,7 +375,7 @@ void GradientEdit::_notification(int p_what) {
 		}
 
 		//Draw point markers
-		for (int i = 0; i < points.size(); i++) {
+		for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 
 			Color col = points[i].color.contrasted();
 			col.a = 0.9;
@@ -443,7 +457,7 @@ void GradientEdit::_color_changed(const Color &p_color) {
 
 	if (grabbed == -1)
 		return;
-	points.write[grabbed].color = p_color;
+	points[grabbed].color = p_color;
 	update();
 	emit_signal("ramp_changed");
 }
@@ -452,28 +466,28 @@ void GradientEdit::set_ramp(const std::vector<float> &p_offsets, const std::vect
 
 	ERR_FAIL_COND(p_offsets.size() != p_colors.size());
 	points.clear();
-	for (int i = 0; i < p_offsets.size(); i++) {
+	for (decltype(p_offsets.size()) i = 0; i < p_offsets.size(); ++i) {
 		Gradient::Point p;
 		p.offset = p_offsets[i];
 		p.color = p_colors[i];
 		points.push_back(p);
 	}
 
-	points.sort();
+	std::sort(points.begin(), points.end());
 	update();
 }
 
 std::vector<float> GradientEdit::get_offsets() const {
 	std::vector<float> ret;
-	for (int i = 0; i < points.size(); i++)
-		ret.push_back(points[i].offset);
+	for (auto &&point : points)
+		ret.push_back(point.offset);
 	return ret;
 }
 
 std::vector<Color> GradientEdit::get_colors() const {
 	std::vector<Color> ret;
-	for (int i = 0; i < points.size(); i++)
-		ret.push_back(points[i].color);
+	for (auto &&point : points)
+		ret.push_back(point.color);
 	return ret;
 }
 

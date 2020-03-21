@@ -41,30 +41,29 @@ bool ConvexPolygonShape2D::_edit_is_selected_on_click(const Point2 &p_point, dou
 
 void ConvexPolygonShape2D::_update_shape() {
 
-	Vector<Vector2> final_points = points;
+	std::vector<Vector2> final_points = points;
 	if (Geometry::is_polygon_clockwise(final_points)) { //needs to be counter clockwise
-		final_points.invert();
+		std::reverse(final_points.begin(), final_points.end());
 	}
 	Physics2DServer::get_singleton()->shape_set_data(get_rid(), final_points);
 	emit_changed();
 }
 
-void ConvexPolygonShape2D::set_point_cloud(const Vector<Vector2> &p_points) {
+void ConvexPolygonShape2D::set_point_cloud(const std::vector<Vector2> &p_points) {
 
-	Vector<Point2> hull = Geometry::convex_hull_2d(p_points);
+	std::vector<Point2> hull = Geometry::convex_hull_2d(p_points);
 	ERR_FAIL_COND(hull.size() < 3);
 	set_points(hull);
 }
 
-void ConvexPolygonShape2D::set_points(const Vector<Vector2> &p_points) {
+void ConvexPolygonShape2D::set_points(const std::vector<Vector2> &p_points) {
 
 	points = p_points;
 
 	_update_shape();
 }
 
-Vector<Vector2> ConvexPolygonShape2D::get_points() const {
-
+std::vector<Vector2> ConvexPolygonShape2D::get_points() const {
 	return points;
 }
 
@@ -79,7 +78,7 @@ void ConvexPolygonShape2D::_bind_methods() {
 
 void ConvexPolygonShape2D::draw(const RID &p_to_rid, const Color &p_color) {
 
-	Vector<Color> col;
+	std::vector<Color> col;
 	col.push_back(p_color);
 	VisualServer::get_singleton()->canvas_item_add_polygon(p_to_rid, points, col);
 }
@@ -87,12 +86,12 @@ void ConvexPolygonShape2D::draw(const RID &p_to_rid, const Color &p_color) {
 Rect2 ConvexPolygonShape2D::get_rect() const {
 
 	Rect2 rect;
-	for (int i = 0; i < points.size(); i++) {
-		if (i == 0)
-			rect.position = points[i];
-		else
-			rect.expand_to(points[i]);
-	}
+
+	rect.position = points.front();
+
+	std::for_each(points.begin() + 1, points.end(), [&](const Vector2 &point) {
+		rect.expand_to(point);
+	});
 
 	return rect;
 }

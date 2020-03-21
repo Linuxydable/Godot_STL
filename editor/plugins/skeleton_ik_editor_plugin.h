@@ -44,7 +44,7 @@ class SkeletonIKEditorPlugin : public EditorPlugin {
 
 	Button *play_btn;
 	EditorNode *editor;
-	Vector<Transform> initial_bone_poses;
+	std::vector<Transform> initial_bone_poses;
 
 	void _play();
 

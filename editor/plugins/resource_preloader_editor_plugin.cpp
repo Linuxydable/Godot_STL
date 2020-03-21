@@ -52,12 +52,9 @@ void ResourcePreloaderEditor::_notification(int p_what) {
 	}
 }
 
-void ResourcePreloaderEditor::_files_load_request(const Vector<String> &p_paths) {
+void ResourcePreloaderEditor::_files_load_request(const std::vector<String> &p_paths) {
 
-	for (int i = 0; i < p_paths.size(); i++) {
-
-		String path = p_paths[i];
-
+	for (auto &&path : p_paths) {
 		RES resource;
 		resource = ResourceLoader::load(path);
 
@@ -74,7 +71,7 @@ void ResourcePreloaderEditor::_files_load_request(const Vector<String> &p_paths)
 		String name = basename;
 		int counter = 1;
 		while (preloader->has_resource(name)) {
-			counter++;
+			++counter;
 			name = basename + " " + itos(counter);
 		}
 
@@ -180,7 +177,7 @@ void ResourcePreloaderEditor::_update_library() {
 
 	tree->clear();
 	tree->set_hide_root(true);
-	TreeItem *root = tree->create_item(NULL);
+	TreeItem *root = tree->create_item(nullptr);
 
 	List<StringName> rnames;
 	preloader->get_resource_list(&rnames);
@@ -249,7 +246,6 @@ void ResourcePreloaderEditor::edit(ResourcePreloader *p_preloader) {
 	if (p_preloader) {
 		_update_library();
 	} else {
-
 		hide();
 		set_physics_process(false);
 	}
@@ -288,9 +284,9 @@ bool ResourcePreloaderEditor::can_drop_data_fw(const Point2 &p_point, const Vari
 
 	if (String(d["type"]) == "files") {
 
-		Vector<String> files = d["files"];
+		std::vector<String> files = d["files"];
 
-		return files.size() != 0;
+		return !files.empty();
 	}
 	return false;
 }
@@ -337,7 +333,7 @@ void ResourcePreloaderEditor::drop_data_fw(const Point2 &p_point, const Variant 
 
 	if (String(d["type"]) == "files") {
 
-		Vector<String> files = d["files"];
+		std::vector<String> files = d["files"];
 
 		_files_load_request(files);
 	}

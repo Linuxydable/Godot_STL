@@ -217,11 +217,11 @@ bool ExportTemplateManager::_install_from_file(const String &p_file, bool p_use_
 
 			//read
 			unzOpenCurrentFile(pkg);
-			ret = unzReadCurrentFile(pkg, data.ptrw(), data.size());
+			ret = unzReadCurrentFile(pkg, data.data(), data.size());
 			unzCloseCurrentFile(pkg);
 
 			String data_str;
-			data_str.parse_utf8((const char *)data.ptr(), data.size());
+			data_str.parse_utf8((const char *)data.data(), data.size());
 			data_str = data_str.strip_edges();
 
 			// Version number should be of the form major.minor[.patch].status[.module_config]
@@ -291,7 +291,7 @@ bool ExportTemplateManager::_install_from_file(const String &p_file, bool p_use_
 
 		//read
 		unzOpenCurrentFile(pkg);
-		unzReadCurrentFile(pkg, data.ptrw(), data.size());
+		unzReadCurrentFile(pkg, data.data(), data.size());
 		unzCloseCurrentFile(pkg);
 
 		String base_dir = file_path.get_base_dir().trim_suffix("/");
@@ -324,7 +324,7 @@ bool ExportTemplateManager::_install_from_file(const String &p_file, bool p_use_
 			ERR_CONTINUE_MSG(true, "Can't open file from path '" + String(to_write) + "'.");
 		}
 
-		f->store_buffer(data.ptr(), data.size());
+		f->store_buffer(data.data(), data.size());
 
 		memdelete(f);
 
@@ -629,7 +629,7 @@ Error ExportTemplateManager::install_android_template() {
 
 			// Read.
 			unzOpenCurrentFile(pkg);
-			unzReadCurrentFile(pkg, data.ptrw(), data.size());
+			unzReadCurrentFile(pkg, data.data(), data.size());
 			unzCloseCurrentFile(pkg);
 
 			if (!dirs_tested.has(base_dir)) {
@@ -640,7 +640,7 @@ Error ExportTemplateManager::install_android_template() {
 			String to_write = String("res://android/build").plus_file(path);
 			FileAccess *f = FileAccess::open(to_write, FileAccess::WRITE);
 			if (f) {
-				f->store_buffer(data.ptr(), data.size());
+				f->store_buffer(data.data(), data.size());
 				memdelete(f);
 #ifndef WINDOWS_ENABLED
 				FileAccess::set_unix_permissions(to_write, (info.external_fa >> 16) & 0x01FF);
