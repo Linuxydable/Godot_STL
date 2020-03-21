@@ -257,8 +257,7 @@ void ScriptCreateDialog::_template_changed(int p_template) {
 	}
 	int selected_id = template_menu->get_selected_id();
 
-	for (int i = 0; i < template_list.size(); i++) {
-		const ScriptTemplateInfo &sinfo = template_list[i];
+	for (auto &&sinfo : template_list) {
 		if (sinfo.id == selected_id) {
 			script_template = sinfo.dir.plus_file(sinfo.name + "." + sinfo.extension);
 			break;
@@ -393,35 +392,33 @@ void ScriptCreateDialog::_lang_changed(int l) {
 
 		template_menu->add_item(TTR("Default"));
 
-		ScriptTemplateInfo *templates = template_list.ptrw();
-
-		Vector<String> origin_names;
+		std::vector<String> origin_names;
 		origin_names.push_back(TTR("Project"));
 		origin_names.push_back(TTR("Editor"));
 		int cur_origin = -1;
 
 		// Populate script template items previously sorted and now grouped by origin
-		for (int i = 0; i < template_list.size(); i++) {
-
-			if (int(templates[i].origin) != cur_origin) {
+		for (auto &&sinfo : template_list) {
+			if (int(sinfo.origin) != cur_origin) {
 				template_menu->add_separator();
 
-				String origin_name = origin_names[templates[i].origin];
+				String origin_name = origin_names[sinfo.origin];
 
 				int last_index = template_menu->get_item_count() - 1;
 				template_menu->set_item_text(last_index, origin_name);
 
-				cur_origin = templates[i].origin;
+				cur_origin = sinfo.origin;
 			}
-			String item_name = templates[i].name.capitalize();
+			String item_name = sinfo.name.capitalize();
 			template_menu->add_item(item_name);
 
 			int new_id = template_menu->get_item_count() - 1;
-			templates[i].id = new_id;
+			sinfo.id = new_id;
 		}
+
 		// Disable overridden
-		for (Map<String, Vector<int> >::Element *E = template_overrides.front(); E; E = E->next()) {
-			const Vector<int> &overrides = E->get();
+		for (Map<String, std::vector<int> >::Element *E = template_overrides.front(); E; E = E->next()) {
+			const std::vector<int> &overrides = E->get();
 
 			if (overrides.size() == 1) {
 				continue; // doesn't override anything
@@ -432,7 +429,7 @@ void ScriptCreateDialog::_lang_changed(int l) {
 			override_info += TTR("Overrides");
 			override_info += ": ";
 
-			for (int i = 1; i < overrides.size(); i++) {
+			for (decltype(overrides.size()) i = 1; i < overrides.size(); ++i) {
 				const ScriptTemplateInfo &overridden = template_list[overrides[i]];
 
 				int disable_index = template_menu->get_item_index(overridden.id);
@@ -471,30 +468,30 @@ void ScriptCreateDialog::_update_script_templates(const String &p_extension) {
 	template_list.clear();
 	template_overrides.clear();
 
-	Vector<String> dirs;
+	std::vector<String> dirs;
 
 	// Ordered from local to global for correct override mechanism
 	dirs.push_back(EditorSettings::get_singleton()->get_project_script_templates_dir());
 	dirs.push_back(EditorSettings::get_singleton()->get_script_templates_dir());
 
-	for (int i = 0; i < dirs.size(); i++) {
+	for (decltype(dirs.size()) i = 0; i < dirs.size(); ++i) {
 
-		Vector<String> list = EditorSettings::get_singleton()->get_script_templates(p_extension, dirs[i]);
+		std::vector<String> list = EditorSettings::get_singleton()->get_script_templates(p_extension, dirs[i]);
 
-		for (int j = 0; j < list.size(); j++) {
+		for (auto &&str : list) {
 			ScriptTemplateInfo sinfo;
 			sinfo.origin = ScriptOrigin(i);
 			sinfo.dir = dirs[i];
-			sinfo.name = list[j];
+			sinfo.name = str;
 			sinfo.extension = p_extension;
 			template_list.push_back(sinfo);
 
 			if (!template_overrides.has(sinfo.name)) {
-				Vector<int> overrides;
+				std::vector<int> overrides;
 				overrides.push_back(template_list.size() - 1); // first one
 				template_overrides.insert(sinfo.name, overrides);
 			} else {
-				Vector<int> &overrides = template_overrides[sinfo.name];
+				std::vector<int> &overrides = template_overrides[sinfo.name];
 				overrides.push_back(template_list.size() - 1);
 			}
 		}
