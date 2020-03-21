@@ -61,7 +61,7 @@ protected:
 		int points[3];
 	};
 
-	Vector<BlendTriangle> triangles;
+	std::vector<BlendTriangle> triangles;
 
 	StringName blend_position;
 	StringName closest;
@@ -74,8 +74,8 @@ protected:
 	BlendMode blend_mode;
 
 	void _add_blend_point(int p_index, const Ref<AnimationRootNode> &p_node);
-	void _set_triangles(const Vector<int> &p_triangles);
-	Vector<int> _get_triangles() const;
+	void _set_triangles(const std::vector<int> &p_triangles);
+	std::vector<int> _get_triangles() const;
 
 	void _blend_triangle(const Vector2 &p_pos, const Vector2 *p_points, float *r_weights);
 
