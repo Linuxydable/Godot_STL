@@ -109,7 +109,7 @@ class Polygon2DEditor : public AbstractPolygon2DEditor {
 	int point_drag_index;
 	bool uv_drag;
 	bool uv_create;
-	Vector<int> polygon_create;
+	std::vector<int> polygon_create;
 	UVMode uv_move_current;
 	Vector2 uv_drag_from;
 	bool updating_uv_scroll;

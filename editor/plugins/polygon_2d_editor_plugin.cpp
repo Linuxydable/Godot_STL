@@ -103,7 +103,7 @@ void Polygon2DEditor::_notification(int p_what) {
 
 void Polygon2DEditor::_sync_bones() {
 
-	Skeleton2D *skeleton = NULL;
+	Skeleton2D *skeleton = nullptr;
 	if (!node->has_node(node->get_skeleton())) {
 		error->set_text(TTR("The skeleton property of the Polygon2D does not point to a Skeleton2D node"));
 		error->popup_centered_minsize();
@@ -513,7 +513,7 @@ void Polygon2DEditor::_uv_input(const Ref<InputEvent> &p_input) {
 							undo_redo->add_undo_method(node, "set_polygon", uv_create_poly_prev);
 							undo_redo->add_do_method(node, "set_internal_vertex_count", 0);
 							undo_redo->add_undo_method(node, "set_internal_vertex_count", uv_create_prev_internal_vertices);
-							undo_redo->add_do_method(node, "set_vertex_colors", Vector<Color>());
+							undo_redo->add_do_method(node, "set_vertex_colors", std::vector<Color>{});
 							undo_redo->add_undo_method(node, "set_vertex_colors", uv_create_colors_prev);
 							undo_redo->add_do_method(node, "clear_bones");
 							undo_redo->add_undo_method(node, "_set_bones", uv_create_bones_prev);
@@ -675,7 +675,7 @@ void Polygon2DEditor::_uv_input(const Ref<InputEvent> &p_input) {
 					}
 
 					if (closest != -1) {
-						if (polygon_create.size() && closest == polygon_create[0]) {
+						if (!polygon_create.empty() && closest == polygon_create.front()) {
 							//close
 							if (polygon_create.size() < 3) {
 								error->set_text(TTR("Invalid Polygon (need 3 different vertices)"));
@@ -695,7 +695,7 @@ void Polygon2DEditor::_uv_input(const Ref<InputEvent> &p_input) {
 							}
 
 							polygon_create.clear();
-						} else if (polygon_create.find(closest) == -1) {
+						} else if (std::find(polygon_create.begin(), polygon_create.end(), closest) == polygon_create.end()) {
 							//add temporarily if not exists
 							polygon_create.push_back(closest);
 						}
@@ -707,15 +707,14 @@ void Polygon2DEditor::_uv_input(const Ref<InputEvent> &p_input) {
 					polygons = polygons.duplicate(); //copy because its a reference
 
 					int erase_index = -1;
-					for (int i = polygons.size() - 1; i >= 0; i--) {
+					for (int i = polygons.size() - 1; i >= 0; --i) {
 						PoolVector<int> points = polygons[i];
-						Vector<Vector2> polys;
-						polys.resize(points.size());
-						for (int j = 0; j < polys.size(); j++) {
+						std::vector<Vector2> polys(points.size());
+						for (decltype(polys.size()) j = 0; j < polys.size(); ++j) {
 							int idx = points[j];
 							if (idx < 0 || idx >= points_prev.size())
 								continue;
-							polys.write[j] = mtx.xform(points_prev[idx]);
+							polys[j] = mtx.xform(points_prev[idx]);
 						}
 
 						if (Geometry::is_point_in_polygon(Vector2(mb->get_position().x, mb->get_position().y), polys)) {
@@ -1053,7 +1052,7 @@ void Polygon2DEditor::_uv_draw() {
 		poly_line_color.a *= 0.25;
 	}
 	Color polygon_line_color = Color(0.5, 0.5, 0.9);
-	Vector<Color> polygon_fill_color;
+	std::vector<Color> polygon_fill_color;
 	{
 		Color pf = polygon_line_color;
 		pf.a *= 0.5;
@@ -1091,7 +1090,7 @@ void Polygon2DEditor::_uv_draw() {
 	for (int i = 0; i < polygons.size(); i++) {
 
 		PoolVector<int> points = polygons[i];
-		Vector<Vector2> polypoints;
+		std::vector<Vector2> polypoints;
 		for (int j = 0; j < points.size(); j++) {
 			int next = (j + 1) % points.size();
 
@@ -1126,8 +1125,8 @@ void Polygon2DEditor::_uv_draw() {
 		}
 	}
 
-	if (polygon_create.size()) {
-		for (int i = 0; i < polygon_create.size(); i++) {
+	if (!polygon_create.empty()) {
+		for (decltype(polygon_create.size()) i = 0; i < polygon_create.size(); ++i) {
 			Vector2 from = uvs[polygon_create[i]];
 			Vector2 to = (i + 1) < polygon_create.size() ? uvs[polygon_create[i + 1]] : uv_create_to;
 			uv_edit_draw->draw_line(mtx.xform(from), mtx.xform(to), polygon_line_color, Math::round(EDSCALE), true);
@@ -1306,7 +1305,7 @@ Polygon2DEditor::Polygon2DEditor(EditorNode *p_editor) :
 	uv_mode_hb->add_child(memnew(VSeparator));
 
 	uv_main_vb->add_child(uv_mode_hb);
-	for (int i = 0; i < UV_MODE_MAX; i++) {
+	for (uint8_t i = 0; i < UV_MODE_MAX; ++i) {
 
 		uv_button[i] = memnew(ToolButton);
 		uv_button[i]->set_toggle_mode(true);
