@@ -127,7 +127,7 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 	}
 
 	int format_bits = 0;
-	int format_channels = 0;
+	uint32_t format_channels = 0;
 
 	AudioStreamSample::LoopMode loop = AudioStreamSample::LOOP_DISABLED;
 	uint16_t compression_code = 1;
@@ -138,7 +138,7 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 	int loop_end = 0;
 	int frames = 0;
 
-	Vector<float> data;
+	std::vector<float> data;
 
 	while (!file->eof_reached()) {
 
@@ -221,19 +221,19 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 				for (int i = 0; i < frames * format_channels; i++) {
 					// 8 bit samples are UNSIGNED
 
-					data.write[i] = int8_t(file->get_8() - 128) / 128.f;
+					data[i] = int8_t(file->get_8() - 128) / 128.f;
 				}
 			} else if (format_bits == 32 && compression_code == 3) {
 				for (int i = 0; i < frames * format_channels; i++) {
 					//32 bit IEEE Float
 
-					data.write[i] = file->get_float();
+					data[i] = file->get_float();
 				}
 			} else if (format_bits == 16) {
 				for (int i = 0; i < frames * format_channels; i++) {
 					//16 bit SIGNED
 
-					data.write[i] = int16_t(file->get_16()) / 32768.f;
+					data[i] = int16_t(file->get_16()) / 32768.f;
 				}
 			} else {
 				for (int i = 0; i < frames * format_channels; i++) {
@@ -247,7 +247,7 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 					}
 					s <<= (32 - format_bits);
 
-					data.write[i] = (int32_t(s) >> 16) / 32768.f;
+					data[i] = (int32_t(s) >> 16) / 32768.f;
 				}
 			}
 
@@ -319,9 +319,8 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 		// resample!
 		int new_data_frames = (int)(frames * (float)limit_rate_hz / (float)rate);
 
-		Vector<float> new_data;
-		new_data.resize(new_data_frames * format_channels);
-		for (int c = 0; c < format_channels; c++) {
+		std::vector<float> new_data(new_data_frames * format_channels);
+		for (decltype(format_channels) c = 0; c < format_channels; ++c) {
 
 			float frac = .0f;
 			int ipos = 0;
@@ -345,7 +344,7 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 
 				float res = (a0 * mu * mu2 + a1 * mu2 + a2 * mu + a3);
 
-				new_data.write[i * format_channels + c] = res;
+				new_data[i * format_channels + c] = res;
 
 				// update position and always keep fractional part within ]0...1]
 				// in order to avoid 32bit floating point precision errors
@@ -372,9 +371,9 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 	if (normalize) {
 
 		float max = 0;
-		for (int i = 0; i < data.size(); i++) {
+		for (auto &&d : data) {
 
-			float amp = Math::abs(data[i]);
+			float amp = Math::abs(d);
 			if (amp > max)
 				max = amp;
 		}
@@ -382,9 +381,8 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 		if (max > 0) {
 
 			float mult = 1.0 / max;
-			for (int i = 0; i < data.size(); i++) {
-
-				data.write[i] *= mult;
+			for (auto &&f : data) {
+				f *= mult;
 			}
 		}
 	}
@@ -398,9 +396,9 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 		bool found = false;
 		float limit = Math::db2linear(TRIM_DB_LIMIT);
 
-		for (int i = 0; i < data.size() / format_channels; i++) {
+		for (decltype(data.size()) i = 0; i < data.size() / format_channels; ++i) {
 			float ampChannelSum = 0;
-			for (int j = 0; j < format_channels; j++) {
+			for (decltype(format_channels) j = 0; j < format_channels; ++j) {
 				ampChannelSum += Math::abs(data[(i * format_channels) + j]);
 			}
 
@@ -417,8 +415,8 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 		}
 
 		if (first < last) {
-			Vector<float> new_data;
-			new_data.resize((last - first) * format_channels);
+			std::vector<float> new_data((last - first) * format_channels);
+
 			for (int i = first; i < last; i++) {
 
 				float fadeOutMult = 1;
@@ -427,8 +425,8 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 					fadeOutMult = ((float)(last - i - 1) / (float)TRIM_FADE_OUT_FRAMES);
 				}
 
-				for (int j = 0; j < format_channels; j++) {
-					new_data.write[((i - first) * format_channels) + j] = data[(i * format_channels) + j] * fadeOutMult;
+				for (decltype(format_channels) j = 0; j < format_channels; ++j) {
+					new_data[((i - first) * format_channels) + j] = data[(i * format_channels) + j] * fadeOutMult;
 				}
 			}
 
@@ -451,10 +449,10 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 
 	if (force_mono && format_channels == 2) {
 
-		Vector<float> new_data;
-		new_data.resize(data.size() / 2);
+		std::vector<float> new_data(data.size() / 2);
+
 		for (int i = 0; i < frames; i++) {
-			new_data.write[i] = (data[i * 2 + 0] + data[i * 2 + 1]) / 2.0;
+			new_data[i] = (data[i * 2 + 0] + data[i * 2 + 1]) / 2.0;
 		}
 
 		data = new_data;
@@ -476,18 +474,15 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 		if (format_channels == 1) {
 			_compress_ima_adpcm(data, dst_data);
 		} else {
+			auto tframes = data.size() / 2;
 
 			//byte interleave
-			Vector<float> left;
-			Vector<float> right;
+			std::vector<float> left(tframes);
+			std::vector<float> right(tframes);
 
-			int tframes = data.size() / 2;
-			left.resize(tframes);
-			right.resize(tframes);
-
-			for (int i = 0; i < tframes; i++) {
-				left.write[i] = data[i * 2 + 0];
-				right.write[i] = data[i * 2 + 1];
+			for (decltype(tframes) i = 0; i < tframes; ++i) {
+				left[i] = data[i * 2 + 0];
+				right[i] = data[i * 2 + 1];
 			}
 
 			PoolVector<uint8_t> bleft;
@@ -516,8 +511,8 @@ Error ResourceImporterWAV::import(const String &p_source_file, const String &p_s
 		{
 			PoolVector<uint8_t>::Write w = dst_data.write();
 
-			int ds = data.size();
-			for (int i = 0; i < ds; i++) {
+			auto ds = data.size();
+			for (decltype(ds) i = 0; i < ds; ++i) {
 
 				if (is16) {
 					int16_t v = CLAMP(data[i] * 32768, -32768, 32767);
