@@ -91,7 +91,7 @@ void ResourceImporterLayeredTexture::get_import_options(List<ImportOption> *r_op
 	r_options->push_back(ImportOption(PropertyInfo(Variant::INT, "slices/vertical", PROPERTY_HINT_RANGE, "1,256,1"), p_preset == PRESET_COLOR_CORRECT ? 1 : 8));
 }
 
-void ResourceImporterLayeredTexture::_save_tex(const Vector<Ref<Image> > &p_images, const String &p_to_path, int p_compress_mode, Image::CompressMode p_vram_compression, bool p_mipmaps, int p_texture_flags) {
+void ResourceImporterLayeredTexture::_save_tex(const std::vector<Ref<Image> > &p_images, const String &p_to_path, int p_compress_mode, Image::CompressMode p_vram_compression, bool p_mipmaps, int p_texture_flags) {
 
 	FileAccess *f = FileAccess::open(p_to_path, FileAccess::WRITE);
 	f->store_8('G');
@@ -117,7 +117,7 @@ void ResourceImporterLayeredTexture::_save_tex(const Vector<Ref<Image> > &p_imag
 		p_compress_mode = COMPRESS_UNCOMPRESSED; //these can't go as lossy
 	}
 
-	for (int i = 0; i < p_images.size(); i++) {
+	for (decltype(p_images.size()) i = 0; i < p_images.size(); ++i) {
 
 		switch (p_compress_mode) {
 			case COMPRESS_LOSSLESS: {
@@ -204,7 +204,7 @@ Error ResourceImporterLayeredTexture::import(const String &p_source_file, const 
 
 	Ref<Image> image;
 	image.instance();
-	Error err = ImageLoader::load_image(p_source_file, image, NULL, false, 1.0);
+	Error err = ImageLoader::load_image(p_source_file, image, nullptr, false, 1.0);
 	if (err != OK)
 		return err;
 
@@ -220,7 +220,7 @@ Error ResourceImporterLayeredTexture::import(const String &p_source_file, const 
 	if (srgb == 1)
 		tex_flags |= Texture::FLAG_CONVERT_TO_LINEAR;
 
-	Vector<Ref<Image> > slices;
+	std::vector<Ref<Image> > slices;
 
 	int slice_w = image->get_width() / hslices;
 	int slice_h = image->get_height() / vslices;
@@ -369,7 +369,7 @@ bool ResourceImporterLayeredTexture::are_import_settings_valid(const String &p_p
 		return true; //do not care about non vram
 	}
 
-	Vector<String> formats_imported;
+	std::vector<String> formats_imported;
 	if (metadata.has("imported_formats")) {
 		formats_imported = metadata["imported_formats"];
 	}
@@ -380,7 +380,7 @@ bool ResourceImporterLayeredTexture::are_import_settings_valid(const String &p_p
 		String setting_path = "rendering/vram_compression/import_" + String(compression_formats[index]);
 		bool test = ProjectSettings::get_singleton()->get(setting_path);
 		if (test) {
-			if (formats_imported.find(compression_formats[index]) == -1) {
+			if (std::find(formats_imported.begin(), formats_imported.end(), compression_formats[index]) == formats_imported.end()) {
 				valid = false;
 				break;
 			}
@@ -391,7 +391,7 @@ bool ResourceImporterLayeredTexture::are_import_settings_valid(const String &p_p
 	return valid;
 }
 
-ResourceImporterLayeredTexture *ResourceImporterLayeredTexture::singleton = NULL;
+ResourceImporterLayeredTexture *ResourceImporterLayeredTexture::singleton = nullptr;
 
 ResourceImporterLayeredTexture::ResourceImporterLayeredTexture() {
 
