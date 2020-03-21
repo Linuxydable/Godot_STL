@@ -168,7 +168,8 @@ StringName AnimationNodeStateMachinePlayback::get_current_node() const {
 StringName AnimationNodeStateMachinePlayback::get_blend_from_node() const {
 	return fading_from;
 }
-Vector<StringName> AnimationNodeStateMachinePlayback::get_travel_path() const {
+
+std::vector<StringName> AnimationNodeStateMachinePlayback::get_travel_path() const {
 	return path;
 }
 float AnimationNodeStateMachinePlayback::get_current_play_pos() const {
@@ -199,7 +200,7 @@ bool AnimationNodeStateMachinePlayback::_travel(AnimationNodeStateMachine *p_sta
 	List<int> open_list;
 
 	//build open list
-	for (int i = 0; i < p_state_machine->transitions.size(); i++) {
+	for (decltype(p_state_machine->transitions.size()) i = 0; i < p_state_machine->transitions.size(); ++i) {
 		if (p_state_machine->transitions[i].from == current) {
 			open_list.push_back(i);
 			float cost = p_state_machine->states[p_state_machine->transitions[i].to].position.distance_to(current_pos);
@@ -225,7 +226,7 @@ bool AnimationNodeStateMachinePlayback::_travel(AnimationNodeStateMachine *p_sta
 		}
 
 		//find the last cost transition
-		List<int>::Element *least_cost_transition = NULL;
+		List<int>::Element *least_cost_transition = nullptr;
 		float least_cost = 1e20;
 
 		for (List<int>::Element *E = open_list.front(); E; E = E->next()) {
@@ -242,7 +243,7 @@ bool AnimationNodeStateMachinePlayback::_travel(AnimationNodeStateMachine *p_sta
 		StringName transition_prev = p_state_machine->transitions[least_cost_transition->get()].from;
 		StringName transition = p_state_machine->transitions[least_cost_transition->get()].to;
 
-		for (int i = 0; i < p_state_machine->transitions.size(); i++) {
+		for (decltype(p_state_machine->transitions.size()) i = 0; i < p_state_machine->transitions.size(); ++i) {
 			if (p_state_machine->transitions[i].from != transition || p_state_machine->transitions[i].to == transition_prev) {
 				continue; //not interested on those
 			}
@@ -287,7 +288,7 @@ bool AnimationNodeStateMachinePlayback::_travel(AnimationNodeStateMachine *p_sta
 		at = cost_map[at].prev;
 	}
 
-	path.invert();
+	std::reverse(path.begin(), path.end());
 
 	return true;
 }
@@ -399,17 +400,17 @@ float AnimationNodeStateMachinePlayback::process(AnimationNodeStateMachine *p_st
 
 	if (path.size()) {
 
-		for (int i = 0; i < p_state_machine->transitions.size(); i++) {
-			if (p_state_machine->transitions[i].from == current && p_state_machine->transitions[i].to == path[0]) {
-				next_xfade = p_state_machine->transitions[i].transition->get_xfade_time();
-				switch_mode = p_state_machine->transitions[i].transition->get_switch_mode();
-				next = path[0];
+		for (auto &&transition : p_state_machine->transitions) {
+			if (transition.from == current && transition.to == path[0]) {
+				next_xfade = transition.transition->get_xfade_time();
+				switch_mode = transition.transition->get_switch_mode();
+				next = path.front();
 			}
 		}
 	} else {
 		float priority_best = 1e20;
 		int auto_advance_to = -1;
-		for (int i = 0; i < p_state_machine->transitions.size(); i++) {
+		for (decltype(p_state_machine->transitions.size()) i = 0; i < p_state_machine->transitions.size(); ++i) {
 
 			bool auto_advance = false;
 			if (p_state_machine->transitions[i].transition->has_auto_advance()) {
@@ -462,8 +463,8 @@ float AnimationNodeStateMachinePlayback::process(AnimationNodeStateMachine *p_st
 				fading_pos = 0;
 			}
 
-			if (path.size()) { //if it came from path, remove path
-				path.remove(0);
+			if (!path.empty()) { //if it came from path, remove path
+				path.erase(path.begin());
 			}
 			current = next;
 			if (switch_mode == AnimationNodeStateMachineTransition::SWITCH_MODE_SYNC) {
@@ -514,9 +515,9 @@ AnimationNodeStateMachinePlayback::AnimationNodeStateMachinePlayback() {
 void AnimationNodeStateMachine::get_parameter_list(List<PropertyInfo> *r_list) const {
 	r_list->push_back(PropertyInfo(Variant::OBJECT, playback, PROPERTY_HINT_RESOURCE_TYPE, "AnimationNodeStateMachinePlayback", PROPERTY_USAGE_DEFAULT | PROPERTY_USAGE_DO_NOT_SHARE_ON_DUPLICATE));
 	List<StringName> advance_conditions;
-	for (int i = 0; i < transitions.size(); i++) {
-		StringName ac = transitions[i].transition->get_advance_condition_name();
-		if (ac != StringName() && advance_conditions.find(ac) == NULL) {
+	for (auto &&transition : transitions) {
+		StringName ac = transition.transition->get_advance_condition_name();
+		if (ac != StringName() && advance_conditions.find(ac) == nullptr) {
 			advance_conditions.push_back(ac);
 		}
 	}
@@ -574,17 +575,17 @@ StringName AnimationNodeStateMachine::get_node_name(const Ref<AnimationNode> &p_
 }
 
 void AnimationNodeStateMachine::get_child_nodes(List<ChildNode> *r_child_nodes) {
-	Vector<StringName> nodes;
+	std::vector<StringName> nodes;
 
 	for (Map<StringName, State>::Element *E = states.front(); E; E = E->next()) {
 		nodes.push_back(E->key());
 	}
 
-	nodes.sort_custom<StringName::AlphCompare>();
+	std::sort(nodes.begin(), nodes.end(), StringName::AlphCompare{});
 
-	for (int i = 0; i < nodes.size(); i++) {
+	for (auto &&str : nodes) {
 		ChildNode cn;
-		cn.name = nodes[i];
+		cn.name = str;
 		cn.node = states[cn.name].node;
 		r_child_nodes->push_back(cn);
 	}
@@ -608,13 +609,13 @@ void AnimationNodeStateMachine::remove_node(const StringName &p_name) {
 	states.erase(p_name);
 	//path.erase(p_name);
 
-	for (int i = 0; i < transitions.size(); i++) {
-		if (transitions[i].from == p_name || transitions[i].to == p_name) {
-			transitions.write[i].transition->disconnect("advance_condition_changed", this, "_tree_changed");
-			transitions.remove(i);
-			i--;
+	auto it_find = std::remove_if(transitions.begin(), transitions.end(), [&](const Transition &trans) {
+		if (trans.from == p_name || trans.to == p_name) {
+			trans.transition->disconnect("advance_condition_changed", this, "_tree_changed");
+			return true;
 		}
-	}
+		return false;
+	});
 
 	if (start_node == p_name) {
 		start_node = StringName();
@@ -640,13 +641,13 @@ void AnimationNodeStateMachine::rename_node(const StringName &p_name, const Stri
 	states[p_new_name] = states[p_name];
 	states.erase(p_name);
 
-	for (int i = 0; i < transitions.size(); i++) {
-		if (transitions[i].from == p_name) {
-			transitions.write[i].from = p_new_name;
+	for (auto &&trans : transitions) {
+		if (trans.from == p_name) {
+			trans.from = p_new_name;
 		}
 
-		if (transitions[i].to == p_name) {
-			transitions.write[i].to = p_new_name;
+		if (trans.to == p_name) {
+			trans.to = p_new_name;
 		}
 	}
 
@@ -681,19 +682,33 @@ void AnimationNodeStateMachine::get_node_list(List<StringName> *r_nodes) const {
 
 bool AnimationNodeStateMachine::has_transition(const StringName &p_from, const StringName &p_to) const {
 
-	for (int i = 0; i < transitions.size(); i++) {
-		if (transitions[i].from == p_from && transitions[i].to == p_to)
+	auto it_find = std::find_if(transitions.begin(), transitions.end(), [&](const Transition &trans) {
+		if (trans.from == p_from && trans.to == p_to) {
 			return true;
+		}
+		return false;
+	});
+
+	if (it_find != transitions.end()) {
+		return true;
 	}
+
 	return false;
 }
 
 int AnimationNodeStateMachine::find_transition(const StringName &p_from, const StringName &p_to) const {
 
-	for (int i = 0; i < transitions.size(); i++) {
-		if (transitions[i].from == p_from && transitions[i].to == p_to)
-			return i;
+	auto it_find = std::find_if(transitions.begin(), transitions.end(), [&](const Transition &trans) {
+		if (trans.from == p_from && trans.to == p_to) {
+			return true;
+		}
+		return false;
+	});
+
+	if (it_find != transitions.end()) {
+		return std::distance(transitions.begin(), it_find);
 	}
+
 	return -1;
 }
 
@@ -704,8 +719,8 @@ void AnimationNodeStateMachine::add_transition(const StringName &p_from, const S
 	ERR_FAIL_COND(!states.has(p_to));
 	ERR_FAIL_COND(p_transition.is_null());
 
-	for (int i = 0; i < transitions.size(); i++) {
-		ERR_FAIL_COND(transitions[i].from == p_from && transitions[i].to == p_to);
+	for (auto &&trans : transitions) {
+		ERR_FAIL_COND(trans.from == p_from && trans.to == p_to);
 	}
 
 	Transition tr;
@@ -739,10 +754,10 @@ int AnimationNodeStateMachine::get_transition_count() const {
 }
 void AnimationNodeStateMachine::remove_transition(const StringName &p_from, const StringName &p_to) {
 
-	for (int i = 0; i < transitions.size(); i++) {
+	for (decltype(transitions.size()) i = 0; i < transitions.size(); ++i) {
 		if (transitions[i].from == p_from && transitions[i].to == p_to) {
-			transitions.write[i].transition->disconnect("advance_condition_changed", this, "_tree_changed");
-			transitions.remove(i);
+			transitions[i].transition->disconnect("advance_condition_changed", this, "_tree_changed");
+			transitions.erase(transitions.begin() + i);
 			return;
 		}
 	}
@@ -755,8 +770,8 @@ void AnimationNodeStateMachine::remove_transition(const StringName &p_from, cons
 void AnimationNodeStateMachine::remove_transition_by_index(int p_transition) {
 
 	ERR_FAIL_INDEX(p_transition, transitions.size());
-	transitions.write[p_transition].transition->disconnect("advance_condition_changed", this, "_tree_changed");
-	transitions.remove(p_transition);
+	transitions[p_transition].transition->disconnect("advance_condition_changed", this, "_tree_changed");
+	transitions.erase(transitions.begin() + p_transition);
 	/*if (playing) {
 		path.clear();
 	}*/
@@ -881,7 +896,7 @@ bool AnimationNodeStateMachine::_get(const StringName &p_name, Variant &r_ret) c
 		Array trans;
 		trans.resize(transitions.size() * 3);
 
-		for (int i = 0; i < transitions.size(); i++) {
+		for (decltype(transitions.size()) i = 0; i < transitions.size(); ++i) {
 			trans[i * 3 + 0] = transitions[i].from;
 			trans[i * 3 + 1] = transitions[i].to;
 			trans[i * 3 + 2] = transitions[i].transition;

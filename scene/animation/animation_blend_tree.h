@@ -51,7 +51,7 @@ protected:
 public:
 	void get_parameter_list(List<PropertyInfo> *r_list) const;
 
-	static Vector<String> (*get_editable_animation_list)();
+	static std::vector<String> (*get_editable_animation_list)();
 
 	virtual String get_caption() const;
 	virtual float process(float p_time, bool p_seek);
@@ -338,7 +338,7 @@ class AnimationNodeBlendTree : public AnimationRootNode {
 	struct Node {
 		Ref<AnimationNode> node;
 		Vector2 position;
-		Vector<StringName> connections;
+		std::vector<StringName> connections;
 	};
 
 	Map<StringName, Node> nodes;
@@ -371,7 +371,7 @@ public:
 	void rename_node(const StringName &p_name, const StringName &p_new_name);
 	bool has_node(const StringName &p_name) const;
 	StringName get_node_name(const Ref<AnimationNode> &p_node) const;
-	Vector<StringName> get_node_connection_array(const StringName &p_name) const;
+	std::vector<StringName> get_node_connection_array(const StringName &p_name) const;
 
 	void set_node_position(const StringName &p_node, const Vector2 &p_position);
 	Vector2 get_node_position(const StringName &p_node) const;

@@ -189,7 +189,7 @@ void AnimationNodeStateMachineEditor::_state_machine_gui_input(const Ref<InputEv
 		//test the lines now
 		int closest = -1;
 		float closest_d = 1e20;
-		for (int i = 0; i < transition_lines.size(); i++) {
+		for (decltype(transition_lines.size()) i = 0; i < transition_lines.size(); ++i) {
 
 			Vector2 s[2] = {
 				transition_lines[i].from,
@@ -588,7 +588,7 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 	bool playing = false;
 	StringName current;
 	StringName blend_from;
-	Vector<StringName> travel_path;
+	std::vector<StringName> travel_path;
 
 	if (playback.is_valid()) {
 		playing = playback->is_playing();
@@ -673,12 +673,12 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 			to = connecting_to;
 		}
 
-		for (int i = 0; i < node_rects.size(); i++) {
-			if (node_rects[i].node_name == connecting_from) {
-				_clip_src_line_to_rect(from, to, node_rects[i].node);
+		for (auto &&n_rect : node_rects) {
+			if (n_rect.node_name == connecting_from) {
+				_clip_src_line_to_rect(from, to, n_rect.node);
 			}
-			if (node_rects[i].node_name == connecting_to_node) {
-				_clip_dst_line_to_rect(from, to, node_rects[i].node);
+			if (n_rect.node_name == connecting_to_node) {
+				_clip_dst_line_to_rect(from, to, n_rect.node);
 			}
 		}
 
@@ -714,12 +714,12 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 			tl.to += offset;
 		}
 
-		for (int j = 0; j < node_rects.size(); j++) {
-			if (node_rects[j].node_name == tl.from_node) {
-				_clip_src_line_to_rect(tl.from, tl.to, node_rects[j].node);
+		for (auto &&n_rect : node_rects) {
+			if (n_rect.node_name == tl.from_node) {
+				_clip_src_line_to_rect(tl.from, tl.to, n_rect.node);
 			}
-			if (node_rects[j].node_name == tl.to_node) {
-				_clip_dst_line_to_rect(tl.from, tl.to, node_rects[j].node);
+			if (n_rect.node_name == tl.to_node) {
+				_clip_dst_line_to_rect(tl.from, tl.to, n_rect.node);
 			}
 		}
 
@@ -736,7 +736,7 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 			if (current == tl.from_node && travel_path[0] == tl.to_node) {
 				travel = true;
 			} else {
-				for (int j = 0; j < travel_path.size() - 1; j++) {
+				for (decltype(travel_path.size()) j = 0; j < travel_path.size() - 1; ++j) {
 					if (travel_path[j] == tl.from_node && travel_path[j + 1] == tl.to_node) {
 						travel = true;
 						break;
@@ -757,15 +757,15 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 	}
 
 	//draw actual nodes
-	for (int i = 0; i < node_rects.size(); i++) {
+	for (auto &&n_rect : node_rects) {
 
-		String name = node_rects[i].node_name;
+		String name = n_rect.node_name;
 		Ref<AnimationNode> anode = state_machine->get_node(name);
 		bool needs_editor = AnimationTreeEditor::get_singleton()->can_edit(anode);
 		Ref<StyleBox> sb = name == selected_node ? style_selected : style;
 		int strsize = font->get_string_size(name).width;
 
-		NodeRect &nr = node_rects.write[i];
+		NodeRect &nr = n_rect;
 
 		Vector2 offset = nr.node.position;
 		int h = nr.node.size.height;
@@ -849,18 +849,17 @@ void AnimationNodeStateMachineEditor::_state_machine_pos_draw() {
 	if (!playback.is_valid() || !playback->is_playing())
 		return;
 
-	int idx = -1;
-	for (int i = 0; i < node_rects.size(); i++) {
-		if (node_rects[i].node_name == playback->get_current_node()) {
-			idx = i;
-			break;
+	auto it_find = std::find_if(node_rects.begin(), node_rects.end(), [&](const NodeRect &rect) {
+		if (rect.node_name == playback->get_current_node()) {
+			return true;
 		}
-	}
+		return false;
+	});
 
-	if (idx == -1)
+	if (it_find == node_rects.end())
 		return;
 
-	const NodeRect &nr = node_rects[idx];
+	const NodeRect &nr = *it_find;
 
 	Vector2 from;
 	from.x = nr.play.position.x;
@@ -964,10 +963,10 @@ void AnimationNodeStateMachineEditor::_notification(int p_what) {
 			}
 		}
 
-		for (int i = 0; i < transition_lines.size(); i++) {
+		for (auto &&t_line : transition_lines) {
 			int tidx = -1;
 			for (int j = 0; j < state_machine->get_transition_count(); j++) {
-				if (transition_lines[i].from_node == state_machine->get_transition_from(j) && transition_lines[i].to_node == state_machine->get_transition_to(j)) {
+				if (t_line.from_node == state_machine->get_transition_from(j) && t_line.to_node == state_machine->get_transition_to(j)) {
 					tidx = j;
 					break;
 				}
@@ -978,36 +977,36 @@ void AnimationNodeStateMachineEditor::_notification(int p_what) {
 				break;
 			}
 
-			if (transition_lines[i].disabled != state_machine->get_transition(tidx)->is_disabled()) {
+			if (t_line.disabled != state_machine->get_transition(tidx)->is_disabled()) {
 				state_machine_draw->update();
 				break;
 			}
 
-			if (transition_lines[i].auto_advance != state_machine->get_transition(tidx)->has_auto_advance()) {
+			if (t_line.auto_advance != state_machine->get_transition(tidx)->has_auto_advance()) {
 				state_machine_draw->update();
 				break;
 			}
 
-			if (transition_lines[i].advance_condition_name != state_machine->get_transition(tidx)->get_advance_condition_name()) {
+			if (t_line.advance_condition_name != state_machine->get_transition(tidx)->get_advance_condition_name()) {
 				state_machine_draw->update();
 				break;
 			}
 
-			if (transition_lines[i].mode != state_machine->get_transition(tidx)->get_switch_mode()) {
+			if (t_line.mode != state_machine->get_transition(tidx)->get_switch_mode()) {
 				state_machine_draw->update();
 				break;
 			}
 
-			bool acstate = transition_lines[i].advance_condition_name != StringName() && bool(AnimationTreeEditor::get_singleton()->get_tree()->get(AnimationTreeEditor::get_singleton()->get_base_path() + String(transition_lines[i].advance_condition_name)));
+			bool acstate = t_line.advance_condition_name != StringName() && bool(AnimationTreeEditor::get_singleton()->get_tree()->get(AnimationTreeEditor::get_singleton()->get_base_path() + String(transition_lines[i].advance_condition_name)));
 
-			if (transition_lines[i].advance_condition_state != acstate) {
+			if (t_line.advance_condition_state != acstate) {
 				state_machine_draw->update();
 				break;
 			}
 		}
 
 		bool same_travel_path = true;
-		Vector<StringName> tp;
+		std::vector<StringName> tp;
 		bool is_playing = false;
 		StringName current_node;
 		StringName blend_from_node;
@@ -1028,7 +1027,7 @@ void AnimationNodeStateMachineEditor::_notification(int p_what) {
 			if (last_travel_path.size() != tp.size()) {
 				same_travel_path = false;
 			} else {
-				for (int i = 0; i < last_travel_path.size(); i++) {
+				for (decltype(last_travel_path.size()) i = 0; i < last_travel_path.size(); ++i) {
 					if (last_travel_path[i] != tp[i]) {
 						same_travel_path = false;
 						break;

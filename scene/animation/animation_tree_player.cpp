@@ -875,7 +875,7 @@ void AnimationTreePlayer::_process_animation(float p_delta) {
 						for (List<int>::Element *F = indices.front(); F; F = F->next()) {
 
 							StringName method = a->method_track_get_name(tr.local_track, F->get());
-							Vector<Variant> args = a->method_track_get_params(tr.local_track, F->get());
+							std::vector<Variant> args = a->method_track_get_params(tr.local_track, F->get());
 							args.resize(VARIANT_ARG_MAX);
 							tr.track->object->call(method, args[0], args[1], args[2], args[3], args[4]);
 						}
@@ -898,7 +898,7 @@ void AnimationTreePlayer::_process_animation(float p_delta) {
 		if (t.skip || !t.object)
 			continue;
 
-		if (t.subpath.size()) { // value track
+		if (!t.subpath.empty()) { // value track
 			t.object->set_indexed(t.subpath, t.value);
 			continue;
 		}
@@ -1365,10 +1365,9 @@ void AnimationTreePlayer::remove_node(const StringName &p_node) {
 	for (Map<StringName, NodeBase *>::Element *E = node_map.front(); E; E = E->next()) {
 
 		NodeBase *nb = E->get();
-		for (int i = 0; i < nb->inputs.size(); i++) {
-
-			if (nb->inputs[i].node == p_node)
-				nb->inputs.write[i].node = StringName();
+		for (auto &&input : nb->inputs) {
+			if (input.node == p_node)
+				input.node = StringName();
 		}
 	}
 
@@ -1391,11 +1390,11 @@ AnimationTreePlayer::ConnectError AnimationTreePlayer::_cycle_test(const StringN
 
 	nb->cycletest = true;
 
-	for (int i = 0; i < nb->inputs.size(); i++) {
-		if (nb->inputs[i].node == StringName())
+	for (auto &&input : nb->inputs) {
+		if (input.node == StringName())
 			return CONNECT_INCOMPLETE;
 
-		ConnectError _err = _cycle_test(nb->inputs[i].node);
+		ConnectError _err = _cycle_test(input.node);
 		if (_err)
 			return _err;
 	}
@@ -1426,14 +1425,13 @@ Error AnimationTreePlayer::connect_nodes(const StringName &p_src_node, const Str
 	for (Map<StringName, NodeBase *>::Element *E = node_map.front(); E; E = E->next()) {
 
 		NodeBase *nb = E->get();
-		for (int i = 0; i < nb->inputs.size(); i++) {
-
-			if (nb->inputs[i].node == p_src_node)
-				nb->inputs.write[i].node = StringName();
+		for (auto &&input : nb->inputs) {
+			if (input.node == p_src_node)
+				input.node = StringName();
 		}
 	}
 
-	dst->inputs.write[p_dst_input].node = p_src_node;
+	dst->inputs[p_dst_input].node = p_src_node;
 
 	_clear_cycle_test();
 
@@ -1466,7 +1464,7 @@ void AnimationTreePlayer::disconnect_nodes(const StringName &p_node, int p_input
 
 	NodeBase *dst = node_map[p_node];
 	ERR_FAIL_INDEX(p_input, dst->inputs.size());
-	dst->inputs.write[p_input].node = StringName();
+	dst->inputs[p_input].node = StringName();
 	last_error = CONNECT_INCOMPLETE;
 	dirty_caches = true;
 }
@@ -1476,8 +1474,7 @@ void AnimationTreePlayer::get_connection_list(List<Connection> *p_connections) c
 	for (Map<StringName, NodeBase *>::Element *E = node_map.front(); E; E = E->next()) {
 
 		NodeBase *nb = E->get();
-		for (int i = 0; i < nb->inputs.size(); i++) {
-
+		for (decltype(nb->inputs.size()) i = 0; i < nb->inputs.size(); ++i) {
 			if (nb->inputs[i].node != StringName()) {
 				Connection c;
 				c.src_node = nb->inputs[i].node;
@@ -1495,7 +1492,7 @@ AnimationTreePlayer::Track *AnimationTreePlayer::_find_track(const NodePath &p_p
 	ERR_FAIL_COND_V(!parent, NULL);
 
 	RES resource;
-	Vector<StringName> leftover_path;
+	std::vector<StringName> leftover_path;
 	Node *child = parent->get_node_and_resource(p_path, resource, leftover_path);
 	if (!child) {
 		String err = "Animation track references unknown Node: '" + String(p_path) + "'.";
@@ -1571,9 +1568,8 @@ void AnimationTreePlayer::_recompute_caches(const StringName &p_node) {
 		}
 	}
 
-	for (int i = 0; i < nb->inputs.size(); i++) {
-
-		_recompute_caches(nb->inputs[i].node);
+	for (auto &&input : nb->inputs) {
+		_recompute_caches(input.node);
 	}
 }
 
@@ -1703,10 +1699,9 @@ Error AnimationTreePlayer::node_rename(const StringName &p_node, const StringNam
 	for (Map<StringName, NodeBase *>::Element *E = node_map.front(); E; E = E->next()) {
 
 		NodeBase *nb = E->get();
-		for (int i = 0; i < nb->inputs.size(); i++) {
-
-			if (nb->inputs[i].node == p_node) {
-				nb->inputs.write[i].node = p_new_name;
+		for (auto &&input : nb->inputs) {
+			if (input.node == p_node) {
+				input.node = p_new_name;
 			}
 		}
 	}

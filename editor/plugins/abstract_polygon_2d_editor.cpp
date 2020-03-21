@@ -89,9 +89,9 @@ bool AbstractPolygon2DEditor::_is_empty() const {
 
 	for (int i = 0; i < n; i++) {
 
-		Vector<Vector2> vertices = _get_polygon(i);
+		std::vector<Vector2> vertices = _get_polygon(i);
 
-		if (vertices.size() != 0)
+		if (!vertices.empty())
 			return false;
 	}
 
@@ -335,7 +335,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 					if (insert.valid()) {
 
-						Vector<Vector2> vertices = _get_polygon(insert.polygon);
+						std::vector<Vector2> vertices = _get_polygon(insert.polygon);
 
 						if (vertices.size() < (_is_line() ? 2 : 3)) {
 
@@ -347,7 +347,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 							return true;
 						} else {
 
-							Vector<Vector2> vertices2 = _get_polygon(insert.polygon);
+							std::vector<Vector2> vertices2 = _get_polygon(insert.polygon);
 							pre_move_edit = vertices2;
 							edited_point = PosVertex(insert.polygon, insert.vertex + 1, xform.affine_inverse().xform(insert.pos));
 							vertices2.insert(edited_point.vertex, edited_point.pos);
@@ -383,7 +383,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 						//apply
 
-						Vector<Vector2> vertices = _get_polygon(edited_point.polygon);
+						std::vector<Vector2> vertices = _get_polygon(edited_point.polygon);
 						ERR_FAIL_INDEX_V(edited_point.vertex, vertices.size(), false);
 						vertices.write[edited_point.vertex] = edited_point.pos - _get_offset(edited_point.polygon);
 
@@ -426,7 +426,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 				if (_is_line()) {
 
 					// for lines, we don't have a wip mode, and we can undo each single add point.
-					Vector<Vector2> vertices = _get_polygon(0);
+					std::vector<Vector2> vertices = _get_polygon(0);
 					vertices.push_back(cpoint);
 					undo_redo->create_action(TTR("Insert Point"));
 					_action_set_polygon(0, vertices);
@@ -494,7 +494,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 			if (!wip_active) {
 
-				Vector<Vector2> vertices = _get_polygon(edited_point.polygon);
+				std::vector<Vector2> vertices = _get_polygon(edited_point.polygon);
 				ERR_FAIL_INDEX_V(edited_point.vertex, vertices.size(), false);
 				vertices.write[edited_point.vertex] = cpoint - _get_offset(edited_point.polygon);
 				_set_polygon(edited_point.polygon, vertices);
@@ -601,8 +601,8 @@ void AbstractPolygon2DEditor::forward_canvas_draw_over_viewport(Control *p_overl
 		if (!wip_active && j == edited_point.polygon && EDITOR_GET("editors/poly_editor/show_previous_outline")) {
 
 			const Color col = Color(0.5, 0.5, 0.5); // FIXME polygon->get_outline_color();
-			const int n = pre_move_edit.size();
-			for (int i = 0; i < n - (is_closed ? 0 : 1); i++) {
+			const auto n = pre_move_edit.size();
+			for (decltype(n) i = 0; i < n - (is_closed ? 0 : 1); ++i) {
 
 				Vector2 p, p2;
 				p = pre_move_edit[i] + offset;

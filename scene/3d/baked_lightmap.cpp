@@ -133,10 +133,10 @@ void BakedLightmapData::_set_user_data(const Array &p_data) {
 Array BakedLightmapData::_get_user_data() const {
 
 	Array ret;
-	for (int i = 0; i < users.size(); i++) {
-		ret.push_back(users[i].path);
-		ret.push_back(users[i].lightmap);
-		ret.push_back(users[i].instance_index);
+	for (auto &&user : users) {
+		ret.push_back(user.path);
+		ret.push_back(user.lightmap);
+		ret.push_back(user.instance_index);
 	}
 	return ret;
 }

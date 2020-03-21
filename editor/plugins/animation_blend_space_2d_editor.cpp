@@ -144,7 +144,7 @@ void AnimationNodeBlendSpace2DEditor::_blend_space_gui_input(const Ref<InputEven
 		selected_triangle = -1;
 		_update_tool_erase();
 
-		for (int i = 0; i < points.size(); i++) {
+		for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 
 			if (points[i].distance_to(mb->get_position()) < 10 * EDSCALE) {
 				selected_point = i;
@@ -161,9 +161,9 @@ void AnimationNodeBlendSpace2DEditor::_blend_space_gui_input(const Ref<InputEven
 		//then try to see if a triangle can be selected
 		if (!blend_space->get_auto_triangles()) { //if autotriangles use, disable this
 			for (int i = 0; i < blend_space->get_triangle_count(); i++) {
-				Vector<Vector2> triangle;
+				std::vector<Vector2> triangle;
 
-				for (int j = 0; j < 3; j++) {
+				for (uint8_t j = 0; j < 3u; ++j) {
 					int idx = blend_space->get_triangle_point(i, j);
 					ERR_FAIL_INDEX(idx, points.size());
 					triangle.push_back(points[idx]);
@@ -184,9 +184,9 @@ void AnimationNodeBlendSpace2DEditor::_blend_space_gui_input(const Ref<InputEven
 		//try to see if a point can be selected
 		selected_point = -1;
 
-		for (int i = 0; i < points.size(); i++) {
+		for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 
-			if (making_triangle.find(i) != -1)
+			if (std::find(making_triangle.begin(), making_triangle.end(), i) != making_triangle.end())
 				continue;
 
 			if (points[i].distance_to(mb->get_position()) < 10 * EDSCALE) {
@@ -382,11 +382,11 @@ void AnimationNodeBlendSpace2DEditor::_tool_switch(int p_tool) {
 	making_triangle.clear();
 
 	if (p_tool == 2) {
-		Vector<Vector2> points;
+		std::vector<Vector2> points;
 		for (int i = 0; i < blend_space->get_blend_point_count(); i++) {
 			points.push_back(blend_space->get_blend_point_position(i));
 		}
-		Vector<Delaunay2D::Triangle> tr = Delaunay2D::triangulate(points);
+		std::vector<Delaunay2D::Triangle> tr = Delaunay2D::triangulate(points);
 		for (int i = 0; i < tr.size(); i++) {
 			blend_space->add_triangle(tr[i].points[0], tr[i].points[1], tr[i].points[2]);
 		}
@@ -476,10 +476,10 @@ void AnimationNodeBlendSpace2DEditor::_blend_space_draw() {
 	//triangles first
 	for (int i = 0; i < blend_space->get_triangle_count(); i++) {
 
-		Vector<Vector2> points;
+		std::vector<Vector2> points;
 		points.resize(3);
 
-		for (int j = 0; j < 3; j++) {
+		for (uint8_t j = 0; j < 3u; ++j) {
 			int point_idx = blend_space->get_triangle_point(i, j);
 			Vector2 point = blend_space->get_blend_point_position(point_idx);
 			if (dragging_selected && selected_point == point_idx) {
@@ -492,10 +492,10 @@ void AnimationNodeBlendSpace2DEditor::_blend_space_draw() {
 			point = (point - blend_space->get_min_space()) / (blend_space->get_max_space() - blend_space->get_min_space());
 			point *= s;
 			point.y = s.height - point.y;
-			points.write[j] = point;
+			points[j] = point;
 		}
 
-		for (int j = 0; j < 3; j++) {
+		for (uint8_t j = 0; j < 3u; ++j) {
 			blend_space_draw->draw_line(points[j], points[(j + 1) % 3], linecolor, 1, true);
 		}
 
@@ -508,11 +508,11 @@ void AnimationNodeBlendSpace2DEditor::_blend_space_draw() {
 			color.a *= 0.2;
 		}
 
-		Vector<Color> colors;
+		std::vector<Color> colors;
 		colors.push_back(color);
 		colors.push_back(color);
 		colors.push_back(color);
-		blend_space_draw->draw_primitive(points, colors, Vector<Vector2>());
+		blend_space_draw->draw_primitive(points, colors, std::vector<Vector2>());
 	}
 
 	points.clear();
@@ -542,16 +542,16 @@ void AnimationNodeBlendSpace2DEditor::_blend_space_draw() {
 	}
 
 	if (making_triangle.size()) {
-		Vector<Vector2> points;
-		for (int i = 0; i < making_triangle.size(); i++) {
-			Vector2 point = blend_space->get_blend_point_position(making_triangle[i]);
+		std::vector<Vector2> points;
+		for (auto &&m_triangle : making_triangle) {
+			Vector2 point = blend_space->get_blend_point_position(m_triangle);
 			point = (point - blend_space->get_min_space()) / (blend_space->get_max_space() - blend_space->get_min_space());
 			point *= s;
 			point.y = s.height - point.y;
 			points.push_back(point);
 		}
 
-		for (int i = 0; i < points.size() - 1; i++) {
+		for (decltype(points.size()) i = 0; i < points.size() - 1; ++i) {
 			blend_space_draw->draw_line(points[i], points[i + 1], linecolor, 2, true);
 		}
 		blend_space_draw->draw_line(points[points.size() - 1], blend_space_draw->get_local_mouse_position(), linecolor, 2, true);

@@ -100,7 +100,7 @@ private:
 		Spatial *spatial;
 		Skeleton *skeleton;
 		int bone_idx;
-		Vector<StringName> subpath;
+		std::vector<StringName> subpath;
 
 		Vector3 loc;
 		Quat rot;
@@ -136,7 +136,7 @@ private:
 		NodeType type;
 		Point2 pos;
 
-		Vector<Input> inputs;
+		std::vector<Input> inputs;
 
 		NodeBase() { cycletest = false; };
 		virtual ~NodeBase() { cycletest = false; }
@@ -278,7 +278,7 @@ private:
 			InputData() { auto_advance = false; }
 		};
 
-		Vector<InputData> input_data;
+		std::vector<InputData> input_data;
 
 		float prev_time;
 		float prev_xfading;
