@@ -636,7 +636,9 @@ std::vector<std::vector<String> > EditorProfiler::get_data_as_csv() const {
 	for (auto &&categorie : frame_metrics[0].categories) {
 		signatures.push_back(categorie.signature);
 
-		signatures.insert(signatures.end(), categorie.items.begin(), categorie.items.end());
+		for (auto &&item : categorie.items) {
+			signatures.push_back(item.signature);
+		}
 	}
 
 	res.push_back(signatures);
