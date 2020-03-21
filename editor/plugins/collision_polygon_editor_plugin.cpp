@@ -66,7 +66,7 @@ void Polygon3DEditor::_notification(int p_what) {
 void Polygon3DEditor::_node_removed(Node *p_node) {
 
 	if (p_node == node) {
-		node = NULL;
+		node = nullptr;
 		if (imgeom->get_parent() == p_node)
 			p_node->remove_child(imgeom);
 		hide();
@@ -141,7 +141,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 		//Let the snap happen when the point is being moved, instead.
 		//cpoint = CanvasItemEditor::get_singleton()->snap_point(cpoint);
 
-		Vector<Vector2> poly = node->call("get_polygon");
+		std::vector<Vector2> poly = node->call("get_polygon");
 
 		//first check if a point is to be added (segment split)
 		real_t grab_threshold = EDITOR_GET("editors/poly_editor/point_grab_radius");
@@ -164,7 +164,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 						return true;
 					} else {
 
-						if (wip.size() > 1 && p_camera->unproject_position(gt.xform(Vector3(wip[0].x, wip[0].y, depth))).distance_to(gpoint) < grab_threshold) {
+						if (wip.size() > 1 && p_camera->unproject_position(gt.xform(Vector3(wip.front().x, wip.front().y, depth))).distance_to(gpoint) < grab_threshold) {
 							//wip closed
 							_wip_close();
 
@@ -207,7 +207,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 							int closest_idx = -1;
 							Vector2 closest_pos;
 							real_t closest_dist = 1e10;
-							for (int i = 0; i < poly.size(); i++) {
+							for (decltype(poly.size()) i = 0; i < poly.size(); ++i) {
 
 								Vector2 points[2] = {
 									p_camera->unproject_position(gt.xform(Vector3(poly[i].x, poly[i].y, depth))),
@@ -245,7 +245,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 							int closest_idx = -1;
 							Vector2 closest_pos;
 							real_t closest_dist = 1e10;
-							for (int i = 0; i < poly.size(); i++) {
+							for (decltype(poly.size()) i = 0; i < poly.size(); ++i) {
 
 								Vector2 cp = p_camera->unproject_position(gt.xform(Vector3(poly[i].x, poly[i].y, depth)));
 
@@ -276,7 +276,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 							//apply
 
 							ERR_FAIL_INDEX_V(edited_point, poly.size(), false);
-							poly.write[edited_point] = edited_point_pos;
+							poly[edited_point] = edited_point_pos;
 							undo_redo->create_action(TTR("Edit Poly"));
 							undo_redo->add_do_method(node, "set_polygon", poly);
 							undo_redo->add_undo_method(node, "set_polygon", pre_move_edit);
@@ -294,8 +294,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 					int closest_idx = -1;
 					Vector2 closest_pos;
 					real_t closest_dist = 1e10;
-					for (int i = 0; i < poly.size(); i++) {
-
+					for (decltype(poly.size()) i = 0; i < poly.size(); ++i) {
 						Vector2 cp = p_camera->unproject_position(gt.xform(Vector3(poly[i].x, poly[i].y, depth)));
 
 						real_t d = cp.distance_to(gpoint);
@@ -310,7 +309,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 
 						undo_redo->create_action(TTR("Edit Poly (Remove Point)"));
 						undo_redo->add_undo_method(node, "set_polygon", poly);
-						poly.remove(closest_idx);
+						poly.erase(poly.begin() + closest_idx);
 						undo_redo->add_do_method(node, "set_polygon", poly);
 						undo_redo->add_do_method(this, "_polygon_draw");
 						undo_redo->add_undo_method(this, "_polygon_draw");
@@ -373,7 +372,7 @@ void Polygon3DEditor::_polygon_draw() {
 	if (!node)
 		return;
 
-	Vector<Vector2> poly;
+	std::vector<Vector2> poly;
 
 	if (wip_active)
 		poly = wip;
@@ -388,7 +387,7 @@ void Polygon3DEditor::_polygon_draw() {
 
 	Rect2 rect;
 
-	for (int i = 0; i < poly.size(); i++) {
+	for (decltype(poly.size()) i = 0; i < poly.size(); ++i) {
 
 		Vector2 p, p2;
 		p = i == edited_point ? edited_point_pos : poly[i];
@@ -477,7 +476,7 @@ void Polygon3DEditor::_polygon_draw() {
 
 		va.resize(poly.size());
 		PoolVector<Vector3>::Write w = va.write();
-		for (int i = 0; i < poly.size(); i++) {
+		for (decltype(poly.size()) i = 0; i < poly.size(); ++i) {
 
 			Vector2 p, p2;
 			p = i == edited_point ? edited_point_pos : poly[i];
@@ -497,7 +496,7 @@ void Polygon3DEditor::edit(Node *p_collision_polygon) {
 
 		node = Object::cast_to<Spatial>(p_collision_polygon);
 		//Enable the pencil tool if the polygon is empty
-		if (Vector<Vector2>(node->call("get_polygon")).size() == 0) {
+		if (std::vector<Vector2>(node->call("get_polygon")).size() == 0) {
 			_menu_option(MODE_CREATE);
 		}
 		wip.clear();
