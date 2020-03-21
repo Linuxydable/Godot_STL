@@ -118,7 +118,7 @@ void ProjectExportDialog::_add_preset(int p_platform) {
 		if (valid)
 			break;
 
-		attempt++;
+		++attempt;
 		name = EditorExport::get_singleton()->get_export_platform(p_platform)->get_name() + " " + itos(attempt);
 	}
 
@@ -218,7 +218,7 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 	name->set_text(current->get_name());
 
 	List<String> extension_list = current->get_platform()->get_binary_extensions(current);
-	Vector<String> extension_vector;
+	std::vector<String> extension_vector;
 	for (int i = 0; i < extension_list.size(); i++) {
 		extension_vector.push_back("*." + extension_list[i]);
 	}
@@ -235,8 +235,8 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 
 	patches->clear();
 	TreeItem *patch_root = patches->create_item();
-	Vector<String> patchlist = current->get_patches();
-	for (int i = 0; i < patchlist.size(); i++) {
+	std::vector<String> patchlist = current->get_patches();
+	for (decltype(patchlist.size()) i = 0; i < patchlist.size(); ++i) {
 		TreeItem *patch = patches->create_item(patch_root);
 		patch->set_cell_mode(0, TreeItem::CELL_MODE_CHECK);
 		String file = patchlist[i].get_file();
@@ -266,14 +266,13 @@ void ProjectExportDialog::_edit_preset(int p_index) {
 	if (!current->get_platform()->can_export(current, error, needs_templates)) {
 
 		if (error != String()) {
-
-			Vector<String> items = error.split("\n", false);
+			std::vector<String> items = error.split("\n", false);
 			error = "";
-			for (int i = 0; i < items.size(); i++) {
-				if (i > 0)
-					error += "\n";
-				error += " - " + items[i];
-			}
+			error += " - " + items.front();
+			std::for_each(items.begin(), items.end(), [&](const String &it) {
+				error += "\n";
+				error += " - " + it;
+			});
 
 			export_error->set_text(error);
 			export_error->show();
@@ -336,9 +335,9 @@ void ProjectExportDialog::_update_feature_list() {
 	current->get_platform()->get_preset_features(current, &features);
 
 	String custom = current->get_custom_features();
-	Vector<String> custom_list = custom.split(",");
-	for (int i = 0; i < custom_list.size(); i++) {
-		String f = custom_list[i].strip_edges();
+	std::vector<String> custom_list = custom.split(",");
+	for (auto &&str : custom_list) {
+		String f = str.strip_edges();
 		if (f != String()) {
 			features.push_back(f);
 		}
@@ -384,7 +383,7 @@ void ProjectExportDialog::_patch_button_pressed(Object *p_item, int p_column, in
 	ERR_FAIL_COND(current.is_null());
 
 	if (p_id == 0) {
-		Vector<String> patches = current->get_patches();
+		std::vector<String> patches = current->get_patches();
 		ERR_FAIL_INDEX(patch_index, patches.size());
 		patch_erase->set_text(vformat(TTR("Delete patch '%s' from list?"), patches[patch_index].get_file()));
 		patch_erase->popup_centered_minsize();
@@ -403,7 +402,7 @@ void ProjectExportDialog::_patch_edited() {
 	Ref<EditorExportPreset> current = get_current_preset();
 	ERR_FAIL_COND(current.is_null());
 
-	Vector<String> patches = current->get_patches();
+	std::vector<String> patches = current->get_patches();
 
 	ERR_FAIL_INDEX(index, patches.size());
 
@@ -421,7 +420,7 @@ void ProjectExportDialog::_patch_selected(const String &p_path) {
 	Ref<EditorExportPreset> current = get_current_preset();
 	ERR_FAIL_COND(current.is_null());
 
-	Vector<String> patches = current->get_patches();
+	std::vector<String> patches = current->get_patches();
 
 	if (patch_index >= patches.size()) {
 
@@ -439,7 +438,7 @@ void ProjectExportDialog::_patch_deleted() {
 	Ref<EditorExportPreset> current = get_current_preset();
 	ERR_FAIL_COND(current.is_null());
 
-	Vector<String> patches = current->get_patches();
+	std::vector<String> patches = current->get_patches();
 	if (patch_index < patches.size()) {
 
 		current->remove_patch(patch_index);
@@ -595,9 +594,9 @@ void ProjectExportDialog::_duplicate_preset() {
 	preset->set_export_filter(current->get_export_filter());
 	preset->set_include_filter(current->get_include_filter());
 	preset->set_exclude_filter(current->get_exclude_filter());
-	Vector<String> list = current->get_patches();
-	for (int i = 0; i < list.size(); i++) {
-		preset->add_patch(list[i]);
+	std::vector<String> list = current->get_patches();
+	for (auto &&str : list) {
+		preset->add_patch(str);
 	}
 	preset->set_custom_features(current->get_custom_features());
 
