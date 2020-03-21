@@ -1462,7 +1462,7 @@ int ProjectList::get_single_selected_index() const {
 	}
 
 	auto it_projects = std::find_if(_projects.begin(), _projects.end(),
-			[&](Item &&project) {
+			[&](const Item& project) {
 				if (project.project_key == key) {
 					return true;
 				}
@@ -1504,7 +1504,7 @@ void ProjectList::remove_project(int p_index, bool p_update_settings) {
 
 bool ProjectList::is_any_project_missing() const {
 	return std::find_if(_projects.begin(), _projects.end(),
-				   [](Item &&project) {
+				   [](const Item& project) {
 					   if (project.missing) {
 						   return true;
 					   }
