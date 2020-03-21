@@ -395,9 +395,9 @@ void GIProbe::_find_meshes(Node *p_at_node, List<PlotMesh> &plot_meshes) {
 	}
 }
 
-GIProbe::BakeBeginFunc GIProbe::bake_begin_function = NULL;
-GIProbe::BakeStepFunc GIProbe::bake_step_function = NULL;
-GIProbe::BakeEndFunc GIProbe::bake_end_function = NULL;
+GIProbe::BakeBeginFunc GIProbe::bake_begin_function = nullptr;
+GIProbe::BakeStepFunc GIProbe::bake_step_function = nullptr;
+GIProbe::BakeEndFunc GIProbe::bake_end_function = nullptr;
 
 void GIProbe::bake(Node *p_from_node, bool p_create_visual_debug) {
 
