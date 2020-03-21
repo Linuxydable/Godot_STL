@@ -170,7 +170,7 @@ void SceneTreeDock::_perform_instance_scenes(const std::vector<String> &p_files,
 
 	bool error = false;
 
-	for(auto&& p_file : p_files){
+	for (auto &&p_file : p_files) {
 		Ref<PackedScene> sdata = ResourceLoader::load(p_file);
 		if (!sdata.is_valid()) {
 			current_option = -1;
@@ -207,7 +207,7 @@ void SceneTreeDock::_perform_instance_scenes(const std::vector<String> &p_files,
 	}
 
 	if (error) {
-		for(auto&& instance : instances){
+		for (auto &&instance : instances) {
 			memdelete(instance);
 		}
 		return;
@@ -222,17 +222,17 @@ void SceneTreeDock::_perform_instance_scenes(const std::vector<String> &p_files,
 			editor_data->get_undo_redo().add_do_method(parent, "move_child", &instances[i], p_pos + i);
 		}
 
-		editor_data->get_undo_redo().add_do_method(&instances[i], "set_owner", edited_scene);
+		editor_data->get_undo_redo().add_do_method(instances[i], "set_owner", edited_scene);
 
 		editor_data->get_undo_redo().add_do_method(editor_selection, "clear");
 
 		editor_data->get_undo_redo().add_do_method(editor_selection, "add_node", &instances[i]);
 
-		editor_data->get_undo_redo().add_do_reference(&instances[i]);
+		editor_data->get_undo_redo().add_do_reference(instances[i]);
 
 		editor_data->get_undo_redo().add_undo_method(parent, "remove_child", &instances[i]);
 
-		String new_name = parent->validate_child_name(&instances[i]);
+		String new_name = parent->validate_child_name(instances[i]);
 		ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
 		editor_data->get_undo_redo().add_do_method(sed, "live_debug_instance_node", edited_scene->get_path_to(parent), p_files[i], new_name);
 		editor_data->get_undo_redo().add_undo_method(sed, "live_debug_remove_node", NodePath(String(edited_scene->get_path_to(parent)).plus_file(new_name)));
@@ -1315,7 +1315,8 @@ void SceneTreeDock::fill_path_renames(Node *p_node, Node *p_new_parent, List<Pai
 		base_path.push_back(n->get_name());
 		n = n->get_parent();
 	}
-	base_path.invert();
+
+	std::reverse(base_path.begin(), base_path.end());
 
 	std::vector<StringName> new_base_path;
 
@@ -1326,7 +1327,7 @@ void SceneTreeDock::fill_path_renames(Node *p_node, Node *p_new_parent, List<Pai
 			n = n->get_parent();
 		}
 
-		new_base_path.reverse(new_base_path.begin(), new_base_path.end() );
+		std::reverse(new_base_path.begin(), new_base_path.end());
 	}
 
 	_fill_path_renames(base_path, new_base_path, p_node, p_renames);
@@ -1505,7 +1506,7 @@ void SceneTreeDock::_node_prerenamed(Node *p_node, const String &p_new_name) {
 		n = n->get_parent();
 	}
 
-	base_path.reverse(base_path.begin(), base_path.end() );
+	std::reverse(base_path.begin(), base_path.end());
 
 	std::vector<StringName> new_base_path = base_path;
 	base_path.push_back(p_node->get_name());
@@ -1581,7 +1582,7 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, s
 	if(p_nodes.empty() )
 		return; // Nothing to reparent.
 
-	std::sort(p_nodes.begin(), p_nodes.end(), Node::Comparator); //Makes result reliable.
+	std::sort(p_nodes.begin(), p_nodes.end(), Node::Comparator{}); //Makes result reliable.
 
 	bool no_change = true;
 
@@ -1601,12 +1602,12 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, s
 	Node *validate = new_parent;
 	while (validate) {
 
-		ERR_FAIL_COND_MSG(p_nodes.find(validate) != -1, "Selection changed at some point. Can't reparent.");
+		ERR_FAIL_COND_MSG(std::find(p_nodes.begin(), p_nodes.end(), validate) != p_nodes.end(), "Selection changed at some point. Can't reparent.");
 		validate = validate->get_parent();
 	}
 
 	// Sort by tree order, so re-adding is easy.
-	std::sort(p_nodes.begin(), p_nodes.end(), Node::Comparator);
+	std::sort(p_nodes.begin(), p_nodes.end(), Node::Comparator{});
 
 	editor_data->get_undo_redo().create_action(TTR("Reparent Node"));
 
@@ -1615,33 +1616,33 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, s
 
 	int inc = 0;
 
-	for(decltype(p_nodes.size() ) ni = 0; ni < p_nodes.size(); ni++){
-		fill_path_renames(&p_nodes[ni], new_parent, &path_renames);
+	for (decltype(p_nodes.size()) ni = 0; ni < p_nodes.size(); ++ni) {
+		fill_path_renames(p_nodes[ni], new_parent, &path_renames);
 
-		former_names.push_back(p_nodes[ni].get_name() );
+		former_names.push_back(p_nodes[ni]->get_name());
 
 		List<Node *> owned;
 
-		p_nodes[ni].get_owned_by(p_nodes[ni].get_owner(), &owned);
+		p_nodes[ni]->get_owned_by(p_nodes[ni]->get_owner(), &owned);
 
 		Array owners;
 		for (List<Node *>::Element *E = owned.front(); E; E = E->next()) {
 			owners.push_back(E->get());
 		}
 
-		if (new_parent == p_nodes[ni].get_parent() && p_nodes[ni].get_index() < p_position_in_parent + ni)
+		if (new_parent == p_nodes[ni]->get_parent() && p_nodes[ni]->get_index() < p_position_in_parent + ni)
 			inc--; // If the child will generate a gap when moved, adjust.
 
-		editor_data->get_undo_redo().add_do_method(p_nodes[ni].get_parent(), "remove_child", &p_nodes[ni]);
+		editor_data->get_undo_redo().add_do_method(p_nodes[ni]->get_parent(), "remove_child", p_nodes[ni]);
 
-		editor_data->get_undo_redo().add_do_method(new_parent, "add_child", &p_nodes[ni]);
+		editor_data->get_undo_redo().add_do_method(new_parent, "add_child", p_nodes[ni]);
 
 		if (p_position_in_parent >= 0)
-			editor_data->get_undo_redo().add_do_method(new_parent, "move_child", &p_nodes[ni], p_position_in_parent + inc);
+			editor_data->get_undo_redo().add_do_method(new_parent, "move_child", p_nodes[ni], p_position_in_parent + inc);
 
 		ScriptEditorDebugger *sed = ScriptEditor::get_singleton()->get_debugger();
 		String old_name = former_names[ni];
-		String new_name = new_parent->validate_child_name(&p_nodes[ni]);
+		String new_name = new_parent->validate_child_name(p_nodes[ni]);
 
 		// Name was modified, fix the path renames.
 		if (old_name.casecmp_to(new_name) != 0) {
@@ -1654,7 +1655,7 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, s
 			std::vector<StringName> fixed_new_names;
 
 			// Get last name and replace with fixed new name.
-			for (int a = 0; a < (unfixed_new_names.size() - 1); a++) {
+			for (decltype(unfixed_new_names.size()) a = 0; a < (unfixed_new_names.size() - 1); ++a) {
 				fixed_new_names.push_back(unfixed_new_names[a]);
 			}
 			fixed_new_names.push_back(new_name);
@@ -1664,33 +1665,30 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, s
 			path_renames[ni].second = fixed_node_path;
 		}
 
-		editor_data->get_undo_redo().add_do_method(sed, "live_debug_reparent_node", edited_scene->get_path_to(&p_nodes[ni])
-			, edited_scene->get_path_to(new_parent), new_name, p_position_in_parent + inc);
+		editor_data->get_undo_redo().add_do_method(sed, "live_debug_reparent_node", edited_scene->get_path_to(p_nodes[ni]), edited_scene->get_path_to(new_parent), new_name, p_position_in_parent + inc);
 
-		editor_data->get_undo_redo().add_undo_method(sed, "live_debug_reparent_node"
-			, NodePath(String(edited_scene->get_path_to(new_parent)).plus_file(new_name))
-			, edited_scene->get_path_to(p_nodes[ni].get_parent()), p_nodes[ni].get_name(), p_nodes[ni].get_index());
+		editor_data->get_undo_redo().add_undo_method(sed, "live_debug_reparent_node", NodePath(String(edited_scene->get_path_to(new_parent)).plus_file(new_name)), edited_scene->get_path_to(p_nodes[ni]->get_parent()), p_nodes[ni]->get_name(), p_nodes[ni]->get_index());
 
 		// need_update : use type_id
 		if(p_keep_global_xform){
-			if(Object::cast_to<Node2D>(&p_nodes[ni]) )
-				editor_data->get_undo_redo().add_do_method(&p_nodes[ni], "set_global_transform", Object::cast_to<Node2D>(&p_nodes[ni])->get_global_transform());
-			
-			if(Object::cast_to<Spatial>(&p_nodes[ni]) )
-				editor_data->get_undo_redo().add_do_method(&p_nodes[ni], "set_global_transform", Object::cast_to<Spatial>(&p_nodes[ni])->get_global_transform());
-			
-			if(Object::cast_to<Control>(&p_nodes[ni]) )
-				editor_data->get_undo_redo().add_do_method(&p_nodes[ni], "set_global_position", Object::cast_to<Control>(&p_nodes[ni])->get_global_position());
+			if (Object::cast_to<Node2D>(p_nodes[ni]))
+				editor_data->get_undo_redo().add_do_method(p_nodes[ni], "set_global_transform", Object::cast_to<Node2D>(p_nodes[ni])->get_global_transform());
+
+			if (Object::cast_to<Spatial>(p_nodes[ni]))
+				editor_data->get_undo_redo().add_do_method(p_nodes[ni], "set_global_transform", Object::cast_to<Spatial>(p_nodes[ni])->get_global_transform());
+
+			if (Object::cast_to<Control>(p_nodes[ni]))
+				editor_data->get_undo_redo().add_do_method(p_nodes[ni], "set_global_position", Object::cast_to<Control>(p_nodes[ni])->get_global_position());
 		}
 
 		editor_data->get_undo_redo().add_do_method(this, "_set_owners", edited_scene, owners);
 
-		if(AnimationPlayerEditor::singleton->get_track_editor()->get_root() == &p_nodes[ni])
+		if (AnimationPlayerEditor::singleton->get_track_editor()->get_root() == p_nodes[ni])
 			editor_data->get_undo_redo().add_do_method(AnimationPlayerEditor::singleton->get_track_editor(), "set_root", &p_nodes[ni]);
 
 		editor_data->get_undo_redo().add_undo_method(new_parent, "remove_child", &p_nodes[ni]);
 
-		editor_data->get_undo_redo().add_undo_method(&p_nodes[ni], "set_name", former_names[ni]);
+		editor_data->get_undo_redo().add_undo_method(p_nodes[ni], "set_name", former_names[ni]);
 
 		inc++;
 	}
@@ -1699,7 +1697,7 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, s
 	for(auto&& p_node : p_nodes){
 		List<Node *> owned;
 
-		p_node.get_owned_by(p_node.get_owner(), &owned);
+		p_node->get_owned_by(p_node->get_owner(), &owned);
 
 		Array owners;
 
@@ -1707,27 +1705,27 @@ void SceneTreeDock::_do_reparent(Node *p_new_parent, int p_position_in_parent, s
 			owners.push_back(E->get());
 		}
 
-		int child_pos = p_node.get_position_in_parent();
+		int child_pos = p_node->get_position_in_parent();
 
-		editor_data->get_undo_redo().add_undo_method(p_node.get_parent(), "add_child", &p_node);
+		editor_data->get_undo_redo().add_undo_method(p_node->get_parent(), "add_child", p_node);
 
-		editor_data->get_undo_redo().add_undo_method(p_node.get_parent(), "move_child", &p_node, child_pos);
+		editor_data->get_undo_redo().add_undo_method(p_node->get_parent(), "move_child", p_node, child_pos);
 
 		editor_data->get_undo_redo().add_undo_method(this, "_set_owners", edited_scene, owners);
 
-		if(AnimationPlayerEditor::singleton->get_track_editor()->get_root() == &p_node)
-			editor_data->get_undo_redo().add_undo_method(AnimationPlayerEditor::singleton->get_track_editor(), "set_root", &p_node);
+		if (AnimationPlayerEditor::singleton->get_track_editor()->get_root() == p_node)
+			editor_data->get_undo_redo().add_undo_method(AnimationPlayerEditor::singleton->get_track_editor(), "set_root", p_node);
 
 		// need_update : use type_id
 		if(p_keep_global_xform){
-			if(Object::cast_to<Node2D>(&p_node) )
-				editor_data->get_undo_redo().add_undo_method(&p_node, "set_transform", Object::cast_to<Node2D>(&p_node)->get_transform());
-			
-			if(Object::cast_to<Spatial>(&p_node) )
-				editor_data->get_undo_redo().add_undo_method(&p_node, "set_transform", Object::cast_to<Spatial>(&p_node)->get_transform());
-			
-			if(Object::cast_to<Control>(&p_node) )
-				editor_data->get_undo_redo().add_undo_method(&p_node, "set_position", Object::cast_to<Control>(&p_node)->get_position());
+			if (Object::cast_to<Node2D>(p_node))
+				editor_data->get_undo_redo().add_undo_method(p_node, "set_transform", Object::cast_to<Node2D>(p_node)->get_transform());
+
+			if (Object::cast_to<Spatial>(p_node))
+				editor_data->get_undo_redo().add_undo_method(p_node, "set_transform", Object::cast_to<Spatial>(p_node)->get_transform());
+
+			if (Object::cast_to<Control>(p_node))
+				editor_data->get_undo_redo().add_undo_method(p_node, "set_position", Object::cast_to<Control>(p_node)->get_position());
 		}
 	}
 
