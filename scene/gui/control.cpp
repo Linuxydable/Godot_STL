@@ -1896,7 +1896,7 @@ void Control::add_icon_override(const StringName &p_name, const Ref<Texture> &p_
 	} else {
 		data.icon_override[p_name] = p_icon;
 		if (data.icon_override[p_name].is_valid()) {
-			data.icon_override[p_name]->connect("changed", this, "_override_changed", Vector<Variant>(), CONNECT_REFERENCE_COUNTED);
+			data.icon_override[p_name]->connect("changed", this, "_override_changed", std::vector<Variant>(), CONNECT_REFERENCE_COUNTED);
 		}
 	}
 	notification(NOTIFICATION_THEME_CHANGED);
@@ -1914,7 +1914,7 @@ void Control::add_shader_override(const StringName &p_name, const Ref<Shader> &p
 	} else {
 		data.shader_override[p_name] = p_shader;
 		if (data.shader_override[p_name].is_valid()) {
-			data.shader_override[p_name]->connect("changed", this, "_override_changed", Vector<Variant>(), CONNECT_REFERENCE_COUNTED);
+			data.shader_override[p_name]->connect("changed", this, "_override_changed", std::vector<Variant>(), CONNECT_REFERENCE_COUNTED);
 		}
 	}
 	notification(NOTIFICATION_THEME_CHANGED);
@@ -1931,7 +1931,7 @@ void Control::add_style_override(const StringName &p_name, const Ref<StyleBox> &
 	} else {
 		data.style_override[p_name] = p_style;
 		if (data.style_override[p_name].is_valid()) {
-			data.style_override[p_name]->connect("changed", this, "_override_changed", Vector<Variant>(), CONNECT_REFERENCE_COUNTED);
+			data.style_override[p_name]->connect("changed", this, "_override_changed", std::vector<Variant>(), CONNECT_REFERENCE_COUNTED);
 		}
 	}
 	notification(NOTIFICATION_THEME_CHANGED);
@@ -1949,7 +1949,7 @@ void Control::add_font_override(const StringName &p_name, const Ref<Font> &p_fon
 	} else {
 		data.font_override[p_name] = p_font;
 		if (data.font_override[p_name].is_valid()) {
-			data.font_override[p_name]->connect("changed", this, "_override_changed", Vector<Variant>(), CONNECT_REFERENCE_COUNTED);
+			data.font_override[p_name]->connect("changed", this, "_override_changed", std::vector<Variant>(), CONNECT_REFERENCE_COUNTED);
 		}
 	}
 	notification(NOTIFICATION_THEME_CHANGED);
