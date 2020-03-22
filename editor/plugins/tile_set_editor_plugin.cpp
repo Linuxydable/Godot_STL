@@ -2895,7 +2895,8 @@ void TileSetEditor::close_shape(const Vector2 &shape_anchor) {
 	} else if (edit_mode == EDITMODE_NAVIGATION) {
 		Ref<NavigationPolygon> shape = memnew(NavigationPolygon);
 
-		PoolVector<Vector2> polygon(current_shape.size());
+		PoolVector<Vector2> polygon;
+		polygon.resize(current_shape.size());
 		std::vector<int> indices;
 		PoolVector<Vector2>::Write w = polygon.write();
 
