@@ -318,13 +318,16 @@ if selected_platform in platform_list:
     # Configure compiler warnings
     if env.msvc:
         # Truncations, narrowing conversions, signed/unsigned comparisons...
-        disable_nonessential_warnings = ['/wd4244'] #['/wd4267', '/wd4244', '/wd4305', '/wd4018', '/wd4800'] sabotage !
+        #disable_nonessential_warnings = ['/wd4267', '/wd4244', '/wd4305', '/wd4018', '/wd4800'] sabotage !
+
+        enable_usefull_warnings = ['/w24018', '/w24388', '/w24389']
+
         if (env["warnings"] == 'extra'):
             env.Append(CCFLAGS=['/Wall']) # Implies /W4
         elif (env["warnings"] == 'all'):
-            env.Append(CCFLAGS=['/W3'] + disable_nonessential_warnings)
+            env.Append(CCFLAGS=['/W3'] + enable_usefull_warnings)
         elif (env["warnings"] == 'moderate'):
-            env.Append(CCFLAGS=['/W2'] + disable_nonessential_warnings)
+            env.Append(CCFLAGS=['/W2'] + enable_usefull_warnings)
         else: # 'no'
             env.Append(CCFLAGS=['/w'])
         # Set exception handling model to avoid warnings caused by Windows system headers.
