@@ -323,17 +323,20 @@ if selected_platform in platform_list:
         enable_usefull_warnings = ['/w24018', '/w24388', '/w24389']
 
         if (env["warnings"] == 'extra'):
-            env.Append(CCFLAGS=['/Wall']) # Implies /W4
+            env.Append(CCFLAGS=['/Wall'])
         elif (env["warnings"] == 'all'):
-            env.Append(CCFLAGS=['/W3'] + enable_usefull_warnings)
+            env.Append(CCFLAGS=['/W4'])
         elif (env["warnings"] == 'moderate'):
             env.Append(CCFLAGS=['/W2'] + enable_usefull_warnings)
         else: # 'no'
-            env.Append(CCFLAGS=['/w'])
+            env.Append(CCFLAGS=['/W3'] + enable_usefull_warnings)
+
         # Set exception handling model to avoid warnings caused by Windows system headers.
         env.Append(CCFLAGS=['/EHsc'])
+
         if (env["werror"]):
             env.Append(CCFLAGS=['/WX'])
+
         # Force to use Unicode encoding
         env.Append(MSVC_FLAGS=['/utf8'])
     else: # Rest of the world
