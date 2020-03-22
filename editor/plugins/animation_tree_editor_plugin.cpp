@@ -30,6 +30,8 @@
 
 #include "animation_tree_editor_plugin.h"
 
+#include <algorithm>
+
 #include "animation_blend_space_1d_editor.h"
 #include "animation_blend_space_2d_editor.h"
 #include "animation_blend_tree_editor_plugin.h"
@@ -183,7 +185,12 @@ void AnimationTreeEditor::add_plugin(AnimationTreeNodeEditorPlugin *p_editor) {
 void AnimationTreeEditor::remove_plugin(AnimationTreeNodeEditorPlugin *p_editor) {
 	ERR_FAIL_COND(p_editor->get_parent() != editor_base);
 	editor_base->remove_child(p_editor);
-	editors.erase(p_editor);
+
+	auto it_find = std::find(editors.begin(), editors.end(), p_editor);
+
+	if (it_find != editors.end()) {
+		editors.erase(it_find);
+	}
 }
 
 String AnimationTreeEditor::get_base_path() {
