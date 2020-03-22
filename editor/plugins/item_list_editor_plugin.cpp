@@ -314,7 +314,7 @@ void ItemListEditor::edit(Node *p_item_list) {
 		return;
 	}
 
-	auto it_find = std::find_if(item_plugins.begin(), item_plugins.end(), [&](const ItemListPlugin *plugin) {
+	auto it_find = std::find_if(item_plugins.begin(), item_plugins.end(), [&](ItemListPlugin *plugin) {
 		if (plugin->handles(p_item_list)) {
 			plugin->set_object(p_item_list);
 			property_editor->edit(plugin);
