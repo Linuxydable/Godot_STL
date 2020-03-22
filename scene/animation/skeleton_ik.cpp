@@ -37,20 +37,26 @@
 #ifndef _3D_DISABLED
 
 FabrikInverseKinematic::ChainItem *FabrikInverseKinematic::ChainItem::find_child(const BoneId p_bone_id) {
-	for (int i = children.size() - 1; 0 <= i; --i) {
-		if (p_bone_id == children[i].bone) {
-			return &children.write[i];
+	auto it_find = std::find_if(children.rbegin(), children.rend(), [&](const ChainItem &it) {
+		if (p_bone_id == it.bone) {
+			return true;
 		}
+		return false;
+	});
+
+	if (it_find != children.rend()) {
+		return &(*it_find);
 	}
-	return NULL;
+
+	return nullptr;
 }
 
 FabrikInverseKinematic::ChainItem *FabrikInverseKinematic::ChainItem::add_child(const BoneId p_bone_id) {
-	const int infant_child_id = children.size();
+	const auto infant_child_id = children.size();
 	children.resize(infant_child_id + 1);
-	children.write[infant_child_id].bone = p_bone_id;
-	children.write[infant_child_id].parent_item = this;
-	return &children.write[infant_child_id];
+	children[infant_child_id].bone = p_bone_id;
+	children[infant_child_id].parent_item = this;
+	return &children[infant_child_id];
 }
 
 /// Build a chain that starts from the root to tip
@@ -68,7 +74,7 @@ bool FabrikInverseKinematic::build_chain(Task *p_task, bool p_force_simple_chain
 	chain.middle_chain_item = NULL;
 
 	// Holds all IDs that are composing a single chain in reverse order
-	Vector<BoneId> chain_ids;
+	std::vector<BoneId> chain_ids;
 	// This is used to know the chain size
 	int sub_chain_size;
 	// Resize only one time in order to fit all joints for performance reason
@@ -84,8 +90,7 @@ bool FabrikInverseKinematic::build_chain(Task *p_task, bool p_force_simple_chain
 		// Picks all IDs that composing a single chain in reverse order (except the root)
 		BoneId chain_sub_tip(ee->tip_bone);
 		while (chain_sub_tip > p_task->root_bone) {
-
-			chain_ids.write[sub_chain_size++] = chain_sub_tip;
+			chain_ids[sub_chain_size++] = chain_sub_tip;
 			chain_sub_tip = p_task->skeleton->get_bone_parent(chain_sub_tip);
 		}
 
@@ -122,8 +127,8 @@ bool FabrikInverseKinematic::build_chain(Task *p_task, bool p_force_simple_chain
 			chain.middle_chain_item = NULL;
 
 		// Initialize current tip
-		chain.tips.write[x].chain_item = sub_chain;
-		chain.tips.write[x].end_effector = ee;
+		chain.tips[x].chain_item = sub_chain;
+		chain.tips[x].end_effector = ee;
 
 		if (p_force_simple_chain) {
 			// NOTE:
@@ -144,9 +149,9 @@ void FabrikInverseKinematic::update_chain(const Skeleton *p_sk, ChainItem *p_cha
 	p_chain_item->initial_transform = p_sk->get_bone_global_pose(p_chain_item->bone);
 	p_chain_item->current_pos = p_chain_item->initial_transform.origin;
 
-	for (int i = p_chain_item->children.size() - 1; 0 <= i; --i) {
-		update_chain(p_sk, &p_chain_item->children.write[i]);
-	}
+	std::for_each(p_chain_item->children.rbegin(), p_chain_item->children.rend(), [&](ChainItem &child) {
+		update_chain(p_sk, &child);
+	});
 }
 
 void FabrikInverseKinematic::solve_simple(Task *p_task, bool p_solve_magnet) {
@@ -212,7 +217,7 @@ void FabrikInverseKinematic::solve_simple_forwards(Chain &r_chain, bool p_solve_
 
 		if (!sub_chain_root->children.empty()) {
 
-			ChainItem &child(sub_chain_root->children.write[0]);
+			ChainItem &child(sub_chain_root->children.front());
 
 			// Is not tip
 			// So calculate next origin location
@@ -269,14 +274,14 @@ void FabrikInverseKinematic::make_goal(Task *p_task, const Transform &p_inverse_
 
 	if (blending_delta >= 0.99f) {
 		// Update the end_effector (local transform) without blending
-		p_task->end_effectors.write[0].goal_transform = p_inverse_transf * p_task->goal_global_transform;
+		p_task->end_effectors.front().goal_transform = p_inverse_transf * p_task->goal_global_transform;
 	} else {
 
 		// End effector in local transform
-		const Transform end_effector_pose(p_task->skeleton->get_bone_global_pose(p_task->end_effectors.write[0].tip_bone));
+		const Transform end_effector_pose(p_task->skeleton->get_bone_global_pose(p_task->end_effectors.front().tip_bone));
 
 		// Update the end_effector (local transform) by blending with current pose
-		p_task->end_effectors.write[0].goal_transform = end_effector_pose.interpolate_with(p_inverse_transf * p_task->goal_global_transform, blending_delta);
+		p_task->end_effectors.front().goal_transform = end_effector_pose.interpolate_with(p_inverse_transf * p_task->goal_global_transform, blending_delta);
 	}
 }
 
@@ -305,7 +310,7 @@ void FabrikInverseKinematic::solve(Task *p_task, real_t blending_delta, bool ove
 		if (!ci->children.empty()) {
 
 			/// Rotate basis
-			const Vector3 initial_ori((ci->children[0].initial_transform.origin - ci->initial_transform.origin).normalized());
+			const Vector3 initial_ori((ci->children.front().initial_transform.origin - ci->initial_transform.origin).normalized());
 			const Vector3 rot_axis(initial_ori.cross(ci->current_ori).normalized());
 
 			if (rot_axis[0] != 0 && rot_axis[1] != 0 && rot_axis[2] != 0) {
@@ -323,9 +328,9 @@ void FabrikInverseKinematic::solve(Task *p_task, real_t blending_delta, bool ove
 		p_task->skeleton->set_bone_global_pose_override(ci->bone, new_bone_pose, 1.0);
 
 		if (!ci->children.empty())
-			ci = &ci->children.write[0];
+			ci = &ci->children.front();
 		else
-			ci = NULL;
+			ci = nullptr;
 	}
 }
 
@@ -336,7 +341,7 @@ void SkeletonIK::_validate_property(PropertyInfo &property) const {
 		if (skeleton) {
 
 			String names("--,");
-			for (int i = 0; i < skeleton->get_bone_count(); i++) {
+			for (decltype(skeleton->get_bone_count()) i = 0; i < skeleton->get_bone_count(); ++i) {
 				if (i > 0)
 					names += ",";
 				names += skeleton->get_bone_name(i);
