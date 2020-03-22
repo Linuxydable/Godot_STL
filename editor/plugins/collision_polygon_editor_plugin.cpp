@@ -227,9 +227,8 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 							}
 
 							if (closest_idx >= 0) {
-
 								pre_move_edit = poly;
-								poly.insert(closest_idx + 1, cpoint);
+								poly.insert(poly.begin() + closest_idx + 1, cpoint);
 								edited_point = closest_idx + 1;
 								edited_point_pos = cpoint;
 								node->call("set_polygon", poly);
@@ -496,7 +495,7 @@ void Polygon3DEditor::edit(Node *p_collision_polygon) {
 
 		node = Object::cast_to<Spatial>(p_collision_polygon);
 		//Enable the pencil tool if the polygon is empty
-		if (std::vector<Vector2>(node->call("get_polygon")).size() == 0) {
+		if (std::vector<Vector2>{ node->call("get_polygon") }.empty()) {
 			_menu_option(MODE_CREATE);
 		}
 		wip.clear();
