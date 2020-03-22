@@ -772,7 +772,7 @@ public:
 private:
 	int current_state;
 	List<EditorSpatialGizmo *> current_gizmos;
-	HashMap<String, std::vector<SpatialMaterial> > materials;
+	HashMap<String, std::vector<Ref<SpatialMaterial> > > materials;
 
 protected:
 	static void _bind_methods();
