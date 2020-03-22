@@ -350,7 +350,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 							std::vector<Vector2> vertices2 = _get_polygon(insert.polygon);
 							pre_move_edit = vertices2;
 							edited_point = PosVertex(insert.polygon, insert.vertex + 1, xform.affine_inverse().xform(insert.pos));
-							vertices2.insert(edited_point.vertex, edited_point.pos);
+							vertices2.insert(vertices2.begin() + edited_point.vertex, edited_point.pos);
 							selected_point = edited_point;
 							edge_point = PosVertex();
 
@@ -385,7 +385,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 						std::vector<Vector2> vertices = _get_polygon(edited_point.polygon);
 						ERR_FAIL_INDEX_V(edited_point.vertex, vertices.size(), false);
-						vertices.write[edited_point.vertex] = edited_point.pos - _get_offset(edited_point.polygon);
+						vertices[edited_point.vertex] = edited_point.pos - _get_offset(edited_point.polygon);
 
 						undo_redo->create_action(TTR("Edit Polygon"));
 						_action_set_polygon(edited_point.polygon, pre_move_edit, vertices);
@@ -482,7 +482,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 			//Move the point in a single axis. Should only work when editing a polygon and while holding shift.
 			if (mode == MODE_EDIT && mm->get_shift()) {
-				Vector2 old_point = pre_move_edit.get(selected_point.vertex);
+				Vector2 old_point = pre_move_edit[selected_point.vertex];
 				if (ABS(cpoint.x - old_point.x) > ABS(cpoint.y - old_point.y)) {
 					cpoint.y = old_point.y;
 				} else {
@@ -496,7 +496,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 				std::vector<Vector2> vertices = _get_polygon(edited_point.polygon);
 				ERR_FAIL_INDEX_V(edited_point.vertex, vertices.size(), false);
-				vertices.write[edited_point.vertex] = cpoint - _get_offset(edited_point.polygon);
+				vertices[edited_point.vertex] = cpoint - _get_offset(edited_point.polygon);
 				_set_polygon(edited_point.polygon, vertices);
 			}
 
@@ -538,7 +538,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 				if (wip.size() > selected_point.vertex) {
 
-					wip.remove(selected_point.vertex);
+					wip.erase(wip.begin() + selected_point.vertex);
 					_wip_changed();
 					selected_point = wip.size() - 1;
 					canvas_item_editor->update_viewport();
@@ -601,7 +601,7 @@ void AbstractPolygon2DEditor::forward_canvas_draw_over_viewport(Control *p_overl
 		if (!wip_active && j == edited_point.polygon && EDITOR_GET("editors/poly_editor/show_previous_outline")) {
 
 			const Color col = Color(0.5, 0.5, 0.5); // FIXME polygon->get_outline_color();
-			const auto n = pre_move_edit.size();
+			auto n = pre_move_edit.size();
 			for (decltype(n) i = 0; i < n - (is_closed ? 0 : 1); ++i) {
 
 				Vector2 p, p2;
