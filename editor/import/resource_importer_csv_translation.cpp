@@ -92,14 +92,13 @@ Error ResourceImporterCSVTranslation::import(const String &p_source_file, const 
 
 	ERR_FAIL_COND_V_MSG(!f, ERR_INVALID_PARAMETER, "Cannot open file from path '" + p_source_file + "'.");
 
-	Vector<String> line = f->get_csv_line(delimiter);
+	std::vector<String> line = f->get_csv_line(delimiter);
 	ERR_FAIL_COND_V(line.size() <= 1, ERR_PARSE_ERROR);
 
-	Vector<String> locales;
-	Vector<Ref<Translation> > translations;
+	std::vector<String> locales;
+	std::vector<Ref<Translation> > translations;
 
-	for (int i = 1; i < line.size(); i++) {
-
+	for (decltype(line.size()) i = 1; i < line.size(); ++i) {
 		String locale = line[i];
 		ERR_FAIL_COND_V_MSG(!TranslationServer::is_locale_valid(locale), ERR_PARSE_ERROR, "Error importing CSV translation: '" + locale + "' is not a valid locale.");
 
@@ -113,20 +112,19 @@ Error ResourceImporterCSVTranslation::import(const String &p_source_file, const 
 	line = f->get_csv_line(delimiter);
 
 	while (line.size() == locales.size() + 1) {
-
-		String key = line[0];
+		String key = line.front();
 		if (key != "") {
 
-			for (int i = 1; i < line.size(); i++) {
-				translations.write[i - 1]->add_message(key, line[i].c_unescape());
+			for (decltype(line.size()) i = 1; i < line.size(); ++i) {
+				translations[i - 1]->add_message(key, line[i].c_unescape());
 			}
 		}
 
 		line = f->get_csv_line(delimiter);
 	}
 
-	for (int i = 0; i < translations.size(); i++) {
-		Ref<Translation> xlt = translations[i];
+	for (auto &&trans : translations) {
+		Ref<Translation> xlt = trans;
 
 		if (compress) {
 			Ref<PHashTranslation> cxl = memnew(PHashTranslation);
@@ -134,7 +132,7 @@ Error ResourceImporterCSVTranslation::import(const String &p_source_file, const 
 			xlt = cxl;
 		}
 
-		String save_path = p_source_file.get_basename() + "." + translations[i]->get_locale() + ".translation";
+		String save_path = p_source_file.get_basename() + "." + trans->get_locale() + ".translation";
 
 		ResourceSaver::save(save_path, xlt);
 		if (r_gen_files) {

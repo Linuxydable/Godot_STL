@@ -309,9 +309,8 @@ void EditorSpatialGizmo::add_collision_segments(const std::vector<Vector3> &p_li
 
 	int from = collision_segments.size();
 	collision_segments.resize(from + p_lines.size());
-	for (int i = 0; i < p_lines.size(); i++) {
-
-		collision_segments.write[from + i] = p_lines[i];
+	for (decltype(p_lines.size()) i = 0; i < p_lines.size(); ++i) {
+		collision_segments[from + i] = p_lines[i];
 	}
 }
 
@@ -353,9 +352,8 @@ void EditorSpatialGizmo::add_handles(const std::vector<Vector3> &p_handles, cons
 
 	if (p_billboard) {
 		float md = 0;
-		for (int i = 0; i < p_handles.size(); i++) {
-
-			md = MAX(0, p_handles[i].length());
+		for (auto &&handle : p_handles) {
+			md = MAX(0, handle.length());
 		}
 		if (md) {
 			mesh->set_custom_aabb(AABB(Vector3(-md, -md, -md), Vector3(md, md, md) * 2.0));
@@ -373,15 +371,15 @@ void EditorSpatialGizmo::add_handles(const std::vector<Vector3> &p_handles, cons
 	if (!p_secondary) {
 		int chs = handles.size();
 		handles.resize(chs + p_handles.size());
-		for (int i = 0; i < p_handles.size(); i++) {
-			handles.write[i + chs] = p_handles[i];
+		for (decltype(p_handles.size()) i = 0; i < p_handles.size(); ++i) {
+			handles[i + chs] = p_handles[i];
 		}
 	} else {
 
 		int chs = secondary_handles.size();
 		secondary_handles.resize(chs + p_handles.size());
-		for (int i = 0; i < p_handles.size(); i++) {
-			secondary_handles.write[i + chs] = p_handles[i];
+		for (decltype(p_handles.size()) i = 0; i < p_handles.size(); ++i) {
+			secondary_handles[i + chs] = p_handles[i];
 		}
 	}
 }
@@ -418,44 +416,30 @@ bool EditorSpatialGizmo::intersect_frustum(const Camera *p_camera, const std::ve
 	if (selectable_icon_size > 0.0f) {
 		Vector3 origin = spatial_node->get_global_transform().get_origin();
 
-		const Plane *p = p_frustum.ptr();
-		int fc = p_frustum.size();
-
-		bool any_out = false;
-
-		for (int j = 0; j < fc; j++) {
-
-			if (p[j].is_point_over(origin)) {
-				any_out = true;
-				break;
+		auto it_find = std::find_if(p_frustum.begin(), p_frustum.end(), [&](const Plane &plane) {
+			if (plane.is_point_over(origin)) {
+				return true;
 			}
-		}
+			return false;
+		});
 
-		return !any_out;
+		return it_find == p_frustum.end();
 	}
 
-	if (collision_segments.size()) {
+	if (!collision_segments.empty()) {
 
-		const Plane *p = p_frustum.ptr();
-		int fc = p_frustum.size();
-
-		int vc = collision_segments.size();
-		const Vector3 *vptr = collision_segments.ptr();
 		Transform t = spatial_node->get_global_transform();
 
-		bool any_out = false;
-		for (int j = 0; j < fc; j++) {
-			for (int i = 0; i < vc; i++) {
-				Vector3 v = t.xform(vptr[i]);
-				if (p[j].is_point_over(v)) {
-					any_out = true;
-					break;
-				}
+		auto it = std::find_first_of(p_frustum.begin(), p_frustum.end(), collision_segments.begin(), collision_segments.end(), [&](const Plane &plane, const Vector3 &segment) {
+			Vector3 v = t.xform(segment);
+			if (plane.is_point_over(v)) {
+				return true;
 			}
-			if (any_out) break;
-		}
+			return false;
+		});
 
-		if (!any_out) return true;
+		if (it == p_frustum.end())
+			return true;
 	}
 
 	if (collision_mesh.is_valid()) {
@@ -468,11 +452,11 @@ bool EditorSpatialGizmo::intersect_frustum(const Camera *p_camera, const std::ve
 
 		std::vector<Plane> transformed_frustum;
 
-		for (int i = 0; i < 4; ++i) {
+		for (uint8_t i = 0; i < 4u; ++i) {
 			transformed_frustum.push_back(it.xform(p_frustum[i]));
 		}
 
-		if (collision_mesh->inside_convex_shape(transformed_frustum.ptr(), transformed_frustum.size(), mesh_scale)) {
+		if (collision_mesh->inside_convex_shape(transformed_frustum.data(), transformed_frustum.size(), mesh_scale)) {
 			return true;
 		}
 	}
@@ -1184,8 +1168,8 @@ void AudioStreamPlayer3DSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) 
 			const Vector3 from(Math::sin(a) * radius, Math::cos(a) * radius, ofs);
 			const Vector3 to(Math::sin(an) * radius, Math::cos(an) * radius, ofs);
 
-			points_primary.write[i * 2 + 0] = from;
-			points_primary.write[i * 2 + 1] = to;
+			points_primary[i * 2 + 0] = from;
+			points_primary[i * 2 + 1] = to;
 		}
 
 		const Ref<Material> material_primary = get_material("stream_player_3d_material_primary", p_gizmo);
@@ -1196,11 +1180,11 @@ void AudioStreamPlayer3DSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) 
 
 		for (uint8_t i = 0; i < 8u; ++i) {
 
-			const float a = i * 2.0 * Math_PI / 8.0;
+			const float a = i * Math_TAU / 8.0;
 			const Vector3 from(Math::sin(a) * radius, Math::cos(a) * radius, ofs);
 
-			points_secondary.write[i * 2 + 0] = from;
-			points_secondary.write[i * 2 + 1] = Vector3();
+			points_secondary[i * 2 + 0] = from;
+			points_secondary[i * 2 + 1] = Vector3();
 		}
 
 		const Ref<Material> material_secondary = get_material("stream_player_3d_material_secondary", p_gizmo);
@@ -3509,7 +3493,7 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	if (Object::cast_to<BoxShape>(*s)) {
 
 		Ref<BoxShape> bs = s;
-		Vector<Vector3> lines;
+		std::vector<Vector3> lines;
 		AABB aabb;
 		aabb.position = -bs->get_extents();
 		aabb.size = aabb.position * -2;
@@ -3577,8 +3561,8 @@ void CollisionShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		for (uint8_t i = 0; i < 64u; ++i) {
 
-			float ra = i * Math_PI * 2.0 / 64.0;
-			float rb = (i + 1) * Math_PI * 2.0 / 64.0;
+			float ra = i * Math_TAU / 64.0;
+			float rb = (i + 1) * Math_TAU / 64.0;
 			Point2 a = Vector2(Math::sin(ra), Math::cos(ra)) * radius;
 			Point2 b = Vector2(Math::sin(rb), Math::cos(rb)) * radius;
 
@@ -3788,7 +3772,9 @@ void CollisionPolygonSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	float depth = polygon->get_depth() * 0.5;
 
 	std::vector<Vector3> lines;
-	for (int i = 0; i < points.size(); i++) {
+	auto size = points.size();
+	lines.reserve(size * 6);
+	for (decltype(size) i = 0; i < size; ++i) {
 
 		int n = (i + 1) % points.size();
 		lines.push_back(Vector3(points[i].x, points[i].y, depth));

@@ -175,7 +175,7 @@ void PropertySelector::_update_search() {
 			if (search_box->get_text() != String() && E->get().name.find(search_box->get_text()) == -1)
 				continue;
 
-			if (type_filter.size() && type_filter.find(E->get().type) == -1)
+			if (type_filter.size() && std::find(type_filter.begin(), type_filter.end(), E->get().type) == type_filter.end())
 				continue;
 
 			TreeItem *item = search_options->create_item(category ? category : root);
@@ -355,9 +355,9 @@ void PropertySelector::_item_selected() {
 
 			Map<String, DocData::ClassDoc>::Element *E = dd->class_list.find(at_class);
 			if (E) {
-				for (int i = 0; i < E->get().properties.size(); i++) {
-					if (E->get().properties[i].name == name) {
-						text = E->get().properties[i].description;
+				for (auto &&prop : E->get().properties) {
+					if (prop.name == name) {
+						text = prop.description;
 					}
 				}
 			}
@@ -372,9 +372,9 @@ void PropertySelector::_item_selected() {
 
 			Map<String, DocData::ClassDoc>::Element *E = dd->class_list.find(at_class);
 			if (E) {
-				for (int i = 0; i < E->get().methods.size(); i++) {
-					if (E->get().methods[i].name == name) {
-						text = E->get().methods[i].description;
+				for (auto &&method : E->get().methods) {
+					if (method.name == name) {
+						text = method.description;
 					}
 				}
 			}

@@ -54,7 +54,7 @@ public:
 	void set_map_data(PoolRealArray p_new);
 	PoolRealArray get_map_data() const;
 
-	virtual Vector<Vector3> get_debug_mesh_lines();
+	virtual std::vector<Vector3> get_debug_mesh_lines();
 
 	HeightMapShape();
 };

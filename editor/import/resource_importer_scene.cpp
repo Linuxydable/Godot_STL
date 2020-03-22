@@ -287,10 +287,10 @@ static void _gen_shape_list(const Ref<Mesh> &mesh, List<Ref<Shape> > &r_shape_li
 		r_shape_list.push_back(shape);
 	} else {
 
-		Vector<Ref<Shape> > cd = mesh->convex_decompose();
+		std::vector<Ref<Shape> > cd = mesh->convex_decompose();
 		if (cd.size()) {
-			for (int i = 0; i < cd.size(); i++) {
-				r_shape_list.push_back(cd[i]);
+			for (auto &&ref_shape : cd) {
+				r_shape_list.push_back(ref_shape);
 			}
 		}
 	}
@@ -787,7 +787,7 @@ void ResourceImporterScene::_filter_anim_tracks(Ref<Animation> anim, Set<String>
 
 		if (!keep.has(path)) {
 			a->remove_track(j);
-			j--;
+			--j;
 		}
 	}
 }
@@ -801,10 +801,9 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 	AnimationPlayer *anim = Object::cast_to<AnimationPlayer>(n);
 	ERR_FAIL_COND(!anim);
 
-	Vector<String> strings = p_text.split("\n");
-	for (int i = 0; i < strings.size(); i++) {
-
-		strings.write[i] = strings[i].strip_edges();
+	std::vector<String> strings = p_text.split("\n");
+	for (auto &&str : strings) {
+		str = str.strip_edges();
 	}
 
 	List<StringName> anim_names;
@@ -818,9 +817,8 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 		Set<String> keep;
 		Set<String> keep_local;
 
-		for (int i = 0; i < strings.size(); i++) {
-
-			if (strings[i].begins_with("@")) {
+		for (auto &&str : strings) {
+			if (str.begins_with("@")) {
 
 				valid_for_this = false;
 				for (Set<String>::Element *F = keep_local.front(); F; F = F->next()) {
@@ -828,10 +826,9 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 				}
 				keep_local.clear();
 
-				Vector<String> filters = strings[i].substr(1, strings[i].length()).split(",");
-				for (int j = 0; j < filters.size(); j++) {
-
-					String fname = filters[j].strip_edges();
+				std::vector<String> filters = str.substr(1, str.length()).split(",");
+				for (auto &&f : filters) {
+					String fname = f.strip_edges();
 					if (fname == "")
 						continue;
 					int fc = fname[0];
@@ -860,10 +857,9 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 					continue;
 
 				for (int j = 0; j < a->get_track_count(); j++) {
-
 					String path = a->track_get_path(j);
 
-					String tname = strings[i];
+					String tname = str;
 					if (tname == "")
 						continue;
 					int fc = tname[0];
