@@ -30,6 +30,8 @@
 
 #include "animation_state_machine_editor.h"
 
+#include <algorithm>
+
 #include "core/io/resource_loader.h"
 #include "core/math/delaunay.h"
 #include "core/os/input.h"
@@ -775,7 +777,7 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 		//now scroll it to draw
 		state_machine_draw->draw_style_box(sb, nr.node);
 
-		if (playing && (blend_from == name || current == name || travel_path.find(name) != -1)) {
+		if (playing && (blend_from == name || current == name || std::find(travel_path.begin(), travel_path.end(), name) != travel_path.end())) {
 			state_machine_draw->draw_style_box(playing_overlay, nr.node);
 		}
 
@@ -997,7 +999,7 @@ void AnimationNodeStateMachineEditor::_notification(int p_what) {
 				break;
 			}
 
-			bool acstate = t_line.advance_condition_name != StringName() && bool(AnimationTreeEditor::get_singleton()->get_tree()->get(AnimationTreeEditor::get_singleton()->get_base_path() + String(transition_lines[i].advance_condition_name)));
+			bool acstate = t_line.advance_condition_name != StringName() && bool(AnimationTreeEditor::get_singleton()->get_tree()->get(AnimationTreeEditor::get_singleton()->get_base_path() + String(t_line.advance_condition_name)));
 
 			if (t_line.advance_condition_state != acstate) {
 				state_machine_draw->update();
