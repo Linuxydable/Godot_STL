@@ -82,10 +82,9 @@ Error ResourceImporterImage::import(const String &p_source_file, const String &p
 
 	size_t len = f->get_len();
 
-	Vector<uint8_t> data;
-	data.resize(len);
+	std::vector<uint8_t> data(len);
 
-	f->get_buffer(data.ptrw(), len);
+	f->get_buffer(data.data(), len);
 
 	memdelete(f);
 
@@ -98,7 +97,7 @@ Error ResourceImporterImage::import(const String &p_source_file, const String &p
 	//SAVE the extension (so it can be recognized by the loader later
 	f->store_pascal_string(p_source_file.get_extension().to_lower());
 	//SAVE the actual image
-	f->store_buffer(data.ptr(), len);
+	f->store_buffer(data.data(), len);
 
 	memdelete(f);
 
