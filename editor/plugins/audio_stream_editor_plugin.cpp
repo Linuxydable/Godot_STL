@@ -69,22 +69,22 @@ void AudioStreamEditor::_draw_preview() {
 	Ref<AudioStreamPreview> preview = AudioStreamPreviewGenerator::get_singleton()->generate_preview(stream);
 	float preview_len = preview->get_length();
 
-	Vector<Vector2> lines;
+	std::vector<Vector2> lines;
+
 	lines.resize(size.width * 2);
 
 	for (int i = 0; i < size.width; i++) {
-
 		float ofs = i * preview_len / size.width;
 		float ofs_n = (i + 1) * preview_len / size.width;
 		float max = preview->get_max(ofs, ofs_n) * 0.5 + 0.5;
 		float min = preview->get_min(ofs, ofs_n) * 0.5 + 0.5;
 
 		int idx = i;
-		lines.write[idx * 2 + 0] = Vector2(i + 1, rect.position.y + min * rect.size.y);
-		lines.write[idx * 2 + 1] = Vector2(i + 1, rect.position.y + max * rect.size.y);
+		lines[idx * 2 + 0] = Vector2(i + 1, rect.position.y + min * rect.size.y);
+		lines[idx * 2 + 1] = Vector2(i + 1, rect.position.y + max * rect.size.y);
 	}
 
-	Vector<Color> color;
+	std::vector<Color> color;
 	color.push_back(get_color("contrast_color_2", "Editor"));
 
 	VS::get_singleton()->canvas_item_add_multiline(_preview->get_canvas_item(), lines, color);
