@@ -1594,8 +1594,7 @@ void ProjectSettingsEditor::_update_translations() {
 
 	String langnames = "";
 	int l_idx = 0;
-	for (int i = 0; i < names.size(); i++) {
-
+	for (decltype(names.size()) i = 0; i < names.size(); ++i) {
 		if (filter_mode == SHOW_ONLY_SELECTED_LOCALES && fl_idx_count != 0) {
 			if (l_filter.size() > 0) {
 
@@ -1666,16 +1665,19 @@ void ProjectSettingsEditor::_update_translations() {
 					t2->set_editable(1, true);
 					t2->set_metadata(1, path);
 
-					int idx = langs.find(locale);
+					auto it_find = std::find(langs.begin(), langs.end(), locale);
 
-					if (idx < 0)
-						idx = 0;
+					int idx = 0;
+
+					if (it_find != langs.end()) {
+						idx = std::distance(langs.begin(), it_find);
+					}
 
 					auto it = std::find(translation_locales_idxs_remap.begin(), translation_locales_idxs_remap.end(), idx);
 
-					if(it != translation_locales_idxs_remap.end() && fl_idx_count > 0 && filter_mode == SHOW_ONLY_SELECTED_LOCALES){
+					if (it != translation_locales_idxs_remap.end() && fl_idx_count > 0 && filter_mode == SHOW_ONLY_SELECTED_LOCALES) {
 						t2->set_range(1, std::distance(translation_locales_idxs_remap.begin(), it) );
-					}else{
+					} else {
 						t2->set_range(1, idx);
 					}
 				}

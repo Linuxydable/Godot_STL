@@ -74,7 +74,6 @@ std::vector<String> EditorQuickOpen::get_selected_files() const {
 }
 
 void EditorQuickOpen::_text_changed(const String &p_newtext) {
-
 	_update_search();
 }
 
@@ -156,7 +155,7 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, std::vector<Pai
 
 					pos = this_sim >= other_sim ? pos - 1 : pos;
 
-					list.insert(pos, pair);
+					list.insert(list.begin() + pos, pair);
 
 				} else {
 					list.push_back(pair);
@@ -193,17 +192,15 @@ std::vector<Pair<String, Ref<Texture> > > EditorQuickOpen::_sort_fs(std::vector<
 	if (search_text == String() || list.size() == 0)
 		return list;
 
-	std::vector<float> scores;
-	scores.resize(list.size());
-	for (int i = 0; i < list.size(); i++)
-		scores.write[i] = _path_cmp(search_text, list[i].first);
+	std::vector<float> scores(list.size());
+	for (decltype(list.size()) i = 0; i < list.size(); ++i)
+		scores[i] = _path_cmp(search_text, list[i].first);
 
 	while (list.size() > 0) {
-
 		float best_score = 0.0f;
 		int best_idx = 0;
 
-		for (int i = 0; i < list.size(); i++) {
+		for (decltype(list.size()) i = 0; i < list.size(); ++i) {
 			float current_score = scores[i];
 			if (current_score > best_score) {
 				best_score = current_score;
@@ -212,8 +209,8 @@ std::vector<Pair<String, Ref<Texture> > > EditorQuickOpen::_sort_fs(std::vector<
 		}
 
 		sorted_list.push_back(list[best_idx]);
-		list.remove(best_idx);
-		scores.remove(best_idx);
+		list.erase(list.begin() + best_idx);
+		scores.erase(scores.begin() + best_idx);
 	}
 
 	return sorted_list;
@@ -229,10 +226,10 @@ void EditorQuickOpen::_update_search() {
 	_parse_fs(efsd, list);
 	list = _sort_fs(list);
 
-	for (int i = 0; i < list.size(); i++) {
+	for (auto &&pair : list) {
 		TreeItem *ti = search_options->create_item(root);
-		ti->set_text(0, list[i].first);
-		ti->set_icon(0, list[i].second);
+		ti->set_text(0, pair.first);
+		ti->set_icon(0, pair.second);
 	}
 
 	if (root->get_children()) {

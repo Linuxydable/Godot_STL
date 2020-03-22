@@ -1101,7 +1101,7 @@ void Collada::_parse_mesh_geometry(XMLParser &parser, String p_id, String p_name
 								prim.polygons.push_back(values.size() / prim.vertex_size);
 								int from = prim.indices.size();
 								prim.indices.resize(from + values.size());
-								for (int i = 0; i < values.size(); i++)
+								for (decltype(values.size()) i = 0; i < values.size(); ++i)
 									prim.indices[from + i] = values[i];
 
 							} else if (prim.vertex_size > 0) {
@@ -1187,8 +1187,8 @@ void Collada::_parse_skin_controller(XMLParser &parser, String p_id) {
 					skindata.sources[current_source].sarray = _read_string_array(parser);
 					if (section == "IDREF_array") {
 						std::vector<String> sa = skindata.sources[current_source].sarray;
-						for (int i = 0; i < sa.size(); i++)
-							state.idref_joints.insert(sa[i]);
+						for (auto &&str : sa)
+							state.idref_joints.insert(str);
 					}
 					COLLADA_PRINT("section: " + current_source + " read " + itos(skindata.sources[current_source].array.size()) + " values.");
 				}
@@ -1295,9 +1295,10 @@ void Collada::_parse_skin_controller(XMLParser &parser, String p_id) {
 	SkinControllerData::Source &joint_source = skindata.sources[joint_arr];
 	SkinControllerData::Source &ibm_source = skindata.sources[ibm];
 
-	ERR_FAIL_COND(joint_source.sarray.size() != ibm_source.array.size() / 16);
+	auto sarray_size = joint_source.sarray.size();
+	ERR_FAIL_COND(sarray_size != ibm_source.array.size() / 16);
 
-	for (int i = 0; i < joint_source.sarray.size(); i++) {
+	for (decltype(sarray_size) i = 0; i < sarray_size; ++i) {
 
 		String name = joint_source.sarray[i];
 		Transform xform = _read_transform_from_array(ibm_source.array, i * 16); //<- this is a mistake, it must be applied to vertices
@@ -1848,7 +1849,7 @@ void Collada::_parse_animation(XMLParser &parser) {
 			break; //end of <asset>
 	}
 
-	for (int i = 0; i < channel_sources.size(); i++) {
+	for (decltype(channel_sources.size()) i = 0; i < channel_sources.size(); ++i) {
 
 		String source = _uri_to_id(channel_sources[i]);
 		String target = channel_targets[i];
@@ -2400,7 +2401,7 @@ bool Collada::_move_geometry_to_skeletons(VisualScene *p_vscene, Node *p_node, L
 		}
 	}
 
-	std::remove_if(p_node->children.begin(), p_node->children.end(), [this, &p_vscene, &p_mgeom](const Node *child) {
+	std::remove_if(p_node->children.begin(), p_node->children.end(), [this, &p_vscene, &p_mgeom](Node *child) {
 		if (_move_geometry_to_skeletons(p_vscene, child, p_mgeom)) {
 			return true;
 		}
