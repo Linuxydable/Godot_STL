@@ -829,14 +829,13 @@ void SpatialEditorViewport::_list_select(Ref<InputEventMouseButton> b) {
 
 	Node *scene = editor->get_edited_scene();
 
-	for (int i = 0; i < selection_results.size(); i++) {
-		Spatial *item = selection_results[i].item;
+	std::remove_if(selection_results.begin(), selection_results.end(), [&](const _RayResult &res) {
+		Spatial *item = res.item;
 		if (item != scene && item->get_owner() != scene && !scene->is_editable_instance(item->get_owner())) {
-			//invalid result
-			selection_results.remove(i);
-			i--;
+			return true;
 		}
-	}
+		return false;
+	});
 
 	clicked_wants_append = b->get_shift();
 
@@ -855,7 +854,7 @@ void SpatialEditorViewport::_list_select(Ref<InputEventMouseButton> b) {
 		NodePath root_path = get_tree()->get_edited_scene_root()->get_path();
 		StringName root_name = root_path.get_name(root_path.get_name_count() - 1);
 
-		for (int i = 0; i < selection_results.size(); i++) {
+		for (decltype(selection_results.size()) i = 0; i < selection_results.size(); ++i) {
 
 			Spatial *spat = selection_results[i].item;
 
@@ -1941,10 +1940,10 @@ void SpatialEditorViewport::_nav_look(Ref<InputEventWithModifiers> p_event, cons
 		cursor.x_rot += p_relative.y * radians_per_pixel;
 	}
 	cursor.y_rot += p_relative.x * radians_per_pixel;
-	if (cursor.x_rot > Math_PI / 2.0)
-		cursor.x_rot = Math_PI / 2.0;
-	if (cursor.x_rot < -Math_PI / 2.0)
-		cursor.x_rot = -Math_PI / 2.0;
+	if (cursor.x_rot > Math_PI_2)
+		cursor.x_rot = Math_PI_2;
+	if (cursor.x_rot < -Math_PI_2)
+		cursor.x_rot = -Math_PI_2;
 
 	// Look is like the opposite of Orbit: the focus point rotates around the camera
 	Transform camera_transform = to_camera_transform(cursor);
@@ -2480,7 +2479,7 @@ void SpatialEditorViewport::_menu_option(int p_option) {
 		case VIEW_TOP: {
 
 			cursor.y_rot = 0;
-			cursor.x_rot = Math_PI / 2.0;
+			cursor.x_rot = Math_PI_2;
 			set_message(TTR("Top View."), 2);
 			name = TTR("Top");
 			_update_name();
@@ -2489,7 +2488,7 @@ void SpatialEditorViewport::_menu_option(int p_option) {
 		case VIEW_BOTTOM: {
 
 			cursor.y_rot = 0;
-			cursor.x_rot = -Math_PI / 2.0;
+			cursor.x_rot = -Math_PI_2;
 			set_message(TTR("Bottom View."), 2);
 			name = TTR("Bottom");
 			_update_name();
@@ -2498,7 +2497,7 @@ void SpatialEditorViewport::_menu_option(int p_option) {
 		case VIEW_LEFT: {
 
 			cursor.x_rot = 0;
-			cursor.y_rot = Math_PI / 2.0;
+			cursor.y_rot = Math_PI_2;
 			set_message(TTR("Left View."), 2);
 			name = TTR("Left");
 			_update_name();
@@ -2507,7 +2506,7 @@ void SpatialEditorViewport::_menu_option(int p_option) {
 		case VIEW_RIGHT: {
 
 			cursor.x_rot = 0;
-			cursor.y_rot = -Math_PI / 2.0;
+			cursor.y_rot = -Math_PI_2;
 			set_message(TTR("Right View."), 2);
 			name = TTR("Right");
 			_update_name();
@@ -4172,7 +4171,7 @@ Dictionary SpatialEditor::get_state() const {
 	d["zfar"] = get_zfar();
 
 	Dictionary gizmos_status;
-	for (int i = 0; i < gizmo_plugins_by_name.size(); i++) {
+	for (decltype(gizmo_plugins_by_name.size()) i = 0; i < gizmo_plugins_by_name.size(); ++i) {
 		if (!gizmo_plugins_by_name[i]->can_be_hidden()) continue;
 		int state = gizmos_menu->get_item_state(gizmos_menu->get_item_index(i));
 		String name = gizmo_plugins_by_name[i]->get_name();
@@ -4264,17 +4263,17 @@ void SpatialEditor::set_state(const Dictionary &p_state) {
 		List<Variant> keys;
 		gizmos_status.get_key_list(&keys);
 
-		for (int j = 0; j < gizmo_plugins_by_name.size(); ++j) {
-			if (!gizmo_plugins_by_name[j]->can_be_hidden()) continue;
+		for (auto &&g_plugin : gizmo_plugins_by_name) {
+			if (!g_plugin->can_be_hidden()) continue;
 			int state = EditorSpatialGizmoPlugin::VISIBLE;
 			for (int i = 0; i < keys.size(); i++) {
-				if (gizmo_plugins_by_name.write[j]->get_name() == keys[i]) {
+				if (g_plugin->get_name() == keys[i]) {
 					state = gizmos_status[keys[i]];
 					break;
 				}
 			}
 
-			gizmo_plugins_by_name.write[j]->set_state(state);
+			g_plugin->set_state(state);
 		}
 		_update_gizmos_menu();
 	}
@@ -4314,7 +4313,7 @@ void SpatialEditor::_xform_dialog_action() {
 	Vector3 rotate;
 	Vector3 translate;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 		translate[i] = xform_translate[i]->get_text().to_double();
 		rotate[i] = Math::deg2rad(xform_rotate[i]->get_text().to_double());
 		scale[i] = xform_scale[i]->get_text().to_double();
@@ -4390,7 +4389,7 @@ void SpatialEditor::_menu_gizmo_toggled(int p_option) {
 			break;
 	}
 
-	gizmo_plugins_by_name.write[p_option]->set_state(state);
+	gizmo_plugins_by_name[p_option]->set_state(state);
 
 	update_all_gizmos();
 }
@@ -4973,8 +4972,9 @@ void SpatialEditor::_update_gizmos_menu() {
 
 	gizmos_menu->clear();
 
-	for (int i = 0; i < gizmo_plugins_by_name.size(); ++i) {
+	for (decltype(gizmo_plugins_by_name.size()) i = 0; i < gizmo_plugins_by_name.size(); ++i) {
 		if (!gizmo_plugins_by_name[i]->can_be_hidden()) continue;
+
 		String plugin_name = gizmo_plugins_by_name[i]->get_name();
 		const int plugin_state = gizmo_plugins_by_name[i]->get_state();
 		gizmos_menu->add_multistate_item(TTR(plugin_name), 3, plugin_state, i);
@@ -4994,8 +4994,9 @@ void SpatialEditor::_update_gizmos_menu() {
 }
 
 void SpatialEditor::_update_gizmos_menu_theme() {
-	for (int i = 0; i < gizmo_plugins_by_name.size(); ++i) {
+	for (decltype(gizmo_plugins_by_name.size()) i = 0; i < gizmo_plugins_by_name.size(); ++i) {
 		if (!gizmo_plugins_by_name[i]->can_be_hidden()) continue;
+
 		const int plugin_state = gizmo_plugins_by_name[i]->get_state();
 		const int idx = gizmos_menu->get_item_index(i);
 		switch (plugin_state) {
@@ -5022,7 +5023,7 @@ void SpatialEditor::_init_grid() {
 	int grid_size = EditorSettings::get_singleton()->get("editors/3d/grid_size");
 	int primary_grid_steps = EditorSettings::get_singleton()->get("editors/3d/primary_grid_steps");
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 		Vector3 axis;
 		axis[i] = 1;
 		Vector3 axis_n1;
@@ -5377,8 +5378,8 @@ void SpatialEditor::_request_gizmo(Object *p_obj) {
 
 		Ref<EditorSpatialGizmo> seg;
 
-		for (int i = 0; i < gizmo_plugins_by_priority.size(); ++i) {
-			seg = gizmo_plugins_by_priority.write[i]->get_gizmo(sp);
+		for (auto &&plugin : gizmo_plugins_by_priority) {
+			seg = plugin->get_gizmo(sp);
 
 			if (seg.is_valid()) {
 				sp->set_gizmo(seg);
@@ -5965,18 +5966,26 @@ void SpatialEditor::add_gizmo_plugin(Ref<EditorSpatialGizmoPlugin> p_plugin) {
 	ERR_FAIL_NULL(p_plugin.ptr());
 
 	gizmo_plugins_by_priority.push_back(p_plugin);
-	gizmo_plugins_by_priority.sort_custom<_GizmoPluginPriorityComparator>();
+	std::sort(gizmo_plugins_by_priority.begin(), gizmo_plugins_by_priority.end(), _GizmoPluginPriorityComparator{});
 
 	gizmo_plugins_by_name.push_back(p_plugin);
-	gizmo_plugins_by_name.sort_custom<_GizmoPluginNameComparator>();
+	std::sort(gizmo_plugins_by_name.begin(), gizmo_plugins_by_name.end(), _GizmoPluginNameComparator{});
 
 	_update_gizmos_menu();
 	SpatialEditor::get_singleton()->update_all_gizmos();
 }
 
 void SpatialEditor::remove_gizmo_plugin(Ref<EditorSpatialGizmoPlugin> p_plugin) {
-	gizmo_plugins_by_priority.erase(p_plugin);
-	gizmo_plugins_by_name.erase(p_plugin);
+
+	auto it_plugin_by_priority = std::find(gizmo_plugins_by_priority.begin(), gizmo_plugins_by_priority.end(), p_plugin);
+	if (it_plugin_by_priority != gizmo_plugins_by_priority.end()) {
+		gizmo_plugins_by_priority.erase(it_plugin_by_priority);
+	}
+
+	auto it_plugin_by_name = std::find(gizmo_plugins_by_name.begin(), gizmo_plugins_by_name.end(), p_plugin);
+	if (it_plugin_by_name != gizmo_plugins_by_name.end()) {
+		gizmo_plugins_by_name.erase(it_plugin_by_name);
+	}
 	_update_gizmos_menu();
 }
 
@@ -6093,12 +6102,12 @@ void EditorSpatialGizmoPlugin::create_handle_material(const String &p_name, bool
 		handle_material->set_on_top_of_alpha();
 	}
 
-	materials[p_name] = std::vector<Ref<SpatialMaterial> >();
+	materials[p_name] = std::vector<Ref<SpatialMaterial> >{};
 	materials[p_name].push_back(handle_material);
 }
 
 void EditorSpatialGizmoPlugin::add_material(const String &p_name, Ref<SpatialMaterial> p_material) {
-	materials[p_name] = std::vector<Ref<SpatialMaterial> >();
+	materials[p_name] = std::vector<Ref<SpatialMaterial> >{};
 	materials[p_name].push_back(p_material);
 }
 
@@ -6106,7 +6115,7 @@ Ref<SpatialMaterial> EditorSpatialGizmoPlugin::get_material(const String &p_name
 	ERR_FAIL_COND_V(!materials.has(p_name), Ref<SpatialMaterial>());
 	ERR_FAIL_COND_V(materials[p_name].size() == 0, Ref<SpatialMaterial>());
 
-	if (p_gizmo.is_null() || materials[p_name].size() == 1) return materials[p_name][0];
+	if (p_gizmo.is_null() || materials[p_name].size() == 1) return materials[p_name].front();
 
 	int index = (p_gizmo->is_selected() ? 1 : 0) + (p_gizmo->is_editable() ? 2 : 0);
 

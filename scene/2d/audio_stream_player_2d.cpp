@@ -47,8 +47,8 @@ void AudioStreamPlayer2D::_mix_audio() {
 	}
 
 	//get data
-	AudioFrame *buffer = mix_buffer.ptrw();
-	int buffer_size = mix_buffer.size();
+	AudioFrame *buffer = mix_buffer.data();
+	auto buffer_size = mix_buffer.size();
 
 	if (stream_paused_fade_out) {
 		// Short fadeout ramp
@@ -97,8 +97,7 @@ void AudioStreamPlayer2D::_mix_audio() {
 
 			AudioFrame *target = AudioServer::get_singleton()->thread_get_channel_mix_buffer(current.bus_index, 0);
 
-			for (int j = 0; j < buffer_size; j++) {
-
+			for (decltype(buffer_size) j = 0; j < buffer_size; ++j) {
 				target[j] += buffer[j] * vol;
 				vol += vol_inc;
 			}
@@ -119,7 +118,7 @@ void AudioStreamPlayer2D::_mix_audio() {
 			if (!valid)
 				continue;
 
-			for (int j = 0; j < buffer_size; j++) {
+			for (decltype(buffer_size) j = 0; j < buffer_size; ++j) {
 
 				AudioFrame frame = buffer[j] * vol;
 				for (int k = 0; k < cc; k++) {

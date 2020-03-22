@@ -96,13 +96,18 @@ void VisualShaderEditor::edit(VisualShader *p_visual_shader) {
 }
 
 void VisualShaderEditor::add_plugin(const Ref<VisualShaderNodePlugin> &p_plugin) {
-	if (plugins.find(p_plugin) != -1)
+	if (std::find(plugins.begin(), plugins.end(), p_plugin) != plugins.end())
 		return;
 	plugins.push_back(p_plugin);
 }
 
 void VisualShaderEditor::remove_plugin(const Ref<VisualShaderNodePlugin> &p_plugin) {
-	plugins.erase(p_plugin);
+
+	auto it_find = std::find(plugins.begin(), plugins.end(), p_plugin);
+
+	if (it_find != plugins.end()) {
+		plugins.erase(it_find);
+	}
 }
 
 void VisualShaderEditor::clear_custom_types() {
@@ -121,7 +126,7 @@ void VisualShaderEditor::add_custom_type(const String &p_name, const Ref<Script>
 	ERR_FAIL_COND(!p_name.is_valid_identifier());
 	ERR_FAIL_COND(!p_script.is_valid());
 
-	for (auto &&option ::add_options) {
+	for (auto &&option : add_options) {
 		if (option.is_custom) {
 			if (option.script == p_script)
 				return;
@@ -1236,18 +1241,17 @@ void VisualShaderEditor::_edit_port_default_input(Object *p_button, int p_node, 
 
 void VisualShaderEditor::_add_custom_node(const String &p_path) {
 
-	int idx = -1;
-
-	for (int i = custom_node_option_idx; i < add_options.size(); i++) {
-		if (add_options[i].script.is_valid()) {
-			if (add_options[i].script->get_path() == p_path) {
-				idx = i;
-				break;
+	auto it_option = std::find_if(add_options.begin(), add_options.end(), [&](const AddOption &opt) {
+		if (opt.script.is_valid()) {
+			if (opt.script->get_path() == p_path) {
+				return true;
 			}
 		}
-	}
-	if (idx != -1) {
-		_add_node(idx);
+		return false;
+	});
+
+	if (it_option != add_options.end()) {
+		_add_node(std::distance(add_options.begin(), it_option));
 	}
 }
 
@@ -1746,9 +1750,9 @@ void VisualShaderEditor::_dup_paste_nodes(int p_type, int p_pasted_type, List<in
 		Ref<VisualShaderNode> node = visual_shader->get_node(pasted_type, E->get());
 
 		bool unsupported = false;
-		for (int i = 0; i < add_options.size(); i++) {
-			if (add_options[i].type == node->get_class_name()) {
-				if (!_is_available(add_options[i].mode)) {
+		for (auto &&option : add_options) {
+			if (option.type == node->get_class_name()) {
+				if (!_is_available(option.mode)) {
 					unsupported = true;
 				}
 				break;
@@ -2898,8 +2902,9 @@ public:
 	void _node_changed() {
 		if (updating)
 			return;
-		for (int i = 0; i < properties.size(); i++) {
-			properties[i]->update_property();
+
+		for (auto &&prop : properties) {
+			prop->update_property();
 		}
 	}
 
@@ -2917,16 +2922,15 @@ public:
 
 	bool updating;
 	Ref<VisualShaderNode> node;
-	Vector<EditorProperty *> properties;
+	std::vector<EditorProperty *> properties;
 
-	void setup(Ref<Resource> p_parent_resource, Vector<EditorProperty *> p_properties, const Vector<StringName> &p_names, Ref<VisualShaderNode> p_node) {
+	void setup(Ref<Resource> p_parent_resource, std::vector<EditorProperty *> p_properties, const std::vector<StringName> &p_names, Ref<VisualShaderNode> p_node) {
 		parent_resource = p_parent_resource;
 		updating = false;
 		node = p_node;
 		properties = p_properties;
 
-		for (int i = 0; i < p_properties.size(); i++) {
-
+		for (decltype(p_properties.size()) i = 0; i < p_properties.size(); ++i) {
 			add_child(p_properties[i]);
 
 			bool res_prop = Object::cast_to<EditorPropertyResource>(p_properties[i]);
@@ -2961,7 +2965,7 @@ Control *VisualShaderNodePluginDefault::create_editor(const Ref<Resource> &p_par
 		return input_editor;
 	}
 
-	Vector<StringName> properties = p_node->get_editable_properties();
+	std::vector<StringName> properties = p_node->get_editable_properties();
 	if (properties.size() == 0) {
 		return NULL;
 	}
@@ -2969,28 +2973,28 @@ Control *VisualShaderNodePluginDefault::create_editor(const Ref<Resource> &p_par
 	List<PropertyInfo> props;
 	p_node->get_property_list(&props);
 
-	Vector<PropertyInfo> pinfo;
+	std::vector<PropertyInfo> pinfo;
 
 	for (List<PropertyInfo>::Element *E = props.front(); E; E = E->next()) {
 
-		for (int i = 0; i < properties.size(); i++) {
-			if (E->get().name == String(properties[i])) {
+		for (auto &&prop : properties) {
+			if (E->get().name == String(prop)) {
 				pinfo.push_back(E->get());
 			}
 		}
 	}
 
-	if (pinfo.size() == 0)
-		return NULL;
+	if (pinfo.empty())
+		return nullptr;
 
 	properties.clear();
 
 	Ref<VisualShaderNode> node = p_node;
-	Vector<EditorProperty *> editors;
+	std::vector<EditorProperty *> editors;
 
-	for (int i = 0; i < pinfo.size(); i++) {
+	for (auto &&info : pinfo) {
 
-		EditorProperty *prop = EditorInspector::instantiate_property_editor(node.ptr(), pinfo[i].type, pinfo[i].name, pinfo[i].hint, pinfo[i].hint_string, pinfo[i].usage);
+		EditorProperty *prop = EditorInspector::instantiate_property_editor(node.ptr(), info.type, info.name, info.hint, info.hint_string, info.usage);
 		if (!prop)
 			return NULL;
 
@@ -3007,8 +3011,9 @@ Control *VisualShaderNodePluginDefault::create_editor(const Ref<Resource> &p_par
 		}
 
 		editors.push_back(prop);
-		properties.push_back(pinfo[i].name);
+		properties.push_back(info.name);
 	}
+
 	VisualShaderNodePluginDefaultEditor *editor = memnew(VisualShaderNodePluginDefaultEditor);
 	editor->setup(p_parent_resource, editors, properties, p_node);
 	return editor;
@@ -3032,7 +3037,7 @@ void EditorPropertyShaderMode::_option_selected(int p_which) {
 	//now undo is hell
 
 	//1. restore connections to output
-	for (int i = 0; i < VisualShader::TYPE_MAX; i++) {
+	for (uint8_t i = 0; i < VisualShader::TYPE_MAX; ++i) {
 
 		VisualShader::Type type = VisualShader::Type(i);
 		List<VisualShader::Connection> conns;
@@ -3044,12 +3049,12 @@ void EditorPropertyShaderMode::_option_selected(int p_which) {
 		}
 	}
 	//2. restore input indices
-	for (int i = 0; i < VisualShader::TYPE_MAX; i++) {
+	for (uint8_t i = 0; i < VisualShader::TYPE_MAX; ++i) {
 
 		VisualShader::Type type = VisualShader::Type(i);
-		Vector<int> nodes = visual_shader->get_node_list(type);
-		for (int j = 0; j < nodes.size(); j++) {
-			Ref<VisualShaderNodeInput> input = visual_shader->get_node(type, nodes[j]);
+		std::vector<int> nodes = visual_shader->get_node_list(type);
+		for (auto &&node : nodes) {
+			Ref<VisualShaderNodeInput> input = visual_shader->get_node(type, node);
 			if (!input.is_valid()) {
 				continue;
 			}
@@ -3121,7 +3126,7 @@ bool EditorInspectorShaderModePlugin::parse_property(Object *p_object, Variant::
 	if (p_path == "mode" && p_object->is_class("VisualShader") && p_type == Variant::INT) {
 
 		EditorPropertyShaderMode *editor = memnew(EditorPropertyShaderMode);
-		Vector<String> options = p_hint_text.split(",");
+		std::vector<String> options = p_hint_text.split(",");
 		editor->setup(options);
 		add_property_editor(p_path, editor);
 

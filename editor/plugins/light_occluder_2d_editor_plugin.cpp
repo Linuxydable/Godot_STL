@@ -75,7 +75,7 @@ Variant LightOccluder2DEditor::_get_polygon(int p_idx) const {
 	if (occluder.is_valid())
 		return occluder->get_polygon();
 	else
-		return Variant(Vector<Vector2>());
+		return Variant(std::vector<Vector2>{});
 }
 
 void LightOccluder2DEditor::_set_polygon(int p_idx, const Variant &p_polygon) const {

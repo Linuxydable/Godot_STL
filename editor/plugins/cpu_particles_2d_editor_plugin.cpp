@@ -97,11 +97,9 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 	Size2i s = Size2(img->get_width(), img->get_height());
 	ERR_FAIL_COND(s.width == 0 || s.height == 0);
 
-	Vector<Point2> valid_positions;
-	Vector<Point2> valid_normals;
-	Vector<uint8_t> valid_colors;
-
-	valid_positions.resize(s.width * s.height);
+	std::vector<Point2> valid_positions(s.width * s.height);
+	std::vector<Point2> valid_normals;
+	std::vector<uint8_t> valid_colors;
 
 	EmissionMode emode = (EmissionMode)emission_mask_mode->get_selected();
 
@@ -131,12 +129,12 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 					if (emode == EMISSION_MODE_SOLID) {
 
 						if (capture_colors) {
-							valid_colors.write[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
-							valid_colors.write[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
-							valid_colors.write[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
-							valid_colors.write[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
+							valid_colors[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
+							valid_colors[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
+							valid_colors[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
+							valid_colors[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
 						}
-						valid_positions.write[vpc++] = Point2(i, j);
+						valid_positions[vpc++] = Point2(i, j);
 
 					} else {
 
@@ -155,7 +153,7 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 						}
 
 						if (on_border) {
-							valid_positions.write[vpc] = Point2(i, j);
+							valid_positions[vpc] = Point2(i, j);
 
 							if (emode == EMISSION_MODE_BORDER_DIRECTED) {
 								Vector2 normal;
@@ -172,14 +170,14 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 								}
 
 								normal.normalize();
-								valid_normals.write[vpc] = normal;
+								valid_normals[vpc] = normal;
 							}
 
 							if (capture_colors) {
-								valid_colors.write[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
-								valid_colors.write[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
-								valid_colors.write[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
-								valid_colors.write[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
+								valid_colors[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
+								valid_colors[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
+								valid_colors[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
+								valid_colors[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
 							}
 
 							vpc++;
@@ -191,7 +189,7 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 	}
 
 	valid_positions.resize(vpc);
-	if (valid_normals.size()) {
+	if (!valid_normals.empty()) {
 		valid_normals.resize(vpc);
 	}
 
@@ -212,12 +210,12 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 		particles->set_emission_colors(pca);
 	}
 
-	if (valid_normals.size()) {
+	if (!valid_normals.empty()) {
 		particles->set_emission_shape(CPUParticles2D::EMISSION_SHAPE_DIRECTED_POINTS);
 		PoolVector2Array norms;
 		norms.resize(valid_normals.size());
 		PoolVector2Array::Write normsw = norms.write();
-		for (int i = 0; i < valid_normals.size(); i += 1) {
+		for (decltype(valid_normals.size()) i = 0; i < valid_normals.size(); ++i) {
 			normsw[i] = valid_normals[i];
 		}
 		particles->set_emission_normals(norms);
@@ -229,7 +227,7 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 		PoolVector2Array points;
 		points.resize(valid_positions.size());
 		PoolVector2Array::Write pointsw = points.write();
-		for (int i = 0; i < valid_positions.size(); i += 1) {
+		for (decltype(valid_positions.size()) i = 0; i < valid_positions.size(); ++i) {
 			pointsw[i] = valid_positions[i];
 		}
 		particles->set_emission_points(points);

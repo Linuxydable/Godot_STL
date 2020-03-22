@@ -120,9 +120,9 @@ void FileDialog::set_enable_multiple_selection(bool p_enable) {
 	tree->set_select_mode(p_enable ? Tree::SELECT_MULTI : Tree::SELECT_SINGLE);
 };
 
-Vector<String> FileDialog::get_selected_files() const {
+std::vector<String> FileDialog::get_selected_files() const {
 
-	Vector<String> list;
+	std::vector<String> list;
 
 	TreeItem *item = tree->get_root();
 	while ((item = tree->get_next_selected(item))) {
@@ -234,9 +234,8 @@ void FileDialog::_action_pressed() {
 			valid = true; // match none
 		} else if (filters.size() > 1 && filter->get_selected() == 0) {
 			// match all filters
-			for (int i = 0; i < filters.size(); i++) {
-
-				String flt = filters[i].get_slice(";", 0);
+			for (auto &&filter : filters) {
+				String flt = filter.get_slice(";", 0);
 				for (int j = 0; j < flt.get_slice_count(","); j++) {
 
 					String str = flt.get_slice(",", j).strip_edges();
@@ -465,9 +464,8 @@ void FileDialog::update_file_list() {
 		// match all
 	} else if (filters.size() > 1 && filter->get_selected() == 0) {
 		// match all filters
-		for (int i = 0; i < filters.size(); i++) {
-
-			String f = filters[i].get_slice(";", 0);
+		for (auto &&filter : filters) {
+			String f = filter.get_slice(";", 0);
 			for (int j = 0; j < f.get_slice_count(","); j++) {
 
 				patterns.push_back(f.get_slice(",", j).strip_edges());
@@ -561,10 +559,10 @@ void FileDialog::update_filters() {
 
 		filter->add_item(RTR("All Recognized") + " ( " + all_filters + " )");
 	}
-	for (int i = 0; i < filters.size(); i++) {
+	for (auto &&f : filters) {
 
-		String flt = filters[i].get_slice(";", 0).strip_edges();
-		String desc = filters[i].get_slice(";", 1).strip_edges();
+		String flt = f.get_slice(";", 0).strip_edges();
+		String desc = f.get_slice(";", 1).strip_edges();
 		if (desc.length())
 			filter->add_item(String(tr(desc)) + " ( " + flt + " )");
 		else
@@ -587,13 +585,13 @@ void FileDialog::add_filter(const String &p_filter) {
 	invalidate();
 }
 
-void FileDialog::set_filters(const Vector<String> &p_filters) {
+void FileDialog::set_filters(const std::vector<String> &p_filters) {
 	filters = p_filters;
 	update_filters();
 	invalidate();
 }
 
-Vector<String> FileDialog::get_filters() const {
+std::vector<String> FileDialog::get_filters() const {
 	return filters;
 }
 

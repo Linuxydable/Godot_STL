@@ -308,7 +308,7 @@ Variant &Tween::_get_initial_val(InterpolateData &p_data) {
 			} else {
 				// Call the method and get the initial value from it
 				Variant::CallError error;
-				initial_val = object->call(p_data.target_key[0], NULL, 0, error);
+				initial_val = object->call(p_data.target_key.front(), nullptr, 0, error);
 				ERR_FAIL_COND_V(error.error != Variant::CallError::CALL_OK, p_data.initial_val);
 			}
 			return initial_val;
@@ -347,7 +347,7 @@ Variant &Tween::_get_delta_val(InterpolateData &p_data) {
 			} else {
 				// We're looking at a method. Call the method on the target object
 				Variant::CallError error;
-				final_val = target->call(p_data.target_key[0], NULL, 0, error);
+				final_val = target->call(p_data.target_key.front(), nullptr, 0, error);
 				ERR_FAIL_COND_V(error.error != Variant::CallError::CALL_OK, p_data.initial_val);
 			}
 
@@ -576,10 +576,10 @@ bool Tween::_apply_tween_value(InterpolateData &p_data, Variant &value) {
 			if (value.get_type() != Variant::NIL) {
 				// Pass it as an argument to the function call
 				Variant *arg[1] = { &value };
-				object->call(p_data.key[0], (const Variant **)arg, 1, error);
+				object->call(p_data.key.front(), (const Variant **)arg, 1, error);
 			} else {
 				// Don't pass any argument
-				object->call(p_data.key[0], NULL, 0, error);
+				object->call(p_data.key.front(), nullptr, 0, error);
 			}
 
 			// Did we get an error from the function call?
@@ -656,7 +656,7 @@ void Tween::_tween_process(float p_delta) {
 		else if (prev_delaying) {
 			// We can apply the tween's value to the data and emit that the tween has started
 			_apply_tween_value(data, data.initial_val);
-			emit_signal("tween_started", object, NodePath(Vector<StringName>(), data.key, false));
+			emit_signal("tween_started", object, NodePath(std::vector<StringName>{}, data.key, false));
 		}
 
 		// Are we at the end of the tween?
@@ -675,22 +675,22 @@ void Tween::_tween_process(float p_delta) {
 					// Run the deferred function callback, applying the correct number of arguments
 					switch (data.args) {
 						case 0:
-							object->call_deferred(data.key[0]);
+							object->call_deferred(data.key.front());
 							break;
 						case 1:
-							object->call_deferred(data.key[0], data.arg[0]);
+							object->call_deferred(data.key.front(), data.arg[0]);
 							break;
 						case 2:
-							object->call_deferred(data.key[0], data.arg[0], data.arg[1]);
+							object->call_deferred(data.key.front(), data.arg[0], data.arg[1]);
 							break;
 						case 3:
-							object->call_deferred(data.key[0], data.arg[0], data.arg[1], data.arg[2]);
+							object->call_deferred(data.key.front(), data.arg[0], data.arg[1], data.arg[2]);
 							break;
 						case 4:
-							object->call_deferred(data.key[0], data.arg[0], data.arg[1], data.arg[2], data.arg[3]);
+							object->call_deferred(data.key.front(), data.arg[0], data.arg[1], data.arg[2], data.arg[3]);
 							break;
 						case 5:
-							object->call_deferred(data.key[0], data.arg[0], data.arg[1], data.arg[2], data.arg[3], data.arg[4]);
+							object->call_deferred(data.key.front(), data.arg[0], data.arg[1], data.arg[2], data.arg[3], data.arg[4]);
 							break;
 					}
 				} else {
@@ -703,7 +703,7 @@ void Tween::_tween_process(float p_delta) {
 						&data.arg[3],
 						&data.arg[4],
 					};
-					object->call(data.key[0], (const Variant **)arg, data.args, error);
+					object->call(data.key.front(), (const Variant **)arg, data.args, error);
 				}
 			}
 		} else {
@@ -712,7 +712,7 @@ void Tween::_tween_process(float p_delta) {
 			_apply_tween_value(data, result);
 
 			// Emit that the tween has taken a step
-			emit_signal("tween_step", object, NodePath(Vector<StringName>(), data.key, false), data.elapsed, result);
+			emit_signal("tween_step", object, NodePath(std::vector<StringName>(), data.key, false), data.elapsed, result);
 		}
 
 		// Is the tween now finished?
@@ -722,7 +722,7 @@ void Tween::_tween_process(float p_delta) {
 
 			// Mark the tween as completed and emit the signal
 			data.elapsed = 0;
-			emit_signal("tween_completed", object, NodePath(Vector<StringName>(), data.key, false));
+			emit_signal("tween_completed", object, NodePath(std::vector<StringName>(), data.key, false));
 
 			// If we are not repeating the tween, remove it
 			if (!repeat)

@@ -182,12 +182,12 @@ void Node::_notification(int p_notification) {
 void Node::_propagate_ready() {
 
 	data.ready_notified = true;
-	data.blocked++;
-	for (int i = 0; i < data.children.size(); i++) {
-
-		data.children[i]->_propagate_ready();
+	++data.blocked;
+	for (auto &&child : data.children) {
+		child->_propagate_ready();
 	}
-	data.blocked--;
+
+	--data.blocked;
 
 	notification(NOTIFICATION_POST_ENTER_TREE);
 
@@ -230,16 +230,16 @@ void Node::_propagate_enter_tree() {
 
 	data.tree->node_added(this);
 
-	data.blocked++;
+	++data.blocked;
 	//block while adding children
 
-	for (int i = 0; i < data.children.size(); i++) {
+	for (auto &&child : data.children) {
 
-		if (!data.children[i]->is_inside_tree()) // could have been added in enter_tree
-			data.children[i]->_propagate_enter_tree();
+		if (!child->is_inside_tree()) // could have been added in enter_tree
+			child->_propagate_enter_tree();
 	}
 
-	data.blocked--;
+	--data.blocked;
 
 #ifdef DEBUG_ENABLED
 
@@ -253,11 +253,11 @@ void Node::_propagate_enter_tree() {
 
 void Node::_propagate_after_exit_tree() {
 
-	data.blocked++;
-	for (int i = 0; i < data.children.size(); i++) {
-		data.children[i]->_propagate_after_exit_tree();
+	++data.blocked;
+	for (auto &&child : data.children) {
+		child->_propagate_after_exit_tree();
 	}
-	data.blocked--;
+	--data.blocked;
 	emit_signal(SceneStringNames::get_singleton()->tree_exited);
 }
 
@@ -342,8 +342,8 @@ void Node::move_child(Node *p_child, int p_pos) {
 	int motion_from = MIN(p_pos, p_child->data.pos);
 	int motion_to = MAX(p_pos, p_child->data.pos);
 
-	data.children.remove(p_child->data.pos);
-	data.children.insert(p_pos, p_child);
+	data.children.erase(data.children.begin() + p_child->data.pos);
+	data.children.insert(data.children.begin() + p_pos, p_child);
 
 	if (data.tree) {
 		data.tree->tree_changed();
@@ -466,9 +466,8 @@ void Node::_propagate_pause_owner(Node *p_owner) {
 	if (this != p_owner && data.pause_mode != PAUSE_MODE_INHERIT)
 		return;
 	data.pause_owner = p_owner;
-	for (int i = 0; i < data.children.size(); i++) {
-
-		data.children[i]->_propagate_pause_owner(p_owner);
+	for (auto &&child : data.children) {
+		child->_propagate_pause_owner(p_owner);
 	}
 }
 
@@ -477,9 +476,8 @@ void Node::set_network_master(int p_peer_id, bool p_recursive) {
 	data.network_master = p_peer_id;
 
 	if (p_recursive) {
-		for (int i = 0; i < data.children.size(); i++) {
-
-			data.children[i]->set_network_master(p_peer_id, true);
+		for (auto &&child : data.children) {
+			child->set_network_master(p_peer_id, true);
 		}
 	}
 }
@@ -919,9 +917,9 @@ String Node::invalid_character = ". : @ / \"";
 
 bool Node::_validate_node_name(String &p_name) {
 	String name = p_name;
-	Vector<String> chars = Node::invalid_character.split(" ");
-	for (int i = 0; i < chars.size(); i++) {
-		name = name.replace(chars[i], "");
+	std::vector<String> chars = Node::invalid_character.split(" ");
+	for (auto &&ch : chars) {
+		name = name.replace(ch, "");
 	}
 	bool is_valid = name == p_name;
 	p_name = name;
@@ -997,16 +995,19 @@ void Node::_validate_child_name(Node *p_child, bool p_force_human_readable) {
 			unique = false;
 		} else {
 			//check if exists
-			Node **children = data.children.ptrw();
-			int cc = data.children.size();
+			auto it_child = std::find_if(data.children.begin(), data.children.end(), [&](Node *node) {
+				if (node == p_child)
+					return false;
 
-			for (int i = 0; i < cc; i++) {
-				if (children[i] == p_child)
-					continue;
-				if (children[i]->data.name == p_child->data.name) {
-					unique = false;
-					break;
+				if (node->data.name == p_child->data.name) {
+					return true;
 				}
+
+				return false;
+			});
+
+			if (it_child != data.children.end()) {
+				unique = false;
 			}
 		}
 
@@ -1067,18 +1068,15 @@ void Node::_generate_serial_child_name(const Node *p_child, StringName &name) co
 	}
 
 	//quickly test if proposed name exists
-	int cc = data.children.size(); //children count
-	const Node *const *children_ptr = data.children.ptr();
 
 	{
-
 		bool exists = false;
 
-		for (int i = 0; i < cc; i++) {
-			if (children_ptr[i] == p_child) { //exclude self in renaming if its already a child
+		for (auto &&child : data.children) {
+			if (child == p_child) { //exclude self in renaming if its already a child
 				continue;
 			}
-			if (children_ptr[i]->data.name == name) {
+			if (child->data.name == name) {
 				exists = true;
 			}
 		}
@@ -1114,11 +1112,11 @@ void Node::_generate_serial_child_name(const Node *p_child, StringName &name) co
 		StringName attempt = name_string + nums;
 		bool exists = false;
 
-		for (int i = 0; i < cc; i++) {
-			if (children_ptr[i] == p_child) {
+		for (auto &&child : data.children) {
+			if (child == p_child) {
 				continue;
 			}
-			if (children_ptr[i]->data.name == attempt) {
+			if (child->data.name == attempt) {
 				exists = true;
 			}
 		}
@@ -1209,9 +1207,8 @@ void Node::_propagate_validate_owner() {
 		}
 	}
 
-	for (int i = 0; i < data.children.size(); i++) {
-
-		data.children[i]->_propagate_validate_owner();
+	for (auto &&child : data.children) {
+		child->_propagate_validate_owner();
 	}
 }
 
@@ -1220,8 +1217,8 @@ void Node::remove_child(Node *p_child) {
 	ERR_FAIL_NULL(p_child);
 	ERR_FAIL_COND_MSG(data.blocked > 0, "Parent node is busy setting up children, remove_node() failed. Consider using call_deferred(\"remove_child\", child) instead.");
 
-	int child_count = data.children.size();
-	Node **children = data.children.ptrw();
+	auto child_count = data.children.size();
+	Node **children = data.children.data();
 	int idx = -1;
 
 	if (p_child->data.pos >= 0 && p_child->data.pos < child_count) {
@@ -1231,13 +1228,16 @@ void Node::remove_child(Node *p_child) {
 	}
 
 	if (idx == -1) { //maybe removed while unparenting or something and index was not updated, so just in case the above fails, try this.
-		for (int i = 0; i < child_count; i++) {
 
-			if (children[i] == p_child) {
-
-				idx = i;
-				break;
+		auto it_find = std::find_if(data.children.begin(), data.children.end(), [&](const Node *node) {
+			if (node == p_child) {
+				return true;
 			}
+			return false;
+		});
+
+		if (it_find != data.children.end()) {
+			idx = std::distance(data.children.begin(), it_find);
 		}
 	}
 
@@ -1252,19 +1252,19 @@ void Node::remove_child(Node *p_child) {
 	remove_child_notify(p_child);
 	p_child->notification(NOTIFICATION_UNPARENTED);
 
-	data.children.remove(idx);
+	data.children.erase(data.children.begin() + idx);
 
 	//update pointer and size
 	child_count = data.children.size();
-	children = data.children.ptrw();
+	children = data.children.data();
 
-	for (int i = idx; i < child_count; i++) {
+	for (decltype(child_count) i = idx; i < child_count; ++i) {
 
 		children[i]->data.pos = i;
 		children[i]->notification(NOTIFICATION_MOVED_IN_PARENT);
 	}
 
-	p_child->data.parent = NULL;
+	p_child->data.parent = nullptr;
 	p_child->data.pos = -1;
 
 	// validate owner
@@ -1288,12 +1288,9 @@ Node *Node::get_child(int p_index) const {
 
 Node *Node::_get_child_by_name(const StringName &p_name) const {
 
-	int cc = data.children.size();
-	Node *const *cd = data.children.ptr();
-
-	for (int i = 0; i < cc; i++) {
-		if (cd[i]->data.name == p_name)
-			return cd[i];
+	for (auto &&child : data.children) {
+		if (child->data.name == p_name)
+			return child;
 	}
 
 	return NULL;
@@ -1341,20 +1338,21 @@ Node *Node::get_node_or_null(const NodePath &p_path) const {
 
 		} else {
 
-			next = NULL;
+			next = nullptr;
 
-			for (int j = 0; j < current->data.children.size(); j++) {
-
-				Node *child = current->data.children[j];
-
+			auto it_child = std::find_if(current->data.children.begin(), current->data.children.end(), [&](const Node *child) {
 				if (child->data.name == name) {
-
-					next = child;
-					break;
+					return true;
 				}
+				return false;
+			});
+
+			if (it_child != current->data.children.end()) {
+				next = *it_child;
 			}
-			if (next == NULL) {
-				return NULL;
+
+			if (next == nullptr) {
+				return nullptr;
 			};
 		}
 		current = next;
@@ -1377,22 +1375,21 @@ bool Node::has_node(const NodePath &p_path) const {
 
 Node *Node::find_node(const String &p_mask, bool p_recursive, bool p_owned) const {
 
-	Node *const *cptr = data.children.ptr();
-	int ccount = data.children.size();
-	for (int i = 0; i < ccount; i++) {
-		if (p_owned && !cptr[i]->data.owner)
+	for (auto &&child : data.children) {
+		if (p_owned && !child->data.owner)
 			continue;
-		if (cptr[i]->data.name.operator String().match(p_mask))
-			return cptr[i];
+
+		if (child->data.name.operator String().match(p_mask))
+			return child;
 
 		if (!p_recursive)
 			continue;
 
-		Node *ret = cptr[i]->find_node(p_mask, true, p_owned);
+		Node *ret = child->find_node(p_mask, true, p_owned);
 		if (ret)
 			return ret;
 	}
-	return NULL;
+	return nullptr;
 }
 
 Node *Node::get_parent() const {
@@ -1437,8 +1434,8 @@ bool Node::is_greater_than(const Node *p_node) const {
 	ERR_FAIL_COND_V(p_node->data.depth < 0, false);
 #ifdef NO_ALLOCA
 
-	Vector<int> this_stack;
-	Vector<int> that_stack;
+	std::vector<int> this_stack;
+	std::vector<int> that_stack;
 	this_stack.resize(data.depth);
 	that_stack.resize(p_node->data.depth);
 
@@ -1608,7 +1605,7 @@ NodePath Node::get_path_to(const Node *p_node) const {
 
 	visited.clear();
 
-	Vector<StringName> path;
+	std::vector<StringName> path;
 
 	n = p_node;
 
@@ -1627,7 +1624,7 @@ NodePath Node::get_path_to(const Node *p_node) const {
 		n = n->data.parent;
 	}
 
-	path.invert();
+	std::reverse(path.begin(), path.end());
 
 	return NodePath(path, false);
 }
@@ -1641,14 +1638,14 @@ NodePath Node::get_path() const {
 
 	const Node *n = this;
 
-	Vector<StringName> path;
+	std::vector<StringName> path;
 
 	while (n) {
 		path.push_back(n->get_name());
 		n = n->data.parent;
 	}
 
-	path.invert();
+	std::reverse(path.begin(), path.end());
 
 	data.path_cache = memnew(NodePath(path, true));
 
@@ -1732,7 +1729,7 @@ void Node::_print_tree_pretty(const String &prefix, const bool last) {
 
 	String new_prefix = last ? String::utf8(" ┖╴") : String::utf8(" ┠╴");
 	print_line(prefix + new_prefix + String(get_name()));
-	for (int i = 0; i < data.children.size(); i++) {
+	for (decltype(data.children.size()) i = 0; i < data.children.size(); ++i) {
 		new_prefix = last ? String::utf8("   ") : String::utf8(" ┃ ");
 		data.children[i]->_print_tree_pretty(prefix + new_prefix, i == data.children.size() - 1);
 	}
@@ -1749,8 +1746,8 @@ void Node::print_tree() {
 
 void Node::_print_tree(const Node *p_node) {
 	print_line(String(p_node->get_path_to(this)));
-	for (int i = 0; i < data.children.size(); i++)
-		data.children[i]->_print_tree(p_node);
+	for (auto &&child : data.children)
+		child->_print_tree(p_node);
 }
 
 void Node::_propagate_reverse_notification(int p_notification) {
@@ -1774,9 +1771,8 @@ void Node::_propagate_deferred_notification(int p_notification, bool p_reverse) 
 	if (!p_reverse)
 		MessageQueue::get_singleton()->push_notification(this, p_notification);
 
-	for (int i = 0; i < data.children.size(); i++) {
-
-		data.children[i]->_propagate_deferred_notification(p_notification, p_reverse);
+	for (auto &&child : data.children) {
+		child->_propagate_deferred_notification(p_notification, p_reverse);
 	}
 
 	if (p_reverse)
@@ -1790,9 +1786,8 @@ void Node::propagate_notification(int p_notification) {
 	data.blocked++;
 	notification(p_notification);
 
-	for (int i = 0; i < data.children.size(); i++) {
-
-		data.children[i]->propagate_notification(p_notification);
+	for (auto &&child : data.children) {
+		child->propagate_notification(p_notification);
 	}
 	data.blocked--;
 }
@@ -1804,8 +1799,8 @@ void Node::propagate_call(const StringName &p_method, const Array &p_args, const
 	if (p_parent_first && has_method(p_method))
 		callv(p_method, p_args);
 
-	for (int i = 0; i < data.children.size(); i++) {
-		data.children[i]->propagate_call(p_method, p_args, p_parent_first);
+	for (auto &&child : data.children) {
+		child->propagate_call(p_method, p_args, p_parent_first);
 	}
 
 	if (!p_parent_first && has_method(p_method))
@@ -1819,8 +1814,9 @@ void Node::_propagate_replace_owner(Node *p_owner, Node *p_by_owner) {
 		set_owner(p_by_owner);
 
 	data.blocked++;
-	for (int i = 0; i < data.children.size(); i++)
-		data.children[i]->_propagate_replace_owner(p_owner, p_by_owner);
+	for (auto &&child : data.children)
+		child->_propagate_replace_owner(p_owner, p_by_owner);
+
 	data.blocked--;
 }
 
@@ -1839,8 +1835,7 @@ void Node::remove_and_skip() {
 	while (true) {
 
 		bool clear = true;
-		for (int i = 0; i < data.children.size(); i++) {
-			Node *c_node = data.children[i];
+		for (auto &&c_node : data.children) {
 			if (!c_node->get_owner())
 				continue;
 
@@ -2427,9 +2422,9 @@ void Node::_replace_connections_target(Node *p_new_target) {
 	}
 }
 
-Vector<Variant> Node::make_binds(VARIANT_ARG_DECLARE) {
+std::vector<Variant> Node::make_binds(VARIANT_ARG_DECLARE) {
 
-	Vector<Variant> ret;
+	std::vector<Variant> ret;
 
 	if (p_arg1.get_type() == Variant::NIL)
 		return ret;
@@ -2464,7 +2459,7 @@ bool Node::has_node_and_resource(const NodePath &p_path) const {
 	if (!has_node(p_path))
 		return false;
 	RES res;
-	Vector<StringName> leftover_path;
+	std::vector<StringName> leftover_path;
 	Node *node = get_node_and_resource(p_path, res, leftover_path, false);
 
 	return node;
@@ -2473,7 +2468,7 @@ bool Node::has_node_and_resource(const NodePath &p_path) const {
 Array Node::_get_node_and_resource(const NodePath &p_path) {
 
 	RES res;
-	Vector<StringName> leftover_path;
+	std::vector<StringName> leftover_path;
 	Node *node = get_node_and_resource(p_path, res, leftover_path, false);
 	Array result;
 
@@ -2487,16 +2482,16 @@ Array Node::_get_node_and_resource(const NodePath &p_path) {
 	else
 		result.push_back(Variant());
 
-	result.push_back(NodePath(Vector<StringName>(), leftover_path, false));
+	result.push_back(NodePath(std::vector<StringName>(), leftover_path, false));
 
 	return result;
 }
 
-Node *Node::get_node_and_resource(const NodePath &p_path, RES &r_res, Vector<StringName> &r_leftover_subpath, bool p_last_is_property) const {
+Node *Node::get_node_and_resource(const NodePath &p_path, RES &r_res, std::vector<StringName> &r_leftover_subpath, bool p_last_is_property) const {
 
 	Node *node = get_node(p_path);
 	r_res = RES();
-	r_leftover_subpath = Vector<StringName>();
+	r_leftover_subpath = std::vector<StringName>();
 	if (!node)
 		return NULL;
 
@@ -2661,8 +2656,8 @@ void Node::get_argument_options(const StringName &p_function, int p_idx, List<St
 void Node::clear_internal_tree_resource_paths() {
 
 	clear_internal_resource_paths();
-	for (int i = 0; i < data.children.size(); i++) {
-		data.children[i]->clear_internal_tree_resource_paths();
+	for (auto &&child : data.children) {
+		child->clear_internal_tree_resource_paths();
 	}
 }
 

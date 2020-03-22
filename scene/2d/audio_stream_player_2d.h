@@ -63,7 +63,7 @@ private:
 
 	Ref<AudioStreamPlayback> stream_playback;
 	Ref<AudioStream> stream;
-	Vector<AudioFrame> mix_buffer;
+	std::vector<AudioFrame> mix_buffer;
 
 	volatile float setseek;
 	volatile bool active;

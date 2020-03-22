@@ -140,7 +140,7 @@ public:
 	virtual ~EditorScriptCodeCompletionCache() {}
 };
 
-void ScriptEditorQuickOpen::popup_dialog(const Vector<String> &p_functions, bool p_dontclear) {
+void ScriptEditorQuickOpen::popup_dialog(const std::vector<String> &p_functions, bool p_dontclear) {
 
 	popup_centered_ratio(0.6);
 	if (p_dontclear)
@@ -176,9 +176,7 @@ void ScriptEditorQuickOpen::_update_search() {
 	search_options->clear();
 	TreeItem *root = search_options->create_item();
 
-	for (int i = 0; i < functions.size(); i++) {
-
-		String file = functions[i];
+	for (auto &&file : functions) {
 		if ((search_box->get_text() == "" || file.findn(search_box->get_text()) != -1)) {
 
 			TreeItem *ti = search_options->create_item(root);
@@ -251,7 +249,7 @@ ScriptEditorQuickOpen::ScriptEditorQuickOpen() {
 
 /////////////////////////////////
 
-ScriptEditor *ScriptEditor::script_editor = NULL;
+ScriptEditor *ScriptEditor::script_editor = nullptr;
 
 /*** SCRIPT EDITOR ******/
 
@@ -357,7 +355,7 @@ ScriptEditorBase *ScriptEditor::_get_current_editor() const {
 
 	int selected = tab_container->get_current_tab();
 	if (selected < 0 || selected >= tab_container->get_child_count())
-		return NULL;
+		return nullptr;
 
 	return Object::cast_to<ScriptEditorBase>(tab_container->get_child(selected));
 }
@@ -376,11 +374,11 @@ void ScriptEditor::_save_history() {
 
 		if (Object::cast_to<ScriptEditorBase>(n)) {
 
-			history.write[history_pos].state = Object::cast_to<ScriptEditorBase>(n)->get_edit_state();
+			history[history_pos].state = Object::cast_to<ScriptEditorBase>(n)->get_edit_state();
 		}
 		if (Object::cast_to<EditorHelp>(n)) {
 
-			history.write[history_pos].state = Object::cast_to<EditorHelp>(n)->get_scroll();
+			history[history_pos].state = Object::cast_to<EditorHelp>(n)->get_scroll();
 		}
 	}
 
@@ -415,11 +413,11 @@ void ScriptEditor::_go_to_tab(int p_idx) {
 
 		if (Object::cast_to<ScriptEditorBase>(n)) {
 
-			history.write[history_pos].state = Object::cast_to<ScriptEditorBase>(n)->get_edit_state();
+			history[history_pos].state = Object::cast_to<ScriptEditorBase>(n)->get_edit_state();
 		}
 		if (Object::cast_to<EditorHelp>(n)) {
 
-			history.write[history_pos].state = Object::cast_to<EditorHelp>(n)->get_scroll();
+			history[history_pos].state = Object::cast_to<EditorHelp>(n)->get_scroll();
 		}
 	}
 
@@ -443,7 +441,7 @@ void ScriptEditor::_go_to_tab(int p_idx) {
 			Object::cast_to<ScriptEditorBase>(c)->ensure_focus();
 
 		Ref<Script> script = Object::cast_to<ScriptEditorBase>(c)->get_edited_resource();
-		if (script != NULL) {
+		if (script != nullptr) {
 			notify_script_changed(script);
 		}
 
@@ -493,7 +491,6 @@ void ScriptEditor::_update_recent_scripts() {
 
 	String path;
 	for (int i = 0; i < rc.size(); i++) {
-
 		path = rc[i];
 		recent_scripts->add_item(path.replace("res://", ""));
 	}
@@ -598,13 +595,13 @@ void ScriptEditor::_close_tab(int p_idx, bool p_save, bool p_history_back) {
 	//remove from history
 	history.resize(history_pos + 1);
 
-	for (int i = 0; i < history.size(); i++) {
-		if (history[i].control == tselected) {
-			history.remove(i);
-			i--;
-			history_pos--;
+	std::remove_if(history.begin(), history.end(), [&](const ScriptHistory &h) {
+		if (h.control == tselected) {
+			--history_pos;
+			return true;
 		}
-	}
+		return false;
+	});
 
 	if (history_pos >= history.size()) {
 		history_pos = history.size() - 1;
@@ -979,7 +976,7 @@ Ref<Script> ScriptEditor::_get_current_script() {
 Array ScriptEditor::_get_open_scripts() const {
 
 	Array ret;
-	Vector<Ref<Script> > scripts = get_open_scripts();
+	std::vector<Ref<Script> > scripts = get_open_scripts();
 	int scrits_amount = scripts.size();
 	for (int idx_script = 0; idx_script < scrits_amount; idx_script++) {
 		ret.push_back(scripts[idx_script]);
@@ -1679,17 +1676,17 @@ void ScriptEditor::_update_members_overview() {
 		return;
 	}
 
-	Vector<String> functions = se->get_functions();
+	std::vector<String> functions = se->get_functions();
 	if (EditorSettings::get_singleton()->get("text_editor/tools/sort_members_outline_alphabetically")) {
-		functions.sort();
+		std::sort(functions.begin(), functions.end());
 	}
 
-	for (int i = 0; i < functions.size(); i++) {
+	for (auto &&func : functions) {
 		String filter = filter_methods->get_text();
-		String name = functions[i].get_slice(":", 0);
+		String name = func.get_slice(":", 0);
 		if (filter == "" || filter.is_subsequence_ofi(name)) {
 			members_overview->add_item(name);
-			members_overview->set_item_metadata(members_overview->get_item_count() - 1, functions[i].get_slice(":", 1).to_int() - 1);
+			members_overview->set_item_metadata(members_overview->get_item_count() - 1, func.get_slice(":", 1).to_int() - 1);
 		}
 	}
 
@@ -1738,8 +1735,8 @@ void ScriptEditor::_update_help_overview() {
 		return;
 	}
 
-	Vector<Pair<String, int> > sections = se->get_sections();
-	for (int i = 0; i < sections.size(); i++) {
+	std::vector<Pair<String, int> > sections = se->get_sections();
+	for (decltype(sections.size()) i = 0; i < sections.size(); ++i) {
 		help_overview->add_item(sections[i].first);
 		help_overview->set_item_metadata(i, sections[i].second);
 	}
@@ -1802,7 +1799,7 @@ void ScriptEditor::_update_script_names() {
 	ScriptSortBy sort_by = (ScriptSortBy)(int)EditorSettings::get_singleton()->get("text_editor/script_list/sort_scripts_by");
 	ScriptListName display_as = (ScriptListName)(int)EditorSettings::get_singleton()->get("text_editor/script_list/list_script_names_as");
 
-	Vector<_ScriptEditorItemData> sedata;
+	std::vector<_ScriptEditorItemData> sedata;
 
 	for (int i = 0; i < tab_container->get_child_count(); i++) {
 
@@ -1888,18 +1885,19 @@ void ScriptEditor::_update_script_names() {
 	}
 
 	if (_sort_list_on_update && !sedata.empty()) {
-		sedata.sort();
+		std::sort(sedata.begin(), sedata.end());
 
 		// change actual order of tab_container so that the order can be rearranged by user
 		int cur_tab = tab_container->get_current_tab();
 		int prev_tab = tab_container->get_previous_tab();
 		int new_cur_tab = -1;
 		int new_prev_tab = -1;
-		for (int i = 0; i < sedata.size(); i++) {
+		for (decltype(sedata.size()) i = 0; i < sedata.size(); ++i) {
 			tab_container->move_child(sedata[i].ref, i);
 			if (new_prev_tab == -1 && sedata[i].index == prev_tab) {
 				new_prev_tab = i;
 			}
+
 			if (new_cur_tab == -1 && sedata[i].index == cur_tab) {
 				new_cur_tab = i;
 			}
@@ -1909,26 +1907,26 @@ void ScriptEditor::_update_script_names() {
 		_sort_list_on_update = false;
 	}
 
-	Vector<_ScriptEditorItemData> sedata_filtered;
-	for (int i = 0; i < sedata.size(); i++) {
+	std::vector<_ScriptEditorItemData> sedata_filtered;
+	for (auto &&it : sedata) {
 		String filter = filter_scripts->get_text();
-		if (filter == "" || filter.is_subsequence_ofi(sedata[i].name)) {
-			sedata_filtered.push_back(sedata[i]);
+		if (filter == "" || filter.is_subsequence_ofi(it.name)) {
+			sedata_filtered.push_back(it);
 		}
 	}
 
-	for (int i = 0; i < sedata_filtered.size(); i++) {
-		script_list->add_item(sedata_filtered[i].name, sedata_filtered[i].icon);
+	for (auto &&it : sedata_filtered) {
+		script_list->add_item(it.name, it.icon);
 		int index = script_list->get_item_count() - 1;
-		script_list->set_item_tooltip(index, sedata_filtered[i].tooltip);
-		script_list->set_item_metadata(index, sedata_filtered[i].index); /* Saving as metadata the script's index in the tab container and not the filtered one */
-		if (sedata_filtered[i].used) {
+		script_list->set_item_tooltip(index, it.tooltip);
+		script_list->set_item_metadata(index, it.index); /* Saving as metadata the script's index in the tab container and not the filtered one */
+		if (it.used) {
 			script_list->set_item_custom_bg_color(index, Color(88 / 255.0, 88 / 255.0, 60 / 255.0));
 		}
-		if (tab_container->get_current_tab() == sedata_filtered[i].index) {
+		if (tab_container->get_current_tab() == it.index) {
 			script_list->select(index);
-			script_name_label->set_text(sedata_filtered[i].name);
-			script_icon->set_texture(sedata_filtered[i].icon);
+			script_name_label->set_text(it.name);
+			script_icon->set_texture(it.icon);
 		}
 	}
 
@@ -2461,16 +2459,17 @@ bool ScriptEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_data
 
 	if (String(d["type"]) == "files") {
 
-		Vector<String> files = d["files"];
+		std::vector<String> files = d["files"];
 
 		if (files.size() == 0)
 			return false; //weird
 
-		for (int i = 0; i < files.size(); i++) {
-			String file = files[i];
+		for (auto &&file : files) {
 			if (file == "" || !FileAccess::exists(file))
 				continue;
+
 			Ref<Script> scr = ResourceLoader::load(file);
+
 			if (scr.is_valid()) {
 				return true;
 			}
@@ -2523,14 +2522,14 @@ void ScriptEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Co
 
 	if (String(d["type"]) == "files") {
 
-		Vector<String> files = d["files"];
+		std::vector<String> files = d["files"];
 
 		int new_index = script_list->get_item_metadata(script_list->get_item_at_position(p_point));
 		int num_tabs_before = tab_container->get_child_count();
-		for (int i = 0; i < files.size(); i++) {
-			String file = files[i];
+		for (auto &&file : files) {
 			if (file == "" || !FileAccess::exists(file))
 				continue;
+
 			Ref<Script> scr = ResourceLoader::load(file);
 			if (scr.is_valid()) {
 				edit(scr);
@@ -2850,12 +2849,11 @@ void ScriptEditor::_update_history_pos(int p_new_pos) {
 	Node *n = tab_container->get_current_tab_control();
 
 	if (Object::cast_to<ScriptEditorBase>(n)) {
-
-		history.write[history_pos].state = Object::cast_to<ScriptEditorBase>(n)->get_edit_state();
+		history[history_pos].state = Object::cast_to<ScriptEditorBase>(n)->get_edit_state();
 	}
-	if (Object::cast_to<EditorHelp>(n)) {
 
-		history.write[history_pos].state = Object::cast_to<EditorHelp>(n)->get_scroll();
+	if (Object::cast_to<EditorHelp>(n)) {
+		history[history_pos].state = Object::cast_to<EditorHelp>(n)->get_scroll();
 	}
 
 	history_pos = p_new_pos;
@@ -2900,9 +2898,9 @@ void ScriptEditor::_history_back() {
 	}
 }
 
-Vector<Ref<Script> > ScriptEditor::get_open_scripts() const {
+std::vector<Ref<Script> > ScriptEditor::get_open_scripts() const {
 
-	Vector<Ref<Script> > out_scripts = Vector<Ref<Script> >();
+	std::vector<Ref<Script> > out_scripts = std::vector<Ref<Script> >();
 
 	for (int i = 0; i < tab_container->get_child_count(); i++) {
 		ScriptEditorBase *se = Object::cast_to<ScriptEditorBase>(tab_container->get_child(i));
