@@ -785,13 +785,12 @@ bool SpriteFramesEditor::can_drop_data_fw(const Point2 &p_point, const Variant &
 
 	if (String(d["type"]) == "files") {
 
-		Vector<String> files = d["files"];
+		std::vector<String> files = d["files"];
 
-		if (files.size() == 0)
+		if (files.empty())
 			return false;
 
-		for (int i = 0; i < files.size(); i++) {
-			String file = files[i];
+		for (auto &&file : files) {
 			String ftype = EditorFileSystem::get_singleton()->get_file_type(file);
 
 			if (!ClassDB::is_parent_class(ftype, "Texture")) {
