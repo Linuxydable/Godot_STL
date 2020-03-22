@@ -30,6 +30,8 @@
 
 #include "animation_tree_player_editor_plugin.h"
 
+#include <vector>
+
 #include "core/io/resource_loader.h"
 #include "core/os/input.h"
 #include "core/os/keyboard.h"
@@ -1099,17 +1101,13 @@ StringName AnimationTreePlayerEditor::_add_node(int p_item) {
 };
 
 void AnimationTreePlayerEditor::_file_dialog_selected(String p_path) {
-
 	switch (file_op) {
-
 		case MENU_IMPORT_ANIMATIONS: {
-			Vector<String> files = file_dialog->get_selected_files();
-
-			for (int i = 0; i < files.size(); i++) {
-
+			for (auto &&file : file_dialog->get_selected_files()) {
 				StringName node = _add_node(AnimationTreePlayer::NODE_ANIMATION);
 
-				RES anim = ResourceLoader::load(files[i]);
+				RES anim = ResourceLoader::load(file);
+
 				anim_tree->animation_node_set_animation(node, anim);
 				//anim_tree->node_set_name(node, files[i].get_file());
 			};
