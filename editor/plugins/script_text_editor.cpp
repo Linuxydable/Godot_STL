@@ -45,9 +45,9 @@ void ConnectionInfoDialog::popup_connections(String p_method, std::vector<Node *
 	tree->clear();
 	TreeItem *root = tree->create_item();
 
-	for (int i = 0; i < p_nodes.size(); ++i) {
+	for (auto &&node : p_nodes) {
 		List<Connection> all_connections;
-		p_nodes[i]->get_signals_connected_to_this(&all_connections);
+		node->get_signals_connected_to_this(&all_connections);
 
 		for (List<Connection>::Element *E = all_connections.front(); E; E = E->next()) {
 			Connection connection = E->get();
@@ -723,7 +723,7 @@ static std::vector<Node *> _find_all_node_for_script(Node *p_base, Node *p_curre
 
 	for (int i = 0; i < p_current->get_child_count(); ++i) {
 		std::vector<Node *> found = _find_all_node_for_script(p_base, p_current->get_child(i), p_script);
-		nodes.append_array(found);
+		nodes.insert(nodes.end(), found.begin(), found.end());
 	}
 
 	return nodes;
