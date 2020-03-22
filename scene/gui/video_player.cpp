@@ -81,8 +81,8 @@ void VideoPlayer::_mix_audio() {
 		return;
 	}
 
-	AudioFrame *buffer = mix_buffer.ptrw();
-	int buffer_size = mix_buffer.size();
+	AudioFrame *buffer = mix_buffer.data();
+	auto buffer_size = mix_buffer.size();
 
 	// Resample
 	if (!mix(buffer, buffer_size))
@@ -96,8 +96,7 @@ void VideoPlayer::_mix_audio() {
 		AudioFrame *target = AudioServer::get_singleton()->thread_get_channel_mix_buffer(bus_index, 0);
 		ERR_FAIL_COND(!target);
 
-		for (int j = 0; j < buffer_size; j++) {
-
+		for (decltype(buffer_size) j = 0; j < buffer_size; ++j) {
 			target[j] += buffer[j] * vol;
 		}
 
@@ -109,7 +108,7 @@ void VideoPlayer::_mix_audio() {
 			ERR_FAIL_COND(!targets[k]);
 		}
 
-		for (int j = 0; j < buffer_size; j++) {
+		for (decltype(buffer_size) j = 0; j < buffer_size; ++j) {
 
 			AudioFrame frame = buffer[j] * vol;
 			for (int k = 0; k < cc; k++) {

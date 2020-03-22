@@ -58,7 +58,7 @@ class VideoPlayer : public Control {
 	Ref<Image> last_frame;
 
 	AudioRBResampler resampler;
-	Vector<AudioFrame> mix_buffer;
+	std::vector<AudioFrame> mix_buffer;
 	int wait_resampler, wait_resampler_limit;
 
 	bool paused;
