@@ -821,8 +821,8 @@ static float _find_closest_angle_to_half_pi_arc(const Vector3 &p_from, const Vec
 
 	for (uint8_t i = 0; i < arc_test_points; ++i) {
 
-		float a = i * M_PI_2 / arc_test_points;
-		float an = (i + 1) * M_PI_2 / arc_test_points;
+		float a = i * Math_PI_2 / arc_test_points;
+		float an = (i + 1) * Math_PI_2 / arc_test_points;
 		Vector3 p = Vector3(Math::cos(a), 0, -Math::sin(a)) * p_arc_radius;
 		Vector3 n = Vector3(Math::cos(an), 0, -Math::sin(an)) * p_arc_radius;
 
@@ -837,8 +837,8 @@ static float _find_closest_angle_to_half_pi_arc(const Vector3 &p_from, const Vec
 	}
 
 	//min_p = p_arc_xform.affine_inverse().xform(min_p);
-	float a = M_PI_2 - Vector2(min_p.x, -min_p.z).angle();
-	return a * 180.0 / M_PI;
+	float a = Math_PI_2 - Vector2(min_p.x, -min_p.z).angle();
+	return a * 180.0 / Math_PI;
 }
 
 void LightSpatialGizmoPlugin::set_handle(EditorSpatialGizmo *p_gizmo, int p_idx, Camera *p_camera, const Point2 &p_point) {
