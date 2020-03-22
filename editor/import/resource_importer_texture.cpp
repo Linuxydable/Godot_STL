@@ -90,7 +90,7 @@ void ResourceImporterTexture::update_imports() {
 		return;
 	}
 
-	Vector<String> to_reimport;
+	std::vector<String> to_reimport;
 	for (Map<StringName, int>::Element *E = make_flags.front(); E; E = E->next()) {
 
 		Ref<ConfigFile> cf;
@@ -130,7 +130,7 @@ void ResourceImporterTexture::update_imports() {
 
 	mutex->unlock();
 
-	if (to_reimport.size()) {
+	if (!to_reimport.empty()) {
 		EditorFileSystem::get_singleton()->reimport_files(to_reimport);
 	}
 }
@@ -581,7 +581,7 @@ bool ResourceImporterTexture::are_import_settings_valid(const String &p_path) co
 		return true; //do not care about non vram
 	}
 
-	Vector<String> formats_imported;
+	std::vector<String> formats_imported;
 	if (metadata.has("imported_formats")) {
 		formats_imported = metadata["imported_formats"];
 	}
@@ -592,7 +592,7 @@ bool ResourceImporterTexture::are_import_settings_valid(const String &p_path) co
 		String setting_path = "rendering/vram_compression/import_" + String(compression_formats[index]);
 		bool test = ProjectSettings::get_singleton()->get(setting_path);
 		if (test) {
-			if (formats_imported.find(compression_formats[index]) == -1) {
+			if (std::find(formats_imported.begin(), formats_imported.end(), compression_formats[index]) == formats_imported.end()) {
 				valid = false;
 				break;
 			}
