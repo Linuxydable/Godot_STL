@@ -87,7 +87,7 @@ class PopupMenu : public Popup {
 	int mouse_over;
 	int submenu_over;
 	Rect2 parent_rect;
-	String _get_accel_text(int p_item) const;
+	String _get_accel_text(unsigned p_item) const;
 	int _get_mouse_over(const Point2 &p_over) const;
 	virtual Size2 get_minimum_size() const;
 	void _scroll(float p_factor, const Point2 &p_over);
