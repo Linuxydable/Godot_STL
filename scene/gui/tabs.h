@@ -156,7 +156,7 @@ public:
 	// need_update : int to const unsigned& p_current
 	void set_current_tab(int p_current);
 
-	int get_current_tab() const;
+	int get_current_tab();
 	int get_hovered_tab() const;
 
 	int get_tab_offset() const;

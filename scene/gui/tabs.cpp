@@ -229,7 +229,7 @@ void Tabs::_gui_input(const Ref<InputEvent> &p_event) {
 				if(!(*it_tabs).disabled && pos.x >= (*it_tabs).ofs_cache && pos.x < (*it_tabs).ofs_cache + (*it_tabs).size_cache){
 					_set_current_it_tab(it_tabs);
 
-					emit_signal("tab_clicked", found);
+					emit_signal("tab_clicked", std::distance(tabs.begin(), it_tabs));
 
 					break;
 				}
@@ -252,7 +252,7 @@ void Tabs::_notification(int p_what) {
 		case NOTIFICATION_RESIZED: {
 			_update_cache();
 			_ensure_no_over_offset();
-			ensure_tab_visible(current);
+			ensure_tab_visible(std::distance(tabs.begin(), it_current));
 		} break;
 		case NOTIFICATION_DRAW: {
 			_update_cache();
@@ -297,7 +297,7 @@ void Tabs::_notification(int p_what) {
 			missing_right = false;
 
 			{
-				auto it_tabs = tabs.begin() + offset
+				auto it_tabs = tabs.begin() + offset;
 
 				for(; it_tabs != tabs.end(); ++it_tabs){
 					(*it_tabs).ofs_cache = w;
@@ -456,7 +456,7 @@ void Tabs::set_current_tab(int p_current){
 	emit_signal("tab_changed", p_current);
 }
 
-int Tabs::get_current_tab() const {
+int Tabs::get_current_tab() {
 	return std::distance(tabs.begin(), it_current);
 }
 
@@ -609,53 +609,64 @@ void Tabs::_update_cache() {
 	int mw = 0;
 	int size_fixed = 0;
 	int count_resize = 0;
-	for (int i = 0; i < tabs.size(); i++) {
-		tabs.write[i].ofs_cache = mw;
-		tabs.write[i].size_cache = get_tab_width(i);
-		tabs.write[i].size_text = Math::ceil(font->get_string_size(tabs[i].xl_text).width);
-		mw += tabs[i].size_cache;
-		if (tabs[i].size_cache <= min_width || i == current) {
-			size_fixed += tabs[i].size_cache;
+
+	for (auto it_tabs = tabs.begin(); it_tabs < tabs.end(); ++it_tabs) {
+		(*it_tabs).ofs_cache = mw;
+		(*it_tabs).size_cache = _get_tab_width(it_tabs);
+		(*it_tabs).size_text = Math::ceil(font->get_string_size((*it_tabs).xl_text).width);
+		mw += (*it_tabs).size_cache;
+		if ((*it_tabs).size_cache <= min_width || it_tabs == it_current) {
+			size_fixed += (*it_tabs).size_cache;
 		} else {
 			count_resize++;
 		}
 	}
 	int m_width = min_width;
+
 	if (count_resize > 0) {
 		m_width = MAX((limit - size_fixed) / count_resize, min_width);
 	}
-	for (int i = 0; i < tabs.size(); i++) {
-		if (i < offset)
-			continue;
+
+	for (auto it_tabs = tabs.begin(); it_tabs < tabs.end(); ++it_tabs) {
 		Ref<StyleBox> sb;
-		if (tabs[i].disabled) {
+
+		if ((*it_tabs).disabled) {
 			sb = tab_disabled;
-		} else if (i == current) {
+		} else if (it_tabs == it_current) {
 			sb = tab_fg;
 		} else {
 			sb = tab_bg;
 		}
-		int lsize = tabs[i].size_cache;
-		int slen = tabs[i].size_text;
-		if (min_width > 0 && mw > limit && i != current) {
+
+		int lsize = (*it_tabs).size_cache;
+
+		int slen = (*it_tabs).size_text;
+
+		if (min_width > 0 && mw > limit && it_tabs != it_current) {
 			if (lsize > m_width) {
 				slen = m_width - (sb->get_margin(MARGIN_LEFT) + sb->get_margin(MARGIN_RIGHT));
-				if (tabs[i].icon.is_valid()) {
-					slen -= tabs[i].icon->get_width();
+
+				if ((*it_tabs).icon.is_valid()) {
+					slen -= (*it_tabs).icon->get_width();
 					slen -= get_constant("hseparation");
 				}
-				if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && i == current)) {
+				if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && it_tabs == it_current)) {
 					Ref<Texture> cb = get_icon("close");
+
 					slen -= cb->get_width();
 					slen -= get_constant("hseparation");
 				}
+
 				slen = MAX(slen, 1);
+
 				lsize = m_width;
 			}
 		}
-		tabs.write[i].ofs_cache = w;
-		tabs.write[i].size_cache = lsize;
-		tabs.write[i].size_text = slen;
+
+		(*it_tabs).ofs_cache = w;
+		(*it_tabs).size_cache = lsize;
+		(*it_tabs).size_text = slen;
+
 		w += lsize;
 	}
 }
@@ -691,26 +702,30 @@ void Tabs::add_tab(const String &p_str, const Ref<Texture> &p_icon) {
 
 void Tabs::clear_tabs() {
 	tabs.clear();
-	current = 0;
+
+	it_current = tabs.begin();
+
 	call_deferred("_update_hover");
+
 	update();
 }
 
 void Tabs::remove_tab(int p_idx) {
-
 	ERR_FAIL_INDEX(p_idx, tabs.size());
-	tabs.remove(p_idx);
-	if (current >= p_idx)
-		current--;
-	_update_cache();
-	call_deferred("_update_hover");
-	update();
-	minimum_size_changed();
 
-	if (current < 0)
-		current = 0;
-	if (current >= tabs.size())
-		current = tabs.size() - 1;
+	tabs.erase(tabs.begin() + p_idx);
+
+	if (p_idx > 0) {
+		it_current = tabs.begin() + p_idx - 1;
+	}
+
+	_update_cache();
+
+	call_deferred("_update_hover");
+
+	update();
+
+	minimum_size_changed();
 
 	_ensure_no_over_offset();
 }
@@ -775,6 +790,7 @@ bool Tabs::can_drop_data(const Point2 &p_point, const Variant &p_data) const {
 	return false;
 }
 
+// need_update : use iterator
 void Tabs::drop_data(const Point2 &p_point, const Variant &p_data) {
 
 	if (!drag_to_rearrange_enabled)
@@ -807,7 +823,7 @@ void Tabs::drop_data(const Point2 &p_point, const Variant &p_data) {
 				Tab moving_tab = from_tabs->tabs[tab_from_id];
 				if (hover_now < 0)
 					hover_now = get_tab_count();
-				tabs.insert(hover_now, moving_tab);
+				tabs.insert(tabs.begin() + hover_now, moving_tab);
 				from_tabs->remove_tab(tab_from_id);
 				set_current_tab(hover_now);
 				emit_signal("tab_changed", hover_now);
@@ -848,16 +864,18 @@ Tabs::TabAlign Tabs::get_tab_align() const {
 }
 
 void Tabs::move_tab(int from, int to) {
-
 	if (from == to)
 		return;
 
 	ERR_FAIL_INDEX(from, tabs.size());
+
 	ERR_FAIL_INDEX(to, tabs.size());
 
 	Tab tab_from = tabs[from];
-	tabs.remove(from);
-	tabs.insert(to, tab_from);
+
+	tabs.erase(tabs.begin() + from);
+
+	tabs.insert(tabs.begin() + to, tab_from);
 
 	_update_cache();
 	update();
@@ -976,13 +994,6 @@ Rect2 Tabs::get_tab_rect(int p_tab) const {
 	ERR_FAIL_INDEX_V(p_tab, tabs.size(), Rect2());
 
 	return Rect2(tabs[p_tab].ofs_cache, 0, tabs[p_tab].size_cache, get_size().height);
-}
-
-void Tabs::set_tab_close_display_policy(CloseButtonDisplayPolicy p_policy) {
-
-	ERR_FAIL_INDEX(p_policy, CLOSE_BUTTON_MAX);
-	cb_displaypolicy = p_policy;
-	update();
 }
 
 Tabs::CloseButtonDisplayPolicy Tabs::get_tab_close_display_policy() const {
