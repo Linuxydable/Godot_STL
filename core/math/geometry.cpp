@@ -54,24 +54,24 @@ void Geometry::MeshData::optimize_vertices() {
 
 	Map<int, int> vtx_remap;
 
-	for (int i = 0; i < faces.size(); i++) {
+	for (auto &&face : faces) {
 
-		for (int j = 0; j < faces[i].indices.size(); j++) {
+		for (auto &&index : face.indices) {
 
-			int idx = faces[i].indices[j];
+			int idx = index;
 			if (!vtx_remap.has(idx)) {
 				int ni = vtx_remap.size();
 				vtx_remap[idx] = ni;
 			}
 
-			faces.write[i].indices.write[j] = vtx_remap[idx];
+			index = vtx_remap[idx];
 		}
 	}
 
-	for (int i = 0; i < edges.size(); i++) {
+	for (auto &&edge : edges) {
 
-		int a = edges[i].a;
-		int b = edges[i].b;
+		int a = edge.a;
+		int b = edge.b;
 
 		if (!vtx_remap.has(a)) {
 			int ni = vtx_remap.size();
@@ -82,22 +82,21 @@ void Geometry::MeshData::optimize_vertices() {
 			vtx_remap[b] = ni;
 		}
 
-		edges.write[i].a = vtx_remap[a];
-		edges.write[i].b = vtx_remap[b];
+		edge.a = vtx_remap[a];
+		edge.b = vtx_remap[b];
 	}
 
-	Vector<Vector3> new_vertices;
-	new_vertices.resize(vtx_remap.size());
+	std::vector<Vector3> new_vertices(vtx_remap.size());
 
-	for (int i = 0; i < vertices.size(); i++) {
+	for (decltype(vertices.size()) i = 0; i < vertices.size(); ++i) {
 
 		if (vtx_remap.has(i))
-			new_vertices.write[vtx_remap[i]] = vertices[i];
+			new_vertices[vtx_remap[i]] = vertices[i];
 	}
 	vertices = new_vertices;
 }
 
-Vector<Vector<Vector2> > (*Geometry::_decompose_func)(const Vector<Vector2> &p_polygon) = NULL;
+std::vector<std::vector<Vector2> > (*Geometry::_decompose_func)(const std::vector<Vector2> &p_polygon) = NULL;
 
 struct _FaceClassify {
 
@@ -132,9 +131,9 @@ static bool _connect_faces(_FaceClassify *p_faces, int len, int p_group) {
 
 	for (int i = 0; i < len; i++) {
 
-		for (int j = 0; j < 3; j++) {
+		for (auto &&link : p_faces[i].links) {
 
-			p_faces[i].links[j].clear();
+			link.clear();
 		}
 	}
 
@@ -147,12 +146,12 @@ static bool _connect_faces(_FaceClassify *p_faces, int len, int p_group) {
 			if (p_faces[j].group != p_group)
 				continue;
 
-			for (int k = 0; k < 3; k++) {
+			for (uint8_t k = 0; k < 3u; ++k) {
 
 				Vector3 vi1 = p_faces[i].face.vertex[k];
 				Vector3 vi2 = p_faces[i].face.vertex[(k + 1) % 3];
 
-				for (int l = 0; l < 3; l++) {
+				for (uint8_t l = 0; l < 3u; ++l) {
 
 					Vector3 vj2 = p_faces[j].face.vertex[l];
 					Vector3 vj1 = p_faces[j].face.vertex[(l + 1) % 3];
@@ -191,9 +190,9 @@ static bool _connect_faces(_FaceClassify *p_faces, int len, int p_group) {
 	for (int i = 0; i < len; i++) {
 
 		p_faces[i].valid = true;
-		for (int j = 0; j < 3; j++) {
+		for (auto &&link : p_faces[i].links) {
 
-			if (p_faces[i].links[j].face == -1)
+			if (link.face == -1)
 				p_faces[i].valid = false;
 		}
 	}
@@ -207,7 +206,7 @@ static bool _group_face(_FaceClassify *p_faces, int len, int p_index, int p_grou
 
 	p_faces[p_index].group = p_group;
 
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		ERR_FAIL_INDEX_V(p_faces[p_index].links[i].face, len, true);
 		_group_face(p_faces, len, p_faces[p_index].links[i].face, p_group);
@@ -688,13 +687,13 @@ PoolVector<Face3> Geometry::wrap_geometry(PoolVector<Face3> p_array, real_t *p_e
 	return wrapped_faces;
 }
 
-Vector<Vector<Vector2> > Geometry::decompose_polygon_in_convex(Vector<Point2> polygon) {
-	Vector<Vector<Vector2> > decomp;
+std::vector<std::vector<Vector2> > Geometry::decompose_polygon_in_convex(std::vector<Point2> polygon) {
+	std::vector<std::vector<Vector2> > decomp;
 	List<TriangulatorPoly> in_poly, out_poly;
 
 	TriangulatorPoly inp;
 	inp.Init(polygon.size());
-	for (int i = 0; i < polygon.size(); i++) {
+	for (decltype(polygon.size()) i = 0; i < polygon.size(); ++i) {
 		inp.GetPoint(i) = polygon[i];
 	}
 	inp.SetOrientation(TRIANGULATOR_CCW);
@@ -706,17 +705,17 @@ Vector<Vector<Vector2> > Geometry::decompose_polygon_in_convex(Vector<Point2> po
 	}
 
 	decomp.resize(out_poly.size());
-	int idx = 0;
+	uint32_t idx = 0;
 	for (List<TriangulatorPoly>::Element *I = out_poly.front(); I; I = I->next()) {
 		TriangulatorPoly &tp = I->get();
 
-		decomp.write[idx].resize(tp.GetNumPoints());
+		decomp[idx].resize(tp.GetNumPoints());
 
 		for (int64_t i = 0; i < tp.GetNumPoints(); i++) {
-			decomp.write[idx].write[i] = tp.GetPoint(i);
+			decomp[idx][i] = tp.GetPoint(i);
 		}
 
-		idx++;
+		++idx;
 	}
 
 	return decomp;
@@ -741,7 +740,7 @@ Geometry::MeshData Geometry::build_convex_mesh(const PoolVector<Plane> &p_planes
 		Vector3 right = p.normal.cross(ref).normalized();
 		Vector3 up = p.normal.cross(right).normalized();
 
-		Vector<Vector3> vertices;
+		std::vector<Vector3> vertices;
 
 		Vector3 center = p.get_any_point();
 		// make a quad clockwise
@@ -755,7 +754,7 @@ Geometry::MeshData Geometry::build_convex_mesh(const PoolVector<Plane> &p_planes
 			if (j == i)
 				continue;
 
-			Vector<Vector3> new_vertices;
+			std::vector<Vector3> new_vertices;
 			Plane clip = p_planes[j];
 
 			if (clip.normal.dot(p.normal) > 0.95)
@@ -764,7 +763,7 @@ Geometry::MeshData Geometry::build_convex_mesh(const PoolVector<Plane> &p_planes
 			if (vertices.size() < 3)
 				break;
 
-			for (int k = 0; k < vertices.size(); k++) {
+			for (decltype(vertices.size()) k = 0; k < vertices.size(); ++k) {
 
 				int k_n = (k + 1) % vertices.size();
 
@@ -806,22 +805,22 @@ Geometry::MeshData Geometry::build_convex_mesh(const PoolVector<Plane> &p_planes
 		MeshData::Face face;
 
 		// Add face indices.
-		for (int j = 0; j < vertices.size(); j++) {
+		for (auto &&vtx : vertices) {
+
+			auto it_vtx = std::find_if(mesh.vertices.begin(), mesh.vertices.end(), [&](const Vector3 &vertex) {
+				if (vertex.distance_to(vtx) < 0.001) {
+					return true;
+				}
+
+				return false;
+			});
 
 			int idx = -1;
-			for (int k = 0; k < mesh.vertices.size(); k++) {
-
-				if (mesh.vertices[k].distance_to(vertices[j]) < 0.001) {
-
-					idx = k;
-					break;
-				}
-			}
-
-			if (idx == -1) {
-
+			if (it_vtx == mesh.vertices.end()) {
 				idx = mesh.vertices.size();
-				mesh.vertices.push_back(vertices[j]);
+				mesh.vertices.push_back(vtx);
+			} else {
+				idx = std::distance(mesh.vertices.begin(), it_vtx);
 			}
 
 			face.indices.push_back(idx);
@@ -831,26 +830,25 @@ Geometry::MeshData Geometry::build_convex_mesh(const PoolVector<Plane> &p_planes
 
 		// Add edge.
 
-		for (int j = 0; j < face.indices.size(); j++) {
+		for (decltype(face.indices.size()) j = 0; j < face.indices.size(); ++j) {
 
 			int a = face.indices[j];
 			int b = face.indices[(j + 1) % face.indices.size()];
 
-			bool found = false;
-			for (int k = 0; k < mesh.edges.size(); k++) {
+			auto it_edge = std::find_if(mesh.edges.begin(), mesh.edges.end(), [&](const Geometry::MeshData::Edge &edge) {
+				if (edge.a == a && edge.b == b) {
+					return true;
+				}
 
-				if (mesh.edges[k].a == a && mesh.edges[k].b == b) {
-					found = true;
-					break;
+				if (edge.b == a && edge.a == b) {
+					return true;
 				}
-				if (mesh.edges[k].b == a && mesh.edges[k].a == b) {
-					found = true;
-					break;
-				}
+			});
+
+			if (it_edge != mesh.edges.end()) {
+				continue;
 			}
 
-			if (found)
-				continue;
 			MeshData::Edge edge;
 			edge.a = a;
 			edge.b = b;
@@ -882,8 +880,8 @@ PoolVector<Plane> Geometry::build_cylinder_planes(real_t p_radius, real_t p_heig
 	for (int i = 0; i < p_sides; i++) {
 
 		Vector3 normal;
-		normal[(p_axis + 1) % 3] = Math::cos(i * (2.0 * Math_PI) / p_sides);
-		normal[(p_axis + 2) % 3] = Math::sin(i * (2.0 * Math_PI) / p_sides);
+		normal[(p_axis + 1) % 3] = Math::cos(i * (Math_TAU) / p_sides);
+		normal[(p_axis + 2) % 3] = Math::sin(i * (Math_TAU) / p_sides);
 
 		planes.push_back(Plane(normal, p_radius));
 	}
@@ -912,8 +910,8 @@ PoolVector<Plane> Geometry::build_sphere_planes(real_t p_radius, int p_lats, int
 	for (int i = 0; i < p_lons; i++) {
 
 		Vector3 normal;
-		normal[(p_axis + 1) % 3] = Math::cos(i * (2.0 * Math_PI) / p_lons);
-		normal[(p_axis + 2) % 3] = Math::sin(i * (2.0 * Math_PI) / p_lons);
+		normal[(p_axis + 1) % 3] = Math::cos(i * (Math_TAU) / p_lons);
+		normal[(p_axis + 2) % 3] = Math::sin(i * (Math_TAU) / p_lons);
 
 		planes.push_back(Plane(normal, p_radius));
 
@@ -972,12 +970,12 @@ struct _AtlasWorkRect {
 
 struct _AtlasWorkRectResult {
 
-	Vector<_AtlasWorkRect> result;
+	std::vector<_AtlasWorkRect> result;
 	int max_w;
 	int max_h;
 };
 
-void Geometry::make_atlas(const Vector<Size2i> &p_rects, Vector<Point2i> &r_result, Size2i &r_size) {
+void Geometry::make_atlas(const std::vector<Size2i> &p_rects, std::vector<Point2i> &r_result, Size2i &r_size) {
 
 	// Super simple, almost brute force scanline stacking fitter.
 	// It's pretty basic for now, but it tries to make sure that the aspect ratio of the
@@ -989,16 +987,16 @@ void Geometry::make_atlas(const Vector<Size2i> &p_rects, Vector<Point2i> &r_resu
 
 	ERR_FAIL_COND(p_rects.size() == 0);
 
-	Vector<_AtlasWorkRect> wrects;
+	std::vector<_AtlasWorkRect> wrects;
 	wrects.resize(p_rects.size());
-	for (int i = 0; i < p_rects.size(); i++) {
-		wrects.write[i].s = p_rects[i];
-		wrects.write[i].idx = i;
+	for (decltype(p_rects.size()) i = 0; i < p_rects.size(); ++i) {
+		wrects[i].s = p_rects[i];
+		wrects[i].idx = i;
 	}
-	wrects.sort();
-	int widest = wrects[0].s.width;
+	std::sort(wrects.begin(), wrects.end());
+	int widest = wrects.front().s.width;
 
-	Vector<_AtlasWorkRectResult> results;
+	std::vector<_AtlasWorkRectResult> results;
 
 	for (int i = 0; i <= 12; i++) {
 
@@ -1008,38 +1006,36 @@ void Geometry::make_atlas(const Vector<Size2i> &p_rects, Vector<Point2i> &r_resu
 		if (w < widest)
 			continue;
 
-		Vector<int> hmax;
+		std::vector<int> hmax;
 		hmax.resize(w);
 		for (int j = 0; j < w; j++)
-			hmax.write[j] = 0;
+			hmax[j] = 0;
 
 		// Place them.
 		int ofs = 0;
 		int limit_h = 0;
-		for (int j = 0; j < wrects.size(); j++) {
+		for (auto &&wrect : wrects) {
 
-			if (ofs + wrects[j].s.width > w) {
-
+			if (ofs + wrect.s.width > w) {
 				ofs = 0;
 			}
 
 			int from_y = 0;
-			for (int k = 0; k < wrects[j].s.width; k++) {
+			for (int k = 0; k < wrect.s.width; k++) {
 
 				if (hmax[ofs + k] > from_y)
 					from_y = hmax[ofs + k];
 			}
 
-			wrects.write[j].p.x = ofs;
-			wrects.write[j].p.y = from_y;
-			int end_h = from_y + wrects[j].s.height;
-			int end_w = ofs + wrects[j].s.width;
+			wrect.p.x = ofs;
+			wrect.p.y = from_y;
+			int end_h = from_y + wrect.s.height;
+			int end_w = ofs + wrect.s.width;
 			if (ofs == 0)
 				limit_h = end_h;
 
-			for (int k = 0; k < wrects[j].s.width; k++) {
-
-				hmax.write[ofs + k] = end_h;
+			for (int k = 0; k < wrect.s.width; k++) {
+				hmax[ofs + k] = end_h;
 			}
 
 			if (end_h > max_h)
@@ -1049,7 +1045,7 @@ void Geometry::make_atlas(const Vector<Size2i> &p_rects, Vector<Point2i> &r_resu
 				max_w = end_w;
 
 			if (ofs == 0 || end_h > limit_h) // While h limit not reached, keep stacking.
-				ofs += wrects[j].s.width;
+				ofs += wrect.s.width;
 		}
 
 		_AtlasWorkRectResult result;
@@ -1064,7 +1060,7 @@ void Geometry::make_atlas(const Vector<Size2i> &p_rects, Vector<Point2i> &r_resu
 	int best = -1;
 	real_t best_aspect = 1e20;
 
-	for (int i = 0; i < results.size(); i++) {
+	for (decltype(results.size()) i = 0; i < results.size(); ++i) {
 
 		real_t h = next_power_of_2(results[i].max_h);
 		real_t w = next_power_of_2(results[i].max_w);
@@ -1077,15 +1073,14 @@ void Geometry::make_atlas(const Vector<Size2i> &p_rects, Vector<Point2i> &r_resu
 
 	r_result.resize(p_rects.size());
 
-	for (int i = 0; i < p_rects.size(); i++) {
-
-		r_result.write[results[best].result[i].idx] = results[best].result[i].p;
+	for (decltype(p_rects.size()) i = 0; i < p_rects.size(); ++i) {
+		r_result[results[best].result[i].idx] = results[best].result[i].p;
 	}
 
 	r_size = Size2(results[best].max_w, results[best].max_h);
 }
 
-Vector<Vector<Point2> > Geometry::_polypaths_do_operation(PolyBooleanOperation p_op, const Vector<Point2> &p_polypath_a, const Vector<Point2> &p_polypath_b, bool is_a_open) {
+std::vector<std::vector<Point2> > Geometry::_polypaths_do_operation(PolyBooleanOperation p_op, const std::vector<Point2> &p_polypath_a, const std::vector<Point2> &p_polypath_b, bool is_a_open) {
 
 	using namespace ClipperLib;
 
@@ -1100,11 +1095,11 @@ Vector<Vector<Point2> > Geometry::_polypaths_do_operation(PolyBooleanOperation p
 	Path path_a, path_b;
 
 	// Need to scale points (Clipper's requirement for robust computation).
-	for (int i = 0; i != p_polypath_a.size(); ++i) {
-		path_a << IntPoint(p_polypath_a[i].x * SCALE_FACTOR, p_polypath_a[i].y * SCALE_FACTOR);
+	for (auto &&point : p_polypath_a) {
+		path_a << IntPoint(point.x * SCALE_FACTOR, point.y * SCALE_FACTOR);
 	}
-	for (int i = 0; i != p_polypath_b.size(); ++i) {
-		path_b << IntPoint(p_polypath_b[i].x * SCALE_FACTOR, p_polypath_b[i].y * SCALE_FACTOR);
+	for (auto &&point : p_polypath_b) {
+		path_b << IntPoint(point.x * SCALE_FACTOR, point.y * SCALE_FACTOR);
 	}
 	Clipper clp;
 	clp.AddPath(path_a, ptSubject, !is_a_open); // Forward compatible with Clipper 10.0.0.
@@ -1120,10 +1115,10 @@ Vector<Vector<Point2> > Geometry::_polypaths_do_operation(PolyBooleanOperation p
 		clp.Execute(op, paths); // Works on closed polygons only.
 	}
 	// Have to scale points down now.
-	Vector<Vector<Point2> > polypaths;
+	std::vector<std::vector<Point2> > polypaths;
 
 	for (Paths::size_type i = 0; i < paths.size(); ++i) {
-		Vector<Vector2> polypath;
+		std::vector<Vector2> polypath;
 
 		const Path &scaled_path = paths[i];
 
@@ -1137,7 +1132,7 @@ Vector<Vector<Point2> > Geometry::_polypaths_do_operation(PolyBooleanOperation p
 	return polypaths;
 }
 
-Vector<Vector<Point2> > Geometry::_polypath_offset(const Vector<Point2> &p_polypath, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type) {
+std::vector<std::vector<Point2> > Geometry::_polypath_offset(const std::vector<Point2> &p_polypath, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type) {
 
 	using namespace ClipperLib;
 
@@ -1162,8 +1157,8 @@ Vector<Vector<Point2> > Geometry::_polypath_offset(const Vector<Point2> &p_polyp
 	Path path;
 
 	// Need to scale points (Clipper's requirement for robust computation).
-	for (int i = 0; i != p_polypath.size(); ++i) {
-		path << IntPoint(p_polypath[i].x * SCALE_FACTOR, p_polypath[i].y * SCALE_FACTOR);
+	for (auto &&point : p_polypath) {
+		path << IntPoint(point.x * SCALE_FACTOR, point.y * SCALE_FACTOR);
 	}
 	co.AddPath(path, jt, et);
 
@@ -1171,10 +1166,10 @@ Vector<Vector<Point2> > Geometry::_polypath_offset(const Vector<Point2> &p_polyp
 	co.Execute(paths, p_delta * SCALE_FACTOR); // Inflate/deflate.
 
 	// Have to scale points down now.
-	Vector<Vector<Point2> > polypaths;
+	std::vector<std::vector<Point2> > polypaths;
 
 	for (Paths::size_type i = 0; i < paths.size(); ++i) {
-		Vector<Vector2> polypath;
+		std::vector<Vector2> polypath;
 
 		const Path &scaled_path = paths[i];
 
