@@ -1349,8 +1349,8 @@ void ColladaImport::_fix_param_animation_tracks() {
 
 										const std::vector<int> &rt = collada.state.referenced_tracks[track_name];
 
-										for (auto &&i : rt) {
-											Collada::AnimationTrack *at = &collada.state.animation_tracks[i];
+										for (auto &&rti : rt) {
+											Collada::AnimationTrack *at = &collada.state.animation_tracks[rti];
 
 											at->target = E->key();
 											at->param = "morph/" + collada.state.mesh_name_map[mesh_name];
