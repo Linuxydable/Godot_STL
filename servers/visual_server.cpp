@@ -90,10 +90,10 @@ Array VisualServer::_shader_get_param_list_bind(RID p_shader) const {
 	return convert_property_list(&l);
 }
 
-static Array to_array(const Vector<ObjectID> &ids) {
+static Array to_array(const std::vector<ObjectID> &ids) {
 	Array a;
 	a.resize(ids.size());
-	for (int i = 0; i < ids.size(); ++i) {
+	for (decltype(ids.size()) i = 0; i < ids.size(); ++i) {
 		a[i] = ids[i];
 	}
 	return a;
@@ -101,26 +101,26 @@ static Array to_array(const Vector<ObjectID> &ids) {
 
 Array VisualServer::_instances_cull_aabb_bind(const AABB &p_aabb, RID p_scenario) const {
 
-	Vector<ObjectID> ids = instances_cull_aabb(p_aabb, p_scenario);
+	std::vector<ObjectID> ids = instances_cull_aabb(p_aabb, p_scenario);
 	return to_array(ids);
 }
 
 Array VisualServer::_instances_cull_ray_bind(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario) const {
 
-	Vector<ObjectID> ids = instances_cull_ray(p_from, p_to, p_scenario);
+	std::vector<ObjectID> ids = instances_cull_ray(p_from, p_to, p_scenario);
 	return to_array(ids);
 }
 
 Array VisualServer::_instances_cull_convex_bind(const Array &p_convex, RID p_scenario) const {
 
-	Vector<Plane> planes;
+	std::vector<Plane> planes;
 	for (int i = 0; i < p_convex.size(); ++i) {
 		Variant v = p_convex[i];
 		ERR_FAIL_COND_V(v.get_type() != Variant::PLANE, Array());
 		planes.push_back(v);
 	}
 
-	Vector<ObjectID> ids = instances_cull_convex(planes, p_scenario);
+	std::vector<ObjectID> ids = instances_cull_convex(planes, p_scenario);
 	return to_array(ids);
 }
 
@@ -245,6 +245,7 @@ RID VisualServer::_make_test_cube() {
 	indices.resize(vertices.size());
 	for (int i = 0; i < vertices.size(); i++)
 		indices.set(i, i);
+
 	d[VisualServer::ARRAY_INDEX] = indices;
 
 	mesh_add_surface_from_arrays(test_cube, PRIMITIVE_TRIANGLES, d);
@@ -280,11 +281,11 @@ RID VisualServer::make_sphere_mesh(int p_lats, int p_lons, float p_radius) {
 
 		for (int j = p_lons; j >= 1; j--) {
 
-			double lng0 = 2 * Math_PI * (double)(j - 1) / p_lons;
+			double lng0 = Math_TAU * (double)(j - 1) / p_lons;
 			double x0 = Math::cos(lng0);
 			double y0 = Math::sin(lng0);
 
-			double lng1 = 2 * Math_PI * (double)(j) / p_lons;
+			double lng1 = Math_TAU * (double)(j) / p_lons;
 			double x1 = Math::cos(lng1);
 			double y1 = Math::sin(lng1);
 
@@ -326,11 +327,12 @@ RID VisualServer::get_white_texture() {
 	if (white_texture.is_valid())
 		return white_texture;
 
+	constexpr uint8_t len = 16 * 3;
 	PoolVector<uint8_t> wt;
-	wt.resize(16 * 3);
+	wt.resize(len);
 	{
 		PoolVector<uint8_t>::Write w = wt.write();
-		for (int i = 0; i < 16 * 3; i++)
+		for (uint8_t i = 0; i < len; ++i)
 			w[i] = 255;
 	}
 	Ref<Image> white = memnew(Image(4, 4, 0, Image::FORMAT_RGB8, wt));
@@ -343,7 +345,7 @@ RID VisualServer::get_white_texture() {
 #define SMALL_VEC2 Vector2(0.00001, 0.00001)
 #define SMALL_VEC3 Vector3(0.00001, 0.00001, 0.00001)
 
-Error VisualServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint32_t *p_offsets, uint32_t p_stride, PoolVector<uint8_t> &r_vertex_array, int p_vertex_array_len, PoolVector<uint8_t> &r_index_array, int p_index_array_len, AABB &r_aabb, Vector<AABB> &r_bone_aabb) {
+Error VisualServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint32_t *p_offsets, uint32_t p_stride, PoolVector<uint8_t> &r_vertex_array, int p_vertex_array_len, PoolVector<uint8_t> &r_index_array, int p_index_array_len, AABB &r_aabb, std::vector<AABB> &r_bone_aabb) {
 
 	PoolVector<uint8_t>::Write vw = r_vertex_array.write();
 
@@ -354,7 +356,7 @@ Error VisualServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint32_
 
 	int max_bone = 0;
 
-	for (int ai = 0; ai < VS::ARRAY_MAX; ai++) {
+	for (uint8_t ai = 0; ai < VS::ARRAY_MAX; ++ai) {
 
 		if (!(p_format & (1 << ai))) // no array
 			continue;
@@ -551,7 +553,7 @@ Error VisualServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint32_
 
 						uint8_t colors[4];
 
-						for (int j = 0; j < 4; j++) {
+						for (uint8_t j = 0; j < 4u; ++j) {
 
 							colors[j] = CLAMP(int((src[i][j]) * 255.0), 0, 255);
 						}
@@ -740,13 +742,13 @@ Error VisualServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint32_
 		//create AABBs for each detected bone
 		int total_bones = max_bone + 1;
 
-		bool first = r_bone_aabb.size() == 0;
+		bool first = r_bone_aabb.empty();
 
 		r_bone_aabb.resize(total_bones);
 
 		if (first) {
 			for (int i = 0; i < total_bones; i++) {
-				r_bone_aabb.write[i].size = Vector3(-1, -1, -1); //negative means unused
+				r_bone_aabb[i].size = Vector3(-1, -1, -1); //negative means unused
 			}
 		}
 
@@ -763,7 +765,7 @@ Error VisualServer::_surface_set_data(Array p_arrays, uint32_t p_format, uint32_
 			PoolVector<int>::Read rb = bones.read();
 			PoolVector<float>::Read rw = weights.read();
 
-			AABB *bptr = r_bone_aabb.ptrw();
+			AABB *bptr = r_bone_aabb.data();
 
 			for (int i = 0; i < vs; i++) {
 
@@ -810,7 +812,7 @@ uint32_t VisualServer::mesh_surface_make_offsets_from_format(uint32_t p_format, 
 
 	int total_elem_size = 0;
 
-	for (int i = 0; i < VS::ARRAY_MAX; i++) {
+	for (uint8_t i = 0; i < VS::ARRAY_MAX; ++i) {
 
 		r_offsets[i] = 0; //reset
 
@@ -1142,12 +1144,12 @@ void VisualServer::mesh_add_surface_from_arrays(RID p_mesh, PrimitiveType p_prim
 	index_array.resize(index_array_size);
 
 	AABB aabb;
-	Vector<AABB> bone_aabb;
+	std::vector<AABB> bone_aabb;
 
 	Error err = _surface_set_data(p_arrays, format, offsets, total_elem_size, vertex_array, array_len, index_array, index_array_len, aabb, bone_aabb);
 	ERR_FAIL_COND_MSG(err, "Invalid array format for surface.");
 
-	Vector<PoolVector<uint8_t> > blend_shape_data;
+	std::vector<PoolVector<uint8_t> > blend_shape_data;
 
 	for (int i = 0; i < p_blend_shapes.size(); i++) {
 
@@ -1172,7 +1174,7 @@ Array VisualServer::_get_array_from_surface(uint32_t p_format, PoolVector<uint8_
 
 	int total_elem_size = 0;
 
-	for (int i = 0; i < VS::ARRAY_MAX; i++) {
+	for (uint8_t i = 0; i < VS::ARRAY_MAX; ++i) {
 
 		offsets[i] = 0; //reset
 
@@ -1294,7 +1296,7 @@ Array VisualServer::_get_array_from_surface(uint32_t p_format, PoolVector<uint8_
 
 	PoolVector<uint8_t>::Read r = p_vertex_data.read();
 
-	for (int i = 0; i < VS::ARRAY_MAX; i++) {
+	for (uint8_t i = 0; i < VS::ARRAY_MAX; ++i) {
 
 		if (!(p_format & (1 << i)))
 			continue;
@@ -1606,7 +1608,7 @@ Array VisualServer::mesh_surface_get_arrays(RID p_mesh, int p_surface) const {
 
 Array VisualServer::mesh_surface_get_blend_shape_arrays(RID p_mesh, int p_surface) const {
 
-	Vector<PoolVector<uint8_t> > blend_shape_data = mesh_surface_get_blend_shapes(p_mesh, p_surface);
+	std::vector<PoolVector<uint8_t> > blend_shape_data = mesh_surface_get_blend_shapes(p_mesh, p_surface);
 	if (blend_shape_data.size() > 0) {
 		int vertex_len = mesh_surface_get_array_len(p_mesh, p_surface);
 
@@ -1617,7 +1619,7 @@ Array VisualServer::mesh_surface_get_blend_shape_arrays(RID p_mesh, int p_surfac
 
 		Array blend_shape_array;
 		blend_shape_array.resize(blend_shape_data.size());
-		for (int i = 0; i < blend_shape_data.size(); i++) {
+		for (decltype(blend_shape_data.size()) i = 0; i < blend_shape_data.size(); ++i) {
 			blend_shape_array.set(i, _get_array_from_surface(format, blend_shape_data[i], vertex_len, index_data, index_len));
 		}
 
@@ -1629,9 +1631,9 @@ Array VisualServer::mesh_surface_get_blend_shape_arrays(RID p_mesh, int p_surfac
 
 Array VisualServer::_mesh_surface_get_skeleton_aabb_bind(RID p_mesh, int p_surface) const {
 
-	Vector<AABB> vec = VS::get_singleton()->mesh_surface_get_skeleton_aabb(p_mesh, p_surface);
+	std::vector<AABB> vec = VS::get_singleton()->mesh_surface_get_skeleton_aabb(p_mesh, p_surface);
 	Array arr;
-	for (int i = 0; i < vec.size(); i++) {
+	for (decltype(vec.size()) i = 0; i < vec.size(); ++i) {
 		arr[i] = vec[i];
 	}
 	return arr;
@@ -1971,8 +1973,8 @@ void VisualServer::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("canvas_item_add_texture_rect_region", "item", "rect", "texture", "src_rect", "modulate", "transpose", "normal_map", "clip_uv"), &VisualServer::canvas_item_add_texture_rect_region, DEFVAL(Color(1, 1, 1)), DEFVAL(false), DEFVAL(RID()), DEFVAL(true));
 	ClassDB::bind_method(D_METHOD("canvas_item_add_nine_patch", "item", "rect", "source", "texture", "topleft", "bottomright", "x_axis_mode", "y_axis_mode", "draw_center", "modulate", "normal_map"), &VisualServer::canvas_item_add_nine_patch, DEFVAL(NINE_PATCH_STRETCH), DEFVAL(NINE_PATCH_STRETCH), DEFVAL(true), DEFVAL(Color(1, 1, 1)), DEFVAL(RID()));
 	ClassDB::bind_method(D_METHOD("canvas_item_add_primitive", "item", "points", "colors", "uvs", "texture", "width", "normal_map"), &VisualServer::canvas_item_add_primitive, DEFVAL(1.0), DEFVAL(RID()));
-	ClassDB::bind_method(D_METHOD("canvas_item_add_polygon", "item", "points", "colors", "uvs", "texture", "normal_map", "antialiased"), &VisualServer::canvas_item_add_polygon, DEFVAL(Vector<Point2>()), DEFVAL(RID()), DEFVAL(RID()), DEFVAL(false));
-	ClassDB::bind_method(D_METHOD("canvas_item_add_triangle_array", "item", "indices", "points", "colors", "uvs", "bones", "weights", "texture", "count", "normal_map"), &VisualServer::canvas_item_add_triangle_array, DEFVAL(Vector<Point2>()), DEFVAL(Vector<int>()), DEFVAL(Vector<float>()), DEFVAL(RID()), DEFVAL(-1), DEFVAL(RID()));
+	ClassDB::bind_method(D_METHOD("canvas_item_add_polygon", "item", "points", "colors", "uvs", "texture", "normal_map", "antialiased"), &VisualServer::canvas_item_add_polygon, DEFVAL(std::vector<Point2>()), DEFVAL(RID()), DEFVAL(RID()), DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("canvas_item_add_triangle_array", "item", "indices", "points", "colors", "uvs", "bones", "weights", "texture", "count", "normal_map"), &VisualServer::canvas_item_add_triangle_array, DEFVAL(std::vector<Point2>()), DEFVAL(std::vector<int>()), DEFVAL(std::vector<float>()), DEFVAL(RID()), DEFVAL(-1), DEFVAL(RID()));
 	ClassDB::bind_method(D_METHOD("canvas_item_add_mesh", "item", "mesh", "transform", "modulate", "texture", "normal_map"), &VisualServer::canvas_item_add_mesh, DEFVAL(Transform2D()), DEFVAL(Color(1, 1, 1)), DEFVAL(RID()), DEFVAL(RID()));
 	ClassDB::bind_method(D_METHOD("canvas_item_add_multimesh", "item", "mesh", "texture", "normal_map"), &VisualServer::canvas_item_add_multimesh, DEFVAL(RID()));
 	ClassDB::bind_method(D_METHOD("canvas_item_add_particles", "item", "particles", "texture", "normal_map"), &VisualServer::canvas_item_add_particles);
@@ -2300,7 +2302,7 @@ void VisualServer::_bind_methods() {
 	ADD_SIGNAL(MethodInfo("frame_post_draw"));
 }
 
-void VisualServer::_canvas_item_add_style_box(RID p_item, const Rect2 &p_rect, const Rect2 &p_source, RID p_texture, const Vector<float> &p_margins, const Color &p_modulate) {
+void VisualServer::_canvas_item_add_style_box(RID p_item, const Rect2 &p_rect, const Rect2 &p_source, RID p_texture, const std::vector<float> &p_margins, const Color &p_modulate) {
 
 	ERR_FAIL_COND(p_margins.size() != 4);
 	//canvas_item_add_style_box(p_item,p_rect,p_source,p_texture,Vector2(p_margins[0],p_margins[1]),Vector2(p_margins[2],p_margins[3]),true,p_modulate);
@@ -2316,11 +2318,9 @@ void VisualServer::mesh_add_surface_from_mesh_data(RID p_mesh, const Geometry::M
 	PoolVector<Vector3> vertices;
 	PoolVector<Vector3> normals;
 
-	for (int i = 0; i < p_mesh_data.faces.size(); i++) {
+	for (auto &&f : p_mesh_data.faces) {
 
-		const Geometry::MeshData::Face &f = p_mesh_data.faces[i];
-
-		for (int j = 2; j < f.indices.size(); j++) {
+		for (decltype(f.indices.size()) j = 2; j < f.indices.size(); ++j) {
 
 #define _ADD_VERTEX(m_idx)                                      \
 	vertices.push_back(p_mesh_data.vertices[f.indices[m_idx]]); \
