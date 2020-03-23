@@ -154,7 +154,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 		if (r_click_item)
 			*r_click_item = NULL;
 	}
-	Line &l = p_frame->lines.write[p_line];
+	Line &l = p_frame->lines[p_line];
 	Item *it = l.from;
 
 	int line_ofs = 0;
@@ -349,7 +349,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 				ItemFade *fade = NULL;
 				int it_char_start = p_char_count;
 
-				Vector<ItemFX *> fx_stack = Vector<ItemFX *>();
+				std::vector<ItemFX *> fx_stack = std::vector<ItemFX *>();
 				_fetch_item_fx_stack(text, fx_stack);
 				bool custom_fx_ok = true;
 
@@ -664,10 +664,10 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 					int idx = 0;
 					//set minimums to zero
-					for (int i = 0; i < table->columns.size(); i++) {
-						table->columns.write[i].min_width = 0;
-						table->columns.write[i].max_width = 0;
-						table->columns.write[i].width = 0;
+					for (auto&& column : table->columns) {
+						column.min_width = 0;
+						column.max_width = 0;
+						column.width = 0;
 					}
 					//compute minimum width for each cell
 					const int available_width = p_width - hseparation * (table->columns.size() - 1) - wofs;
@@ -683,8 +683,8 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 						for (int i = 0; i < frame->lines.size(); i++) {
 
 							_process_line(frame, Point2(), ly, available_width, i, PROCESS_CACHE, cfont, Color(), font_color_shadow, use_outline, shadow_ofs2);
-							table->columns.write[column].min_width = MAX(table->columns[column].min_width, frame->lines[i].minimum_width);
-							table->columns.write[column].max_width = MAX(table->columns[column].max_width, frame->lines[i].maximum_width);
+							table->columns[column].min_width = MAX(table->columns[column].min_width, frame->lines[i].minimum_width);
+							table->columns[column].max_width = MAX(table->columns[column].max_width, frame->lines[i].maximum_width);
 						}
 						idx++;
 					}
@@ -695,48 +695,64 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					int remaining_width = available_width;
 					table->total_width = hseparation;
 
-					for (int i = 0; i < table->columns.size(); i++) {
-						remaining_width -= table->columns[i].min_width;
-						if (table->columns[i].max_width > table->columns[i].min_width)
-							table->columns.write[i].expand = true;
-						if (table->columns[i].expand)
-							total_ratio += table->columns[i].expand_ratio;
+					for (auto&& column : table->columns) {
+						remaining_width -= column.min_width;
+
+						if (column.max_width > column.min_width)
+							column.expand = true;
+
+						if (column.expand)
+							total_ratio += column.expand_ratio;
 					}
 
+					// need_update : maybe can merge loops ?
 					//assign actual widths
-					for (int i = 0; i < table->columns.size(); i++) {
-						table->columns.write[i].width = table->columns[i].min_width;
-						if (table->columns[i].expand && total_ratio > 0)
-							table->columns.write[i].width += table->columns[i].expand_ratio * remaining_width / total_ratio;
-						table->total_width += table->columns[i].width + hseparation;
+					for (auto&& column : table->columns) {
+						column.width = column.min_width;
+
+						if (column.expand && total_ratio > 0)
+							column.width += column.expand_ratio * remaining_width / total_ratio;
+
+						table->total_width += column.width + hseparation;
 					}
 
 					//resize to max_width if needed and distribute the remaining space
 					bool table_need_fit = true;
+
 					while (table_need_fit) {
 						table_need_fit = false;
 						//fit slim
-						for (int i = 0; i < table->columns.size(); i++) {
-							if (!table->columns[i].expand)
+						for (auto&& column : table->columns) {
+							if (!column.expand)
 								continue;
-							int dif = table->columns[i].width - table->columns[i].max_width;
+
+							int dif = column.width - column.max_width;
+
 							if (dif > 0) {
 								table_need_fit = true;
-								table->columns.write[i].width = table->columns[i].max_width;
+
+								column.width = column.max_width;
+
 								table->total_width -= dif;
-								total_ratio -= table->columns[i].expand_ratio;
+
+								total_ratio -= column.expand_ratio;
 							}
 						}
 						//grow
 						remaining_width = available_width - table->total_width;
+
 						if (remaining_width > 0 && total_ratio > 0) {
-							for (int i = 0; i < table->columns.size(); i++) {
-								if (table->columns[i].expand) {
-									int dif = table->columns[i].max_width - table->columns[i].width;
+							for (auto&& column : table->columns) {
+								if (column.expand) {
+									int dif = column.max_width - column.width;
+
 									if (dif > 0) {
-										int slice = table->columns[i].expand_ratio * remaining_width / total_ratio;
+										int slice = column.expand_ratio * remaining_width / total_ratio;
+
 										int incr = MIN(dif, slice);
-										table->columns.write[i].width += incr;
+
+										column.width += incr;
+
 										table->total_width += incr;
 									}
 								}
@@ -752,12 +768,13 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 						int column = idx % table->columns.size();
 
-						for (int i = 0; i < frame->lines.size(); i++) {
-
+						for (decltype(frame->lines.size()) i = 0; i < frame->lines.size(); i++) {
 							int ly = 0;
+
 							_process_line(frame, Point2(), ly, table->columns[column].width, i, PROCESS_CACHE, cfont, Color(), font_color_shadow, use_outline, shadow_ofs2);
-							frame->lines.write[i].height_cache = ly; //actual height
-							frame->lines.write[i].height_accum_cache = ly; //actual height
+
+							frame->lines[i].height_cache = ly; //actual height
+							frame->lines[i].height_accum_cache = ly; //actual height
 						}
 						idx++;
 					}
@@ -784,7 +801,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 					if (visible)
 						line_is_blank = false;
 
-					for (int i = 0; i < frame->lines.size(); i++) {
+					for (decltype(frame->lines.size()) i = 0; i < frame->lines.size(); i++) {
 
 						if (visible) {
 							if (p_mode == PROCESS_DRAW) {
@@ -799,7 +816,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 
 						yofs += frame->lines[i].height_cache;
 						if (p_mode == PROCESS_CACHE) {
-							frame->lines.write[i].height_accum_cache = offset.y + draw_ofs.y + frame->lines[i].height_cache;
+							frame->lines[i].height_accum_cache = offset.y + draw_ofs.y + frame->lines[i].height_cache;
 						}
 					}
 
@@ -1432,7 +1449,7 @@ bool RichTextLabel::_find_by_type(Item *p_item, ItemType p_type) {
 	return false;
 }
 
-void RichTextLabel::_fetch_item_fx_stack(Item *p_item, Vector<ItemFX *> &r_stack) {
+void RichTextLabel::_fetch_item_fx_stack(Item *p_item, std::vector<ItemFX *> &r_stack) {
 	Item *item = p_item;
 	while (item) {
 		if (item->type == ITEM_CUSTOMFX || item->type == ITEM_SHAKE || item->type == ITEM_WAVE || item->type == ITEM_TORNADO || item->type == ITEM_RAINBOW) {
@@ -1499,14 +1516,15 @@ void RichTextLabel::_validate_line_caches(ItemFrame *p_frame) {
 	Ref<Font> base_font = get_font("normal_font");
 
 	for (int i = p_frame->first_invalid_line; i < p_frame->lines.size(); i++) {
-
 		int y = 0;
+
 		_process_line(p_frame, text_rect.get_position(), y, text_rect.get_size().width - scroll_w, i, PROCESS_CACHE, base_font, Color(), font_color_shadow, use_outline, shadow_ofs);
-		p_frame->lines.write[i].height_cache = y;
-		p_frame->lines.write[i].height_accum_cache = y;
+
+		p_frame->lines[i].height_cache = y;
+		p_frame->lines[i].height_accum_cache = y;
 
 		if (i > 0)
-			p_frame->lines.write[i].height_accum_cache += p_frame->lines[i - 1].height_accum_cache;
+			p_frame->lines[i].height_accum_cache += p_frame->lines[i - 1].height_accum_cache;
 	}
 
 	int total_height = 0;
@@ -1581,7 +1599,7 @@ void RichTextLabel::add_text(const String &p_text) {
 			_add_item(item, false);
 			current_frame->lines.resize(current_frame->lines.size() + 1);
 			if (item->type != ITEM_NEWLINE)
-				current_frame->lines.write[current_frame->lines.size() - 1].from = item;
+				current_frame->lines[current_frame->lines.size() - 1].from = item;
 			_invalidate_current_line(current_frame);
 		}
 
@@ -1608,7 +1626,7 @@ void RichTextLabel::_add_item(Item *p_item, bool p_enter, bool p_ensure_newline)
 	}
 
 	if (current_frame->lines[current_frame->lines.size() - 1].from == NULL) {
-		current_frame->lines.write[current_frame->lines.size() - 1].from = p_item;
+		current_frame->lines[current_frame->lines.size() - 1].from = p_item;
 	}
 	p_item->line = current_frame->lines.size() - 1;
 
@@ -1616,12 +1634,13 @@ void RichTextLabel::_add_item(Item *p_item, bool p_enter, bool p_ensure_newline)
 }
 
 void RichTextLabel::_remove_item(Item *p_item, const int p_line, const int p_subitem_line) {
-
 	int size = p_item->subitems.size();
+
 	if (size == 0) {
 		p_item->parent->subitems.erase(p_item);
 		if (p_item->type == ITEM_NEWLINE) {
-			current_frame->lines.remove(p_line);
+			current_frame->lines.erase(current_frame->lines.begin() + p_line);
+
 			for (int i = p_subitem_line; i < current->subitems.size(); i++) {
 				if (current->subitems[i]->line > 0)
 					current->subitems[i]->line--;
@@ -1676,11 +1695,11 @@ bool RichTextLabel::remove_line(const int p_line) {
 	}
 
 	if (!was_newline) {
-		current_frame->lines.remove(p_line);
+		current_frame->lines.erase(current_frame->lines.begin() + p_line);
 	}
 
 	if (p_line == 0 && current->subitems.size() > 0)
-		main->lines.write[0].from = main;
+		main->lines[0].from = main;
 
 	main->first_invalid_line = 0;
 
@@ -1762,15 +1781,16 @@ void RichTextLabel::push_meta(const Variant &p_meta) {
 }
 
 void RichTextLabel::push_table(int p_columns) {
-
 	ERR_FAIL_COND(p_columns < 1);
+
 	ItemTable *item = memnew(ItemTable);
 
 	item->columns.resize(p_columns);
 	item->total_width = 0;
-	for (int i = 0; i < item->columns.size(); i++) {
-		item->columns.write[i].expand = false;
-		item->columns.write[i].expand_ratio = 1;
+
+	for (auto&& column : item->columns) {
+		column.expand = false;
+		column.expand_ratio = 1;
 	}
 	_add_item(item, true, true);
 }
@@ -1819,31 +1839,35 @@ void RichTextLabel::push_customfx(Ref<RichTextEffect> p_custom_effect, Dictionar
 }
 
 void RichTextLabel::set_table_column_expand(int p_column, bool p_expand, int p_ratio) {
-
 	ERR_FAIL_COND(current->type != ITEM_TABLE);
+
 	ItemTable *table = static_cast<ItemTable *>(current);
+
 	ERR_FAIL_INDEX(p_column, table->columns.size());
-	table->columns.write[p_column].expand = p_expand;
-	table->columns.write[p_column].expand_ratio = p_ratio;
+
+	table->columns[p_column].expand = p_expand;
+	table->columns[p_column].expand_ratio = p_ratio;
 }
 
 void RichTextLabel::push_cell() {
-
 	ERR_FAIL_COND(current->type != ITEM_TABLE);
 
 	ItemFrame *item = memnew(ItemFrame);
+
 	item->parent_frame = current_frame;
+
 	_add_item(item, true);
+
 	current_frame = item;
+
 	item->cell = true;
 	item->parent_line = item->parent_frame->lines.size() - 1;
 	item->lines.resize(1);
-	item->lines.write[0].from = NULL;
+	item->lines[0].from = NULL;
 	item->first_invalid_line = 0;
 }
 
 int RichTextLabel::get_current_table_column() const {
-
 	ERR_FAIL_COND_V(current->type != ITEM_TABLE, -1);
 
 	ItemTable *table = static_cast<ItemTable *>(current);
@@ -2193,19 +2217,20 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			tag_stack.push_front("font");
 
 		} else if (tag.begins_with("fade")) {
-			Vector<String> tags = tag.split(" ", false);
+			std::vector<String> tags = tag.split(" ", false);
 			int startIndex = 0;
 			int length = 10;
 
+			// need_update : ugly
 			if (tags.size() > 1) {
-				tags.remove(0);
-				for (int i = 0; i < tags.size(); i++) {
-					String expr = tags[i];
-					if (expr.begins_with("start=")) {
-						String start_str = expr.substr(6, expr.length());
+				tags.erase(tags.begin());
+
+				for (auto&& tag : tags) {
+					if (tag.begins_with("start=")) {
+						String start_str = tag.substr(6, tag.length());
 						startIndex = start_str.to_int();
-					} else if (expr.begins_with("length=")) {
-						String end_str = expr.substr(7, expr.length());
+					} else if (tag.begins_with("length=")) {
+						String end_str = tag.substr(7, tag.length());
 						length = end_str.to_int();
 					}
 				}
@@ -2215,19 +2240,20 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			pos = brk_end + 1;
 			tag_stack.push_front("fade");
 		} else if (tag.begins_with("shake")) {
-			Vector<String> tags = tag.split(" ", false);
+			std::vector<String> tags = tag.split(" ", false);
 			int strength = 5;
 			float rate = 20.0f;
 
+			// need_udapte : 2 times same
 			if (tags.size() > 1) {
-				tags.remove(0);
-				for (int i = 0; i < tags.size(); i++) {
-					String expr = tags[i];
-					if (expr.begins_with("level=")) {
-						String str_str = expr.substr(6, expr.length());
+				tags.erase(tags.begin());
+
+				for (auto&& tag : tags) {
+					if (tag.begins_with("level=")) {
+						String str_str = tag.substr(6, tag.length());
 						strength = str_str.to_int();
-					} else if (expr.begins_with("rate=")) {
-						String rate_str = expr.substr(5, expr.length());
+					} else if (tag.begins_with("rate=")) {
+						String rate_str = tag.substr(5, tag.length());
 						rate = rate_str.to_float();
 					}
 				}
@@ -2238,19 +2264,20 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			tag_stack.push_front("shake");
 			set_process_internal(true);
 		} else if (tag.begins_with("wave")) {
-			Vector<String> tags = tag.split(" ", false);
+			std::vector<String> tags = tag.split(" ", false);
 			float amplitude = 20.0f;
 			float period = 5.0f;
 
+			// need_udpate : 3 times same
 			if (tags.size() > 1) {
-				tags.remove(0);
-				for (int i = 0; i < tags.size(); i++) {
-					String expr = tags[i];
-					if (expr.begins_with("amp=")) {
-						String amp_str = expr.substr(4, expr.length());
+				tags.erase(tags.begin());
+
+				for (auto&& tag : tags) {
+					if (tag.begins_with("amp=")) {
+						String amp_str = tag.substr(4, tag.length());
 						amplitude = amp_str.to_float();
-					} else if (expr.begins_with("freq=")) {
-						String period_str = expr.substr(5, expr.length());
+					} else if (tag.begins_with("freq=")) {
+						String period_str = tag.substr(5, tag.length());
 						period = period_str.to_float();
 					}
 				}
@@ -2261,19 +2288,20 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			tag_stack.push_front("wave");
 			set_process_internal(true);
 		} else if (tag.begins_with("tornado")) {
-			Vector<String> tags = tag.split(" ", false);
+			std::vector<String> tags = tag.split(" ", false);
 			float radius = 10.0f;
 			float frequency = 1.0f;
 
+			// need_udpate : 4 times same
 			if (tags.size() > 1) {
-				tags.remove(0);
-				for (int i = 0; i < tags.size(); i++) {
-					String expr = tags[i];
-					if (expr.begins_with("radius=")) {
-						String amp_str = expr.substr(7, expr.length());
+				tags.erase(tags.begin());
+
+				for (auto&& tag : tags) {
+					if (tag.begins_with("radius=")) {
+						String amp_str = tag.substr(7, tag.length());
 						radius = amp_str.to_float();
-					} else if (expr.begins_with("freq=")) {
-						String period_str = expr.substr(5, expr.length());
+					} else if (tag.begins_with("freq=")) {
+						String period_str = tag.substr(5, tag.length());
 						frequency = period_str.to_float();
 					}
 				}
@@ -2284,23 +2312,24 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			tag_stack.push_front("tornado");
 			set_process_internal(true);
 		} else if (tag.begins_with("rainbow")) {
-			Vector<String> tags = tag.split(" ", false);
+			std::vector<String> tags = tag.split(" ", false);
 			float saturation = 0.8f;
 			float value = 0.8f;
 			float frequency = 1.0f;
 
+			// need_update : 5 times same
 			if (tags.size() > 1) {
-				tags.remove(0);
-				for (int i = 0; i < tags.size(); i++) {
-					String expr = tags[i];
-					if (expr.begins_with("sat=")) {
-						String sat_str = expr.substr(4, expr.length());
+				tags.erase(tags.begin());
+
+				for (auto &&tag : tags) {
+					if (tag.begins_with("sat=")) {
+						String sat_str = tag.substr(4, tag.length());
 						saturation = sat_str.to_float();
-					} else if (expr.begins_with("val=")) {
-						String val_str = expr.substr(4, expr.length());
+					} else if (tag.begins_with("val=")) {
+						String val_str = tag.substr(4, tag.length());
 						value = val_str.to_float();
-					} else if (expr.begins_with("freq=")) {
-						String freq_str = expr.substr(5, expr.length());
+					} else if (tag.begins_with("freq=")) {
+						String freq_str = tag.substr(5, tag.length());
 						frequency = freq_str.to_float();
 					}
 				}
@@ -2311,13 +2340,15 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			tag_stack.push_front("rainbow");
 			set_process_internal(true);
 		} else {
-			Vector<String> expr = tag.split(" ", false);
+			std::vector<String> expr = tag.split(" ", false);
 			if (expr.size() < 1) {
 				add_text("[");
 				pos = brk_pos + 1;
 			} else {
 				String identifier = expr[0];
-				expr.remove(0);
+
+				expr.erase(expr.begin());
+
 				Dictionary properties = parse_expressions_for_values(expr);
 				Ref<RichTextEffect> effect = _get_custom_effect_by_code(identifier);
 
@@ -2539,7 +2570,7 @@ float RichTextLabel::get_percent_visible() const {
 	return percent_visible;
 }
 
-void RichTextLabel::set_effects(const Vector<Variant> &effects) {
+void RichTextLabel::set_effects(const std::vector<Variant> &effects) {
 	custom_effects.clear();
 	for (int i = 0; i < effects.size(); i++) {
 		Ref<RichTextEffect> effect = Ref<RichTextEffect>(effects[i]);
@@ -2549,8 +2580,8 @@ void RichTextLabel::set_effects(const Vector<Variant> &effects) {
 	parse_bbcode(bbcode);
 }
 
-Vector<Variant> RichTextLabel::get_effects() {
-	Vector<Variant> r;
+std::vector<Variant> RichTextLabel::get_effects() {
+	std::vector<Variant> r;
 	for (int i = 0; i < custom_effects.size(); i++) {
 		r.push_back(custom_effects[i].get_ref_ptr());
 	}
@@ -2747,19 +2778,19 @@ Ref<RichTextEffect> RichTextLabel::_get_custom_effect_by_code(String p_bbcode_id
 	return Ref<RichTextEffect>();
 }
 
-Dictionary RichTextLabel::parse_expressions_for_values(Vector<String> p_expressions) {
+Dictionary RichTextLabel::parse_expressions_for_values(std::vector<String> p_expressions) {
 	Dictionary d = Dictionary();
 	for (int i = 0; i < p_expressions.size(); i++) {
 		String expression = p_expressions[i];
 
 		Array a = Array();
-		Vector<String> parts = expression.split("=", true);
+		std::vector<String> parts = expression.split("=", true);
 		String key = parts[0];
 		if (parts.size() != 2) {
 			return d;
 		}
 
-		Vector<String> values = parts[1].split(",", false);
+		std::vector<String> values = parts[1].split(",", false);
 
 		RegEx color = RegEx();
 		color.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
@@ -2810,7 +2841,7 @@ RichTextLabel::RichTextLabel() {
 	main->index = 0;
 	current = main;
 	main->lines.resize(1);
-	main->lines.write[0].from = main;
+	main->lines[0].from = main;
 	main->first_invalid_line = 0;
 	current_frame = main;
 	tab_size = 4;
