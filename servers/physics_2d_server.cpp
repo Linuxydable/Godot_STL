@@ -30,6 +30,8 @@
 
 #include "physics_2d_server.h"
 
+#include <algorithm>
+
 #include "core/method_bind_ext.gen.inc"
 #include "core/print_string.h"
 #include "core/project_settings.h"
@@ -186,20 +188,19 @@ int Physics2DShapeQueryParameters::get_collision_mask() const {
 	return collision_mask;
 }
 
-void Physics2DShapeQueryParameters::set_exclude(const Vector<RID> &p_exclude) {
+void Physics2DShapeQueryParameters::set_exclude(const std::vector<RID> &p_exclude) {
 
 	exclude.clear();
-	for (int i = 0; i < p_exclude.size(); i++)
-		exclude.insert(p_exclude[i]);
+	for (auto &&ex : p_exclude)
+		exclude.insert(ex);
 }
 
-Vector<RID> Physics2DShapeQueryParameters::get_exclude() const {
+std::vector<RID> Physics2DShapeQueryParameters::get_exclude() const {
 
-	Vector<RID> ret;
-	ret.resize(exclude.size());
+	std::vector<RID> ret(exclude.size());
 	int idx = 0;
 	for (Set<RID>::Element *E = exclude.front(); E; E = E->next()) {
-		ret.write[idx] = E->get();
+		ret[idx] = E->get();
 	}
 	return ret;
 }
@@ -266,12 +267,12 @@ Physics2DShapeQueryParameters::Physics2DShapeQueryParameters() {
 	collide_with_areas = false;
 }
 
-Dictionary Physics2DDirectSpaceState::_intersect_ray(const Vector2 &p_from, const Vector2 &p_to, const Vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas) {
+Dictionary Physics2DDirectSpaceState::_intersect_ray(const Vector2 &p_from, const Vector2 &p_to, const std::vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas) {
 
 	RayResult inters;
 	Set<RID> exclude;
-	for (int i = 0; i < p_exclude.size(); i++)
-		exclude.insert(p_exclude[i]);
+	for (auto &&ex : p_exclude)
+		exclude.insert(ex);
 
 	bool res = intersect_ray(p_from, p_to, inters, exclude, p_layers, p_collide_with_bodies, p_collide_with_areas);
 
@@ -294,9 +295,9 @@ Array Physics2DDirectSpaceState::_intersect_shape(const Ref<Physics2DShapeQueryP
 
 	ERR_FAIL_COND_V(!p_shape_query.is_valid(), Array());
 
-	Vector<ShapeResult> sr;
+	std::vector<ShapeResult> sr;
 	sr.resize(p_max_results);
-	int rc = intersect_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, sr.ptrw(), sr.size(), p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
+	int rc = intersect_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, sr.data(), sr.size(), p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
 	Array ret;
 	ret.resize(rc);
 	for (int i = 0; i < rc; i++) {
@@ -328,20 +329,20 @@ Array Physics2DDirectSpaceState::_cast_motion(const Ref<Physics2DShapeQueryParam
 	return ret;
 }
 
-Array Physics2DDirectSpaceState::_intersect_point_impl(const Vector2 &p_point, int p_max_results, const Vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas, bool p_filter_by_canvas, ObjectID p_canvas_instance_id) {
+Array Physics2DDirectSpaceState::_intersect_point_impl(const Vector2 &p_point, int p_max_results, const std::vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas, bool p_filter_by_canvas, ObjectID p_canvas_instance_id) {
 
 	Set<RID> exclude;
-	for (int i = 0; i < p_exclude.size(); i++)
-		exclude.insert(p_exclude[i]);
+	for (auto &&ex : p_exclude)
+		exclude.insert(ex);
 
-	Vector<ShapeResult> ret;
+	std::vector<ShapeResult> ret;
 	ret.resize(p_max_results);
 
 	int rc;
 	if (p_filter_by_canvas)
-		rc = intersect_point(p_point, ret.ptrw(), ret.size(), exclude, p_layers, p_collide_with_bodies, p_collide_with_areas);
+		rc = intersect_point(p_point, ret.data(), ret.size(), exclude, p_layers, p_collide_with_bodies, p_collide_with_areas);
 	else
-		rc = intersect_point_on_canvas(p_point, p_canvas_instance_id, ret.ptrw(), ret.size(), exclude, p_layers, p_collide_with_bodies, p_collide_with_areas);
+		rc = intersect_point_on_canvas(p_point, p_canvas_instance_id, ret.data(), ret.size(), exclude, p_layers, p_collide_with_bodies, p_collide_with_areas);
 
 	if (rc == 0)
 		return Array();
@@ -361,12 +362,12 @@ Array Physics2DDirectSpaceState::_intersect_point_impl(const Vector2 &p_point, i
 	return r;
 }
 
-Array Physics2DDirectSpaceState::_intersect_point(const Vector2 &p_point, int p_max_results, const Vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas) {
+Array Physics2DDirectSpaceState::_intersect_point(const Vector2 &p_point, int p_max_results, const std::vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas) {
 
 	return _intersect_point_impl(p_point, p_max_results, p_exclude, p_layers, p_collide_with_bodies, p_collide_with_areas);
 }
 
-Array Physics2DDirectSpaceState::_intersect_point_on_canvas(const Vector2 &p_point, ObjectID p_canvas_intance_id, int p_max_results, const Vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas) {
+Array Physics2DDirectSpaceState::_intersect_point_on_canvas(const Vector2 &p_point, ObjectID p_canvas_intance_id, int p_max_results, const std::vector<RID> &p_exclude, uint32_t p_layers, bool p_collide_with_bodies, bool p_collide_with_areas) {
 
 	return _intersect_point_impl(p_point, p_max_results, p_exclude, p_layers, p_collide_with_bodies, p_collide_with_areas, true, p_canvas_intance_id);
 }
@@ -375,10 +376,10 @@ Array Physics2DDirectSpaceState::_collide_shape(const Ref<Physics2DShapeQueryPar
 
 	ERR_FAIL_COND_V(!p_shape_query.is_valid(), Array());
 
-	Vector<Vector2> ret;
+	std::vector<Vector2> ret;
 	ret.resize(p_max_results * 2);
 	int rc = 0;
-	bool res = collide_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, ret.ptrw(), p_max_results, rc, p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
+	bool res = collide_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->motion, p_shape_query->margin, ret.data(), p_max_results, rc, p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
 	if (!res)
 		return Array();
 	Array r;
@@ -774,7 +775,7 @@ Physics2DServer::~Physics2DServer() {
 	singleton = NULL;
 }
 
-Vector<Physics2DServerManager::ClassInfo> Physics2DServerManager::physics_2d_servers;
+std::vector<Physics2DServerManager::ClassInfo> Physics2DServerManager::physics_2d_servers;
 int Physics2DServerManager::default_server_id = -1;
 int Physics2DServerManager::default_server_priority = -1;
 const String Physics2DServerManager::setting_property_name("physics/2d/physics_engine");
@@ -808,11 +809,17 @@ void Physics2DServerManager::set_default_server(const String &p_name, int p_prio
 
 int Physics2DServerManager::find_server_id(const String &p_name) {
 
-	for (int i = physics_2d_servers.size() - 1; 0 <= i; --i) {
-		if (p_name == physics_2d_servers[i].name) {
-			return i;
+	auto it_server = std::find_if(physics_2d_servers.rbegin(), physics_2d_servers.rend(), [&](const Physics2DServerManager::ClassInfo &pserver) {
+		if (p_name == pserver.name) {
+			return true;
 		}
+		return false;
+	});
+
+	if (it_server != physics_2d_servers.rend()) {
+		return std::distance(physics_2d_servers.rbegin(), it_server);
 	}
+
 	return -1;
 }
 
