@@ -311,9 +311,9 @@ if selected_platform in platform_list:
     # must happen after the flags, so when flags are used by configure, stuff happens (ie, ssl on x11)
     detect.configure(env)
 
-    # Enable C++11 support
+    # Enable C++17 support
     if not env.msvc:
-        env.Append(CXXFLAGS=['-std=c++11'])
+        env.Append(CXXFLAGS=['-std=c++17'])
 
     # Configure compiler warnings
     if env.msvc:
