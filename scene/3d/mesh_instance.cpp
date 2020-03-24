@@ -53,7 +53,7 @@ bool MeshInstance::_set(const StringName &p_name, const Variant &p_value) {
 	}
 
 	if (p_name.operator String().begins_with("material/")) {
-		size_type idx = p_name.operator String().get_slicec('/', 1).to_int();
+		size_t idx = p_name.operator String().get_slicec('/', 1).to_int();
 
 		if(idx >= materials.size())
 			return false;
@@ -77,7 +77,7 @@ bool MeshInstance::_get(const StringName &p_name, Variant &r_ret) const {
 	}
 
 	if (p_name.operator String().begins_with("material/")) {
-		size_type idx = p_name.operator String().get_slicec('/', 1).to_int();
+		size_t idx = p_name.operator String().get_slicec('/', 1).to_int();
 
 		if(idx >= materials.size())
 			return false;
@@ -284,7 +284,7 @@ void MeshInstance::_notification(int p_what) {
 	}
 }
 
-size_type MeshInstance::get_surface_material_count() const {
+size_t MeshInstance::get_surface_material_count() const {
 	return materials.size();
 }
 
@@ -336,7 +336,7 @@ void MeshInstance::create_debug_tangents() {
 		if(tangents.empty() )
 			continue;
 
-		for (auto j = 0; j < verts.size(); j++) {
+		for (decltype(verts.size()) j = 0; j < verts.size(); ++j) {
 			Vector3 t = Vector3(tangents[j * 4 + 0], tangents[j * 4 + 1], tangents[j * 4 + 2]);
 
 			Vector3 b = (norms[j].cross(t)).normalized() * tangents[j * 4 + 3];
