@@ -552,20 +552,20 @@ void TileMap::update_dirty_quadrants() {
 				tex->draw_rect_region(canvas_item, rect, r, modulate, c.transpose, normal_map, clip_uv);
 			}
 
-			Vector<TileSet::ShapeData> shapes = tile_set->tile_get_shapes(c.id);
+			std::vector<TileSet::ShapeData> shapes = tile_set->tile_get_shapes(c.id);
 
-			for (int j = 0; j < shapes.size(); j++) {
-				Ref<Shape2D> shape = shapes[j].shape;
+			for (auto &&sdata : shapes) {
+				Ref<Shape2D> shape = sdata.shape;
 				if (shape.is_valid()) {
-					if (tile_set->tile_get_tile_mode(c.id) == TileSet::SINGLE_TILE || (shapes[j].autotile_coord.x == c.autotile_coord_x && shapes[j].autotile_coord.y == c.autotile_coord_y)) {
+					if (tile_set->tile_get_tile_mode(c.id) == TileSet::SINGLE_TILE || (sdata.autotile_coord.x == c.autotile_coord_x && sdata.autotile_coord.y == c.autotile_coord_y)) {
 						Transform2D xform;
 						xform.set_origin(offset.floor());
 
-						Vector2 shape_ofs = shapes[j].shape_transform.get_origin();
+						Vector2 shape_ofs = sdata.shape_transform.get_origin();
 
 						_fix_cell_transform(xform, c, shape_ofs, s);
 
-						xform *= shapes[j].shape_transform.untranslated();
+						xform *= sdata.shape_transform.untranslated();
 
 						if (debug_canvas_item.is_valid()) {
 							vs->canvas_item_add_set_transform(debug_canvas_item, xform);
@@ -577,7 +577,7 @@ void TileMap::update_dirty_quadrants() {
 							for (int k = 0; k < _shapes.size(); k++) {
 								Ref<ConvexPolygonShape2D> convex = _shapes[k];
 								if (convex.is_valid()) {
-									_add_shape(shape_idx, q, convex, shapes[j], xform, Vector2(E->key().x, E->key().y));
+									_add_shape(shape_idx, q, convex, sdata, xform, Vector2(E->key().x, E->key().y));
 #ifdef DEBUG_ENABLED
 								} else {
 									print_error("The TileSet assigned to the TileMap " + get_name() + " has an invalid convex shape.");
@@ -585,7 +585,7 @@ void TileMap::update_dirty_quadrants() {
 								}
 							}
 						} else {
-							_add_shape(shape_idx, q, shape, shapes[j], xform, Vector2(E->key().x, E->key().y));
+							_add_shape(shape_idx, q, shape, sdata, xform, Vector2(E->key().x, E->key().y));
 						}
 					}
 				}
@@ -629,22 +629,21 @@ void TileMap::update_dirty_quadrants() {
 							int vsize = navigation_polygon_vertices.size();
 
 							if (vsize > 2) {
-								Vector<Color> colors;
-								Vector<Vector2> vertices;
-								vertices.resize(vsize);
-								colors.resize(vsize);
+								std::vector<Color> colors(vsize);
+								std::vector<Vector2> vertices(vsize);
+
 								{
 									PoolVector<Vector2>::Read vr = navigation_polygon_vertices.read();
 									for (int j = 0; j < vsize; j++) {
-										vertices.write[j] = vr[j];
-										colors.write[j] = debug_navigation_color;
+										vertices[j] = vr[j];
+										colors[j] = debug_navigation_color;
 									}
 								}
 
-								Vector<int> indices;
+								std::vector<int> indices;
 
 								for (int j = 0; j < navpoly->get_polygon_count(); j++) {
-									Vector<int> polygon = navpoly->get_polygon(j);
+									std::vector<int> polygon = navpoly->get_polygon(j);
 
 									for (int k = 2; k < polygon.size(); k++) {
 
