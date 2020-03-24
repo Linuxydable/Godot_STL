@@ -367,7 +367,7 @@ void TextureProgress::_notification(int p_what) {
 								pts.append(end);
 								float from = MIN(start, end);
 								float to = MAX(start, end);
-								std::for_each_n(std::begin(corners), 12, [&](const float &corner) {
+								std::for_each(std::begin(corners), std::begin(corners) + 12, [&](const float &corner) {
 									if (corner > from && corner < to)
 										pts.append(corner);
 								});
