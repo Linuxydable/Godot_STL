@@ -2401,12 +2401,13 @@ bool Collada::_move_geometry_to_skeletons(VisualScene *p_vscene, Node *p_node, L
 		}
 	}
 
-	std::remove_if(p_node->children.begin(), p_node->children.end(), [this, &p_vscene, &p_mgeom](Node *child) {
+	p_node->children.erase(std::remove_if(p_node->children.begin(), p_node->children.end(), [this, &p_vscene, &p_mgeom](Node *child) {
 		if (_move_geometry_to_skeletons(p_vscene, child, p_mgeom)) {
 			return true;
 		}
 		return false;
-	});
+	}),
+			p_node->children.end());
 
 	return false;
 }

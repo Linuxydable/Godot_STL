@@ -829,13 +829,14 @@ void SpatialEditorViewport::_list_select(Ref<InputEventMouseButton> b) {
 
 	Node *scene = editor->get_edited_scene();
 
-	std::remove_if(selection_results.begin(), selection_results.end(), [&](const _RayResult &res) {
+	selection_results.erase(std::remove_if(selection_results.begin(), selection_results.end(), [&](const _RayResult &res) {
 		Spatial *item = res.item;
 		if (item != scene && item->get_owner() != scene && !scene->is_editable_instance(item->get_owner())) {
 			return true;
 		}
 		return false;
-	});
+	}),
+			selection_results.end());
 
 	clicked_wants_append = b->get_shift();
 
