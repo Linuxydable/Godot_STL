@@ -289,8 +289,8 @@ Size2 DynamicFontAtSize::get_char_size(CharType p_char, CharType p_next, const s
 void DynamicFontAtSize::set_texture_flags(uint32_t p_flags) {
 
 	texture_flags = p_flags;
-	for (int i = 0; i < textures.size(); i++) {
-		Ref<ImageTexture> &tex = textures.write[i].texture;
+	for (auto &&ctex : textures) {
+		Ref<ImageTexture> &tex = ctex.texture;
 		if (!tex.is_null())
 			tex->set_flags(p_flags);
 	}
@@ -372,8 +372,7 @@ DynamicFontAtSize::TexturePosition DynamicFontAtSize::_find_texture_pos_for_glyp
 	int mw = p_width;
 	int mh = p_height;
 
-	for (int i = 0; i < textures.size(); i++) {
-
+	for (decltype(textures.size()) i = 0; i < textures.size(); ++i) {
 		const CharTexture &ct = textures[i];
 
 		if (ct.texture->get_format() != p_image_format)
@@ -668,10 +667,10 @@ void DynamicFont::_reload_cache() {
 		fallback_outline_data_at_size.resize(0);
 	}
 
-	for (int i = 0; i < fallbacks.size(); i++) {
-		fallback_data_at_size.write[i] = fallbacks.write[i]->_get_dynamic_font_at_size(cache_id);
+	for (decltype(fallbacks.size()) i = 0; i < fallbacks.size(); ++i) {
+		fallback_data_at_size[i] = fallbacks[i]->_get_dynamic_font_at_size(cache_id);
 		if (outline_cache_id.outline_size > 0)
-			fallback_outline_data_at_size.write[i] = fallbacks.write[i]->_get_dynamic_font_at_size(outline_cache_id);
+			fallback_outline_data_at_size[i] = fallbacks[i]->_get_dynamic_font_at_size(outline_cache_id);
 	}
 
 	emit_changed();
@@ -1070,12 +1069,13 @@ void DynamicFont::update_oversampling() {
 				E->self()->outline_data_at_size->update_oversampling();
 			}
 
-			for (int i = 0; i < E->self()->fallback_data_at_size.size(); i++) {
+			auto len = E->self()->fallback_data_at_size.size();
+			for (decltype(len) i = 0; i < len; ++i) {
 				if (E->self()->fallback_data_at_size[i].is_valid()) {
-					E->self()->fallback_data_at_size.write[i]->update_oversampling();
+					E->self()->fallback_data_at_size[i]->update_oversampling();
 
 					if (E->self()->has_outline() && E->self()->fallback_outline_data_at_size[i].is_valid()) {
-						E->self()->fallback_outline_data_at_size.write[i]->update_oversampling();
+						E->self()->fallback_outline_data_at_size[i]->update_oversampling();
 					}
 				}
 			}
