@@ -61,14 +61,6 @@ static SegmentIntersectionResult segment_intersection(
 	return SEGMENT_PARALLEL;
 }
 
-// TODO I'm pretty sure there is an even faster way to swap things
-template <typename T>
-static inline void swap(T &a, T &b) {
-	T tmp = a;
-	a = b;
-	b = tmp;
-}
-
 static float calculate_total_distance(const std::vector<Vector2> &points) {
 	float d = 0.f;
 	for (decltype(points.size()) i = 1; i < points.size(); ++i) {
