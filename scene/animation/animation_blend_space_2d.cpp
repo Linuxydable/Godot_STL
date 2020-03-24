@@ -115,40 +115,25 @@ void AnimationNodeBlendSpace2D::remove_blend_point(int p_point) {
 
 	blend_points[p_point].node->disconnect("tree_changed", this, "_tree_changed");
 
-	for (int i = 0; i < triangles.size(); i++) {
-		bool erase = false;
-		for (int j = 0; j < 3; j++) {
-			if (triangles[i].points[j] == p_point) {
-				erase = true;
-				break;
-			} else if (triangles[i].points[j] > p_point) {
-				triangles[i].points[j]--;
+	triangles.erase(std::remove_if(triangles.begin(), triangles.end(),
+		[&](auto &&triangle) {
+			for (auto &&point : triangle.points) {
+				if (point == p_point) {
+					return true;
+				} else if (point > p_point) {
+					--point;
+				}
 			}
-		}
-		if (erase) {
-			triangles.remove(i);
-			--i;
-		}
-	}
 
-	std::remove_if(triangles.begin(), triangles.end(), [&](const BlendTriangle &triangle) {
-		auto it_find = std::find_if(std::begin(triangle.points), std::end(triangle.points), [&](int &point) {
-			if (point == p_point) {
-				return true;
-			} else if (point > p_point) {
-				--point;
-			}
-		});
-
-		if (it_find != std::end(triangle.points)) {
-			return true;
-		}
-	});
+				return false;
+		}), triangles.end());
 
 	for (int i = p_point; i < blend_points_used - 1; i++) {
 		blend_points[i] = blend_points[i + 1];
 	}
+
 	--blend_points_used;
+
 	emit_signal("tree_changed");
 }
 

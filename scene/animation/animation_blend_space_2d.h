@@ -31,6 +31,8 @@
 #ifndef ANIMATION_BLEND_SPACE_2D_H
 #define ANIMATION_BLEND_SPACE_2D_H
 
+#include <vector>
+
 #include "scene/animation/animation_tree.h"
 
 class AnimationNodeBlendSpace2D : public AnimationRootNode {

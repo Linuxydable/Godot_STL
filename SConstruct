@@ -320,6 +320,8 @@ if selected_platform in platform_list:
         # Truncations, narrowing conversions, signed/unsigned comparisons...
         #disable_nonessential_warnings = ['/wd4267', '/wd4244', '/wd4305', '/wd4018', '/wd4800'] sabotage !
 
+        env.Append(CXXFLAGS=['/std:c++latest'])
+
         enable_usefull_warnings = ['/w24018', '/w24388', '/w24389']
 
         if (env["warnings"] == 'extra'):
