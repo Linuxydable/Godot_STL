@@ -1014,10 +1014,13 @@ bool SceneState::is_node_in_group(int p_node, const StringName &p_group) const {
 
 	if (p_node < nodes.size()) {
 		const StringName *namep = names.data();
-		if (std::find_if(nodes[p_node].groups.begin(), nodes[p_node].groups.end(), [&](const int &group) {
-				if (namep[group] == p_group)
+		auto &groups = nodes[p_node].groups;
+		if (std::find_if(groups.begin(), groups.end(), [&](const int &group) {
+				if (namep[group] == p_group) {
 					return true;
-			}) != nodes[p_node].groups.end()) {
+				}
+				return false;
+			}) != groups.end()) {
 			return true;
 		}
 	}
