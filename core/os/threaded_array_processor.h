@@ -75,17 +75,15 @@ void thread_process_array(uint32_t p_elements, C *p_instance, M p_method, U p_us
 	data.elements = p_elements;
 	data.process(data.index); //process first, let threads increment for next
 
-	Vector<Thread *> threads;
+	std::vector<Thread *> threads(OS::get_singleton()->get_processor_count());
 
-	threads.resize(OS::get_singleton()->get_processor_count());
-
-	for (int i = 0; i < threads.size(); i++) {
-		threads.write[i] = Thread::create(process_array_thread<ThreadArrayProcessData<C, U> >, &data);
+	for (auto &&thread : threads) {
+		thread = Thread::create(process_array_thread<ThreadArrayProcessData<C, U> >, &data);
 	}
 
-	for (int i = 0; i < threads.size(); i++) {
-		Thread::wait_to_finish(threads[i]);
-		memdelete(threads[i]);
+	for (auto &&thread : threads) {
+		Thread::wait_to_finish(thread);
+		memdelete(thread);
 	}
 }
 
