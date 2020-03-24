@@ -33,6 +33,7 @@
 
 #include <vector>
 
+#include "core/error_macros.h"
 #include "core/typedefs.h"
 
 template <class T>
