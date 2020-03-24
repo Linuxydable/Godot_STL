@@ -46,7 +46,7 @@ void Navigation::_navmesh_link(int p_id) {
 
 	PoolVector<Vector3>::Read r = vertices.read();
 
-	for (int i = 0; i < nm.navmesh->get_polygon_count(); ++i) {
+	for (decltype(nm.navmesh->get_polygon_count()) i = 0; i < nm.navmesh->get_polygon_count(); ++i) {
 
 		//build
 
@@ -54,16 +54,16 @@ void Navigation::_navmesh_link(int p_id) {
 		Polygon &p = P->get();
 		p.owner = &nm;
 
-		Vector<int> poly = nm.navmesh->get_polygon(i);
-		int plen = poly.size();
-		const int *indices = poly.ptr();
+		std::vector<int> poly = nm.navmesh->get_polygon(i);
+		auto plen = poly.size();
+		const int *indices = poly.data();
 		bool valid = true;
 		p.edges.resize(plen);
 
 		Vector3 center;
 		float sum = 0;
 
-		for (int j = 0; j < plen; j++) {
+		for (decltype(plen) j = 0; j < plen; ++j) {
 
 			int idx = indices[j];
 			if (idx < 0 || idx >= len) {
@@ -75,7 +75,7 @@ void Navigation::_navmesh_link(int p_id) {
 			Vector3 ep = nm.xform.xform(r[idx]);
 			center += ep;
 			e.point = _get_point(ep);
-			p.edges.write[j] = e;
+			p.edges[j] = e;
 
 			if (j >= 2) {
 				Vector3 epa = nm.xform.xform(r[indices[j - 2]]);
@@ -99,7 +99,7 @@ void Navigation::_navmesh_link(int p_id) {
 
 		//connect
 
-		for (int j = 0; j < plen; j++) {
+		for (decltype(plen) j = 0; j < plen; ++j) {
 
 			int next = (j + 1) % plen;
 			EdgeKey ek(p.edges[j].point, p.edges[next].point);
@@ -119,16 +119,16 @@ void Navigation::_navmesh_link(int p_id) {
 					ConnectionPending pending;
 					pending.polygon = &p;
 					pending.edge = j;
-					p.edges.write[j].P = C->get().pending.push_back(pending);
+					p.edges[j].P = C->get().pending.push_back(pending);
 					continue;
 				}
 
 				C->get().B = &p;
 				C->get().B_edge = j;
-				C->get().A->edges.write[C->get().A_edge].C = &p;
-				C->get().A->edges.write[C->get().A_edge].C_edge = j;
-				p.edges.write[j].C = C->get().A;
-				p.edges.write[j].C_edge = C->get().A_edge;
+				C->get().A->edges[C->get().A_edge].C = &p;
+				C->get().A->edges[C->get().A_edge].C_edge = j;
+				p.edges[j].C = C->get().A;
+				p.edges[j].C_edge = C->get().A_edge;
 				//connection successful.
 			}
 		}
@@ -148,7 +148,7 @@ void Navigation::_navmesh_unlink(int p_id) {
 		Polygon &p = E->get();
 
 		int ec = p.edges.size();
-		Polygon::Edge *edges = p.edges.ptrw();
+		Polygon::Edge *edges = p.edges.data();
 
 		for (int i = 0; i < ec; ++i) {
 			int next = (i + 1) % ec;
@@ -164,10 +164,10 @@ void Navigation::_navmesh_unlink(int p_id) {
 			} else if (C->get().B) {
 				//disconnect
 
-				C->get().B->edges.write[C->get().B_edge].C = NULL;
-				C->get().B->edges.write[C->get().B_edge].C_edge = -1;
-				C->get().A->edges.write[C->get().A_edge].C = NULL;
-				C->get().A->edges.write[C->get().A_edge].C_edge = -1;
+				C->get().B->edges[C->get().B_edge].C = NULL;
+				C->get().B->edges[C->get().B_edge].C_edge = -1;
+				C->get().A->edges[C->get().A_edge].C = NULL;
+				C->get().A->edges[C->get().A_edge].C_edge = -1;
 
 				if (C->get().A == &E->get()) {
 
@@ -184,11 +184,11 @@ void Navigation::_navmesh_unlink(int p_id) {
 
 					C->get().B = cp.polygon;
 					C->get().B_edge = cp.edge;
-					C->get().A->edges.write[C->get().A_edge].C = cp.polygon;
-					C->get().A->edges.write[C->get().A_edge].C_edge = cp.edge;
-					cp.polygon->edges.write[cp.edge].C = C->get().A;
-					cp.polygon->edges.write[cp.edge].C_edge = C->get().A_edge;
-					cp.polygon->edges.write[cp.edge].P = NULL;
+					C->get().A->edges[C->get().A_edge].C = cp.polygon;
+					C->get().A->edges[C->get().A_edge].C_edge = cp.edge;
+					cp.polygon->edges[cp.edge].C = C->get().A;
+					cp.polygon->edges[cp.edge].C_edge = C->get().A_edge;
+					cp.polygon->edges[cp.edge].P = NULL;
 				}
 
 			} else {
