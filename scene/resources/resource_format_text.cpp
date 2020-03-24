@@ -332,7 +332,7 @@ Ref<PackedScene> ResourceInteractiveLoaderText::_parse_node_tag(VariantParser::R
 				binds = next_tag.fields["binds"];
 			}
 
-			Vector<int> bind_ints;
+			std::vector<int> bind_ints;
 			for (int i = 0; i < binds.size(); i++) {
 				bind_ints.push_back(packed_scene->get_state()->add_value(binds[i]));
 			}
@@ -1008,8 +1008,8 @@ Error ResourceInteractiveLoaderText::save_as_binary(FileAccess *p_f, const Strin
 		return ERR_CANT_OPEN;
 	}
 
-	Vector<size_t> local_offsets;
-	Vector<size_t> local_pointers_pos;
+	std::vector<size_t> local_offsets;
+	std::vector<size_t> local_pointers_pos;
 
 	while (next_tag.name == "sub_resource" || next_tag.name == "resource") {
 
@@ -1151,15 +1151,15 @@ Error ResourceInteractiveLoaderText::save_as_binary(FileAccess *p_f, const Strin
 	wf->seek(sub_res_count_pos); //plus one because the saved one
 	wf->store_32(local_offsets.size());
 
-	for (int i = 0; i < local_offsets.size(); i++) {
+	for (decltype(local_offsets.size()) i = 0; i < local_offsets.size(); ++i) {
 		wf->seek(local_pointers_pos[i]);
 		wf->store_64(local_offsets[i] + offset_from);
 	}
 
 	wf->seek_end();
 
-	Vector<uint8_t> data = FileAccess::get_file_as_array(temp_file);
-	wf->store_buffer(data.ptr(), data.size());
+	std::vector<uint8_t> data = FileAccess::get_file_as_array(temp_file);
+	wf->store_buffer(data.data(), data.size());
 	{
 		DirAccessRef dar = DirAccess::open(temp_file.get_base_dir());
 		dar->remove(temp_file);
@@ -1568,22 +1568,21 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 	}
 #endif
 
-	Vector<ResourceSort> sorted_er;
+	std::vector<ResourceSort> sorted_er;
 
 	for (Map<RES, int>::Element *E = external_resources.front(); E; E = E->next()) {
-
 		ResourceSort rs;
 		rs.resource = E->key();
 		rs.index = E->get();
 		sorted_er.push_back(rs);
 	}
 
-	sorted_er.sort();
+	std::sort(sorted_er.begin(), sorted_er.end());
 
-	for (int i = 0; i < sorted_er.size(); i++) {
-		String p = sorted_er[i].resource->get_path();
+	for (auto &&res : sorted_er) {
+		String p = res.resource->get_path();
 
-		f->store_string("[ext_resource path=\"" + p + "\" type=\"" + sorted_er[i].resource->get_save_class() + "\" id=" + itos(sorted_er[i].index) + "]\n"); //bundled
+		f->store_string("[ext_resource path=\"" + p + "\" type=\"" + res.resource->get_save_class() + "\" id=" + itos(res.index) + "]\n"); //bundled
 	}
 
 	if (external_resources.size())
@@ -1695,7 +1694,7 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 			NodePath owner = state->get_node_owner_path(i);
 			Ref<PackedScene> instance = state->get_node_instance(i);
 			String instance_placeholder = state->get_node_instance_placeholder(i);
-			Vector<StringName> groups = state->get_node_groups(i);
+			std::vector<StringName> groups = state->get_node_groups(i);
 
 			String header = "[node";
 			header += " name=\"" + String(name).c_escape() + "\"";
@@ -1712,11 +1711,11 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 				header += " index=\"" + itos(index) + "\"";
 			}
 
-			if (groups.size()) {
-				groups.sort_custom<StringName::AlphCompare>();
+			if (!groups.empty()) {
+				std::sort(groups.begin(), groups.end(), StringName::AlphCompare{});
 				String sgroups = " groups=[\n";
-				for (int j = 0; j < groups.size(); j++) {
-					sgroups += "\"" + String(groups[j]).c_escape() + "\",\n";
+				for (auto &&group : groups) {
+					sgroups += "\"" + String(group).c_escape() + "\",\n";
 				}
 				sgroups += "]";
 				header += sgroups;
@@ -1777,9 +1776,9 @@ Error ResourceFormatSaverTextInstance::save(const String &p_path, const RES &p_r
 			f->store_line("]");
 		}
 
-		Vector<NodePath> editable_instances = state->get_editable_instances();
-		for (int i = 0; i < editable_instances.size(); i++) {
-			f->store_line("\n[editable path=\"" + editable_instances[i].operator String() + "\"]");
+		std::vector<NodePath> editable_instances = state->get_editable_instances();
+		for (auto &&ed_instance : editable_instances) {
+			f->store_line("\n[editable path=\"" + ed_instance.operator String() + "\"]");
 		}
 	}
 
