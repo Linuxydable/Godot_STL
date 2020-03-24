@@ -215,11 +215,7 @@ int AnimationNodeBlendSpace2D::get_triangle_point(int p_triangle, int p_point) {
 void AnimationNodeBlendSpace2D::remove_triangle(int p_triangle) {
 	ERR_FAIL_INDEX(p_triangle, triangles.size());
 
-	auto it_find = std::find(triangles.begin(), triangles.end(), p_triangle);
-
-	if (it_find != triangles.end()) {
-		triangles.erase(it_find);
-	}
+	triangles.erase(triangles.begin() + p_triangle);
 }
 
 int AnimationNodeBlendSpace2D::get_triangle_count() const {
