@@ -69,9 +69,9 @@ static inline void swap(T &a, T &b) {
 	b = tmp;
 }
 
-static float calculate_total_distance(const Vector<Vector2> &points) {
+static float calculate_total_distance(const std::vector<Vector2> &points) {
 	float d = 0.f;
-	for (int i = 1; i < points.size(); ++i) {
+	for (decltype(points.size()) i = 1; i < points.size(); ++i) {
 		d += points[i].distance_to(points[i - 1]);
 	}
 	return d;
@@ -584,7 +584,7 @@ void LineBuilder::new_arc(Vector2 center, Vector2 vbegin, float angle_delta, Col
 	float t = Vector2(1, 0).angle_to(vbegin);
 	float end_angle = t + angle_delta;
 	Vector2 rpos(0, 0);
-	float tt_begin = -Math_PI / 2.f;
+	float tt_begin = -Math_PI_2;
 	float tt = tt_begin;
 
 	// Center vertice
