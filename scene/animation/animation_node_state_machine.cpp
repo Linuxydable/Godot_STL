@@ -609,13 +609,14 @@ void AnimationNodeStateMachine::remove_node(const StringName &p_name) {
 	states.erase(p_name);
 	//path.erase(p_name);
 
-	auto it_find = std::remove_if(transitions.begin(), transitions.end(), [&](const Transition &trans) {
-		if (trans.from == p_name || trans.to == p_name) {
-			trans.transition->disconnect("advance_condition_changed", this, "_tree_changed");
-			return true;
-		}
-		return false;
-	});
+	auto it_find = std::remove_if(transitions.begin(), transitions.end(),
+		[&](auto&& transition) {
+			if (transition.from == p_name || transition.to == p_name) {
+				transition.transition->disconnect("advance_condition_changed", this, "_tree_changed");
+				return true;
+			}
+			return false;
+		});
 
 	if (start_node == p_name) {
 		start_node = StringName();
