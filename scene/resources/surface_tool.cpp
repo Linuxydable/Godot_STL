@@ -80,8 +80,8 @@ uint32_t SurfaceTool::VertexHasher::hash(const Vertex &p_vtx) {
 	h = hash_djb2_buffer((const uint8_t *)&p_vtx.uv, sizeof(real_t) * 2, h);
 	h = hash_djb2_buffer((const uint8_t *)&p_vtx.uv2, sizeof(real_t) * 2, h);
 	h = hash_djb2_buffer((const uint8_t *)&p_vtx.color, sizeof(real_t) * 4, h);
-	h = hash_djb2_buffer((const uint8_t *)p_vtx.bones.ptr(), p_vtx.bones.size() * sizeof(int), h);
-	h = hash_djb2_buffer((const uint8_t *)p_vtx.weights.ptr(), p_vtx.weights.size() * sizeof(float), h);
+	h = hash_djb2_buffer((const uint8_t *)p_vtx.bones.data(), p_vtx.bones.size() * sizeof(int), h);
+	h = hash_djb2_buffer((const uint8_t *)p_vtx.weights.data(), p_vtx.weights.size() * sizeof(float), h);
 	return h;
 }
 
@@ -127,11 +127,14 @@ void SurfaceTool::add_vertex(const Vector3 &p_vertex) {
 			//more than required, sort, cap and normalize.
 			std::vector<WeightSort> weights;
 
-			WeightSort ws;
-			for(auto it0=vtx.bones.begin(), auto it1=vtx.weights.begin(); it0 != vtx.bones.end(); ++it0, ++it1){
-				ws.index = *it0;
-				ws.weight = *it1;
-				weights.push_back(ws);
+			{
+				WeightSort ws;
+				auto it0 = vtx.bones.begin();
+				auto it1 = vtx.weights.begin();
+				for (; it0 != vtx.bones.end(); ++it0, ++it1) {
+					ws = { *it0, *it1 };
+					weights.push_back(ws);
+				}
 			}
 
 			//sort
@@ -141,11 +144,10 @@ void SurfaceTool::add_vertex(const Vector3 &p_vertex) {
 			weights.resize(expected_vertices);
 
 			//renormalize
-			auto total = 0.0;
-
-			for(auto it=weights.begin(); it!=weights.end(); ++it){
-				total += (*it).weight;
-			}
+			float total = 0.0;
+			std::for_each(weights.begin(), weights.end(), [&](const WeightSort &wsort) {
+				total += wsort.weight;
+			});
 
 			vtx.weights.resize(expected_vertices);
 			vtx.weights.shrink_to_fit();
@@ -153,15 +155,21 @@ void SurfaceTool::add_vertex(const Vector3 &p_vertex) {
 			vtx.bones.resize(expected_vertices);
 			vtx.bones.shrink_to_fit();
 
-			if(signbit(total) ){
-				for(auto it0=vtx.bones.begin(), auto it1=vtx.weights.begin(), auto it2=weights.begin(); it0 != vtx.bones.end(); ++it0, ++it1, ++it2){
-					*it0 = (*it2).index;
+			if (signbit(total)) {
+				auto it0 = vtx.bones.begin();
+				auto it1 = vtx.weights.begin();
+				auto it2 = weights.begin();
+				for (; it0 != vtx.bones.end(); ++it0, ++it1, ++it2) {
+					*it0 = it2->index;
 					*it1 = 0;
 				}
-			}else{
-				for(auto it0=vtx.bones.begin(), auto it1=vtx.weights.begin(), auto it2=weights.begin(); it0 != vtx.bones.end(); ++it0, ++it1, ++it2){
-					*it0 = (*it2).index;
-					*it1 = (*it2).weight/total;
+			} else {
+				auto it0 = vtx.bones.begin();
+				auto it1 = vtx.weights.begin();
+				auto it2 = weights.begin();
+				for (; it0 != vtx.bones.end(); ++it0, ++it1, ++it2) {
+					*it0 = it2->index;
+					*it1 = it2->weight / total;
 				}
 			}
 		}
@@ -525,35 +533,18 @@ void SurfaceTool::deindex() {
 	if (index_array.size() == 0)
 		return; //nothing to deindex
 
-	std::vector<Vertex> varr;
+	std::vector<Vertex> varr(vertex_array.size());
 
-	varr.resize(vertex_array.size());
-
-	{
-		List<Vertex>::Element *E = vertex_array.front();
-
-		for(auto&& c_var : varr){
-			c_var = E->get();
-
-			E = E->next();
-		}
+	uint32_t idx = 0;
+	for (List<Vertex>::Element *E = vertex_array.front(); E; E = E->next()) {
+		varr[idx++] = E->get();
 	}
 
 	vertex_array.clear();
+	for (List<int>::Element *E = index_array.front(); E; E = E->next()) {
 
-	vertex_array.resize(index_array.size() );
-	vertex_array.shrink_to_fit();
-
-	{
-		List<int>::Element *E = index_array.front();
-
-		for(auto&& c_vertex : vertex_array){
-			ERR_FAIL_INDEX(E->get(), varr.size());
-
-			c_vertex = varr[E->get()]
-
-			E = E->next();
-		}
+		ERR_FAIL_INDEX(E->get(), varr.size());
+		vertex_array.push_back(varr[E->get()]);
 	}
 
 	format &= ~Mesh::ARRAY_FORMAT_INDEX;
@@ -651,21 +642,11 @@ std::vector<SurfaceTool::Vertex> SurfaceTool::create_vertex_array_from_triangle_
 		if (lformat & VS::ARRAY_FORMAT_TEX_UV2)
 			v.uv2 = uv2arr[i];
 		if (lformat & VS::ARRAY_FORMAT_BONES) {
-			std::vector<int> b;
-			b.resize(4);
-			b.write[0] = barr[i * 4 + 0];
-			b.write[1] = barr[i * 4 + 1];
-			b.write[2] = barr[i * 4 + 2];
-			b.write[3] = barr[i * 4 + 3];
+			std::vector<int> b{ barr[i * 4 + 0], barr[i * 4 + 1], barr[i * 4 + 2], barr[i * 4 + 3] };
 			v.bones = b;
 		}
 		if (lformat & VS::ARRAY_FORMAT_WEIGHTS) {
-			std::vector<float> w;
-			w.resize(4);
-			w.write[0] = warr[i * 4 + 0];
-			w.write[1] = warr[i * 4 + 1];
-			w.write[2] = warr[i * 4 + 2];
-			w.write[3] = warr[i * 4 + 3];
+			std::vector<float> w{ warr[i * 4 + 0], warr[i * 4 + 1], warr[i * 4 + 2], warr[i * 4 + 3] };
 			v.weights = w;
 		}
 
@@ -756,21 +737,11 @@ void SurfaceTool::_create_list_from_arrays(Array arr, List<Vertex> *r_vertex, Li
 		if (lformat & VS::ARRAY_FORMAT_TEX_UV2)
 			v.uv2 = uv2arr[i];
 		if (lformat & VS::ARRAY_FORMAT_BONES) {
-			std::vector<int> b;
-			b.resize(4);
-			b.write[0] = barr[i * 4 + 0];
-			b.write[1] = barr[i * 4 + 1];
-			b.write[2] = barr[i * 4 + 2];
-			b.write[3] = barr[i * 4 + 3];
+			std::vector<int> b{ barr[i * 4 + 0], barr[i * 4 + 1], barr[i * 4 + 2], barr[i * 4 + 3] };
 			v.bones = b;
 		}
 		if (lformat & VS::ARRAY_FORMAT_WEIGHTS) {
-			std::vector<float> w;
-			w.resize(4);
-			w.write[0] = warr[i * 4 + 0];
-			w.write[1] = warr[i * 4 + 1];
-			w.write[2] = warr[i * 4 + 2];
-			w.write[3] = warr[i * 4 + 3];
+			std::vector<float> w{ warr[i * 4 + 0], warr[i * 4 + 1], warr[i * 4 + 2], warr[i * 4 + 3] };
 			v.weights = w;
 		}
 
@@ -980,14 +951,14 @@ void SurfaceTool::generate_tangents() {
 	triangle_data.vertices.resize(vertex_array.size());
 	int idx = 0;
 	for (List<Vertex>::Element *E = vertex_array.front(); E; E = E->next()) {
-		triangle_data.vertices.write[idx++] = E;
+		triangle_data.vertices[idx++] = E;
 		E->get().binormal = Vector3();
 		E->get().tangent = Vector3();
 	}
 	triangle_data.indices.resize(index_array.size());
 	idx = 0;
 	for (List<int>::Element *E = index_array.front(); E; E = E->next()) {
-		triangle_data.indices.write[idx++] = E;
+		triangle_data.indices[idx++] = E;
 	}
 	msc.m_pUserData = &triangle_data;
 
