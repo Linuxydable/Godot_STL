@@ -272,7 +272,7 @@ String FileAccess::get_token() const {
 }
 
 class CharBuffer {
-	Vector<char> vector;
+	std::vector<char> vector;
 	char stack_buffer[256];
 
 	char *buffer;
@@ -289,12 +289,11 @@ class CharBuffer {
 		if (buffer == stack_buffer) { // first chunk?
 
 			for (int i = 0; i < written; i++) {
-
-				vector.write[i] = stack_buffer[i];
+				vector[i] = stack_buffer[i];
 			}
 		}
 
-		buffer = vector.ptrw();
+		buffer = vector.data();
 		capacity = vector.size();
 		ERR_FAIL_COND_V(written >= capacity, false);
 
@@ -344,9 +343,9 @@ String FileAccess::get_line() const {
 	return String::utf8(line.get_data());
 }
 
-Vector<String> FileAccess::get_csv_line(const String &p_delim) const {
+std::vector<String> FileAccess::get_csv_line(const String &p_delim) const {
 
-	ERR_FAIL_COND_V(p_delim.length() != 1, Vector<String>());
+	ERR_FAIL_COND_V(p_delim.length() != 1, std::vector<String>());
 
 	String l;
 	int qc = 0;
@@ -366,7 +365,7 @@ Vector<String> FileAccess::get_csv_line(const String &p_delim) const {
 
 	l = l.substr(0, l.length() - 1);
 
-	Vector<String> strings;
+	std::vector<String> strings;
 
 	bool in_quote = false;
 	String current;
@@ -564,7 +563,7 @@ void FileAccess::store_line(const String &p_line) {
 	store_8('\n');
 }
 
-void FileAccess::store_csv_line(const Vector<String> &p_values, const String &p_delim) {
+void FileAccess::store_csv_line(const std::vector<String> &p_values, const String &p_delim) {
 
 	ERR_FAIL_COND(p_delim.length() != 1);
 
@@ -592,18 +591,18 @@ void FileAccess::store_buffer(const uint8_t *p_src, int p_length) {
 		store_8(p_src[i]);
 }
 
-Vector<uint8_t> FileAccess::get_file_as_array(const String &p_path, Error *r_error) {
+std::vector<uint8_t> FileAccess::get_file_as_array(const String &p_path, Error *r_error) {
 
 	FileAccess *f = FileAccess::open(p_path, READ, r_error);
 	if (!f) {
 		if (r_error) { // if error requested, do not throw error
-			return Vector<uint8_t>();
+			return std::vector<uint8_t>();
 		}
-		ERR_FAIL_V_MSG(Vector<uint8_t>(), "Can't open file from path '" + String(p_path) + "'.");
+		ERR_FAIL_V_MSG(std::vector<uint8_t>(), "Can't open file from path '" + String(p_path) + "'.");
 	}
-	Vector<uint8_t> data;
+	std::vector<uint8_t> data;
 	data.resize(f->get_len());
-	f->get_buffer(data.ptrw(), data.size());
+	f->get_buffer(data.data(), data.size());
 	memdelete(f);
 	return data;
 }
@@ -611,7 +610,7 @@ Vector<uint8_t> FileAccess::get_file_as_array(const String &p_path, Error *r_err
 String FileAccess::get_file_as_string(const String &p_path, Error *r_error) {
 
 	Error err;
-	Vector<uint8_t> array = get_file_as_array(p_path, &err);
+	std::vector<uint8_t> array = get_file_as_array(p_path, &err);
 	if (r_error) {
 		*r_error = err;
 	}
@@ -623,7 +622,7 @@ String FileAccess::get_file_as_string(const String &p_path, Error *r_error) {
 	}
 
 	String ret;
-	ret.parse_utf8((const char *)array.ptr(), array.size());
+	ret.parse_utf8((const char *)array.data(), array.size());
 	return ret;
 }
 
@@ -657,13 +656,13 @@ String FileAccess::get_md5(const String &p_file) {
 	return String::md5(hash);
 }
 
-String FileAccess::get_multiple_md5(const Vector<String> &p_file) {
+String FileAccess::get_multiple_md5(const std::vector<String> &p_file) {
 
 	CryptoCore::MD5Context ctx;
 	ctx.start();
 
-	for (int i = 0; i < p_file.size(); i++) {
-		FileAccess *f = FileAccess::open(p_file[i], READ);
+	for (auto &&file : p_file) {
+		FileAccess *f = FileAccess::open(file, READ);
 		ERR_CONTINUE(!f);
 
 		unsigned char step[32768];
