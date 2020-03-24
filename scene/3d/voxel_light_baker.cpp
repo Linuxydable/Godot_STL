@@ -1229,15 +1229,15 @@ void VoxelLightBaker::_fixup_plot(int p_idx, int p_level) {
 
 		//go down
 
-		bake_cells.[p_idx].emission[0] = 0;
-		bake_cells.[p_idx].emission[1] = 0;
-		bake_cells.[p_idx].emission[2] = 0;
-		bake_cells.[p_idx].normal[0] = 0;
-		bake_cells.[p_idx].normal[1] = 0;
-		bake_cells.[p_idx].normal[2] = 0;
-		bake_cells.[p_idx].albedo[0] = 0;
-		bake_cells.[p_idx].albedo[1] = 0;
-		bake_cells.[p_idx].albedo[2] = 0;
+		bake_cells[p_idx].emission[0] = 0;
+		bake_cells[p_idx].emission[1] = 0;
+		bake_cells[p_idx].emission[2] = 0;
+		bake_cells[p_idx].normal[0] = 0;
+		bake_cells[p_idx].normal[1] = 0;
+		bake_cells[p_idx].normal[2] = 0;
+		bake_cells[p_idx].albedo[0] = 0;
+		bake_cells[p_idx].albedo[1] = 0;
+		bake_cells[p_idx].albedo[2] = 0;
 		if (bake_light.size()) {
 			for (auto &&rgb : bake_light[p_idx].accum) {
 				rgb[0] = 0;
