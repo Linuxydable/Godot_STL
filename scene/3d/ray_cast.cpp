@@ -369,10 +369,7 @@ void RayCast::_update_debug_shape() {
 	Array a;
 	a.resize(Mesh::ARRAY_MAX);
 
-	Vector<Vector3> verts;
-	verts.push_back(Vector3());
-	verts.push_back(cast_to);
-	a[Mesh::ARRAY_VERTEX] = verts;
+	a[Mesh::ARRAY_VERTEX] = std::vector<Vector3>{ Vector3{}, cast_to };
 
 	mesh->add_surface_from_arrays(Mesh::PRIMITIVE_LINES, a);
 	mesh->surface_set_material(0, debug_material);
