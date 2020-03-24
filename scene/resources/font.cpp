@@ -178,21 +178,20 @@ PoolVector<int> BitmapFont::_get_kernings() const {
 	return kernings;
 }
 
-void BitmapFont::_set_textures(const Vector<Variant> &p_textures) {
+void BitmapFont::_set_textures(const std::vector<Variant> &p_textures) {
 
 	textures.clear();
-	for (int i = 0; i < p_textures.size(); i++) {
-		Ref<Texture> tex = p_textures[i];
+	for (auto &&tex : p_textures) {
 		ERR_CONTINUE(!tex.is_valid());
 		add_texture(tex);
 	}
 }
 
-Vector<Variant> BitmapFont::_get_textures() const {
+std::vector<Variant> BitmapFont::_get_textures() const {
 
-	Vector<Variant> rtextures;
-	for (int i = 0; i < textures.size(); i++)
-		rtextures.push_back(textures[i].get_ref_ptr());
+	std::vector<Variant> rtextures;
+	for (auto &&texture : textures)
+		rtextures.push_back(texture.get_ref_ptr());
 	return rtextures;
 }
 
@@ -378,15 +377,13 @@ int BitmapFont::get_character_count() const {
 	return char_map.size();
 };
 
-Vector<CharType> BitmapFont::get_char_keys() const {
+std::vector<CharType> BitmapFont::get_char_keys() const {
 
-	Vector<CharType> chars;
-	chars.resize(char_map.size());
+	std::vector<CharType> chars(char_map.size());
 	const CharType *ct = NULL;
 	int count = 0;
 	while ((ct = char_map.next(ct))) {
-
-		chars.write[count++] = *ct;
+		chars[count++] = *ct;
 	};
 
 	return chars;
@@ -431,14 +428,14 @@ void BitmapFont::add_kerning_pair(CharType p_A, CharType p_B, int p_kerning) {
 	}
 }
 
-Vector<BitmapFont::KerningPairKey> BitmapFont::get_kerning_pair_keys() const {
+std::vector<BitmapFont::KerningPairKey> BitmapFont::get_kerning_pair_keys() const {
 
-	Vector<BitmapFont::KerningPairKey> ret;
+	std::vector<BitmapFont::KerningPairKey> ret;
 	ret.resize(kerning_map.size());
 	int i = 0;
 
 	for (Map<KerningPairKey, int>::Element *E = kerning_map.front(); E; E = E->next()) {
-		ret.write[i++] = E->key();
+		ret[i++] = E->key();
 	}
 
 	return ret;
@@ -506,17 +503,16 @@ Size2 Font::get_wordwrap_string_size(const String &p_string, float p_width) cons
 	float line_w = 0;
 	float h = 0;
 	float space_w = get_char_size(' ').width;
-	Vector<String> lines = p_string.split("\n");
-	for (int i = 0; i < lines.size(); i++) {
+	std::vector<String> lines = p_string.split("\n");
+	for (auto &&t : lines) {
 		h += get_height();
-		String t = lines[i];
 		line_w = 0;
-		Vector<String> words = t.split(" ");
-		for (int j = 0; j < words.size(); j++) {
-			line_w += get_string_size(words[j]).x;
+		std::vector<String> words = t.split(" ");
+		for (auto &&word : words) {
+			line_w += get_string_size(word).x;
 			if (line_w > p_width) {
 				h += get_height();
-				line_w = get_string_size(words[j]).x;
+				line_w = get_string_size(word).x;
 			} else {
 				line_w += space_w;
 			}
