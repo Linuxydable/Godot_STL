@@ -414,7 +414,7 @@ String Skeleton::get_bone_name(unsigned p_bone) const {
 	return bones[p_bone].name;
 }
 
-bool Skeleton::is_bone_parent_of(unsigned p_bone, int p_parent_bone_id) const {
+bool Skeleton::is_bone_parent_of(int p_bone, int p_parent_bone_id) const {
 
 	int parent_of_bone = get_bone_parent(p_bone);
 
