@@ -2173,12 +2173,13 @@ public:
 		}
 		Error err = OK;
 		std::vector<String> cl = cmdline.strip_edges().split(" ");
-		std::remove_if(cl.begin(), cl.end(), [](const String &str) {
+		cl.erase(std::remove_if(cl.begin(), cl.end(), [](const String &str) {
 			if (str.strip_edges().length() == 0) {
 				return true;
 			}
+
 			return false;
-		});
+		}), cl.end());
 
 		gen_export_flags(cl, p_flags);
 

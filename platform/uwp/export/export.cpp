@@ -1335,12 +1335,12 @@ public:
 
 		std::vector<String> cl = ((String)p_preset->get("command_line/extra_args")).strip_edges().split(" ");
 
-		std::remove_if(cl.begin(), cl.end(), [](const String &str) {
+		cl.erase(std::remove_if(cl.begin(), cl.end(), [](const String &str) {
 			if (str.strip_edges().length() == 0) {
 				return true;
 			}
 			return false;
-		});
+		}), cl.end());
 
 		if (!(p_flags & DEBUG_FLAG_DUMB_CLIENT)) {
 			cl.push_back("--path");
