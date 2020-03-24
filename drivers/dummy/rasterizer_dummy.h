@@ -138,12 +138,12 @@ public:
 		PoolVector<uint8_t> index_array;
 		int index_count;
 		AABB aabb;
-		Vector<PoolVector<uint8_t> > blend_shapes;
-		Vector<AABB> bone_aabbs;
+		std::vector<PoolVector<uint8_t> > blend_shapes;
+		std::vector<AABB> bone_aabbs;
 	};
 
 	struct DummyMesh : public RID_Data {
-		Vector<DummySurface> surfaces;
+		std::vector<DummySurface> surfaces;
 		int blend_shape_count;
 		VS::BlendShapeMode blend_shape_mode;
 	};
@@ -294,12 +294,12 @@ public:
 		return mesh_owner.make_rid(mesh);
 	}
 
-	void mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const Vector<PoolVector<uint8_t> > &p_blend_shapes = Vector<PoolVector<uint8_t> >(), const Vector<AABB> &p_bone_aabbs = Vector<AABB>()) {
+	void mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const std::vector<PoolVector<uint8_t> > &p_blend_shapes = std::vector<PoolVector<uint8_t> >(), const std::vector<AABB> &p_bone_aabbs = std::vector<AABB>()) {
 		DummyMesh *m = mesh_owner.getornull(p_mesh);
 		ERR_FAIL_COND(!m);
 
 		m->surfaces.push_back(DummySurface());
-		DummySurface *s = &m->surfaces.write[m->surfaces.size() - 1];
+		DummySurface *s = &m->surfaces.back();
 		s->format = p_format;
 		s->primitive = p_primitive;
 		s->array = p_array;
@@ -383,15 +383,15 @@ public:
 
 		return m->surfaces[p_surface].aabb;
 	}
-	Vector<PoolVector<uint8_t> > mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const {
+	std::vector<PoolVector<uint8_t> > mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const {
 		DummyMesh *m = mesh_owner.getornull(p_mesh);
-		ERR_FAIL_COND_V(!m, Vector<PoolVector<uint8_t> >());
+		ERR_FAIL_COND_V(!m, std::vector<PoolVector<uint8_t> >());
 
 		return m->surfaces[p_surface].blend_shapes;
 	}
-	Vector<AABB> mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const {
+	std::vector<AABB> mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const {
 		DummyMesh *m = mesh_owner.getornull(p_mesh);
-		ERR_FAIL_COND_V(!m, Vector<AABB>());
+		ERR_FAIL_COND_V(!m, std::vector<AABB>());
 
 		return m->surfaces[p_surface].bone_aabbs;
 	}
@@ -401,7 +401,7 @@ public:
 		ERR_FAIL_COND(!m);
 		ERR_FAIL_COND(p_index >= m->surfaces.size());
 
-		m->surfaces.remove(p_index);
+		m->surfaces.erase(m->surfaces.begin() + p_index);
 	}
 	int mesh_get_surface_count(RID p_mesh) const {
 		DummyMesh *m = mesh_owner.getornull(p_mesh);

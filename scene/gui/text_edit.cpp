@@ -135,13 +135,13 @@ void TextEdit::Text::_update_line_cache(int p_line) const {
 		w += get_char_width(str[i], str[i + 1], w);
 	}
 
-	text.write[p_line].width_cache = w;
+	text[p_line].width_cache = w;
 
-	text.write[p_line].wrap_amount_cache = -1;
+	text[p_line].wrap_amount_cache = -1;
 
 	// Update regions.
 
-	text.write[p_line].region_info.clear();
+	text[p_line].region_info.clear();
 
 	for (int i = 0; i < len; i++) {
 
@@ -154,7 +154,7 @@ void TextEdit::Text::_update_line_cache(int p_line) const {
 
 		int left = len - i;
 
-		for (int j = 0; j < color_regions->size(); j++) {
+		for (decltype(color_regions->size()) j = 0; j < color_regions->size(); ++j) {
 
 			const ColorRegion &cr = color_regions->operator[](j);
 
@@ -180,7 +180,7 @@ void TextEdit::Text::_update_line_cache(int p_line) const {
 				ColorRegionInfo cri;
 				cri.end = false;
 				cri.region = j;
-				text.write[p_line].region_info[i] = cri;
+				text[p_line].region_info[i] = cri;
 				i += lr - 1;
 
 				break;
@@ -208,7 +208,7 @@ void TextEdit::Text::_update_line_cache(int p_line) const {
 				ColorRegionInfo cri;
 				cri.end = true;
 				cri.region = j;
-				text.write[p_line].region_info[i] = cri;
+				text[p_line].region_info[i] = cri;
 				i += lr - 1;
 
 				break;
@@ -244,7 +244,7 @@ void TextEdit::Text::set_line_wrap_amount(int p_line, int p_wrap_amount) const {
 
 	ERR_FAIL_INDEX(p_line, text.size());
 
-	text.write[p_line].wrap_amount_cache = p_wrap_amount;
+	text[p_line].wrap_amount_cache = p_wrap_amount;
 }
 
 int TextEdit::Text::get_line_wrap_amount(int p_line) const {
@@ -256,15 +256,15 @@ int TextEdit::Text::get_line_wrap_amount(int p_line) const {
 
 void TextEdit::Text::clear_width_cache() {
 
-	for (int i = 0; i < text.size(); i++) {
-		text.write[i].width_cache = -1;
+	for (auto &&line : text) {
+		line.width_cache = -1;
 	}
 }
 
 void TextEdit::Text::clear_wrap_cache() {
 
-	for (int i = 0; i < text.size(); i++) {
-		text.write[i].wrap_amount_cache = -1;
+	for (auto &&line : text) {
+		line.wrap_amount_cache = -1;
 	}
 }
 
@@ -278,7 +278,7 @@ int TextEdit::Text::get_max_width(bool p_exclude_hidden) const {
 	// Quite some work, but should be fast enough.
 
 	int max = 0;
-	for (int i = 0; i < text.size(); i++) {
+	for (decltype(text.size()) i = 0; i < text.size(); ++i) {
 		if (!p_exclude_hidden || !is_hidden(i))
 			max = MAX(max, get_line_width(i));
 	}
@@ -289,9 +289,9 @@ void TextEdit::Text::set(int p_line, const String &p_text) {
 
 	ERR_FAIL_INDEX(p_line, text.size());
 
-	text.write[p_line].width_cache = -1;
-	text.write[p_line].wrap_amount_cache = -1;
-	text.write[p_line].data = p_text;
+	text[p_line].width_cache = -1;
+	text[p_line].wrap_amount_cache = -1;
+	text[p_line].data = p_text;
 }
 
 void TextEdit::Text::insert(int p_at, const String &p_text) {
@@ -305,11 +305,11 @@ void TextEdit::Text::insert(int p_at, const String &p_text) {
 	line.width_cache = -1;
 	line.wrap_amount_cache = -1;
 	line.data = p_text;
-	text.insert(p_at, line);
+	text.insert(text.begin() + p_at, line);
 }
 void TextEdit::Text::remove(int p_at) {
 
-	text.remove(p_at);
+	text.erase(text.begin() + p_at);
 }
 
 int TextEdit::Text::get_char_width(CharType c, CharType next_c, int px) const {
@@ -967,7 +967,7 @@ void TextEdit::_notification(int p_what) {
 						current_color = cache.font_color_readonly;
 					}
 
-					Vector<String> wrap_rows = get_wrap_rows_text(minimap_line);
+					std::vector<String> wrap_rows = get_wrap_rows_text(minimap_line);
 					int line_wrap_amount = times_line_wraps(minimap_line);
 					int last_wrap_column = 0;
 
@@ -1092,7 +1092,7 @@ void TextEdit::_notification(int p_what) {
 
 				bool underlined = false;
 
-				Vector<String> wrap_rows = get_wrap_rows_text(line);
+				std::vector<String> wrap_rows = get_wrap_rows_text(line);
 				int line_wrap_amount = times_line_wraps(line);
 				int last_wrap_column = 0;
 
@@ -1626,9 +1626,9 @@ void TextEdit::_notification(int p_what) {
 					int l = line_from + i;
 					ERR_CONTINUE(l < 0 || l >= completion_options.size());
 					Color text_color = cache.completion_font_color;
-					for (int j = 0; j < color_regions.size(); j++) {
-						if (completion_options[l].insert_text.begins_with(color_regions[j].begin_key)) {
-							text_color = color_regions[j].color;
+					for (auto &&cregion : color_regions) {
+						if (completion_options[l].insert_text.begins_with(cregion.begin_key)) {
+							text_color = cregion.color;
 						}
 					}
 					int yofs = (get_row_height() - cache.font->get_height()) / 2;
@@ -2068,7 +2068,7 @@ void TextEdit::_get_mouse_pos(const Point2i &p_mouse, int &r_row, int &r_col) co
 		col = get_char_pos_for_line(colx, row, wrap_index);
 		if (is_wrap_enabled() && wrap_index < times_line_wraps(row)) {
 			// Move back one if we are at the end of the row.
-			Vector<String> rows2 = get_wrap_rows_text(row);
+			std::vector<String> rows2 = get_wrap_rows_text(row);
 			int row_end_col = 0;
 			for (int i = 0; i < wrap_index + 1; i++) {
 				row_end_col += rows2[i].length();
@@ -2094,11 +2094,11 @@ Vector2i TextEdit::_get_cursor_pixel_pos() {
 		row += times_line_wraps(i);
 	}
 	// Row might be wrapped. Adjust row and r_column
-	Vector<String> rows2 = get_wrap_rows_text(cursor.line);
+	std::vector<String> rows2 = get_wrap_rows_text(cursor.line);
 	while (rows2.size() > 1) {
-		if (cursor.column >= rows2[0].length()) {
-			cursor.column -= rows2[0].length();
-			rows2.remove(0);
+		if (cursor.column >= rows2.front().length()) {
+			cursor.column -= rows2.front().length();
+			rows2.erase(rows2.begin());
 			row++;
 		} else {
 			break;
@@ -3359,7 +3359,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 				} else {
 
 					// Move cursor column to start of wrapped row and then to start of text.
-					Vector<String> rows = get_wrap_rows_text(cursor.line);
+					std::vector<String> rows = get_wrap_rows_text(cursor.line);
 					int wi = get_cursor_wrap_index();
 					int row_start_col = 0;
 					for (int i = 0; i < wi; i++) {
@@ -3418,7 +3418,7 @@ void TextEdit::_gui_input(const Ref<InputEvent> &p_gui_input) {
 					cursor_set_line(get_last_unhidden_line(), true, false, 9999);
 
 				// Move cursor column to end of wrapped row and then to end of text.
-				Vector<String> rows = get_wrap_rows_text(cursor.line);
+				std::vector<String> rows = get_wrap_rows_text(cursor.line);
 				int wi = get_cursor_wrap_index();
 				int row_end_col = -1;
 				for (int i = 0; i < wi + 1; i++) {
@@ -3833,7 +3833,7 @@ void TextEdit::_base_insert_text(int p_line, int p_char, const String &p_text, i
 
 	/* STEP 1: Remove \r from source text and separate in substrings. */
 
-	Vector<String> substrings = p_text.replace("\r", "").split("\n");
+	std::vector<String> substrings = p_text.replace("\r", "").split("\n");
 
 	/* STEP 2: Fire breakpoint_toggled signals. */
 
@@ -3862,19 +3862,15 @@ void TextEdit::_base_insert_text(int p_line, int p_char, const String &p_text, i
 	String preinsert_text = text[p_line].substr(0, p_char);
 	String postinsert_text = text[p_line].substr(p_char, text[p_line].size());
 
-	for (int j = 0; j < substrings.size(); j++) {
+	for (decltype(substrings.size()) j = 0; j < substrings.size(); ++j) {
 		// Insert the substrings.
-
 		if (j == 0) {
-
 			text.set(p_line, preinsert_text + substrings[j]);
 		} else {
-
 			text.insert(p_line + j, substrings[j]);
 		}
 
 		if (j == substrings.size() - 1) {
-
 			text.set(p_line + j, text[p_line + j] + postinsert_text);
 		}
 	}
@@ -4176,7 +4172,7 @@ void TextEdit::_update_wrap_at() {
 		// Update all values that wrap.
 		if (!line_wraps(i))
 			continue;
-		Vector<String> rows = get_wrap_rows_text(i);
+		std::vector<String> rows = get_wrap_rows_text(i);
 		text.set_line_wrap_amount(i, rows.size() - 1);
 	}
 }
@@ -4284,7 +4280,7 @@ int TextEdit::times_line_wraps(int line) const {
 	int wrap_amount = text.get_line_wrap_amount(line);
 	if (wrap_amount == -1) {
 		// Update the value.
-		Vector<String> rows = get_wrap_rows_text(line);
+		std::vector<String> rows = get_wrap_rows_text(line);
 		wrap_amount = rows.size() - 1;
 		text.set_line_wrap_amount(line, wrap_amount);
 	}
@@ -4292,11 +4288,11 @@ int TextEdit::times_line_wraps(int line) const {
 	return wrap_amount;
 }
 
-Vector<String> TextEdit::get_wrap_rows_text(int p_line) const {
+std::vector<String> TextEdit::get_wrap_rows_text(int p_line) const {
 
-	ERR_FAIL_INDEX_V(p_line, text.size(), Vector<String>());
+	ERR_FAIL_INDEX_V(p_line, text.size(), std::vector<String>());
 
-	Vector<String> lines;
+	std::vector<String> lines;
 	if (!line_wraps(p_line)) {
 		lines.push_back(text[p_line]);
 		return lines;
@@ -4380,8 +4376,8 @@ int TextEdit::get_line_wrap_index_at_col(int p_line, int p_column) const {
 	// Loop through wraps in the line text until we get to the column.
 	int wrap_index = 0;
 	int col = 0;
-	Vector<String> rows = get_wrap_rows_text(p_line);
-	for (int i = 0; i < rows.size(); i++) {
+	std::vector<String> rows = get_wrap_rows_text(p_line);
+	for (decltype(rows.size()) i = 0; i < rows.size(); ++i) {
 		wrap_index = i;
 		String s = rows[wrap_index];
 		col += s.length();
@@ -4443,7 +4439,7 @@ void TextEdit::cursor_set_line(int p_row, bool p_adjust_viewport, bool p_can_be_
 
 	int n_col = get_char_pos_for_line(cursor.last_fit_x, p_row, p_wrap_index);
 	if (n_col != 0 && is_wrap_enabled() && p_wrap_index < times_line_wraps(p_row)) {
-		Vector<String> rows = get_wrap_rows_text(p_row);
+		std::vector<String> rows = get_wrap_rows_text(p_row);
 		int row_end_col = 0;
 		for (int i = 0; i < p_wrap_index + 1; i++) {
 			row_end_col += rows[i].length();
@@ -4577,7 +4573,7 @@ int TextEdit::get_char_pos_for_line(int p_px, int p_line, int p_wrap_index) cons
 			p_px -= wrap_offset_px;
 		else
 			p_wrap_index = 0;
-		Vector<String> rows = get_wrap_rows_text(p_line);
+		std::vector<String> rows = get_wrap_rows_text(p_line);
 		int c_pos = get_char_pos_for(p_px, rows[p_wrap_index]);
 		for (int i = 0; i < p_wrap_index; i++) {
 			String s = rows[i];
@@ -4599,9 +4595,9 @@ int TextEdit::get_column_x_offset_for_line(int p_char, int p_line) const {
 
 		int n_char = p_char;
 		int col = 0;
-		Vector<String> rows = get_wrap_rows_text(p_line);
+		std::vector<String> rows = get_wrap_rows_text(p_line);
 		int wrap_index = 0;
-		for (int i = 0; i < rows.size(); i++) {
+		for (decltype(rows.size()) i = 0; i < rows.size(); ++i) {
 			wrap_index = i;
 			String s = rows[wrap_index];
 			col += s.length();
@@ -5852,8 +5848,8 @@ bool TextEdit::is_folded(int p_line) const {
 	return !is_line_hidden(p_line) && is_line_hidden(p_line + 1);
 }
 
-Vector<int> TextEdit::get_folded_lines() const {
-	Vector<int> folded_lines;
+std::vector<int> TextEdit::get_folded_lines() const {
+	std::vector<int> folded_lines;
 
 	for (int i = 0; i < text.size(); i++) {
 		if (is_folded(i)) {
@@ -6310,12 +6306,12 @@ float TextEdit::get_v_scroll_speed() const {
 	return v_scroll_speed;
 }
 
-void TextEdit::set_completion(bool p_enabled, const Vector<String> &p_prefixes) {
+void TextEdit::set_completion(bool p_enabled, const std::vector<String> &p_prefixes) {
 
 	completion_prefixes.clear();
 	completion_enabled = p_enabled;
-	for (int i = 0; i < p_prefixes.size(); i++)
-		completion_prefixes.insert(p_prefixes[i]);
+	for (auto &&prefix : p_prefixes)
+		completion_prefixes.insert(prefix);
 }
 
 void TextEdit::_confirm_completion() {
@@ -6464,9 +6460,9 @@ void TextEdit::_update_completion_candidates() {
 	completion_options.clear();
 	completion_index = 0;
 	completion_base = s;
-	Vector<float> sim_cache;
+	std::vector<float> sim_cache;
 	bool single_quote = s.begins_with("'");
-	Vector<ScriptCodeCompletionOption> completion_options_casei;
+	std::vector<ScriptCodeCompletionOption> completion_options_casei;
 
 	for (List<ScriptCodeCompletionOption>::Element *E = completion_sources.front(); E; E = E->next()) {
 		ScriptCodeCompletionOption &option = E->get();
@@ -6487,9 +6483,9 @@ void TextEdit::_update_completion_candidates() {
 		}
 	}
 
-	completion_options.append_array(completion_options_casei);
+	completion_options.insert(completion_options.end(), completion_options_casei.begin(), completion_options_casei.end());
 
-	if (completion_options.size() == 0) {
+	if (completion_options.empty()) {
 		for (int i = 0; i < completion_sources.size(); i++) {
 			if (s.is_subsequence_of(completion_sources[i].display)) {
 				completion_options.push_back(completion_sources[i]);
@@ -6497,7 +6493,7 @@ void TextEdit::_update_completion_candidates() {
 		}
 	}
 
-	if (completion_options.size() == 0) {
+	if (completion_options.empty()) {
 		for (int i = 0; i < completion_sources.size(); i++) {
 			if (s.is_subsequence_ofi(completion_sources[i].display)) {
 				completion_options.push_back(completion_sources[i]);
@@ -6505,20 +6501,20 @@ void TextEdit::_update_completion_candidates() {
 		}
 	}
 
-	if (completion_options.size() == 0) {
+	if (completion_options.empty()) {
 		// No options to complete, cancel.
 		_cancel_completion();
 		return;
 	}
 
-	if (completion_options.size() == 1 && s == completion_options[0].display) {
+	if (completion_options.size() == 1 && s == completion_options.front().display) {
 		// A perfect match, stop completion.
 		_cancel_completion();
 		return;
 	}
 
 	// The top of the list is the best match.
-	completion_current = completion_options[0];
+	completion_current = completion_options.front();
 	completion_enabled = true;
 }
 
@@ -6539,9 +6535,8 @@ void TextEdit::query_code_comple() {
 	bool ignored = completion_active && !completion_options.empty();
 	if (ignored) {
 		ScriptCodeCompletionOption::Kind kind = ScriptCodeCompletionOption::KIND_PLAIN_TEXT;
-		const ScriptCodeCompletionOption *previous_option = NULL;
-		for (int i = 0; i < completion_options.size(); i++) {
-			const ScriptCodeCompletionOption &current_option = completion_options[i];
+		const ScriptCodeCompletionOption *previous_option = nullptr;
+		for (auto &&current_option : completion_options) {
 			if (!previous_option) {
 				previous_option = &current_option;
 				kind = current_option.kind;

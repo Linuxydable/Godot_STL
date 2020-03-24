@@ -242,6 +242,7 @@ private:
 
 	TextOperation current_op;
 
+	// need update : List to std::stack
 	List<TextOperation> undo_stack;
 	List<TextOperation>::Element *undo_stack_pos;
 
