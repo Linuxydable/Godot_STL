@@ -756,105 +756,99 @@ Vector3 ConvexPolygonShapeSW::get_support(const Vector3 &p_normal) const {
 	return vrts[vert_support_idx];
 }
 
+// need_update : return r_amount
 void ConvexPolygonShapeSW::get_supports(const Vector3 &p_normal, int p_max, Vector3 *r_supports, int &r_amount) const {
-
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int fc = mesh.faces.size();
-
-	const Geometry::MeshData::Edge *edges = mesh.edges.ptr();
-	int ec = mesh.edges.size();
-
-	const Vector3 *vertices = mesh.vertices.ptr();
-	int vc = mesh.vertices.size();
-
 	//find vertex first
 	real_t max = 0;
 	int vtx = 0;
 
-	for (int i = 0; i < vc; i++) {
+	{
+		real_t d = p_normal.dot(mesh.vertices[0]);
 
-		real_t d = p_normal.dot(vertices[i]);
+		max = d;
 
-		if (i == 0 || d > max) {
-			max = d;
-			vtx = i;
+		for (decltype(mesh.vertices.size()) i = 1; i < mesh.vertices.size(); i++) {
+			d = p_normal.dot(mesh.vertices[i]);
+
+			if (d > max) {
+				max = d;
+				vtx = i;
+			}
 		}
 	}
 
-	for (int i = 0; i < fc; i++) {
+	for (auto &&face : mesh.faces) {
+		if (face.plane.normal.dot(p_normal) > _FACE_IS_VALID_SUPPORT_THRESHOLD) {
+			//find indice == vtx
+			auto it_find = std::find_if(face.indices.begin(), face.indices.end(),
+					[&](const int &indice) {
+						if (indice == vtx) {
+							return true;
+						}
+						return false;
+					});
 
-		if (faces[i].plane.normal.dot(p_normal) > _FACE_IS_VALID_SUPPORT_THRESHOLD) {
-
-			int ic = faces[i].indices.size();
-			const int *ind = faces[i].indices.ptr();
-
-			bool valid = false;
-			for (int j = 0; j < ic; j++) {
-				if (ind[j] == vtx) {
-					valid = true;
-					break;
-				}
-			}
-
-			if (!valid)
+			//not found
+			if (it_find == face.indices.end()) {
 				continue;
-
-			int m = MIN(p_max, ic);
-			for (int j = 0; j < m; j++) {
-
-				r_supports[j] = vertices[ind[j]];
 			}
+
+			// need_update : m can be negativ ?
+			int m = MIN(p_max, face.indices.size());
+
+			for (int j = 0; j < m; j++) {
+				r_supports[j] = mesh.vertices[face.indices[j]];
+			}
+
 			r_amount = m;
+
 			return;
 		}
 	}
 
-	for (int i = 0; i < ec; i++) {
-
-		real_t dot = (vertices[edges[i].a] - vertices[edges[i].b]).normalized().dot(p_normal);
-		dot = ABS(dot);
-		if (dot < _EDGE_IS_VALID_SUPPORT_THRESHOLD && (edges[i].a == vtx || edges[i].b == vtx)) {
-
+	for (auto &&edge : mesh.edges) {
+		if (ABS((mesh.vertices[edge.a] - mesh.vertices[edge.b]).normalized().dot(p_normal)) < _EDGE_IS_VALID_SUPPORT_THRESHOLD && (edge.a == vtx || edge.b == vtx)) {
 			r_amount = 2;
-			r_supports[0] = vertices[edges[i].a];
-			r_supports[1] = vertices[edges[i].b];
+
+			r_supports[0] = mesh.vertices[edge.a];
+			r_supports[1] = mesh.vertices[edge.b];
+
 			return;
 		}
 	}
 
-	r_supports[0] = vertices[vtx];
+	r_supports[0] = mesh.vertices[vtx];
+
 	r_amount = 1;
 }
 
 bool ConvexPolygonShapeSW::intersect_segment(const Vector3 &p_begin, const Vector3 &p_end, Vector3 &r_result, Vector3 &r_normal) const {
-
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int fc = mesh.faces.size();
-
-	const Vector3 *vertices = mesh.vertices.ptr();
-
 	Vector3 n = p_end - p_begin;
+
 	real_t min = 1e20;
+
 	bool col = false;
 
-	for (int i = 0; i < fc; i++) {
+	for (auto &&face : mesh.faces) {
+		if (face.plane.normal.dot(n) > 0)
+			//opposing face
+			continue;
 
-		if (faces[i].plane.normal.dot(n) > 0)
-			continue; //opposing face
+		for (int j = 1; j < face.indices.size() - 1; j++) {
+			Face3 f(mesh.vertices[face.indices[0]], mesh.vertices[face.indices[j]], mesh.vertices[face.indices[j + 1]]);
 
-		int ic = faces[i].indices.size();
-		const int *ind = faces[i].indices.ptr();
-
-		for (int j = 1; j < ic - 1; j++) {
-
-			Face3 f(vertices[ind[0]], vertices[ind[j]], vertices[ind[j + 1]]);
 			Vector3 result;
+
 			if (f.intersects_segment(p_begin, p_end, &result)) {
 				real_t d = n.dot(result);
+
 				if (d < min) {
 					min = d;
+
 					r_result = result;
-					r_normal = faces[i].plane.normal;
+
+					r_normal = face.plane.normal;
+
 					col = true;
 				}
 
@@ -867,41 +861,33 @@ bool ConvexPolygonShapeSW::intersect_segment(const Vector3 &p_begin, const Vecto
 }
 
 bool ConvexPolygonShapeSW::intersect_point(const Vector3 &p_point) const {
-
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int fc = mesh.faces.size();
-
-	for (int i = 0; i < fc; i++) {
-
-		if (faces[i].plane.distance_to(p_point) >= 0)
-			return false;
-	}
-
-	return true;
+	return (std::find_if_not(mesh.faces.begin(), mesh.faces.end(),
+					[&](auto &&face) {
+						if (face.plane.distance_to(p_point) >= 0) {
+							return true;
+						}
+						return false;
+					}) == mesh.faces.end());
 }
 
 Vector3 ConvexPolygonShapeSW::get_closest_point_to(const Vector3 &p_point) const {
-
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int fc = mesh.faces.size();
-	const Vector3 *vertices = mesh.vertices.ptr();
-
 	bool all_inside = true;
-	for (int i = 0; i < fc; i++) {
 
-		if (!faces[i].plane.is_point_over(p_point))
+	for (auto &&face : mesh.faces) {
+		if (!face.plane.is_point_over(p_point))
 			continue;
 
 		all_inside = false;
+
 		bool is_inside = true;
-		int ic = faces[i].indices.size();
-		const int *indices = faces[i].indices.ptr();
 
-		for (int j = 0; j < ic; j++) {
+		for (int j = 0; j < face.indices.size(); j++) {
+			Vector3 a = mesh.vertices[face.indices[j]];
 
-			Vector3 a = vertices[indices[j]];
-			Vector3 b = vertices[indices[(j + 1) % ic]];
-			Vector3 n = (a - b).cross(faces[i].plane.normal).normalized();
+			Vector3 b = mesh.vertices[face.indices[(j + 1) % face.indices.size()]];
+
+			Vector3 n = (a - b).cross(face.plane.normal).normalized();
+
 			if (Plane(a, n).is_point_over(p_point)) {
 				is_inside = false;
 				break;
@@ -909,7 +895,7 @@ Vector3 ConvexPolygonShapeSW::get_closest_point_to(const Vector3 &p_point) const
 		}
 
 		if (is_inside) {
-			return faces[i].plane.project(p_point);
+			return face.plane.project(p_point);
 		}
 	}
 
@@ -918,20 +904,20 @@ Vector3 ConvexPolygonShapeSW::get_closest_point_to(const Vector3 &p_point) const
 	}
 
 	float min_distance = 1e20;
+
 	Vector3 min_point;
 
 	//check edges
-	const Geometry::MeshData::Edge *edges = mesh.edges.ptr();
-	int ec = mesh.edges.size();
-	for (int i = 0; i < ec; i++) {
-
+	for (auto &&edge : mesh.edges) {
 		Vector3 s[2] = {
-			vertices[edges[i].a],
-			vertices[edges[i].b]
+			mesh.vertices[edge.a],
+			mesh.vertices[edge.b]
 		};
 
 		Vector3 closest = Geometry::get_closest_point_to_segment(p_point, s);
+
 		float d = closest.distance_to(p_point);
+
 		if (d < min_distance) {
 			min_distance = d;
 			min_point = closest;
@@ -952,20 +938,24 @@ Vector3 ConvexPolygonShapeSW::get_moment_of_inertia(real_t p_mass) const {
 			(p_mass / 3.0) * (extents.y * extents.y + extents.y * extents.y));
 }
 
-void ConvexPolygonShapeSW::_setup(const Vector<Vector3> &p_vertices) {
-
+void ConvexPolygonShapeSW::_setup(const std::vector<Vector3> &p_vertices) {
 	Error err = QuickHull::build(p_vertices, mesh);
+
 	if (err != OK)
 		ERR_PRINT("Failed to build QuickHull");
 
 	AABB _aabb;
 
-	for (int i = 0; i < mesh.vertices.size(); i++) {
+	{
+		auto it_vertice = mesh.vertices.begin();
 
-		if (i == 0)
-			_aabb.position = mesh.vertices[i];
-		else
-			_aabb.expand_to(mesh.vertices[i]);
+		_aabb.position = *it_vertice;
+
+		++it_vertice;
+
+		for (; it_vertice != mesh.vertices.end(); ++it_vertice) {
+			_aabb.expand_to(*it_vertice);
+		}
 	}
 
 	configure(_aabb);
