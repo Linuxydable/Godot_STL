@@ -722,8 +722,7 @@ void ConcavePolygonShape2DSW::get_supports(const Vector2 &p_normal, Vector2 *r_s
 
 	real_t d = -1e10;
 	int idx = -1;
-	for (int i = 0; i < points.size(); i++) {
-
+	for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 		real_t ld = p_normal.dot(points[i]);
 		if (ld > d) {
 			d = ld;
@@ -891,8 +890,8 @@ int ConcavePolygonShape2DSW::_generate_bvh(BVH *p_bvh, int p_len, int p_depth) {
 
 	int l = _generate_bvh(p_bvh, median, p_depth + 1);
 	int r = _generate_bvh(&p_bvh[median], p_len - median, p_depth + 1);
-	bvh.write[node_idx].left = l;
-	bvh.write[node_idx].right = r;
+	bvh[node_idx].left = l;
+	bvh[node_idx].right = r;
 
 	return node_idx;
 }
@@ -951,22 +950,19 @@ void ConcavePolygonShape2DSW::set_data(const Variant &p_data) {
 		points.resize(pointmap.size());
 		aabb.position = pointmap.front()->key();
 		for (Map<Point2, int>::Element *E = pointmap.front(); E; E = E->next()) {
-
 			aabb.expand_to(E->key());
-			points.write[E->get()] = E->key();
+			points[E->get()] = E->key();
 		}
 
-		Vector<BVH> main_vbh;
-		main_vbh.resize(segments.size());
-		for (int i = 0; i < main_vbh.size(); i++) {
-
-			main_vbh.write[i].aabb.position = points[segments[i].points[0]];
-			main_vbh.write[i].aabb.expand_to(points[segments[i].points[1]]);
-			main_vbh.write[i].left = -1;
-			main_vbh.write[i].right = i;
+		std::vector<BVH> main_vbh(segments.size());
+		for (decltype(main_vbh.size()) i = 0; i < main_vbh.size(); ++i) {
+			main_vbh[i].aabb.position = points[segments[i].points[0]];
+			main_vbh[i].aabb.expand_to(points[segments[i].points[1]]);
+			main_vbh[i].left = -1;
+			main_vbh[i].right = i;
 		}
 
-		_generate_bvh(main_vbh.ptrw(), main_vbh.size(), 1);
+		_generate_bvh(main_vbh.data(), main_vbh.size(), 1);
 
 	} else {
 		//dictionary with arrays
