@@ -31,6 +31,8 @@
 #ifndef SPACE_SW_H
 #define SPACE_SW_H
 
+#include <vector>
+
 #include "area_pair_sw.h"
 #include "area_sw.h"
 #include "body_pair_sw.h"
@@ -119,7 +121,7 @@ private:
 
 	RID static_global_body;
 
-	Vector<Vector3> contact_debug;
+	std::vector<Vector3> contact_debug;
 	int contact_debug_count;
 
 	friend class PhysicsDirectSpaceStateSW;
@@ -174,29 +176,27 @@ public:
 	void set_param(PhysicsServer::SpaceParameter p_param, real_t p_value);
 	real_t get_param(PhysicsServer::SpaceParameter p_param) const;
 
-	void set_island_count(int p_island_count) { island_count = p_island_count; }
-	int get_island_count() const { return island_count; }
+	void set_island_count(int p_island_count);
+	int get_island_count() const;
 
-	void set_active_objects(int p_active_objects) { active_objects = p_active_objects; }
-	int get_active_objects() const { return active_objects; }
+	void set_active_objects(int p_active_objects);
+	int get_active_objects() const;
 
-	int get_collision_pairs() const { return collision_pairs; }
+	int get_collision_pairs() const;
 
 	PhysicsDirectSpaceStateSW *get_direct_state();
 
-	void set_debug_contacts(int p_amount) { contact_debug.resize(p_amount); }
-	_FORCE_INLINE_ bool is_debugging_contacts() const { return !contact_debug.empty(); }
-	_FORCE_INLINE_ void add_debug_contact(const Vector3 &p_contact) {
-		if (contact_debug_count < contact_debug.size()) contact_debug.write[contact_debug_count++] = p_contact;
-	}
-	_FORCE_INLINE_ Vector<Vector3> get_debug_contacts() { return contact_debug; }
-	_FORCE_INLINE_ int get_debug_contact_count() { return contact_debug_count; }
+	void set_debug_contacts(int p_amount);
+	_FORCE_INLINE_ bool is_debugging_contacts() const;
+	_FORCE_INLINE_ void add_debug_contact(const Vector3 &p_contact);
+	_FORCE_INLINE_ std::vector<Vector3> get_debug_contacts();
+	_FORCE_INLINE_ int get_debug_contact_count();
 
-	void set_static_global_body(RID p_body) { static_global_body = p_body; }
-	RID get_static_global_body() { return static_global_body; }
+	void set_static_global_body(RID p_body);
+	RID get_static_global_body();
 
-	void set_elapsed_time(ElapsedTime p_time, uint64_t p_msec) { elapsed_time[p_time] = p_msec; }
-	uint64_t get_elapsed_time(ElapsedTime p_time) const { return elapsed_time[p_time]; }
+	void set_elapsed_time(ElapsedTime p_time, uint64_t p_msec);
+	uint64_t get_elapsed_time(ElapsedTime p_time) const;
 
 	int test_body_ray_separation(BodySW *p_body, const Transform &p_transform, bool p_infinite_inertia, Vector3 &r_recover_motion, PhysicsServer::SeparationResult *r_results, int p_result_max, real_t p_margin);
 	bool test_body_motion(BodySW *p_body, const Transform &p_from, const Vector3 &p_motion, bool p_infinite_inertia, real_t p_margin, PhysicsServer::MotionResult *r_result, bool p_exclude_raycast_shapes);

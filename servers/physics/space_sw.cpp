@@ -1183,6 +1183,30 @@ real_t SpaceSW::get_param(PhysicsServer::SpaceParameter p_param) const {
 	return 0;
 }
 
+void SpaceSW::set_island_count(int p_island_count) {
+	island_count = p_island_count;
+}
+
+int SpaceSW::get_island_count() const {
+	return island_count;
+}
+
+void SpaceSW::set_active_objects(int p_active_objects) {
+	active_objects = p_active_objects;
+}
+
+void SpaceSW::set_active_objects(int p_active_objects) {
+	active_objects = p_active_objects;
+}
+
+int SpaceSW::get_active_objects() const {
+	return active_objects;
+}
+
+int SpaceSW::get_collision_pairs() const {
+	return collision_pairs;
+}
+
 void SpaceSW::lock() {
 
 	locked = true;
@@ -1201,6 +1225,43 @@ bool SpaceSW::is_locked() const {
 PhysicsDirectSpaceStateSW *SpaceSW::get_direct_state() {
 
 	return direct_access;
+}
+
+void SpaceSW::set_debug_contacts(int p_amount) {
+	contact_debug.resize(p_amount);
+}
+
+_FORCE_INLINE_ bool SpaceSW::is_debugging_contacts() const {
+	return !contact_debug.empty();
+}
+
+_FORCE_INLINE_ void SpaceSW::add_debug_contact(const Vector3 &p_contact) {
+	if (contact_debug_count < contact_debug.size())
+		contact_debug[contact_debug_count++] = p_contact;
+}
+
+_FORCE_INLINE_ std::vector<Vector3> SpaceSW::get_debug_contacts() {
+	return contact_debug;
+}
+
+_FORCE_INLINE_ int SpaceSW::get_debug_contact_count() {
+	return contact_debug_count;
+}
+
+void SpaceSW::set_static_global_body(RID p_body) {
+	static_global_body = p_body;
+}
+
+RID SpaceSW::get_static_global_body() {
+	return static_global_body;
+}
+
+void SpaceSW::set_elapsed_time(ElapsedTime p_time, uint64_t p_msec) {
+	elapsed_time[p_time] = p_msec;
+}
+
+uint64_t SpaceSW::get_elapsed_time(ElapsedTime p_time) const {
+	return elapsed_time[p_time];
 }
 
 SpaceSW::SpaceSW() {
