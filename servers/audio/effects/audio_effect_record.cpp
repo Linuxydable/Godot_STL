@@ -40,7 +40,7 @@ void AudioEffectRecordInstance::process(const AudioFrame *p_src_frames, AudioFra
 
 	//Add incoming audio frames to the IO ring buffer
 	const AudioFrame *src = p_src_frames;
-	AudioFrame *rb_buf = ring_buffer.ptrw();
+	AudioFrame *rb_buf = ring_buffer.data();
 	for (int i = 0; i < p_frame_count; i++) {
 		p_dst_frames[i] = p_src_frames[i];
 		rb_buf[ring_buffer_pos & ring_buffer_mask] = src[i];
@@ -88,7 +88,7 @@ void AudioEffectRecordInstance::_io_thread_process() {
 void AudioEffectRecordInstance::_io_store_buffer() {
 	int to_read = ring_buffer_pos - ring_buffer_read_pos;
 
-	AudioFrame *rb_buf = ring_buffer.ptrw();
+	AudioFrame *rb_buf = ring_buffer.data();
 
 	while (to_read) {
 		AudioFrame buffered_frame = rb_buf[ring_buffer_read_pos & ring_buffer_mask];
@@ -239,16 +239,16 @@ Ref<AudioStreamSample> AudioEffectRecord::get_recording() const {
 		}
 	} else if (dst_format == AudioStreamSample::FORMAT_IMA_ADPCM) {
 		//byte interleave
-		Vector<float> left;
-		Vector<float> right;
+		std::vector<float> left;
+		std::vector<float> right;
 
-		int tframes = current_instance->recording_data.size() / 2;
+		auto tframes = current_instance->recording_data.size() / 2;
 		left.resize(tframes);
 		right.resize(tframes);
 
-		for (int i = 0; i < tframes; i++) {
-			left.set(i, current_instance->recording_data[i * 2 + 0]);
-			right.set(i, current_instance->recording_data[i * 2 + 1]);
+		for (decltype(tframes) i = 0; i < tframes; ++i) {
+			left[i] = current_instance->recording_data[i * 2 + 0];
+			right[i] = current_instance->recording_data[i * 2 + 1];
 		}
 
 		PoolVector<uint8_t> bleft;
