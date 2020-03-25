@@ -31,6 +31,8 @@
 #ifndef COLLISION_OBJECT_SW_H
 #define COLLISION_OBJECT_SW_H
 
+#include <vector>
+
 #include "broad_phase_sw.h"
 #include "core/self_list.h"
 #include "servers/physics_server.h"
@@ -71,7 +73,7 @@ private:
 		Shape() { disabled = false; }
 	};
 
-	Vector<Shape> shapes;
+	std::vector<Shape> shapes;
 	SpaceSW *space;
 	Transform transform;
 	Transform inv_transform;
