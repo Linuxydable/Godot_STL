@@ -847,7 +847,7 @@ bool VisualShader::_set(const StringName &p_name, const Variant &p_value) {
 
 			std::vector<int> conns = p_value;
 			if (conns.size() % 4 == 0) {
-				for (int i = 0; i < conns.size(); i += 4) {
+				for (decltype(conns.size()) i = 0; i < conns.size(); i += 4) {
 					connect_nodes_forced(type, conns[i + 0], conns[i + 1], conns[i + 2], conns[i + 3]);
 				}
 			}
@@ -957,7 +957,7 @@ void VisualShader::_get_property_list(List<PropertyInfo> *p_list) const {
 	Map<String, String> blend_mode_enums;
 	Set<String> toggles;
 
-	for (auto &&mode : ShaderTypes::get_singleton()->get_modes(VisualServer::ShaderMode(shader_mode))) {
+	for (const String &mode : ShaderTypes::get_singleton()->get_modes(VisualServer::ShaderMode(shader_mode))) {
 		int idx = 0;
 		bool in_enum = false;
 		while (render_mode_enums[idx].string) {
@@ -1198,7 +1198,7 @@ void VisualShader::_update_shader() const {
 
 					int which = modes[render_mode_enums[idx].string];
 					int count = 0;
-					for (auto &&mode : ShaderTypes::get_singleton()->get_modes(VisualServer::ShaderMode(shader_mode))) {
+					for (const String &mode : ShaderTypes::get_singleton()->get_modes(VisualServer::ShaderMode(shader_mode))) {
 						if (mode.begins_with(render_mode_enums[idx].string)) {
 							if (count == which) {
 								if (render_mode != String()) {
@@ -2363,19 +2363,20 @@ void VisualShaderNodeGroupBase::_apply_port_changes() {
 	clear_input_ports();
 	clear_output_ports();
 
-	for (auto &&i_str : inputs_strings) {
-		std::vector<String> arr = i_str.split(",");
+	for (decltype(inputs_strings.size()) i = 0; i < inputs_strings.size(); ++i) {
+		std::vector<String> arr = inputs_strings[i].split(",");
 		Port port;
 		port.type = (PortType)arr[1].to_int();
 		port.name = arr[2];
-		i_str = port;
+		input_ports[i] = port;
 	}
-	for (auto &&o_str : outputs_strings) {
-		std::vector<String> arr = o_str.split(",");
+
+	for (decltype(outputs_strings.size()) i = 0; i < outputs_strings.size(); ++i) {
+		std::vector<String> arr = outputs_strings[i].split(",");
 		Port port;
 		port.type = (PortType)arr[1].to_int();
 		port.name = arr[2];
-		o_str = port;
+		output_ports[i] = port;
 	}
 }
 

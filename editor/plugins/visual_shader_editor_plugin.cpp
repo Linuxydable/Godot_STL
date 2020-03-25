@@ -112,13 +112,14 @@ void VisualShaderEditor::remove_plugin(const Ref<VisualShaderNodePlugin> &p_plug
 
 void VisualShaderEditor::clear_custom_types() {
 
-	std::remove_if(add_options.begin(), add_options.end(), [](const AddOption &option) {
+	add_options.erase(std::remove_if(add_options.begin(), add_options.end(), [](const AddOption &option) {
 		if (option.is_custom) {
 			return true;
 		}
 
 		return false;
-	});
+	}),
+			add_options.end());
 }
 
 void VisualShaderEditor::add_custom_type(const String &p_name, const Ref<Script> &p_script, const String &p_description, int p_return_icon_type, const String &p_category, const String &p_sub_category) {

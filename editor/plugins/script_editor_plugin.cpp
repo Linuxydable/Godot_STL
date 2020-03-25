@@ -595,13 +595,14 @@ void ScriptEditor::_close_tab(int p_idx, bool p_save, bool p_history_back) {
 	//remove from history
 	history.resize(history_pos + 1);
 
-	std::remove_if(history.begin(), history.end(), [&](const ScriptHistory &h) {
+	history.erase(std::remove_if(history.begin(), history.end(), [&](const ScriptHistory &h) {
 		if (h.control == tselected) {
 			--history_pos;
 			return true;
 		}
 		return false;
-	});
+	}),
+			history.end());
 
 	if (history_pos >= history.size()) {
 		history_pos = history.size() - 1;

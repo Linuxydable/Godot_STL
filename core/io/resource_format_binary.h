@@ -48,11 +48,11 @@ class ResourceInteractiveLoaderBinary : public ResourceInteractiveLoader {
 
 	uint64_t importmd_ofs;
 
-	Vector<char> str_buf;
+	std::vector<char> str_buf;
 	List<RES> resource_cache;
 
 	//Map<int,StringName> string_map;
-	Vector<StringName> string_map;
+	std::vector<StringName> string_map;
 
 	StringName _get_string();
 
@@ -61,14 +61,14 @@ class ResourceInteractiveLoaderBinary : public ResourceInteractiveLoader {
 		String type;
 	};
 
-	Vector<ExtResource> external_resources;
+	std::vector<ExtResource> external_resources;
 
 	struct IntResource {
 		String path;
 		uint64_t offset;
 	};
 
-	Vector<IntResource> internal_resources;
+	std::vector<IntResource> internal_resources;
 
 	String get_unicode_string();
 	void _advance_padding(uint32_t p_len);
@@ -132,7 +132,7 @@ class ResourceFormatSaverBinaryInstance {
 
 	Map<NonPersistentKey, RES> non_persistent_map;
 	Map<StringName, int> string_map;
-	Vector<StringName> strings;
+	std::vector<StringName> strings;
 
 	Map<RES, int> external_resources;
 	List<RES> saved_resources;

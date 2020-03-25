@@ -37,14 +37,14 @@
 
 void Shape::add_vertices_to_array(PoolVector<Vector3> &array, const Transform &p_xform) {
 
-	Vector<Vector3> toadd = get_debug_mesh_lines();
+	std::vector<Vector3> toadd = get_debug_mesh_lines();
 
 	if (toadd.size()) {
 
 		int base = array.size();
 		array.resize(base + toadd.size());
 		PoolVector<Vector3>::Write w = array.write();
-		for (int i = 0; i < toadd.size(); i++) {
+		for (decltype(toadd.size()) i = 0; i < toadd.size(); ++i) {
 			w[i + base] = p_xform.xform(toadd[i]);
 		}
 	}
@@ -64,7 +64,7 @@ Ref<ArrayMesh> Shape::get_debug_mesh() {
 	if (debug_mesh_cache.is_valid())
 		return debug_mesh_cache;
 
-	Vector<Vector3> lines = get_debug_mesh_lines();
+	std::vector<Vector3> lines = get_debug_mesh_lines();
 
 	debug_mesh_cache = Ref<ArrayMesh>(memnew(ArrayMesh));
 
@@ -75,7 +75,7 @@ Ref<ArrayMesh> Shape::get_debug_mesh() {
 		{
 
 			PoolVector<Vector3>::Write w = array.write();
-			for (int i = 0; i < lines.size(); i++) {
+			for (decltype(lines.size()) i = 0; i < lines.size(); ++i) {
 				w[i] = lines[i];
 			}
 		}

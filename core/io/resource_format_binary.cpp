@@ -106,7 +106,7 @@ StringName ResourceInteractiveLoaderBinary::_get_string() {
 	uint32_t id = f->get_32();
 	if (id & 0x80000000) {
 		uint32_t len = id & 0x7FFFFFFF;
-		if ((int)len > str_buf.size()) {
+		if (len > str_buf.size()) {
 			str_buf.resize(len);
 		}
 		if (len == 0)
@@ -798,7 +798,7 @@ static String get_ustring(FileAccess *f) {
 
 String ResourceInteractiveLoaderBinary::get_unicode_string() {
 
-	int len = f->get_32();
+	auto len = f->get_32();
 	if (len > str_buf.size()) {
 		str_buf.resize(len);
 	}
@@ -884,10 +884,9 @@ void ResourceInteractiveLoaderBinary::open(FileAccess *p_f) {
 
 	uint32_t string_table_size = f->get_32();
 	string_map.resize(string_table_size);
-	for (uint32_t i = 0; i < string_table_size; i++) {
-
+	for (auto &&sname : string_map) {
 		StringName s = get_unicode_string();
-		string_map.write[i] = s;
+		sname = s;
 	}
 
 	print_bl("strings: " + itos(string_table_size));
@@ -1841,8 +1840,8 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 	}
 
 	f->store_32(strings.size()); //string table size
-	for (int i = 0; i < strings.size(); i++) {
-		save_unicode_string(f, strings[i]);
+	for (auto &&str : strings) {
+		save_unicode_string(f, str);
 	}
 
 	// save external resource table
