@@ -180,7 +180,9 @@ void CollisionObject2DSW::_update_shapes() {
 	if (!space)
 		return;
 
-	for (auto &&s : shapes) {
+	for (decltype(shapes.size()) i = 0; i < shapes.size(); ++i) {
+		Shape &s = shapes[i];
+
 		if (s.disabled)
 			continue;
 
@@ -206,6 +208,8 @@ void CollisionObject2DSW::_update_shapes_with_motion(const Vector2 &p_motion) {
 		return;
 
 	for (decltype(shapes.size()) i; i < shapes.size(); ++i) {
+		Shape &s = shapes[i];
+
 		if (s.disabled)
 			continue;
 
