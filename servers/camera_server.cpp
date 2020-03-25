@@ -29,6 +29,9 @@
 /*************************************************************************/
 
 #include "camera_server.h"
+
+#include <algorithm>
+
 #include "servers/camera/camera_feed.h"
 #include "visual_server.h"
 
@@ -110,23 +113,26 @@ void CameraServer::add_feed(const Ref<CameraFeed> &p_feed) {
 };
 
 void CameraServer::remove_feed(const Ref<CameraFeed> &p_feed) {
-	for (int i = 0; i < feeds.size(); i++) {
-		if (feeds[i] == p_feed) {
-			int feed_id = p_feed->get_id();
+	auto it_find = std::find_if(feeds.begin(), feeds.end(),
+		[&](const Ref<CameraFeed>& feed) {
+				if (feed == p_feed) {
+					int feed_id = feed->get_id();
 
-// record for debugging
-#ifdef DEBUG_ENABLED
-			print_line("Removed camera " + p_feed->get_name() + " with id " + itos(feed_id) + " position " + itos(p_feed->get_position()));
-#endif
+					// record for debugging
+					#ifdef DEBUG_ENABLED
+						print_line("Removed camera " + feed->get_name() + " with id " + itos(feed_id) + " position " + itos(feed->get_position()));
+					#endif
 
-			// remove it from our array, if this results in our feed being unreferenced it will be destroyed
-			feeds.remove(i);
+					emit_signal("camera_feed_removed", feed_id);
 
-			// let whomever is interested know
-			emit_signal("camera_feed_removed", feed_id);
-			return;
-		};
-	};
+					return true;
+				}
+				return false;
+		});
+
+	if (it_find != feeds.end()) {
+		feeds.erase(it_find);
+	}
 };
 
 Ref<CameraFeed> CameraServer::get_feed(int p_index) {
