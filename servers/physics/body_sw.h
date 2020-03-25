@@ -31,6 +31,8 @@
 #ifndef BODY_SW_H
 #define BODY_SW_H
 
+#include <vector>
+
 #include "area_sw.h"
 #include "collision_object_sw.h"
 #include "core/vset.h"
@@ -111,7 +113,7 @@ class BodySW : public CollisionObjectSW {
 		}
 	};
 
-	Vector<AreaCMP> areas;
+	std::vector<AreaCMP> areas;
 
 	struct Contact {
 
@@ -126,7 +128,7 @@ class BodySW : public CollisionObjectSW {
 		Vector3 collider_velocity_at_pos;
 	};
 
-	Vector<Contact> contacts; //no contacts by default
+	std::vector<Contact> contacts; //no contacts by default
 	int contact_count;
 
 	struct ForceIntegrationCallback {
@@ -154,23 +156,9 @@ public:
 	void set_kinematic_margin(real_t p_margin);
 	_FORCE_INLINE_ real_t get_kinematic_margin() { return kinematic_safe_margin; }
 
-	_FORCE_INLINE_ void add_area(AreaSW *p_area) {
-		int index = areas.find(AreaCMP(p_area));
-		if (index > -1) {
-			areas.write[index].refCount += 1;
-		} else {
-			areas.ordered_insert(AreaCMP(p_area));
-		}
-	}
+	_FORCE_INLINE_ void add_area(AreaSW *p_area);
 
-	_FORCE_INLINE_ void remove_area(AreaSW *p_area) {
-		int index = areas.find(AreaCMP(p_area));
-		if (index > -1) {
-			areas.write[index].refCount -= 1;
-			if (areas[index].refCount < 1)
-				areas.remove(index);
-		}
-	}
+	_FORCE_INLINE_ void remove_area(AreaSW *p_area);
 
 	_FORCE_INLINE_ void set_max_contacts_reported(int p_size) {
 		contacts.resize(p_size);
@@ -338,52 +326,6 @@ public:
 	BodySW();
 	~BodySW();
 };
-
-//add contact inline
-
-void BodySW::add_contact(const Vector3 &p_local_pos, const Vector3 &p_local_normal, real_t p_depth, int p_local_shape, const Vector3 &p_collider_pos, int p_collider_shape, ObjectID p_collider_instance_id, const RID &p_collider, const Vector3 &p_collider_velocity_at_pos) {
-
-	int c_max = contacts.size();
-
-	if (c_max == 0)
-		return;
-
-	Contact *c = contacts.ptrw();
-
-	int idx = -1;
-
-	if (contact_count < c_max) {
-		idx = contact_count++;
-	} else {
-
-		real_t least_depth = 1e20;
-		int least_deep = -1;
-		for (int i = 0; i < c_max; i++) {
-
-			if (i == 0 || c[i].depth < least_depth) {
-				least_deep = i;
-				least_depth = c[i].depth;
-			}
-		}
-
-		if (least_deep >= 0 && least_depth < p_depth) {
-
-			idx = least_deep;
-		}
-		if (idx == -1)
-			return; //none least deepe than this
-	}
-
-	c[idx].local_pos = p_local_pos;
-	c[idx].local_normal = p_local_normal;
-	c[idx].depth = p_depth;
-	c[idx].local_shape = p_local_shape;
-	c[idx].collider_pos = p_collider_pos;
-	c[idx].collider_shape = p_collider_shape;
-	c[idx].collider_instance_id = p_collider_instance_id;
-	c[idx].collider = p_collider;
-	c[idx].collider_velocity_at_pos = p_collider_velocity_at_pos;
-}
 
 class PhysicsDirectBodyStateSW : public PhysicsDirectBodyState {
 

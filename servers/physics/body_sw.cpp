@@ -29,6 +29,9 @@
 /*************************************************************************/
 
 #include "body_sw.h"
+
+#include <algorithm>
+
 #include "area_sw.h"
 #include "space_sw.h"
 
@@ -442,7 +445,6 @@ bool BodySW::is_axis_locked(PhysicsServer::BodyAxis p_axis) const {
 }
 
 void BodySW::integrate_forces(real_t p_step) {
-
 	if (mode == PhysicsServer::BODY_MODE_STATIC)
 		return;
 
@@ -451,21 +453,25 @@ void BodySW::integrate_forces(real_t p_step) {
 
 	ERR_FAIL_COND(!def_area);
 
-	int ac = areas.size();
 	bool stopped = false;
+
 	gravity = Vector3(0, 0, 0);
+
 	area_linear_damp = 0;
+
 	area_angular_damp = 0;
-	if (ac) {
-		areas.sort();
-		const AreaCMP *aa = &areas[0];
+
+	if (!areas.empty()) {
+		std::sort(areas.begin(), areas.end());
+
 		// damp_area = aa[ac-1].area;
-		for (int i = ac - 1; i >= 0 && !stopped; i--) {
-			PhysicsServer::AreaSpaceOverrideMode mode = aa[i].area->get_space_override_mode();
+		for (int i = areas.size() - 1; i >= 0 && !stopped; i--) {
+			PhysicsServer::AreaSpaceOverrideMode mode = areas[i].area->get_space_override_mode();
+
 			switch (mode) {
 				case PhysicsServer::AREA_SPACE_OVERRIDE_COMBINE:
 				case PhysicsServer::AREA_SPACE_OVERRIDE_COMBINE_REPLACE: {
-					_compute_area_gravity_and_dampenings(aa[i].area);
+					_compute_area_gravity_and_dampenings(areas[i].area);
 					stopped = mode == PhysicsServer::AREA_SPACE_OVERRIDE_COMBINE_REPLACE;
 				} break;
 				case PhysicsServer::AREA_SPACE_OVERRIDE_REPLACE:
@@ -473,7 +479,7 @@ void BodySW::integrate_forces(real_t p_step) {
 					gravity = Vector3(0, 0, 0);
 					area_angular_damp = 0;
 					area_linear_damp = 0;
-					_compute_area_gravity_and_dampenings(aa[i].area);
+					_compute_area_gravity_and_dampenings(areas[i].area);
 					stopped = mode == PhysicsServer::AREA_SPACE_OVERRIDE_REPLACE;
 				} break;
 				default: {
@@ -760,6 +766,34 @@ void BodySW::set_kinematic_margin(real_t p_margin) {
 	kinematic_safe_margin = p_margin;
 }
 
+_FORCE_INLINE_ void BodySW::add_area(AreaSW *p_area) {
+	for (auto it_areas = areas.begin(); it_areas != areas.end(); ++it_areas) {
+		if (it_areas->area == p_area) {
+			it_areas->refCount += 1;
+
+			break;
+		} else if (it_areas->area > p_area) {
+			areas.insert(it_areas, AreaCMP(p_area));
+
+			break;
+		}
+	}
+}
+
+_FORCE_INLINE_ void BodySW::remove_area(AreaSW *p_area) {
+	auto c_area = AreaCMP(p_area);
+
+	auto it_find = std::find(areas.begin(), areas.end(), c_area);
+
+	if (it_find != areas.end()) {
+		it_find->refCount--;
+
+		if (it_find->refCount < 1) {
+			areas.erase(it_find);
+		}
+	}
+}
+
 BodySW::BodySW() :
 		CollisionObjectSW(TYPE_BODY),
 		locked_axis(0),
@@ -809,4 +843,44 @@ PhysicsDirectBodyStateSW *PhysicsDirectBodyStateSW::singleton = NULL;
 PhysicsDirectSpaceState *PhysicsDirectBodyStateSW::get_space_state() {
 
 	return body->get_space()->get_direct_state();
+}
+
+void BodySW::add_contact(const Vector3 &p_local_pos, const Vector3 &p_local_normal, real_t p_depth, int p_local_shape, const Vector3 &p_collider_pos, int p_collider_shape, ObjectID p_collider_instance_id, const RID &p_collider, const Vector3 &p_collider_velocity_at_pos) {
+	if (contacts.size() == 0)
+		return;
+
+	int idx = -1;
+
+	if (contact_count < contacts.size()) {
+		idx = contact_count++;
+	} else {
+		real_t least_depth = 1e20;
+
+		int least_deep = -1;
+
+		for (int i = 0; i < contacts.size(); i++) {
+			if (i == 0 || contacts[i].depth < least_depth) {
+				least_deep = i;
+				least_depth = contacts[i].depth;
+			}
+		}
+
+		if (least_deep >= 0 && least_depth < p_depth) {
+			idx = least_deep;
+		}
+
+		if (idx == -1)
+			return; //none least deepe than this
+	}
+
+	// need_update : do not access 9 times
+	contacts[idx].local_pos = p_local_pos;
+	contacts[idx].local_normal = p_local_normal;
+	contacts[idx].depth = p_depth;
+	contacts[idx].local_shape = p_local_shape;
+	contacts[idx].collider_pos = p_collider_pos;
+	contacts[idx].collider_shape = p_collider_shape;
+	contacts[idx].collider_instance_id = p_collider_instance_id;
+	contacts[idx].collider = p_collider;
+	contacts[idx].collider_velocity_at_pos = p_collider_velocity_at_pos;
 }
