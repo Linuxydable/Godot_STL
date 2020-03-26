@@ -187,10 +187,10 @@ public:
 	PhysicsDirectSpaceStateSW *get_direct_state();
 
 	void set_debug_contacts(int p_amount);
-	_FORCE_INLINE_ bool is_debugging_contacts() const;
-	_FORCE_INLINE_ void add_debug_contact(const Vector3 &p_contact);
-	_FORCE_INLINE_ std::vector<Vector3> get_debug_contacts();
-	_FORCE_INLINE_ int get_debug_contact_count();
+	bool is_debugging_contacts() const;
+	void add_debug_contact(const Vector3 &p_contact);
+	std::vector<Vector3> get_debug_contacts();
+	int get_debug_contact_count();
 
 	void set_static_global_body(RID p_body);
 	RID get_static_global_body();
