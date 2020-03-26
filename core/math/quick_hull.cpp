@@ -457,16 +457,21 @@ Error QuickHull::build(const std::vector<Vector3> &p_points, Geometry::MeshData 
 
 	int idx = 0;
 	for (List<Geometry::MeshData::Face>::Element *E = ret_faces.front(); E; E = E->next()) {
-		r_mesh.faces.write[idx++] = E->get();
+		r_mesh.faces[idx++] = E->get();
 	}
-	r_mesh.edges.resize(ret_edges.size());
-	idx = 0;
-	for (Map<Edge, RetFaceConnect>::Element *E = ret_edges.front(); E; E = E->next()) {
 
+	r_mesh.edges.resize(ret_edges.size());
+
+	idx = 0;
+
+	for (Map<Edge, RetFaceConnect>::Element *E = ret_edges.front(); E; E = E->next()) {
 		Geometry::MeshData::Edge e;
+
 		e.a = E->key().vertices[0];
+
 		e.b = E->key().vertices[1];
-		r_mesh.edges.write[idx++] = e;
+
+		r_mesh.edges[idx++] = e;
 	}
 
 	r_mesh.vertices = p_points;
