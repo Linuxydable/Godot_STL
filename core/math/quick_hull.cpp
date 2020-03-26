@@ -34,7 +34,7 @@
 
 uint32_t QuickHull::debug_stop_after = 0xFFFFFFFF;
 
-Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_mesh) {
+Error QuickHull::build(const std::vector<Vector3> &p_points, Geometry::MeshData &r_mesh) {
 
 	/* CREATE AABB VOLUME */
 
@@ -52,17 +52,16 @@ Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_me
 		return ERR_CANT_CREATE;
 	}
 
-	Vector<bool> valid_points;
-	valid_points.resize(p_points.size());
+	std::vector<bool> valid_points(p_points.size());
 	Set<Vector3> valid_cache;
 
-	for (int i = 0; i < p_points.size(); i++) {
+	for (decltype(p_points.size()) i = 0; i < p_points.size(); ++i) {
 
 		Vector3 sp = p_points[i].snapped(Vector3(0.0001, 0.0001, 0.0001));
 		if (valid_cache.has(sp)) {
-			valid_points.write[i] = false;
+			valid_points[i] = false;
 		} else {
-			valid_points.write[i] = true;
+			valid_points[i] = true;
 			valid_cache.insert(sp);
 		}
 	}
@@ -77,7 +76,7 @@ Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_me
 	{
 		real_t max = 0, min = 0;
 
-		for (int i = 0; i < p_points.size(); i++) {
+		for (decltype(p_points.size()) i = 0; i < p_points.size(); ++i) {
 
 			if (!valid_points[i])
 				continue;
@@ -101,7 +100,7 @@ Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_me
 		real_t maxd = 0;
 		Vector3 rel12 = p_points[simplex[0]] - p_points[simplex[1]];
 
-		for (int i = 0; i < p_points.size(); i++) {
+		for (decltype(p_points.size()) i = 0; i < p_points.size(); ++i) {
 
 			if (!valid_points[i])
 				continue;
@@ -123,7 +122,7 @@ Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_me
 		real_t maxd = 0;
 		Plane p(p_points[simplex[0]], p_points[simplex[1]], p_points[simplex[2]]);
 
-		for (int i = 0; i < p_points.size(); i++) {
+		for (decltype(p_points.size()) i = 0; i < p_points.size(); ++i) {
 
 			if (!valid_points[i])
 				continue;
@@ -418,7 +417,7 @@ Error QuickHull::build(const Vector<Vector3> &p_points, Geometry::MeshData &r_me
 								break;
 							}
 							if (idx != a) {
-								f.indices.insert(i + 1, idx);
+								f.indices.insert(f.indices.begin() + i + 1, idx);
 								i++;
 								merged++;
 							}
