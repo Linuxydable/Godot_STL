@@ -843,6 +843,8 @@ Geometry::MeshData Geometry::build_convex_mesh(const PoolVector<Plane> &p_planes
 				if (edge.b == a && edge.a == b) {
 					return true;
 				}
+
+				return false;
 			});
 
 			if (it_edge != mesh.edges.end()) {

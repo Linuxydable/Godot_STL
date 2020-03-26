@@ -3149,7 +3149,7 @@ void OS_X11::set_icon(const Ref<Image> &p_icon) {
 				pr += 4;
 			}
 
-			XChangeProperty(x11_display, x11_window, net_wm_icon, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)&pd, pd.size());
+			XChangeProperty(x11_display, x11_window, net_wm_icon, XA_CARDINAL, 32, PropModeReplace, reinterpret_cast<unsigned char *>(pd.data()), pd.size());
 
 			if (!g_set_icon_error)
 				break;
