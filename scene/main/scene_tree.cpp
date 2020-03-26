@@ -899,33 +899,28 @@ void SceneTree::_call_input_pause(const StringName &p_group, const StringName &p
 
 	//copy, so copy on write happens in case something is removed from process while being called
 	//performance is not lost because only if something is added/removed the vector is copied.
-	std::vector<Node *> nodes_copy = g.nodes;
-
-	auto node_count = nodes_copy.size();
-	Node **nodes = nodes_copy.data();
 
 	Variant arg = p_input;
 	const Variant *v[1] = { &arg };
 
 	call_lock++;
 
-	for (decltype(node_count) i = node_count - 1; i >= 0; --i) {
-
+	for (auto it_nodes = g.nodes.rbegin(); it_nodes != g.nodes.rend(); ++it_nodes) {
 		if (input_handled)
 			break;
 
-		Node *n = nodes[i];
-		if (call_lock && call_skip.has(n))
+		if (call_lock && call_skip.has(*it_nodes))
 			continue;
 
-		if (!n->can_process())
+		if (!(*it_nodes)->can_process())
 			continue;
 
-		n->call_multilevel(p_method, (const Variant **)v, 1);
+		(*it_nodes)->call_multilevel(p_method, (const Variant **)v, 1);
 		//ERR_FAIL_COND(node_count != g.nodes.size());
 	}
 
 	call_lock--;
+
 	if (call_lock == 0)
 		call_skip.clear();
 }
