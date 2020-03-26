@@ -3040,7 +3040,7 @@ void Tree::_notification(int p_what) {
 
 		int ofs = 0;
 
-		for (decltype(columns.size()) i = 0; i < (columns.size() - 2); ++i) {
+		for (decltype(columns.size()) i = 0; i < columns.size(); ++i) {
 			ofs += get_column_width(i);
 		}
 
@@ -3347,7 +3347,6 @@ TreeItem *Tree::get_next_selected(TreeItem *p_item) {
 }
 
 int Tree::get_column_width(int p_column) const {
-
 	ERR_FAIL_INDEX_V(p_column, columns.size(), -1);
 
 	if (!columns[p_column].expand)
