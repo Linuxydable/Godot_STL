@@ -2084,7 +2084,7 @@ bool Expression::_execute(const Array &p_inputs, Object *p_instance, Expression:
 			}
 
 			Variant::CallError ce;
-			exec_func(bifunc->func, (const Variant **)argp.ptr(), &r_ret, ce, r_error_str);
+			exec_func(bifunc->func, (const Variant **)argp.data(), &r_ret, ce, r_error_str);
 
 			if (ce.error != Variant::CallError::CALL_OK) {
 				r_error_str = "Builtin Call Failed. " + r_error_str;
