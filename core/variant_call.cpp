@@ -51,9 +51,9 @@ struct _VariantCall {
 	struct FuncData {
 
 		int arg_count;
-		Vector<Variant> default_args;
-		Vector<Variant::Type> arg_types;
-		Vector<StringName> arg_names;
+		std::vector<Variant> default_args;
+		std::vector<Variant::Type> arg_types;
+		std::vector<StringName> arg_names;
 		Variant::Type return_type;
 
 		bool _const;
@@ -149,7 +149,7 @@ struct _VariantCall {
 #endif
 	}
 
-	static void addfunc(bool p_const, Variant::Type p_type, Variant::Type p_return, bool p_has_return, const StringName &p_name, VariantFunc p_func, const Vector<Variant> &p_defaultarg, const Arg &p_argtype1 = Arg(), const Arg &p_argtype2 = Arg(), const Arg &p_argtype3 = Arg(), const Arg &p_argtype4 = Arg(), const Arg &p_argtype5 = Arg()) {
+	static void addfunc(bool p_const, Variant::Type p_type, Variant::Type p_return, bool p_has_return, const StringName &p_name, VariantFunc p_func, const std::vector<Variant> &p_defaultarg, const Arg &p_argtype1 = Arg(), const Arg &p_argtype2 = Arg(), const Arg &p_argtype3 = Arg(), const Arg &p_argtype4 = Arg(), const Arg &p_argtype5 = Arg()) {
 
 		FuncData funcdata;
 		funcdata.func = p_func;
@@ -863,8 +863,8 @@ struct _VariantCall {
 	struct ConstructData {
 
 		int arg_count;
-		Vector<Variant::Type> arg_types;
-		Vector<String> arg_names;
+		std::vector<Variant::Type> arg_types;
+		std::vector<String> arg_names;
 		VariantConstructFunc func;
 	};
 
@@ -1278,13 +1278,13 @@ bool Variant::has_method(const StringName &p_method) const {
 	return tf.functions.has(p_method);
 }
 
-Vector<Variant::Type> Variant::get_method_argument_types(Variant::Type p_type, const StringName &p_method) {
+std::vector<Variant::Type> Variant::get_method_argument_types(Variant::Type p_type, const StringName &p_method) {
 
 	const _VariantCall::TypeFunc &tf = _VariantCall::type_funcs[p_type];
 
 	const Map<StringName, _VariantCall::FuncData>::Element *E = tf.functions.find(p_method);
 	if (!E)
-		return Vector<Variant::Type>();
+		return std::vector<Variant::Type>();
 
 	return E->get().arg_types;
 }
@@ -1300,13 +1300,13 @@ bool Variant::is_method_const(Variant::Type p_type, const StringName &p_method) 
 	return E->get()._const;
 }
 
-Vector<StringName> Variant::get_method_argument_names(Variant::Type p_type, const StringName &p_method) {
+std::vector<StringName> Variant::get_method_argument_names(Variant::Type p_type, const StringName &p_method) {
 
 	const _VariantCall::TypeFunc &tf = _VariantCall::type_funcs[p_type];
 
 	const Map<StringName, _VariantCall::FuncData>::Element *E = tf.functions.find(p_method);
 	if (!E)
-		return Vector<StringName>();
+		return std::vector<StringName>();
 
 	return E->get().arg_names;
 }
@@ -1325,13 +1325,13 @@ Variant::Type Variant::get_method_return_type(Variant::Type p_type, const String
 	return E->get().return_type;
 }
 
-Vector<Variant> Variant::get_method_default_arguments(Variant::Type p_type, const StringName &p_method) {
+std::vector<Variant> Variant::get_method_default_arguments(Variant::Type p_type, const StringName &p_method) {
 
 	const _VariantCall::TypeFunc &tf = _VariantCall::type_funcs[p_type];
 
 	const Map<StringName, _VariantCall::FuncData>::Element *E = tf.functions.find(p_method);
 	if (!E)
-		return Vector<Variant>();
+		return std::vector<Variant>();
 
 	return E->get().default_args;
 }
@@ -1351,7 +1351,7 @@ void Variant::get_method_list(List<MethodInfo> *p_list) const {
 			mi.flags |= METHOD_FLAG_CONST;
 		}
 
-		for (int i = 0; i < fd.arg_types.size(); i++) {
+		for (decltype(fd.arg_types.size()) i = 0; i < fd.arg_types.size(); ++i) {
 
 			PropertyInfo pi;
 			pi.type = fd.arg_types[i];
