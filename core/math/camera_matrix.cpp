@@ -275,7 +275,7 @@ void CameraMatrix::get_viewport_size(real_t &r_width, real_t &r_height) const {
 
 bool CameraMatrix::get_endpoints(const Transform &p_transform, Vector3 *p_8points) const {
 
-	Vector<Plane> planes = get_projection_planes(Transform());
+	std::vector<Plane> planes = get_projection_planes(Transform());
 	const Planes intersections[8][3] = {
 		{ PLANE_FAR, PLANE_LEFT, PLANE_TOP },
 		{ PLANE_FAR, PLANE_LEFT, PLANE_BOTTOM },
@@ -298,7 +298,7 @@ bool CameraMatrix::get_endpoints(const Transform &p_transform, Vector3 *p_8point
 	return true;
 }
 
-Vector<Plane> CameraMatrix::get_projection_planes(const Transform &p_transform) const {
+std::vector<Plane> CameraMatrix::get_projection_planes(const Transform &p_transform) const {
 
 	/** Fast Plane Extraction from combined modelview/projection matrices.
 	 * References:
@@ -306,7 +306,7 @@ Vector<Plane> CameraMatrix::get_projection_planes(const Transform &p_transform) 
 	 * https://web.archive.org/web/20061020020112/http://www2.ravensoft.com/users/ggribb/plane%20extraction.pdf
 	 */
 
-	Vector<Plane> planes;
+	std::vector<Plane> planes;
 
 	const real_t *matrix = (const real_t *)this->matrix;
 
