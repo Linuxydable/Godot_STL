@@ -113,8 +113,7 @@ bool MainLoop::idle(float p_time) {
 	return false;
 }
 
-void MainLoop::drop_files(const Vector<String> &p_files, int p_from_screen) {
-
+void MainLoop::drop_files(const std::vector<String> &p_files, int p_from_screen) {
 	if (get_script_instance())
 		get_script_instance()->call("_drop_files", p_files, p_from_screen);
 }
