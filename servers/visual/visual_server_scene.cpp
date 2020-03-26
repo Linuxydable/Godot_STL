@@ -420,9 +420,9 @@ void VisualServerScene::instance_set_base(RID p_instance, RID p_base) {
 
 		instance->blend_values.clear();
 
-		for (int i = 0; i < instance->materials.size(); i++) {
-			if (instance->materials[i].is_valid()) {
-				VSG::storage->material_remove_instance_owner(instance->materials[i], instance);
+		for (auto &&imaterial : instance->materials) {
+			if (imaterial.is_valid()) {
+				VSG::storage->material_remove_instance_owner(imaterial, instance);
 			}
 		}
 		instance->materials.clear();
@@ -624,7 +624,7 @@ void VisualServerScene::instance_set_blend_shape_weight(RID p_instance, int p_sh
 	}
 
 	ERR_FAIL_INDEX(p_shape, instance->blend_values.size());
-	instance->blend_values.write[p_shape] = p_weight;
+	instance->blend_values[p_shape] = p_weight;
 }
 
 void VisualServerScene::instance_set_surface_material(RID p_instance, int p_surface, RID p_material) {
@@ -642,7 +642,7 @@ void VisualServerScene::instance_set_surface_material(RID p_instance, int p_surf
 	if (instance->materials[p_surface].is_valid()) {
 		VSG::storage->material_remove_instance_owner(instance->materials[p_surface], instance);
 	}
-	instance->materials.write[p_surface] = p_material;
+	instance->materials[p_surface] = p_material;
 	instance->base_changed(false, true);
 
 	if (instance->materials[p_surface].is_valid()) {
@@ -1275,7 +1275,7 @@ void VisualServerScene::_update_instance_lightmap_captures(Instance *p_instance)
 	//print_line("update captures for pos: " + p_instance->transform.origin);
 
 	for (int i = 0; i < 12; i++)
-		new (&p_instance->lightmap_capture_data.ptrw()[i]) Color;
+		new (&p_instance->lightmap_capture_data.data()[i]) Color;
 
 	//this could use some sort of blending..
 	for (List<Instance *>::Element *E = geom->lightmap_captures.front(); E; E = E->next()) {
@@ -1295,7 +1295,7 @@ void VisualServerScene::_update_instance_lightmap_captures(Instance *p_instance)
 
 			Vector3 dir = to_cell_xform.basis.xform(cone_traces[i]).normalized();
 			Color capture = _light_capture_voxel_cone_trace(octree_r.ptr(), pos, dir, cone_aperture, cell_subdiv);
-			p_instance->lightmap_capture_data.write[i] += capture;
+			p_instance->lightmap_capture_data[i] += capture;
 		}
 	}
 }
@@ -1974,7 +1974,7 @@ void VisualServerScene::_prepare_scene(const Transform p_cam_transform, const Ca
 
 					InstanceLightData *light = static_cast<InstanceLightData *>(E->get()->base_data);
 
-					ins->light_instances.write[l++] = light->instance;
+					ins->light_instances[l++] = light->instance;
 				}
 
 				geom->lighting_dirty = false;
@@ -1989,7 +1989,7 @@ void VisualServerScene::_prepare_scene(const Transform p_cam_transform, const Ca
 
 					InstanceReflectionProbeData *reflection_probe = static_cast<InstanceReflectionProbeData *>(E->get()->base_data);
 
-					ins->reflection_probe_instances.write[l++] = reflection_probe->instance;
+					ins->reflection_probe_instances[l++] = reflection_probe->instance;
 				}
 
 				geom->reflection_dirty = false;
@@ -2004,7 +2004,7 @@ void VisualServerScene::_prepare_scene(const Transform p_cam_transform, const Ca
 
 					InstanceGIProbeData *gi_probe = static_cast<InstanceGIProbeData *>(E->get()->base_data);
 
-					ins->gi_probe_instances.write[l++] = gi_probe->probe_instance;
+					ins->gi_probe_instances[l++] = gi_probe->probe_instance;
 				}
 
 				geom->gi_probes_dirty = false;
@@ -2359,7 +2359,7 @@ void VisualServerScene::_setup_gi_probe(Instance *p_instance) {
 
 	probe->dynamic.level_cell_lists.resize(header->cell_subdiv);
 
-	_gi_probe_fill_local_data(0, 0, 0, 0, 0, cells, header, ldw.ptr(), &probe->dynamic.level_cell_lists);
+	_gi_probe_fill_local_data(0, 0, 0, 0, 0, cells, header, ldw.ptr(), probe->dynamic.level_cell_lists.data());
 
 	bool compress = VSG::storage->gi_probe_is_compressed(p_instance->base);
 
@@ -2449,7 +2449,7 @@ void VisualServerScene::_setup_gi_probe(Instance *p_instance) {
 
 			uint32_t key = blockz * blockw * blockh + blocky * blockw + blockx;
 
-			Map<uint32_t, InstanceGIProbeData::CompBlockS3TC> &cmap = comp_blocks.write[mipmap];
+			Map<uint32_t, InstanceGIProbeData::CompBlockS3TC> &cmap = comp_blocks[mipmap];
 
 			if (!cmap.has(key)) {
 
@@ -2886,7 +2886,7 @@ void VisualServerScene::_bake_gi_probe(Instance *p_gi_probe) {
 	const GIProbeDataCell *cells = (const GIProbeDataCell *)&r[16];
 
 	int leaf_count = probe_data->dynamic.level_cell_lists[header->cell_subdiv - 1].size();
-	const uint32_t *leaves = probe_data->dynamic.level_cell_lists[header->cell_subdiv - 1].ptr();
+	const uint32_t *leaves = probe_data->dynamic.level_cell_lists[header->cell_subdiv - 1].data();
 
 	PoolVector<InstanceGIProbeData::LocalData>::Write ldw = probe_data->dynamic.local_data.write();
 
@@ -2936,7 +2936,7 @@ void VisualServerScene::_bake_gi_probe(Instance *p_gi_probe) {
 
 			//print_line("generating mipmap stage: " + itos(stage));
 			int level_cell_count = probe_data->dynamic.level_cell_lists[i].size();
-			const uint32_t *level_cells = probe_data->dynamic.level_cell_lists[i].ptr();
+			const uint32_t *level_cells = probe_data->dynamic.level_cell_lists[i].data();
 
 			PoolVector<uint8_t>::Write lw = probe_data->dynamic.mipmaps_3d[stage].write();
 			uint8_t *mipmapw = lw.ptr();
@@ -3305,9 +3305,7 @@ void VisualServerScene::_update_dirty_instance(Instance *p_instance) {
 			int new_blend_shape_count = VSG::storage->mesh_get_blend_shape_count(p_instance->base);
 			if (new_blend_shape_count != p_instance->blend_values.size()) {
 				p_instance->blend_values.resize(new_blend_shape_count);
-				for (int i = 0; i < new_blend_shape_count; i++) {
-					p_instance->blend_values.write[i] = 0;
-				}
+				std::fill(p_instance->blend_values.begin(), p_instance->blend_values.end(), 0);
 			}
 		}
 
@@ -3331,7 +3329,7 @@ void VisualServerScene::_update_dirty_instance(Instance *p_instance) {
 					if (mesh.is_valid()) {
 						bool cast_shadows = false;
 
-						for (int i = 0; i < p_instance->materials.size(); i++) {
+						for (decltype(p_instance->materials.size()) i = 0; i < p_instance->materials.size(); ++i) {
 
 							RID mat = p_instance->materials[i].is_valid() ? p_instance->materials[i] : VSG::storage->mesh_surface_get_material(mesh, i);
 

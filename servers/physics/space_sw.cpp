@@ -1195,10 +1195,6 @@ void SpaceSW::set_active_objects(int p_active_objects) {
 	active_objects = p_active_objects;
 }
 
-void SpaceSW::set_active_objects(int p_active_objects) {
-	active_objects = p_active_objects;
-}
-
 int SpaceSW::get_active_objects() const {
 	return active_objects;
 }

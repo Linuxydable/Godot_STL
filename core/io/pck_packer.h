@@ -51,7 +51,7 @@ class PCKPacker : public Reference {
 		int size;
 		uint64_t offset_offset;
 	};
-	Vector<File> files;
+	std::vector<File> files;
 
 public:
 	Error pck_start(const String &p_file, int p_alignment);

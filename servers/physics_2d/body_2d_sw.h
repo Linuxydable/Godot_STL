@@ -32,6 +32,9 @@
 #define BODY_2D_SW_H
 
 #include "area_2d_sw.h"
+
+#include <algorithm>
+
 #include "collision_object_2d_sw.h"
 #include "core/vset.h"
 
@@ -99,7 +102,7 @@ class Body2DSW : public CollisionObject2DSW {
 		}
 	};
 
-	Vector<AreaCMP> areas;
+	std::vector<AreaCMP> areas;
 
 	struct Contact {
 
@@ -114,7 +117,7 @@ class Body2DSW : public CollisionObject2DSW {
 		Vector2 collider_velocity_at_pos;
 	};
 
-	Vector<Contact> contacts; //no contacts by default
+	std::vector<Contact> contacts; //no contacts by default
 	int contact_count;
 
 	struct ForceIntegrationCallback {
@@ -138,20 +141,21 @@ public:
 	void set_force_integration_callback(ObjectID p_id, const StringName &p_method, const Variant &p_udata = Variant());
 
 	_FORCE_INLINE_ void add_area(Area2DSW *p_area) {
-		int index = areas.find(AreaCMP(p_area));
-		if (index > -1) {
-			areas.write[index].refCount += 1;
+		auto it_area = std::find(areas.begin(), areas.end(), AreaCMP(p_area));
+		if (it_area != areas.end()) {
+			it_area->refCount += 1;
 		} else {
-			areas.ordered_insert(AreaCMP(p_area));
+			areas.push_back(AreaCMP(p_area));
+			std::sort(areas.begin(), areas.end());
 		}
 	}
 
 	_FORCE_INLINE_ void remove_area(Area2DSW *p_area) {
-		int index = areas.find(AreaCMP(p_area));
-		if (index > -1) {
-			areas.write[index].refCount -= 1;
-			if (areas[index].refCount < 1)
-				areas.remove(index);
+		auto it_area = std::find(areas.begin(), areas.end(), AreaCMP(p_area));
+		if (it_area != areas.end()) {
+			it_area->refCount -= 1;
+			if (it_area->refCount < 1)
+				areas.erase(it_area);
 		}
 	}
 
@@ -299,12 +303,12 @@ public:
 
 void Body2DSW::add_contact(const Vector2 &p_local_pos, const Vector2 &p_local_normal, real_t p_depth, int p_local_shape, const Vector2 &p_collider_pos, int p_collider_shape, ObjectID p_collider_instance_id, const RID &p_collider, const Vector2 &p_collider_velocity_at_pos) {
 
-	int c_max = contacts.size();
+	auto c_max = contacts.size();
 
 	if (c_max == 0)
 		return;
 
-	Contact *c = contacts.ptrw();
+	Contact *c = contacts.data();
 
 	int idx = -1;
 
@@ -314,7 +318,7 @@ void Body2DSW::add_contact(const Vector2 &p_local_pos, const Vector2 &p_local_no
 
 		real_t least_depth = 1e20;
 		int least_deep = -1;
-		for (int i = 0; i < c_max; i++) {
+		for (decltype(c_max) i = 0; i < c_max; ++i) {
 
 			if (i == 0 || c[i].depth < least_depth) {
 				least_deep = i;

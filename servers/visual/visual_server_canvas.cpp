@@ -126,9 +126,10 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 			_collect_ysort_children(p_canvas_item, Transform2D(), p_material_owner, Color(1, 1, 1, 1), NULL, p_canvas_item->ysort_children_count);
 		}
 
-		p_canvas_item->child_items.resize(p_canvas_item->ysort_children_count)
+		p_canvas_item->child_items.resize(p_canvas_item->ysort_children_count);
 
-		_collect_ysort_children(p_canvas_item, Transform2D(), p_material_owner, Color(1, 1, 1, 1), p_canvas_item->child_items, 0);
+		int i = 0;
+		_collect_ysort_children(p_canvas_item, Transform2D(), p_material_owner, Color(1, 1, 1, 1), p_canvas_item->child_items.data(), i);
 
 		std::sort(p_canvas_item->child_items.begin(), p_canvas_item->child_items.end(), ItemPtrSort);
 	}
@@ -138,17 +139,30 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 	else
 		p_z = p_canvas_item->z_index;
 
-	for(auto&& child_item : p_canvas_item->child_items){
+	for (auto &&child_item : p_canvas_item->child_items) {
 		if (!child_item->behind || (p_canvas_item->sort_y && child_item->sort_y))
 			continue;
 
 		if (p_canvas_item->sort_y) {
-			_render_canvas_item(child_item, xform * child_item->ysort_xform, p_clip_rect
-				, modulate * child_item->ysort_modulate, p_z, z_list, z_last_list, (Item *)p_canvas_item->final_clip_owner
-				, child_item->material_owner);
+			_render_canvas_item(child_item,
+					xform * child_item->ysort_xform,
+					p_clip_rect,
+					modulate * child_item->ysort_modulate,
+					p_z,
+					z_list,
+					z_last_list,
+					(Item *)p_canvas_item->final_clip_owner,
+					static_cast<Item *>(child_item->material_owner));
 		} else {
-			_render_canvas_item(child_item, xform, p_clip_rect, modulate, p_z, z_list, z_last_list
-				, (Item *)p_canvas_item->final_clip_owner, p_material_owner);
+			_render_canvas_item(child_item,
+					xform,
+					p_clip_rect,
+					modulate,
+					p_z,
+					z_list,
+					z_last_list,
+					static_cast<Item *>(p_canvas_item->final_clip_owner),
+					p_material_owner);
 		}
 	}
 
@@ -189,12 +203,24 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 			continue;
 
 		if (p_canvas_item->sort_y) {
-			_render_canvas_item(child_item, xform * child_item->ysort_xform, p_clip_rect
-				, modulate * child_item->ysort_modulate, p_z, z_list, z_last_list, (Item *)p_canvas_item->final_clip_owner
-				, child_item->material_owner);
+			_render_canvas_item(child_item,
+					xform * child_item->ysort_xform,
+					p_clip_rect,
+					modulate * child_item->ysort_modulate,
+					p_z,
+					z_list,
+					z_last_list,
+					static_cast<Item *>(p_canvas_item->final_clip_owner), static_cast<Item *>(child_item->material_owner));
 		} else {
-			_render_canvas_item(child_item, xform, p_clip_rect, modulate, p_z, z_list, z_last_list
-				, (Item *)p_canvas_item->final_clip_owner, p_material_owner);
+			_render_canvas_item(child_item,
+					xform,
+					p_clip_rect,
+					modulate,
+					p_z,
+					z_list,
+					z_last_list,
+					static_cast<Item *>(p_canvas_item->final_clip_owner),
+					p_material_owner);
 		}
 	}
 }
@@ -228,17 +254,15 @@ void VisualServerCanvas::render_canvas(Canvas *p_canvas, const Transform2D &p_tr
 		p_canvas->children_order_dirty = false;
 	}
 
-	auto it = std::find(p_canvas->child_items.begin(), p_canvas->child_items.end(),
-		[](const Canvas::ChildItem& child_item){
-			if (child_item.mirror.x || child_item.mirror.y) {
-				return true;
-			}
-			return false;
+	auto it = std::find_if(p_canvas->child_items.begin(), p_canvas->child_items.end(), [](auto &&child_item) {
+		if (child_item.mirror.x || child_item.mirror.y) {
+			return true;
 		}
-	);
+		return false;
+	});
 
-	if(it == p_canvas->child_items.end() ){
-		static const int z_range = VS::CANVAS_ITEM_Z_MAX - VS::CANVAS_ITEM_Z_MIN + 1;
+	if (it == p_canvas->child_items.end()) {
+		constexpr uint32_t z_range = VS::CANVAS_ITEM_Z_MAX - VS::CANVAS_ITEM_Z_MIN + 1;
 
 		RasterizerCanvas::Item *z_list[z_range];
 
@@ -252,7 +276,7 @@ void VisualServerCanvas::render_canvas(Canvas *p_canvas, const Transform2D &p_tr
 			_render_canvas_item(child_item.item, p_transform, p_clip_rect, Color(1, 1, 1, 1), 0, z_list, z_last_list, nullptr, nullptr);
 		}
 
-		for (int i = 0; i < z_range; i++) {
+		for (uint32_t i = 0; i < z_range; ++i) {
 			if (!z_list[i])
 				continue;
 
@@ -1382,7 +1406,7 @@ bool VisualServerCanvas::free(RID p_rid) {
 		}
 
 		for(auto&& child_item : canvas_item->child_items){
-			child_item.item->parent = RID();
+			child_item->parent = RID();
 		}
 
 		/*

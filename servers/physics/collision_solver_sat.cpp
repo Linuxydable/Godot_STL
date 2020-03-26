@@ -553,27 +553,20 @@ static void _collision_sphere_convex_polygon(const ShapeSW *p_a, const Transform
 
 	const Geometry::MeshData &mesh = convex_polygon_B->get_mesh();
 
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int face_count = mesh.faces.size();
-	const Geometry::MeshData::Edge *edges = mesh.edges.ptr();
-	int edge_count = mesh.edges.size();
-	const Vector3 *vertices = mesh.vertices.ptr();
-	int vertex_count = mesh.vertices.size();
+	const Vector3 *vertices = mesh.vertices.data();
 
 	// faces of B
-	for (int i = 0; i < face_count; i++) {
-
-		Vector3 axis = p_transform_b.xform(faces[i].plane).normal;
+	for (auto &&m_face : mesh.faces) {
+		Vector3 axis = p_transform_b.xform(m_face.plane).normal;
 
 		if (!separator.test_axis(axis))
 			return;
 	}
 
 	// edges of B
-	for (int i = 0; i < edge_count; i++) {
-
-		Vector3 v1 = p_transform_b.xform(vertices[edges[i].a]);
-		Vector3 v2 = p_transform_b.xform(vertices[edges[i].b]);
+	for (auto &&m_edge : mesh.edges) {
+		Vector3 v1 = p_transform_b.xform(vertices[m_edge.a]);
+		Vector3 v2 = p_transform_b.xform(vertices[m_edge.b]);
 		Vector3 v3 = p_transform_a.origin;
 
 		Vector3 n1 = v2 - v1;
@@ -586,9 +579,9 @@ static void _collision_sphere_convex_polygon(const ShapeSW *p_a, const Transform
 	}
 
 	// vertices of B
-	for (int i = 0; i < vertex_count; i++) {
+	for (auto &&m_vert : mesh.vertices) {
 
-		Vector3 v1 = p_transform_b.xform(vertices[i]);
+		Vector3 v1 = p_transform_b.xform(m_vert);
 		Vector3 v2 = p_transform_a.origin;
 
 		Vector3 axis = (v2 - v1).normalized();
@@ -848,16 +841,10 @@ static void _collision_box_convex_polygon(const ShapeSW *p_a, const Transform &p
 
 	const Geometry::MeshData &mesh = convex_polygon_B->get_mesh();
 
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int face_count = mesh.faces.size();
-	const Geometry::MeshData::Edge *edges = mesh.edges.ptr();
-	int edge_count = mesh.edges.size();
-	const Vector3 *vertices = mesh.vertices.ptr();
-	int vertex_count = mesh.vertices.size();
+	const Vector3 *vertices = mesh.vertices.data();
 
 	// faces of A
-	for (int i = 0; i < 3; i++) {
-
+	for (uint8_t i = 0; i < 3u; ++i) {
 		Vector3 axis = p_transform_a.basis.get_axis(i).normalized();
 
 		if (!separator.test_axis(axis))
@@ -865,22 +852,20 @@ static void _collision_box_convex_polygon(const ShapeSW *p_a, const Transform &p
 	}
 
 	// faces of B
-	for (int i = 0; i < face_count; i++) {
-
-		Vector3 axis = p_transform_b.xform(faces[i].plane).normal;
+	for (auto &&m_face : mesh.faces) {
+		Vector3 axis = p_transform_b.xform(m_face.plane).normal;
 
 		if (!separator.test_axis(axis))
 			return;
 	}
 
 	// A<->B edges
-	for (int i = 0; i < 3; i++) {
+	for (uint8_t i = 0; i < 3u; ++i) {
 
 		Vector3 e1 = p_transform_a.basis.get_axis(i);
 
-		for (int j = 0; j < edge_count; j++) {
-
-			Vector3 e2 = p_transform_b.basis.xform(vertices[edges[j].a]) - p_transform_b.basis.xform(vertices[edges[j].b]);
+		for (auto &&m_edge : mesh.edges) {
+			Vector3 e2 = p_transform_b.basis.xform(vertices[m_edge.a]) - p_transform_b.basis.xform(vertices[m_edge.b]);
 
 			Vector3 axis = e1.cross(e2).normalized();
 
@@ -892,9 +877,8 @@ static void _collision_box_convex_polygon(const ShapeSW *p_a, const Transform &p
 	if (withMargin) {
 
 		// calculate closest points between vertices and box edges
-		for (int v = 0; v < vertex_count; v++) {
-
-			Vector3 vtxb = p_transform_b.xform(vertices[v]);
+		for (auto &&m_vert : mesh.vertices) {
+			Vector3 vtxb = p_transform_b.xform(m_vert);
 			Vector3 ab_vec = vtxb - p_transform_a.origin;
 
 			Vector3 cnormal_a = p_transform_a.basis.xform_inv(ab_vec);
@@ -912,8 +896,7 @@ static void _collision_box_convex_polygon(const ShapeSW *p_a, const Transform &p
 			}
 
 			//now try edges, which become cylinders!
-
-			for (int i = 0; i < 3; i++) {
+			for (uint8_t i = 0; i < 3u; ++i) {
 
 				//a ->b
 				Vector3 axis_a = p_transform_a.basis.get_axis(i);
@@ -924,9 +907,9 @@ static void _collision_box_convex_polygon(const ShapeSW *p_a, const Transform &p
 		}
 
 		//convex edges and box points
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 2; j++) {
-				for (int k = 0; k < 2; k++) {
+		for (uint8_t i = 0; i < 2u; ++i) {
+			for (uint8_t j = 0; j < 2u; ++j) {
+				for (uint8_t k = 0; k < 2u; ++k) {
 					Vector3 he = box_A->get_half_extents();
 					he.x *= (i * 2 - 1);
 					he.y *= (j * 2 - 1);
@@ -935,10 +918,10 @@ static void _collision_box_convex_polygon(const ShapeSW *p_a, const Transform &p
 					for (int l = 0; l < 3; l++)
 						point += p_transform_a.basis.get_axis(l) * he[l];
 
-					for (int e = 0; e < edge_count; e++) {
+					for (auto &&m_edge : mesh.edges) {
 
-						Vector3 p1 = p_transform_b.xform(vertices[edges[e].a]);
-						Vector3 p2 = p_transform_b.xform(vertices[edges[e].b]);
+						Vector3 p1 = p_transform_b.xform(vertices[m_edge.a]);
+						Vector3 p2 = p_transform_b.xform(vertices[m_edge.b]);
 						Vector3 n = (p2 - p1);
 
 						if (!separator.test_axis((point - p2).cross(n).cross(n).normalized()))
@@ -1128,16 +1111,11 @@ static void _collision_capsule_convex_polygon(const ShapeSW *p_a, const Transfor
 
 	const Geometry::MeshData &mesh = convex_polygon_B->get_mesh();
 
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int face_count = mesh.faces.size();
-	const Geometry::MeshData::Edge *edges = mesh.edges.ptr();
-	int edge_count = mesh.edges.size();
-	const Vector3 *vertices = mesh.vertices.ptr();
+	const Vector3 *vertices = mesh.vertices.data();
 
 	// faces of B
-	for (int i = 0; i < face_count; i++) {
-
-		Vector3 axis = p_transform_b.xform(faces[i].plane).normal;
+	for (auto &&m_face : mesh.faces) {
+		Vector3 axis = p_transform_b.xform(m_face.plane).normal;
 
 		if (!separator.test_axis(axis))
 			return;
@@ -1145,10 +1123,10 @@ static void _collision_capsule_convex_polygon(const ShapeSW *p_a, const Transfor
 
 	// edges of B, capsule cylinder
 
-	for (int i = 0; i < edge_count; i++) {
+	for (auto &&m_edge : mesh.edges) {
 
 		// cylinder
-		Vector3 edge_axis = p_transform_b.basis.xform(vertices[edges[i].a]) - p_transform_b.basis.xform(vertices[edges[i].b]);
+		Vector3 edge_axis = p_transform_b.basis.xform(vertices[m_edge.a]) - p_transform_b.basis.xform(vertices[m_edge.b]);
 		Vector3 axis = edge_axis.cross(p_transform_a.basis.get_axis(2)).normalized();
 
 		if (!separator.test_axis(axis))
@@ -1156,8 +1134,7 @@ static void _collision_capsule_convex_polygon(const ShapeSW *p_a, const Transfor
 	}
 
 	// capsule balls, edges of B
-
-	for (int i = 0; i < 2; i++) {
+	for (uint8_t i = 0; i < 2u; ++i) {
 
 		// edges of B, capsule cylinder
 
@@ -1165,10 +1142,9 @@ static void _collision_capsule_convex_polygon(const ShapeSW *p_a, const Transfor
 
 		Vector3 sphere_pos = p_transform_a.origin + ((i == 0) ? capsule_axis : -capsule_axis);
 
-		for (int j = 0; j < edge_count; j++) {
-
-			Vector3 n1 = sphere_pos - p_transform_b.xform(vertices[edges[j].a]);
-			Vector3 n2 = p_transform_b.basis.xform(vertices[edges[j].a]) - p_transform_b.basis.xform(vertices[edges[j].b]);
+		for (auto &&m_edge : mesh.edges) {
+			Vector3 n1 = sphere_pos - p_transform_b.xform(vertices[m_edge.a]);
+			Vector3 n2 = p_transform_b.basis.xform(vertices[m_edge.a]) - p_transform_b.basis.xform(vertices[m_edge.b]);
 
 			Vector3 axis = n1.cross(n2).cross(n2).normalized();
 
@@ -1259,27 +1235,14 @@ static void _collision_convex_polygon_convex_polygon(const ShapeSW *p_a, const T
 		return;
 
 	const Geometry::MeshData &mesh_A = convex_polygon_A->get_mesh();
-
-	const Geometry::MeshData::Face *faces_A = mesh_A.faces.ptr();
-	int face_count_A = mesh_A.faces.size();
-	const Geometry::MeshData::Edge *edges_A = mesh_A.edges.ptr();
-	int edge_count_A = mesh_A.edges.size();
-	const Vector3 *vertices_A = mesh_A.vertices.ptr();
-	int vertex_count_A = mesh_A.vertices.size();
+	const Vector3 *vertices_A = mesh_A.vertices.data();
 
 	const Geometry::MeshData &mesh_B = convex_polygon_B->get_mesh();
-
-	const Geometry::MeshData::Face *faces_B = mesh_B.faces.ptr();
-	int face_count_B = mesh_B.faces.size();
-	const Geometry::MeshData::Edge *edges_B = mesh_B.edges.ptr();
-	int edge_count_B = mesh_B.edges.size();
-	const Vector3 *vertices_B = mesh_B.vertices.ptr();
-	int vertex_count_B = mesh_B.vertices.size();
+	const Vector3 *vertices_B = mesh_B.vertices.data();
 
 	// faces of A
-	for (int i = 0; i < face_count_A; i++) {
-
-		Vector3 axis = p_transform_a.xform(faces_A[i].plane).normal;
+	for (auto &&m_face : mesh_A.faces) {
+		Vector3 axis = p_transform_a.xform(m_face.plane).normal;
 		//Vector3 axis = p_transform_a.basis.xform( faces_A[i].plane.normal ).normalized();
 
 		if (!separator.test_axis(axis))
@@ -1287,9 +1250,8 @@ static void _collision_convex_polygon_convex_polygon(const ShapeSW *p_a, const T
 	}
 
 	// faces of B
-	for (int i = 0; i < face_count_B; i++) {
-
-		Vector3 axis = p_transform_b.xform(faces_B[i].plane).normal;
+	for (auto &&m_face : mesh_B.faces) {
+		Vector3 axis = p_transform_b.xform(m_face.plane).normal;
 		//Vector3 axis = p_transform_b.basis.xform( faces_B[i].plane.normal ).normalized();
 
 		if (!separator.test_axis(axis))
@@ -1297,13 +1259,11 @@ static void _collision_convex_polygon_convex_polygon(const ShapeSW *p_a, const T
 	}
 
 	// A<->B edges
-	for (int i = 0; i < edge_count_A; i++) {
+	for (auto &&m_face_A : mesh_A.edges) {
+		Vector3 e1 = p_transform_a.basis.xform(vertices_A[m_face_A.a]) - p_transform_a.basis.xform(vertices_A[m_face_A.b]);
 
-		Vector3 e1 = p_transform_a.basis.xform(vertices_A[edges_A[i].a]) - p_transform_a.basis.xform(vertices_A[edges_A[i].b]);
-
-		for (int j = 0; j < edge_count_B; j++) {
-
-			Vector3 e2 = p_transform_b.basis.xform(vertices_B[edges_B[j].a]) - p_transform_b.basis.xform(vertices_B[edges_B[j].b]);
+		for (auto &&m_face_B : mesh_B.edges) {
+			Vector3 e2 = p_transform_b.basis.xform(vertices_B[m_face_B.a]) - p_transform_b.basis.xform(vertices_B[m_face_B.b]);
 
 			Vector3 axis = e1.cross(e2).normalized();
 
@@ -1315,42 +1275,42 @@ static void _collision_convex_polygon_convex_polygon(const ShapeSW *p_a, const T
 	if (withMargin) {
 
 		//vertex-vertex
-		for (int i = 0; i < vertex_count_A; i++) {
+		for (auto &&m_vert_a : mesh_A.vertices) {
 
-			Vector3 va = p_transform_a.xform(vertices_A[i]);
+			Vector3 va = p_transform_a.xform(m_vert_a);
 
-			for (int j = 0; j < vertex_count_B; j++) {
+			for (auto &&m_vert_B : mesh_B.vertices) {
 
-				if (!separator.test_axis((va - p_transform_b.xform(vertices_B[j])).normalized()))
+				if (!separator.test_axis((va - p_transform_b.xform(m_vert_B)).normalized()))
 					return;
 			}
 		}
 		//edge-vertex (shell)
 
-		for (int i = 0; i < edge_count_A; i++) {
+		for (auto &&m_edge_A : mesh_A.edges) {
 
-			Vector3 e1 = p_transform_a.basis.xform(vertices_A[edges_A[i].a]);
-			Vector3 e2 = p_transform_a.basis.xform(vertices_A[edges_A[i].b]);
+			Vector3 e1 = p_transform_a.basis.xform(vertices_A[m_edge_A.a]);
+			Vector3 e2 = p_transform_a.basis.xform(vertices_A[m_edge_A.b]);
 			Vector3 n = (e2 - e1);
 
-			for (int j = 0; j < vertex_count_B; j++) {
+			for (auto &&m_vert_B : mesh_B.vertices) {
 
-				Vector3 e3 = p_transform_b.xform(vertices_B[j]);
+				Vector3 e3 = p_transform_b.xform(m_vert_B);
 
 				if (!separator.test_axis((e1 - e3).cross(n).cross(n).normalized()))
 					return;
 			}
 		}
 
-		for (int i = 0; i < edge_count_B; i++) {
+		for (auto &&m_edge_B : mesh_B.edges) {
 
-			Vector3 e1 = p_transform_b.basis.xform(vertices_B[edges_B[i].a]);
-			Vector3 e2 = p_transform_b.basis.xform(vertices_B[edges_B[i].b]);
+			Vector3 e1 = p_transform_b.basis.xform(vertices_B[m_edge_B.a]);
+			Vector3 e2 = p_transform_b.basis.xform(vertices_B[m_edge_B.b]);
 			Vector3 n = (e2 - e1);
 
-			for (int j = 0; j < vertex_count_A; j++) {
+			for (auto &&m_vert_A : mesh_A.vertices) {
 
-				Vector3 e3 = p_transform_a.xform(vertices_A[j]);
+				Vector3 e3 = p_transform_a.xform(m_vert_A);
 
 				if (!separator.test_axis((e1 - e3).cross(n).cross(n).normalized()))
 					return;
@@ -1371,12 +1331,7 @@ static void _collision_convex_polygon_face(const ShapeSW *p_a, const Transform &
 
 	const Geometry::MeshData &mesh = convex_polygon_A->get_mesh();
 
-	const Geometry::MeshData::Face *faces = mesh.faces.ptr();
-	int face_count = mesh.faces.size();
-	const Geometry::MeshData::Edge *edges = mesh.edges.ptr();
-	int edge_count = mesh.edges.size();
-	const Vector3 *vertices = mesh.vertices.ptr();
-	int vertex_count = mesh.vertices.size();
+	const Vector3 *vertices = mesh.vertices.data();
 
 	Vector3 vertex[3] = {
 		p_transform_b.xform(face_B->vertex[0]),
@@ -1388,21 +1343,21 @@ static void _collision_convex_polygon_face(const ShapeSW *p_a, const Transform &
 		return;
 
 	// faces of A
-	for (int i = 0; i < face_count; i++) {
+	for (auto &&m_face : mesh.faces) {
 
 		//Vector3 axis = p_transform_a.xform( faces[i].plane ).normal;
-		Vector3 axis = p_transform_a.basis.xform(faces[i].plane.normal).normalized();
+		Vector3 axis = p_transform_a.basis.xform(m_face.plane.normal).normalized();
 
 		if (!separator.test_axis(axis))
 			return;
 	}
 
 	// A<->B edges
-	for (int i = 0; i < edge_count; i++) {
+	for (auto &&m_edge : mesh.edges) {
 
-		Vector3 e1 = p_transform_a.xform(vertices[edges[i].a]) - p_transform_a.xform(vertices[edges[i].b]);
+		Vector3 e1 = p_transform_a.xform(vertices[m_edge.a]) - p_transform_a.xform(vertices[m_edge.b]);
 
-		for (int j = 0; j < 3; j++) {
+		for (uint8_t j = 0; j < 3u; ++j) {
 
 			Vector3 e2 = vertex[j] - vertex[(j + 1) % 3];
 
@@ -1416,11 +1371,11 @@ static void _collision_convex_polygon_face(const ShapeSW *p_a, const Transform &
 	if (withMargin) {
 
 		//vertex-vertex
-		for (int i = 0; i < vertex_count; i++) {
+		for (auto &&m_vert : mesh.vertices) {
 
-			Vector3 va = p_transform_a.xform(vertices[i]);
+			Vector3 va = p_transform_a.xform(m_vert);
 
-			for (int j = 0; j < 3; j++) {
+			for (uint8_t j = 0; j < 3u; ++j) {
 
 				if (!separator.test_axis((va - vertex[j]).normalized()))
 					return;
@@ -1428,13 +1383,13 @@ static void _collision_convex_polygon_face(const ShapeSW *p_a, const Transform &
 		}
 		//edge-vertex (shell)
 
-		for (int i = 0; i < edge_count; i++) {
+		for (auto &&m_edge : mesh.edges) {
 
-			Vector3 e1 = p_transform_a.basis.xform(vertices[edges[i].a]);
-			Vector3 e2 = p_transform_a.basis.xform(vertices[edges[i].b]);
+			Vector3 e1 = p_transform_a.basis.xform(vertices[m_edge.a]);
+			Vector3 e2 = p_transform_a.basis.xform(vertices[m_edge.b]);
 			Vector3 n = (e2 - e1);
 
-			for (int j = 0; j < 3; j++) {
+			for (uint8_t j = 0; j < 3u; ++j) {
 
 				Vector3 e3 = vertex[j];
 
@@ -1449,9 +1404,9 @@ static void _collision_convex_polygon_face(const ShapeSW *p_a, const Transform &
 			Vector3 e2 = vertex[(i + 1) % 3];
 			Vector3 n = (e2 - e1);
 
-			for (int j = 0; j < vertex_count; j++) {
+			for (auto &&m_vert : mesh.vertices) {
 
-				Vector3 e3 = p_transform_a.xform(vertices[j]);
+				Vector3 e3 = p_transform_a.xform(m_vert);
 
 				if (!separator.test_axis((e1 - e3).cross(n).cross(n).normalized()))
 					return;

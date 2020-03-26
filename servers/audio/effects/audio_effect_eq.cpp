@@ -33,11 +33,11 @@
 
 void AudioEffectEQInstance::process(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count) {
 
-	int band_count = bands[0].size();
-	EQ::BandProcess *proc_l = bands[0].ptrw();
-	EQ::BandProcess *proc_r = bands[1].ptrw();
-	float *bgain = gains.ptrw();
-	for (int i = 0; i < band_count; i++) {
+	auto band_count = bands[0].size();
+	EQ::BandProcess *proc_l = bands[0].data();
+	EQ::BandProcess *proc_r = bands[1].data();
+	float *bgain = gains.data();
+	for (decltype(band_count) i = 0; i < band_count; ++i) {
 		bgain[i] = Math::db2linear(base->gain[i]);
 	}
 
@@ -46,7 +46,7 @@ void AudioEffectEQInstance::process(const AudioFrame *p_src_frames, AudioFrame *
 		AudioFrame src = p_src_frames[i];
 		AudioFrame dst = AudioFrame(0, 0);
 
-		for (int j = 0; j < band_count; j++) {
+		for (decltype(band_count) j = 0; j < band_count; ++j) {
 
 			float l = src.l;
 			float r = src.r;
@@ -67,10 +67,10 @@ Ref<AudioEffectInstance> AudioEffectEQ::instance() {
 	ins.instance();
 	ins->base = Ref<AudioEffectEQ>(this);
 	ins->gains.resize(eq.get_band_count());
-	for (int i = 0; i < 2; i++) {
-		ins->bands[i].resize(eq.get_band_count());
-		for (int j = 0; j < ins->bands[i].size(); j++) {
-			ins->bands[i].write[j] = eq.get_band_processor(j);
+	for (auto &&bprocess : ins->bands) {
+		bprocess.resize(eq.get_band_count());
+		for (decltype(bprocess.size()) j = 0; j < bprocess.size(); ++j) {
+			bprocess[j] = eq.get_band_processor(j);
 		}
 	}
 
@@ -79,7 +79,7 @@ Ref<AudioEffectInstance> AudioEffectEQ::instance() {
 
 void AudioEffectEQ::set_band_gain_db(int p_band, float p_volume) {
 	ERR_FAIL_INDEX(p_band, gain.size());
-	gain.write[p_band] = p_volume;
+	gain[p_band] = p_volume;
 }
 
 float AudioEffectEQ::get_band_gain_db(int p_band) const {
@@ -115,8 +115,7 @@ bool AudioEffectEQ::_get(const StringName &p_name, Variant &r_ret) const {
 
 void AudioEffectEQ::_get_property_list(List<PropertyInfo> *p_list) const {
 
-	for (int i = 0; i < band_names.size(); i++) {
-
+	for (decltype(band_names.size()) i = 0; i < band_names.size(); ++i) {
 		p_list->push_back(PropertyInfo(Variant::REAL, band_names[i], PROPERTY_HINT_RANGE, "-60,24,0.1"));
 	}
 }
@@ -133,8 +132,8 @@ AudioEffectEQ::AudioEffectEQ(EQ::Preset p_preset) {
 	eq.set_mix_rate(AudioServer::get_singleton()->get_mix_rate());
 	eq.set_preset_band_mode(p_preset);
 	gain.resize(eq.get_band_count());
-	for (int i = 0; i < gain.size(); i++) {
-		gain.write[i] = 0.0;
+	for (decltype(gain.size()) i = 0; i < gain.size(); ++i) {
+		gain[i] = 0.0;
 		String name = "band_db/" + itos(eq.get_band_frequency(i)) + "_hz";
 		prop_band_map[name] = i;
 		band_names.push_back(name);

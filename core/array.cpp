@@ -123,8 +123,7 @@ Error Array::resize(int p_new_size) {
 	try {
 		_p->array.resize(p_new_size);
 	} catch (...) {
-		ERR_FAIL_MSG("can't resize.");
-		return ERR_CANT_CREATE;
+		ERR_FAIL_COND_V_MSG(0, ERR_CANT_CREATE, "Can't resize.");
 	}
 
 	return OK;
@@ -362,7 +361,7 @@ _FORCE_INLINE_ int bisect(const std::vector<Variant> &p_array, const Variant &p_
 	if (p_before) {
 		while (lo < hi) {
 			const int mid = (lo + hi) / 2;
-			if (p_less(p_array.get(mid), p_value)) {
+			if (p_less(p_array[mid], p_value)) {
 				lo = mid + 1;
 			} else {
 				hi = mid;
@@ -371,7 +370,7 @@ _FORCE_INLINE_ int bisect(const std::vector<Variant> &p_array, const Variant &p_
 	} else {
 		while (lo < hi) {
 			const int mid = (lo + hi) / 2;
-			if (p_less(p_value, p_array.get(mid))) {
+			if (p_less(p_value, p_array[mid])) {
 				hi = mid;
 			} else {
 				lo = mid + 1;

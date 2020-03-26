@@ -413,7 +413,7 @@ void VisualServerViewport::viewport_set_active(RID p_viewport, bool p_active) {
 		// need_update : warning is better than error
 		ERR_FAIL_COND( it == active_viewports.end() ); //not exist
 
-		active_viewports.erase(viewport);
+		active_viewports.erase(it);
 	}
 }
 

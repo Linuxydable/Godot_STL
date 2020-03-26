@@ -40,7 +40,7 @@ class AudioEffectChorusInstance : public AudioEffectInstance {
 	friend class AudioEffectChorus;
 	Ref<AudioEffectChorus> base;
 
-	Vector<AudioFrame> audio_buffer;
+	std::vector<AudioFrame> audio_buffer;
 	unsigned int buffer_pos;
 	unsigned int buffer_mask;
 

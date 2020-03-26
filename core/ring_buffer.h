@@ -33,6 +33,8 @@
 
 #include <vector>
 
+#include "error_macros.h"
+
 template <typename T>
 class RingBuffer {
 
