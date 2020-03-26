@@ -1566,14 +1566,17 @@ PoolVector<Vector3> _Geometry::segment_intersects_cylinder(const Vector3 &p_from
 	return r;
 }
 PoolVector<Vector3> _Geometry::segment_intersects_convex(const Vector3 &p_from, const Vector3 &p_to, const std::vector<Plane> &p_planes) {
-
 	PoolVector<Vector3> r;
+
 	Vector3 res, norm;
-	if (!Geometry::segment_intersects_convex(p_from, p_to, p_planes.ptr(), p_planes.size(), &res, &norm))
+
+	if (!Geometry::segment_intersects_convex(p_from, p_to, p_planes.data(), p_planes.size(), &res, &norm))
 		return r;
 
 	r.resize(2);
+
 	r.set(0, res);
+
 	r.set(1, norm);
 	return r;
 }
