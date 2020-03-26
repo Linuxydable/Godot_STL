@@ -156,9 +156,9 @@ public:
 	void set_kinematic_margin(real_t p_margin);
 	_FORCE_INLINE_ real_t get_kinematic_margin() { return kinematic_safe_margin; }
 
-	_FORCE_INLINE_ void add_area(AreaSW *p_area);
+	void add_area(AreaSW *p_area);
 
-	_FORCE_INLINE_ void remove_area(AreaSW *p_area);
+	void remove_area(AreaSW *p_area);
 
 	_FORCE_INLINE_ void set_max_contacts_reported(int p_size) {
 		contacts.resize(p_size);
@@ -168,7 +168,7 @@ public:
 	_FORCE_INLINE_ int get_max_contacts_reported() const { return contacts.size(); }
 
 	_FORCE_INLINE_ bool can_report_contacts() const { return !contacts.empty(); }
-	_FORCE_INLINE_ void add_contact(const Vector3 &p_local_pos, const Vector3 &p_local_normal, real_t p_depth, int p_local_shape, const Vector3 &p_collider_pos, int p_collider_shape, ObjectID p_collider_instance_id, const RID &p_collider, const Vector3 &p_collider_velocity_at_pos);
+	void add_contact(const Vector3 &p_local_pos, const Vector3 &p_local_normal, real_t p_depth, int p_local_shape, const Vector3 &p_collider_pos, int p_collider_shape, ObjectID p_collider_instance_id, const RID &p_collider, const Vector3 &p_collider_velocity_at_pos);
 
 	_FORCE_INLINE_ void add_exception(const RID &p_exception) { exceptions.insert(p_exception); }
 	_FORCE_INLINE_ void remove_exception(const RID &p_exception) { exceptions.erase(p_exception); }

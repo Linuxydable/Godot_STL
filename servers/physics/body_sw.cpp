@@ -766,7 +766,7 @@ void BodySW::set_kinematic_margin(real_t p_margin) {
 	kinematic_safe_margin = p_margin;
 }
 
-_FORCE_INLINE_ void BodySW::add_area(AreaSW *p_area) {
+void BodySW::add_area(AreaSW *p_area) {
 	for (auto it_areas = areas.begin(); it_areas != areas.end(); ++it_areas) {
 		if (it_areas->area == p_area) {
 			it_areas->refCount += 1;
@@ -780,7 +780,7 @@ _FORCE_INLINE_ void BodySW::add_area(AreaSW *p_area) {
 	}
 }
 
-_FORCE_INLINE_ void BodySW::remove_area(AreaSW *p_area) {
+void BodySW::remove_area(AreaSW *p_area) {
 	auto c_area = AreaCMP(p_area);
 
 	auto it_find = std::find(areas.begin(), areas.end(), c_area);
