@@ -113,12 +113,11 @@ Error PCKPacker::flush(bool p_verbose) {
 
 	file->store_32(files.size());
 
-	for (int i = 0; i < files.size(); i++) {
-
-		file->store_pascal_string(files[i].path);
-		files.write[i].offset_offset = file->get_position();
+	for (auto &&f : files) {
+		file->store_pascal_string(f.path);
+		f.offset_offset = file->get_position();
 		file->store_64(0); // offset
-		file->store_64(files[i].size); // size
+		file->store_64(f.size); // size
 
 		// # empty md5
 		file->store_32(0);
@@ -136,10 +135,9 @@ Error PCKPacker::flush(bool p_verbose) {
 	uint8_t *buf = memnew_arr(uint8_t, buf_max);
 
 	int count = 0;
-	for (int i = 0; i < files.size(); i++) {
-
-		FileAccess *src = FileAccess::open(files[i].src_path, FileAccess::READ);
-		uint64_t to_write = files[i].size;
+	for (auto &&f : files) {
+		FileAccess *src = FileAccess::open(f.src_path, FileAccess::READ);
+		uint64_t to_write = f.size;
 		while (to_write > 0) {
 
 			int read = src->get_buffer(buf, MIN(to_write, buf_max));
@@ -148,11 +146,11 @@ Error PCKPacker::flush(bool p_verbose) {
 		};
 
 		uint64_t pos = file->get_position();
-		file->seek(files[i].offset_offset); // go back to store the file's offset
+		file->seek(f.offset_offset); // go back to store the file's offset
 		file->store_64(ofs);
 		file->seek(pos);
 
-		ofs = _align(ofs + files[i].size, alignment);
+		ofs = _align(ofs + f.size, alignment);
 		_pad(file, ofs - pos);
 
 		src->close();
