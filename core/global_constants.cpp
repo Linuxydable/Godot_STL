@@ -59,7 +59,7 @@ struct _GlobalConstant {
 #endif
 };
 
-static Vector<_GlobalConstant> _global_constants;
+static std::vector<_GlobalConstant> _global_constants;
 
 #ifdef DEBUG_METHODS_ENABLED
 
