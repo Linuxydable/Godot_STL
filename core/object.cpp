@@ -117,8 +117,9 @@ MethodInfo::operator Dictionary() const {
 	d["name"] = name;
 	d["args"] = convert_property_list(&arguments);
 	Array da;
-	for (int i = 0; i < default_arguments.size(); i++)
-		da.push_back(default_arguments[i]);
+	for (auto &&arg : default_arguments)
+		da.push_back(arg);
+
 	d["default_args"] = da;
 	d["flags"] = flags;
 	d["id"] = id;
@@ -548,7 +549,7 @@ Variant Object::get(const StringName &p_name, bool *r_valid) const {
 	}
 }
 
-void Object::set_indexed(const Vector<StringName> &p_names, const Variant &p_value, bool *r_valid) {
+void Object::set_indexed(const std::vector<StringName> &p_names, const Variant &p_value, bool *r_valid) {
 	if (p_names.empty()) {
 		if (r_valid)
 			*r_valid = false;
@@ -572,6 +573,7 @@ void Object::set_indexed(const Vector<StringName> &p_names, const Variant &p_val
 	}
 
 	for (int i = 1; i < p_names.size() - 1; i++) {
+
 		value_stack.push_back(value_stack.back()->get().get_named(p_names[i], r_valid));
 
 		if (!*r_valid) {
@@ -599,7 +601,7 @@ void Object::set_indexed(const Vector<StringName> &p_names, const Variant &p_val
 	ERR_FAIL_COND(!value_stack.empty());
 }
 
-Variant Object::get_indexed(const Vector<StringName> &p_names, bool *r_valid) const {
+Variant Object::get_indexed(const std::vector<StringName> &p_names, bool *r_valid) const {
 	if (p_names.empty()) {
 		if (r_valid)
 			*r_valid = false;
@@ -610,10 +612,10 @@ Variant Object::get_indexed(const Vector<StringName> &p_names, bool *r_valid) co
 	Variant current_value = get(p_names[0], &valid);
 	for (int i = 1; i < p_names.size(); i++) {
 		current_value = current_value.get_named(p_names[i], &valid);
-
 		if (!valid)
 			break;
 	}
+
 	if (r_valid)
 		*r_valid = valid;
 
@@ -1177,7 +1179,7 @@ Error Object::emit_signal(const StringName &p_name, const Variant **p_args, int 
 
 	OBJ_DEBUG_LOCK
 
-	Vector<const Variant *> bind_mem;
+	std::vector<const Variant *> bind_mem;
 
 	Error err = OK;
 
@@ -1201,13 +1203,13 @@ Error Object::emit_signal(const StringName &p_name, const Variant **p_args, int 
 			bind_mem.resize(p_argcount + c.binds.size());
 
 			for (int j = 0; j < p_argcount; j++) {
-				bind_mem.write[j] = p_args[j];
+				bind_mem[j] = p_args[j];
 			}
 			for (int j = 0; j < c.binds.size(); j++) {
-				bind_mem.write[p_argcount + j] = &c.binds[j];
+				bind_mem[p_argcount + j] = &c.binds[j];
 			}
 
-			args = (const Variant **)bind_mem.ptr();
+			args = (const Variant **)bind_mem.data();
 			argc = bind_mem.size();
 		}
 
@@ -1426,7 +1428,7 @@ void Object::get_signals_connected_to_this(List<Connection> *p_connections) cons
 	}
 }
 
-Error Object::connect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method, const Vector<Variant> &p_binds, uint32_t p_flags) {
+Error Object::connect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method, const std::vector<Variant> &p_binds, uint32_t p_flags) {
 
 	ERR_FAIL_NULL_V(p_to_object, ERR_INVALID_PARAMETER);
 
@@ -1814,7 +1816,7 @@ Variant::Type Object::get_static_property_type(const StringName &p_property, boo
 	return Variant::NIL;
 }
 
-Variant::Type Object::get_static_property_type_indexed(const Vector<StringName> &p_path, bool *r_valid) const {
+Variant::Type Object::get_static_property_type_indexed(const std::vector<StringName> &p_path, bool *r_valid) const {
 
 	if (p_path.size() == 0) {
 		if (r_valid)
