@@ -30,6 +30,8 @@
 
 #include "file_access_encrypted.h"
 
+#include <algorithm>
+
 #include "core/crypto/crypto_core.h"
 #include "core/os/copymem.h"
 #include "core/print_string.h"
@@ -39,7 +41,7 @@
 
 #define COMP_MAGIC 0x43454447
 
-Error FileAccessEncrypted::open_and_parse(FileAccess *p_base, const Vector<uint8_t> &p_key, Mode p_mode) {
+Error FileAccessEncrypted::open_and_parse(FileAccess *p_base, const std::vector<uint8_t> &p_key, Mode p_mode) {
 
 	ERR_FAIL_COND_V_MSG(file != NULL, ERR_ALREADY_IN_USE, "Can't open file while another file from path '" + file->get_path_absolute() + "' is open.");
 	ERR_FAIL_COND_V(p_key.size() != 32, ERR_INVALID_PARAMETER);
@@ -78,11 +80,11 @@ Error FileAccessEncrypted::open_and_parse(FileAccess *p_base, const Vector<uint8
 
 		data.resize(ds);
 
-		uint32_t blen = p_base->get_buffer(data, ds);
+		uint32_t blen = p_base->get_buffer(data.data(), ds);
 		ERR_FAIL_COND_V(blen != ds, ERR_FILE_CORRUPT);
 
 		CryptoCore::AESContext ctx;
-		ctx.set_decode_key(key, 256);
+		ctx.set_decode_key(key.data(), 256);
 
 		for (size_t i = 0; i < ds; i += 16) {
 
@@ -92,7 +94,7 @@ Error FileAccessEncrypted::open_and_parse(FileAccess *p_base, const Vector<uint8
 		data.resize(length);
 
 		unsigned char hash[16];
-		ERR_FAIL_COND_V(CryptoCore::md5(data, data.size(), hash) != OK, ERR_BUG);
+		ERR_FAIL_COND_V(CryptoCore::md5(data.data(), data.size(), hash) != OK, ERR_BUG);
 
 		ERR_FAIL_COND_V_MSG(String::md5(hash) != String::md5(md5d), ERR_FILE_CORRUPT, "The MD5 sum of the decrypted file does not match the expected value. It could be that the file is corrupt, or that the provided decryption key is invalid.");
 
@@ -109,7 +111,7 @@ Error FileAccessEncrypted::open_and_parse_password(FileAccess *p_base, const Str
 	ERR_FAIL_COND_V(cs.length() != 32, ERR_INVALID_PARAMETER);
 
 	// need_update : use std::array
-	Vector<uint8_t> key;
+	std::vector<uint8_t> key;
 
 	key.resize(32);
 
@@ -129,26 +131,24 @@ void FileAccessEncrypted::close(){
 		return;
 
 	if (writing) {
-		Vector<uint8_t> compressed;
+		std::vector<uint8_t> compressed;
 
 		if(data.size() % 16){
-			data.size() += 16 - (data.size() % 16);
+			data.resize(16 - (data.size() % 16));
 		}
 
 		unsigned char hash[16];
 
-		ERR_FAIL_COND(CryptoCore::md5(data.ptr(), data.size(), hash) != OK); // Bug?
+		ERR_FAIL_COND(CryptoCore::md5(data.data(), data.size(), hash) != OK); // Bug?
 
 		compressed.resize(data.size() );
-
-		zeromem(compressed, data.size() );
 
 		for(decltype(data.size() ) i = 0; i < data.size(); i++){
 			compressed[i] = data[i];
 		}
 
 		CryptoCore::AESContext ctx;
-		ctx.set_encode_key(key, 256);
+		ctx.set_encode_key(key.data(), 256);
 
 		for(decltype(data.size() ) i = 0; i < data.size(); i += 16){
 			ctx.encrypt_ecb(&compressed[i], &compressed[i]);
@@ -160,7 +160,7 @@ void FileAccessEncrypted::close(){
 		file->store_buffer(hash, 16);
 		file->store_64(data.size() );
 
-		file->store_buffer(compressed, compressed.size());
+		file->store_buffer(compressed.data(), compressed.size());
 		file->close();
 
 		memdelete(file);
