@@ -224,12 +224,12 @@ void StreamPeer::put_utf8_string(const String &p_string) {
 void StreamPeer::put_var(const Variant &p_variant, bool p_full_objects) {
 
 	int len = 0;
-	Vector<uint8_t> buf;
+	std::vector<uint8_t> buf;
 	encode_variant(p_variant, NULL, len, p_full_objects);
 	buf.resize(len);
 	put_32(len);
-	encode_variant(p_variant, buf.ptrw(), len, p_full_objects);
-	put_data(buf.ptr(), buf.size());
+	encode_variant(p_variant, buf.data(), len, p_full_objects);
+	put_data(buf.data(), buf.size());
 }
 
 uint8_t StreamPeer::get_u8() {
@@ -335,13 +335,17 @@ String StreamPeer::get_string(int p_bytes) {
 		p_bytes = get_u32();
 	ERR_FAIL_COND_V(p_bytes < 0, String());
 
-	Vector<char> buf;
-	Error err = buf.resize(p_bytes + 1);
+	std::vector<char> buf;
+
+	buf.resize(p_bytes + 1);
+
+	Error err = get_data((uint8_t *)&buf[0], p_bytes);
+
 	ERR_FAIL_COND_V(err != OK, String());
-	err = get_data((uint8_t *)&buf[0], p_bytes);
-	ERR_FAIL_COND_V(err != OK, String());
-	buf.write[p_bytes] = 0;
-	return buf.ptr();
+
+	buf[p_bytes] = 0;
+
+	return buf.data();
 }
 String StreamPeer::get_utf8_string(int p_bytes) {
 
@@ -349,27 +353,33 @@ String StreamPeer::get_utf8_string(int p_bytes) {
 		p_bytes = get_u32();
 	ERR_FAIL_COND_V(p_bytes < 0, String());
 
-	Vector<uint8_t> buf;
-	Error err = buf.resize(p_bytes);
-	ERR_FAIL_COND_V(err != OK, String());
-	err = get_data(buf.ptrw(), p_bytes);
+	std::vector<uint8_t> buf;
+
+	buf.resize(p_bytes);
+
+	Error err = get_data(buf.data(), p_bytes);
+
 	ERR_FAIL_COND_V(err != OK, String());
 
 	String ret;
-	ret.parse_utf8((const char *)buf.ptr(), buf.size());
+
+	ret.parse_utf8((const char *)buf.data(), buf.size());
+
 	return ret;
 }
 Variant StreamPeer::get_var(bool p_allow_objects) {
-
 	int len = get_32();
-	Vector<uint8_t> var;
-	Error err = var.resize(len);
-	ERR_FAIL_COND_V(err != OK, Variant());
-	err = get_data(var.ptrw(), len);
+
+	std::vector<uint8_t> var;
+
+	var.resize(len);
+
+	Error err = get_data(var.data(), len);
+
 	ERR_FAIL_COND_V(err != OK, Variant());
 
 	Variant ret;
-	err = decode_variant(ret, var.ptr(), len, NULL, p_allow_objects);
+	err = decode_variant(ret, var.data(), len, NULL, p_allow_objects);
 	ERR_FAIL_COND_V_MSG(err != OK, Variant(), "Error when trying to decode Variant.");
 
 	return ret;
