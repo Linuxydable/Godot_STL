@@ -1019,9 +1019,10 @@ public:
 		}
 
 		void clear() {
-			for(auto command : commands){
-				delete command;
+			for(auto&& command : commands){
+				memdelete(command);
 			}
+
 			commands.clear();
 
 			clip = false;
