@@ -31,6 +31,8 @@
 #ifndef FILE_ACCESS_BUFFERED_H
 #define FILE_ACCESS_BUFFERED_H
 
+#include <vector>
+
 #include "core/os/file_access.h"
 #include "core/pool_vector.h"
 #include "core/ustring.h"
@@ -61,8 +63,7 @@ protected:
 	} file;
 
 	mutable struct Cache {
-
-		Vector<uint8_t> buffer;
+		std::vector<uint8_t> buffer;
 		int offset;
 	} cache;
 
