@@ -422,7 +422,7 @@ Error HTTPClient::poll() {
 					// End of response, parse.
 					response_str.push_back(0);
 					String response;
-					response.parse_utf8((const char *)response_str.ptr());
+					response.parse_utf8((const char *)response_str.data());
 					std::vector<String> responses = response.split("\n");
 					body_size = -1;
 					chunked = false;
@@ -596,7 +596,7 @@ PoolByteArray HTTPClient::read_response_body_chunk() {
 			} else {
 
 				int rec = 0;
-				err = _get_http_data(&chunk.write[chunk.size() - chunk_left], chunk_left, rec);
+				err = _get_http_data(&chunk[chunk.size() - chunk_left], chunk_left, rec);
 				if (rec == 0) {
 					break;
 				}
@@ -612,7 +612,7 @@ PoolByteArray HTTPClient::read_response_body_chunk() {
 
 					ret.resize(chunk.size() - 2);
 					PoolByteArray::Write w = ret.write();
-					copymem(w.ptr(), chunk.ptr(), chunk.size() - 2);
+					copymem(w.ptr(), chunk.data(), chunk.size() - 2);
 					chunk.clear();
 				}
 
