@@ -731,12 +731,11 @@ String ResourceLoader::get_resource_type(const String &p_path) {
 }
 
 String ResourceLoader::_path_remap(const String &p_path, bool *r_translation_remapped) {
-
 	String new_path = p_path;
 
 	if (translation_remaps.has(new_path)) {
+		std::vector<String> &v = *translation_remaps.getptr(new_path);
 
-		Vector<String> &v = *translation_remaps.getptr(new_path);
 		String locale = TranslationServer::get_singleton()->get_locale();
 		if (r_translation_remapped) {
 			*r_translation_remapped = true;
@@ -856,10 +855,10 @@ void ResourceLoader::load_translation_remaps() {
 	for (List<Variant>::Element *E = keys.front(); E; E = E->next()) {
 
 		Array langs = remaps[E->get()];
-		Vector<String> lang_remaps;
+		std::vector<String> lang_remaps;
 		lang_remaps.resize(langs.size());
 		for (int i = 0; i < langs.size(); i++) {
-			lang_remaps.write[i] = langs[i];
+			lang_remaps[i] = langs[i];
 		}
 
 		translation_remaps[String(E->get())] = lang_remaps;
@@ -960,7 +959,7 @@ void ResourceLoader::add_custom_loaders() {
 
 void ResourceLoader::remove_custom_loaders() {
 
-	Vector<Ref<ResourceFormatLoader> > custom_loaders;
+	std::vector<Ref<ResourceFormatLoader> > custom_loaders;
 	for (int i = 0; i < loader_count; ++i) {
 		if (loader[i]->get_script_instance()) {
 			custom_loaders.push_back(loader[i]);
@@ -1003,7 +1002,7 @@ bool ResourceLoader::abort_on_missing_resource = true;
 bool ResourceLoader::timestamp_on_load = false;
 
 SelfList<Resource>::List ResourceLoader::remapped_list;
-HashMap<String, Vector<String> > ResourceLoader::translation_remaps;
+HashMap<String, std::vector<String> > ResourceLoader::translation_remaps;
 HashMap<String, String> ResourceLoader::path_remaps;
 
 ResourceLoaderImport ResourceLoader::import = NULL;
