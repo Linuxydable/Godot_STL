@@ -30,6 +30,8 @@
 
 #include "main.h"
 
+#include <iostream>
+
 #include <vector>
 
 #include "core/crypto/crypto.h"
@@ -366,6 +368,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	List<String> main_args;
 
 	for (int i = 0; i < argc; i++) {
+		std::cout << argv[i] << std::endl;
 
 		args.push_back(String::utf8(argv[i]));
 	}
@@ -642,10 +645,9 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 				OS::get_singleton()->print("Missing render thread mode argument, aborting.\n");
 				goto error;
 			}
-#ifdef TOOLS_ENABLED
 		} else if (I->get() == "-e" || I->get() == "--editor") { // starts editor
-
 			editor = true;
+#ifdef TOOLS_ENABLED
 		} else if (I->get() == "-p" || I->get() == "--project-manager") { // starts project manager
 
 			project_manager = true;
@@ -831,7 +833,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	} else {
 
 #ifdef TOOLS_ENABLED
-		editor = false;
+		//editor = false;
 #else
 		String error_msg = "Error: Could not load game data at path '" + project_path + "'. Is the .pck file missing?\n";
 		OS::get_singleton()->print("%s", error_msg.ascii().get_data());
@@ -878,7 +880,7 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	if (script_debugger) {
 		//there is a debugger, parse breakpoints
 
-		for(auto&& bp : breakpoints){
+		for (auto &&bp : breakpoints) {
 			int sp = bp.find_last(":");
 			ERR_CONTINUE_MSG(sp == -1, "Invalid breakpoint: '" + bp + "', expected file:line format.");
 

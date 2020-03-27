@@ -474,18 +474,25 @@ Dictionary PolygonPathFinder::_get_data() const {
 		PoolVector<Vector2>::Write wp = p.write();
 		PoolVector<float>::Write pw = penalties.write();
 
-		for (decltype(points.size()) i = 0; i < points.size() - 2; ++i) {
+		for (decltype(points.size()) i = 0; i < points.size(); ++i) {
 			wp[i] = points[i].pos;
+
 			pw[i] = points[i].penalty;
+
 			PoolVector<int> c;
+
 			c.resize(points[i].connections.size());
+
 			{
 				PoolVector<int>::Write cw = c.write();
+
 				int idx = 0;
+
 				for (Set<int>::Element *E = points[i].connections.front(); E; E = E->next()) {
 					cw[idx++] = E->get();
 				}
 			}
+
 			connections[i] = c;
 		}
 	}
