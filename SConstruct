@@ -330,6 +330,8 @@ if selected_platform in platform_list:
             env.Append(CCFLAGS=['/W4'])
         elif (env["warnings"] == 'moderate'):
             env.Append(CCFLAGS=['/W2'] + enable_usefull_warnings)
+        elif (env["warnings"] == 'no'):
+            env.Append(CCFLAGS=['/w'])
         else: # 'no'
             env.Append(CCFLAGS=['/W3'] + enable_usefull_warnings)
 
