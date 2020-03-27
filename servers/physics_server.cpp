@@ -777,7 +777,7 @@ int PhysicsServerManager::find_server_id(const String &p_name) {
 	});
 
 	if (it_server != physics_servers.rend()) {
-		return std::distance(physics_servers.rbegin(), it_server);
+		return std::distance(physics_servers.begin(), it_server.base()) - 1;
 	}
 
 	return -1;
