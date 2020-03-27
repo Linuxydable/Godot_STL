@@ -1471,7 +1471,7 @@ int ProjectList::get_single_selected_index() const {
 
 	// need_update : rewrite this function and try to not use std::distance
 	if (it_projects != _projects.end()) {
-		return std::distance(_projects.begin(), _projects.end());
+		return std::distance(_projects.begin(), it_projects);
 	}
 
 	return 0;
