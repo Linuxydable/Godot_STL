@@ -29,6 +29,9 @@
 /*************************************************************************/
 
 #include "polygon_path_finder.h"
+
+#include <algorithm>
+
 #include "core/math/geometry.h"
 
 bool PolygonPathFinder::_is_point_inside(const Vector2 &p_point) const {
@@ -465,16 +468,28 @@ Dictionary PolygonPathFinder::_get_data() const {
 	PoolVector<Vector2> p;
 	PoolVector<int> ind;
 	Array connections;
-	p.resize(MAX(0, points.size() - 2));
-	connections.resize(MAX(0, points.size() - 2));
+
+	decltype(points.size()) size = 0;
+
+	if (points.size() > 2) {
+		size = points.size() - 2;
+	}
+
+	p.resize(size);
+
+	connections.resize(size);
+
 	ind.resize(edges.size() * 2);
+
 	PoolVector<float> penalties;
-	penalties.resize(MAX(0, points.size() - 2));
+
+	penalties.resize(size);
+
 	{
 		PoolVector<Vector2>::Write wp = p.write();
 		PoolVector<float>::Write pw = penalties.write();
 
-		for (decltype(points.size()) i = 0; i < points.size(); ++i) {
+		for (decltype(size) i = 0; i < size; ++i) {
 			wp[i] = points[i].pos;
 
 			pw[i] = points[i].penalty;

@@ -367,6 +367,8 @@ Error Main::setup(const char *execpath, int argc, char *argv[], bool p_second_ph
 	List<String> args;
 	List<String> main_args;
 
+	std::cout << "argc : " << argc << std::endl;
+
 	for (int i = 0; i < argc; i++) {
 		std::cout << argv[i] << std::endl;
 
