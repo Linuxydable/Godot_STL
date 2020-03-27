@@ -47,27 +47,27 @@ Size2 Tabs::get_minimum_size() const {
 	Ref<Font> font = get_font("font");
 
 	Size2 ms(0, MAX(MAX(tab_bg->get_minimum_size().height, tab_fg->get_minimum_size().height), tab_disabled->get_minimum_size().height) + font->get_height());
-	
-	for(auto it_tabs = tabs.begin(); it_tabs != tabs.end(); ++it_tabs){
+
+	for (auto it_tabs = tabs.begin(); it_tabs != tabs.end(); ++it_tabs) {
 		Ref<Texture> tex = (*it_tabs).icon;
 
 		if (tex.is_valid()) {
 			ms.height = MAX(ms.height, tex->get_size().height);
 
-			if((*it_tabs).text != "")
+			if ((*it_tabs).text != "")
 				ms.width += get_constant("hseparation");
 		}
 
-		ms.width += Math::ceil(font->get_string_size( (*it_tabs).xl_text).width);
+		ms.width += Math::ceil(font->get_string_size((*it_tabs).xl_text).width);
 
-		if( (*it_tabs).disabled)
+		if ((*it_tabs).disabled)
 			ms.width += tab_disabled->get_minimum_size().width;
-		else if(it_tabs == it_current)
+		else if (it_tabs == it_current)
 			ms.width += tab_fg->get_minimum_size().width;
 		else
 			ms.width += tab_bg->get_minimum_size().width;
 
-		if( (*it_tabs).right_button.is_valid() ){
+		if ((*it_tabs).right_button.is_valid()) {
 			Ref<Texture> rb = (*it_tabs).right_button;
 
 			Size2 bms = rb->get_size();
@@ -78,7 +78,7 @@ Size2 Tabs::get_minimum_size() const {
 			ms.height = MAX(bms.height + tab_bg->get_minimum_size().height, ms.height);
 		}
 
-		if(cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && it_tabs == it_current) ){
+		if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && it_tabs == it_current)) {
 			Ref<Texture> cb = get_icon("close");
 
 			Size2 bms = cb->get_size();
@@ -96,8 +96,8 @@ Size2 Tabs::get_minimum_size() const {
 }
 
 // need_udpate : do not use p_current
-void Tabs::_set_current_it_tab(const std::vector<Tab>::iterator& it_tab){
-	if(it_tab == it_current)
+void Tabs::_set_current_it_tab(const std::vector<Tab>::iterator &it_tab) {
+	if (it_tab == it_current)
 		return;
 
 	int p_current = std::distance(tabs.begin(), it_tab);
@@ -166,9 +166,9 @@ void Tabs::_gui_input(const Ref<InputEvent> &p_event) {
 
 		if (rb_pressing && !mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 
-			if(it_rb_hover != tabs.end() ){
+			if (it_rb_hover != tabs.end()) {
 				//pressed
-				emit_signal("right_button_pressed", std::distance(tabs.begin(), it_rb_hover) );
+				emit_signal("right_button_pressed", std::distance(tabs.begin(), it_rb_hover));
 			}
 
 			rb_pressing = false;
@@ -177,9 +177,9 @@ void Tabs::_gui_input(const Ref<InputEvent> &p_event) {
 
 		if (cb_pressing && !mb->is_pressed() && mb->get_button_index() == BUTTON_LEFT) {
 
-			if(it_cb_hover != tabs.end() ){
+			if (it_cb_hover != tabs.end()) {
 				//pressed
-				emit_signal("tab_close", std::distance(tabs.begin(), it_cb_hover) );
+				emit_signal("tab_close", std::distance(tabs.begin(), it_cb_hover));
 			}
 
 			cb_pressing = false;
@@ -213,20 +213,20 @@ void Tabs::_gui_input(const Ref<InputEvent> &p_event) {
 				}
 			}
 
-			for(auto it_tabs = tabs.begin() + offset; it_tabs != tabs.end(); ++it_tabs){
-				if( (*it_tabs).rb_rect.has_point(pos) ){
+			for (auto it_tabs = tabs.begin() + offset; it_tabs != tabs.end(); ++it_tabs) {
+				if ((*it_tabs).rb_rect.has_point(pos)) {
 					rb_pressing = true;
 					update();
 					return;
 				}
 
-				if( (*it_tabs).cb_rect.has_point(pos) ){
+				if ((*it_tabs).cb_rect.has_point(pos)) {
 					cb_pressing = true;
 					update();
 					return;
 				}
 
-				if(!(*it_tabs).disabled && pos.x >= (*it_tabs).ofs_cache && pos.x < (*it_tabs).ofs_cache + (*it_tabs).size_cache){
+				if (!(*it_tabs).disabled && pos.x >= (*it_tabs).ofs_cache && pos.x < (*it_tabs).ofs_cache + (*it_tabs).size_cache) {
 					_set_current_it_tab(it_tabs);
 
 					emit_signal("tab_clicked", std::distance(tabs.begin(), it_tabs));
@@ -243,7 +243,7 @@ void Tabs::_notification(int p_what) {
 	switch (p_what) {
 
 		case NOTIFICATION_TRANSLATION_CHANGED: {
-			for(auto&& tab : tabs){
+			for (auto &&tab : tabs) {
 				tab.xl_text = tr(tab.text);
 			}
 			minimum_size_changed();
@@ -271,7 +271,7 @@ void Tabs::_notification(int p_what) {
 			int w = 0;
 			int mw = 0;
 
-			for(auto it = tabs.begin(); it != tabs.end(); ++it){
+			for (auto it = tabs.begin(); it != tabs.end(); ++it) {
 				(*it).ofs_cache = mw;
 
 				mw += _get_tab_width(it);
@@ -299,7 +299,7 @@ void Tabs::_notification(int p_what) {
 			{
 				auto it_tabs = tabs.begin() + offset;
 
-				for(; it_tabs != tabs.end(); ++it_tabs){
+				for (; it_tabs != tabs.end(); ++it_tabs) {
 					(*it_tabs).ofs_cache = w;
 
 					int lsize = (*it_tabs).size_cache;
@@ -308,11 +308,11 @@ void Tabs::_notification(int p_what) {
 
 					Color col;
 
-					if( (*it_tabs).disabled){
+					if ((*it_tabs).disabled) {
 						sb = tab_disabled;
 
 						col = color_disabled;
-					}else if(it_tabs == it_current){
+					} else if (it_tabs == it_current) {
 						sb = tab_fg;
 
 						col = color_fg;
@@ -322,7 +322,7 @@ void Tabs::_notification(int p_what) {
 						col = color_bg;
 					}
 
-					if(w + lsize > limit){
+					if (w + lsize > limit) {
 						missing_right = true;
 						break;
 					}
@@ -334,20 +334,18 @@ void Tabs::_notification(int p_what) {
 
 					Size2i sb_ms = sb->get_minimum_size();
 					Ref<Texture> icon = (*it_tabs).icon;
-					if(icon.is_valid() ){
+					if (icon.is_valid()) {
 						icon->draw(ci, Point2i(w, sb->get_margin(MARGIN_TOP) + ((sb_rect.size.y - sb_ms.y) - icon->get_height()) / 2));
-						
-						if( (*it_tabs).text != "")
+
+						if ((*it_tabs).text != "")
 							w += icon->get_width() + get_constant("hseparation");
 					}
 
-					font->draw(ci, Point2i(w
-						, sb->get_margin(MARGIN_TOP) + ((sb_rect.size.y - sb_ms.y) - font->get_height()) / 2 + font->get_ascent())
-						, (*it_tabs).xl_text, col, (*it_tabs).size_text);
+					font->draw(ci, Point2i(w, sb->get_margin(MARGIN_TOP) + ((sb_rect.size.y - sb_ms.y) - font->get_height()) / 2 + font->get_ascent()), (*it_tabs).xl_text, col, (*it_tabs).size_text);
 
 					w += (*it_tabs).size_text;
 
-					if( (*it_tabs).right_button.is_valid() ){
+					if ((*it_tabs).right_button.is_valid()) {
 						Ref<StyleBox> style = get_stylebox("button");
 
 						Ref<Texture> rb = (*it_tabs).right_button;
@@ -360,7 +358,7 @@ void Tabs::_notification(int p_what) {
 						rb_rect.position.x = w;
 						rb_rect.position.y = sb->get_margin(MARGIN_TOP) + ((sb_rect.size.y - sb_ms.y) - (rb_rect.size.y)) / 2;
 
-						if(it_tabs == it_rb_hover){
+						if (it_tabs == it_rb_hover) {
 							if (rb_pressing)
 								get_stylebox("button_pressed")->draw(ci, rb_rect);
 							else
@@ -368,13 +366,13 @@ void Tabs::_notification(int p_what) {
 						}
 
 						rb->draw(ci, Point2i(w + style->get_margin(MARGIN_LEFT), rb_rect.position.y + style->get_margin(MARGIN_TOP)));
-						
+
 						w += rb->get_width();
-						
+
 						(*it_tabs).rb_rect = rb_rect;
 					}
 
-					if(cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && it_tabs == it_current) ){
+					if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && it_tabs == it_current)) {
 						Ref<StyleBox> style = get_stylebox("button");
 
 						Ref<Texture> cb = close;
@@ -387,7 +385,7 @@ void Tabs::_notification(int p_what) {
 						cb_rect.position.x = w;
 						cb_rect.position.y = sb->get_margin(MARGIN_TOP) + ((sb_rect.size.y - sb_ms.y) - (cb_rect.size.y)) / 2;
 
-						if(!(*it_tabs).disabled && it_tabs == it_cb_hover){
+						if (!(*it_tabs).disabled && it_tabs == it_cb_hover) {
 							if (cb_pressing)
 								get_stylebox("button_pressed")->draw(ci, cb_rect);
 							else
@@ -395,9 +393,9 @@ void Tabs::_notification(int p_what) {
 						}
 
 						cb->draw(ci, Point2i(w + style->get_margin(MARGIN_LEFT), cb_rect.position.y + style->get_margin(MARGIN_TOP)));
-						
+
 						w += cb->get_width();
-						
+
 						(*it_tabs).cb_rect = cb_rect;
 					}
 
@@ -406,9 +404,9 @@ void Tabs::_notification(int p_what) {
 
 				auto i = std::distance(tabs.begin(), it_tabs);
 
-				if(missing_right){
+				if (missing_right) {
 					max_drawn_tab = i - 1;
-				}else{
+				} else {
 					max_drawn_tab = i;
 				}
 			}
@@ -435,14 +433,14 @@ void Tabs::_notification(int p_what) {
 	}
 }
 
-int Tabs::get_tab_count() const{
+int Tabs::get_tab_count() const {
 	return tabs.size();
 }
 
-void Tabs::set_current_tab(int p_current){
+void Tabs::set_current_tab(int p_current) {
 	auto it = tabs.begin() + p_current;
 
-	if(it == it_current)
+	if (it == it_current)
 		return;
 
 	ERR_FAIL_INDEX(p_current, get_tab_count());
@@ -545,10 +543,10 @@ void Tabs::set_tab_close_display_policy(CloseButtonDisplayPolicy p_policy) {
 	update();
 }
 
-Rect2 Tabs::_get_tab_rect(const std::vector<Tab>::iterator& it_tabs) const{
-	ERR_FAIL_COND_V(it_tabs >= tabs.end(), Rect2() );
+Rect2 Tabs::_get_tab_rect(const std::vector<Tab>::iterator &it_tabs) const {
+	ERR_FAIL_COND_V(it_tabs >= tabs.end(), Rect2());
 
-	return Rect2( (*it_tabs).ofs_cache, 0, (*it_tabs).size_cache, get_size().height);
+	return Rect2((*it_tabs).ofs_cache, 0, (*it_tabs).size_cache, get_size().height);
 }
 
 void Tabs::_update_hover() {
@@ -563,19 +561,19 @@ void Tabs::_update_hover() {
 
 	auto hover_buttons = tabs.end();
 
-	for(auto it_tabs = tabs.begin(); it_tabs != tabs.end(); ++it_tabs){
+	for (auto it_tabs = tabs.begin(); it_tabs != tabs.end(); ++it_tabs) {
 		Rect2 rect = _get_tab_rect(it_tabs);
-		
-		if(rect.has_point(pos) ){
+
+		if (rect.has_point(pos)) {
 			hover_now = it_tabs;
 		}
-		
-		if( (*it_tabs).rb_rect.has_point(pos) ){
+
+		if ((*it_tabs).rb_rect.has_point(pos)) {
 			it_rb_hover = it_tabs;
 			it_cb_hover = tabs.end();
 			hover_buttons = it_tabs;
 			break;
-		}else if(!(*it_tabs).disabled && (*it_tabs).cb_rect.has_point(pos) ){
+		} else if (!(*it_tabs).disabled && (*it_tabs).cb_rect.has_point(pos)) {
 			it_cb_hover = it_tabs;
 			it_rb_hover = tabs.end();
 			hover_buttons = it_tabs;
@@ -583,14 +581,16 @@ void Tabs::_update_hover() {
 		}
 	}
 
-	auto i = std::distance(tabs.begin(), hover_now);
+	if (hover_now != tabs.end()) {
+		auto i = std::distance(tabs.begin(), hover_now);
 
-	if (hover != i) {
-		hover = i;
-		emit_signal("tab_hover", i);
+		if (hover != i) {
+			hover = i;
+			emit_signal("tab_hover", i);
+		}
 	}
 
-	if(hover_buttons == tabs.end() ){ // no hover
+	if (hover_buttons == tabs.end()) { // no hover
 		it_rb_hover = tabs.end();
 		it_cb_hover = tabs.end();
 	}
@@ -881,7 +881,7 @@ void Tabs::move_tab(int from, int to) {
 	update();
 }
 
-unsigned Tabs::_get_tab_width(const std::vector<Tab>::iterator& it_tabs) const{
+unsigned Tabs::_get_tab_width(const std::vector<Tab>::iterator &it_tabs) const {
 	ERR_FAIL_COND_V(it_tabs >= tabs.end(), 0);
 
 	Ref<StyleBox> tab_bg = get_stylebox("tab_bg");
@@ -898,27 +898,27 @@ unsigned Tabs::_get_tab_width(const std::vector<Tab>::iterator& it_tabs) const{
 
 	if (tex.is_valid()) {
 		x += tex->get_width();
-		if( (*it_tabs).text != "")
+		if ((*it_tabs).text != "")
 			x += get_constant("hseparation");
 	}
 
-	x += Math::ceil(font->get_string_size( (*it_tabs).xl_text).width);
+	x += Math::ceil(font->get_string_size((*it_tabs).xl_text).width);
 
-	if( (*it_tabs).disabled)
+	if ((*it_tabs).disabled)
 		x += tab_disabled->get_minimum_size().width;
-	else if(it_tabs == it_current)
+	else if (it_tabs == it_current)
 		x += tab_fg->get_minimum_size().width;
 	else
 		x += tab_bg->get_minimum_size().width;
 
-	if( (*it_tabs).right_button.is_valid() ){
+	if ((*it_tabs).right_button.is_valid()) {
 		Ref<Texture> rb = (*it_tabs).right_button;
 
 		x += rb->get_width();
 		x += get_constant("hseparation");
 	}
 
-	if(cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && it_tabs == it_current) ){
+	if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && it_tabs == it_current)) {
 		Ref<Texture> cb = get_icon("close");
 
 		x += cb->get_width();
