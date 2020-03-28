@@ -6250,9 +6250,9 @@ GDScriptParser::DataType GDScriptParser::_reduce_node_type(Node *p_node) {
 				break;
 			} else if (current_function) {
 				auto it_find = std::find(current_function->arguments.begin(), current_function->arguments.end(), id->name);
-				auto dist = std::distance(current_function->arguments.begin(), it_find);
-				if (dist >= 0) {
-					node_type = current_function->argument_types[dist];
+				if (it_find != current_function->arguments.end()) {
+					auto idx = std::distance(current_function->arguments.begin(), it_find);
+					node_type = current_function->argument_types[idx];
 					break;
 				}
 			}
