@@ -1471,23 +1471,25 @@ String Variant::stringify(List<const void *> &stack) const {
 			List<Variant> keys;
 			d.get_key_list(&keys);
 
-			std::vector<_VariantStrPair> pairs;
+			if (!keys.empty()) {
+				std::vector<_VariantStrPair> pairs;
 
-			for (List<Variant>::Element *E = keys.front(); E; E = E->next()) {
+				for (List<Variant>::Element *E = keys.front(); E; E = E->next()) {
 
-				_VariantStrPair sp;
-				sp.key = E->get().stringify(stack);
-				sp.value = d[E->get()].stringify(stack);
+					_VariantStrPair sp;
+					sp.key = E->get().stringify(stack);
+					sp.value = d[E->get()].stringify(stack);
 
-				pairs.push_back(sp);
+					pairs.push_back(sp);
+				}
+
+				std::sort(pairs.begin(), pairs.end());
+				str += pairs.front().key + ":" + pairs.front().value;
+				std::for_each(pairs.begin() + 1, pairs.end(), [&](auto &&pair) {
+					str += ", ";
+					str += pair.key + ":" + pair.value;
+				});
 			}
-
-			std::sort(pairs.begin(), pairs.end());
-			str += pairs.front().key + ":" + pairs.front().value;
-			std::for_each(pairs.begin() + 1, pairs.end(), [&](const _VariantStrPair &pair) {
-				str += ", ";
-				str += pair.key + ":" + pair.value;
-			});
 
 			str += "}";
 
