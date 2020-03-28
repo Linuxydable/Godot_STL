@@ -2044,11 +2044,14 @@ void EditorInspector::_multiple_properties_changed(std::vector<String> p_paths, 
 	ERR_FAIL_COND(p_paths.size() == 0 || p_values.size() == 0);
 	ERR_FAIL_COND(p_paths.size() != p_values.size());
 	String names;
-	names += p_paths.front();
-	std::for_each(p_paths.begin() + 1, p_paths.end(), [&names](const String &path) {
-		names += ",";
-		names += path;
-	});
+
+	if (!p_paths.empty()) {
+		names += p_paths.front();
+		std::for_each(p_paths.begin() + 1, p_paths.end(), [&names](auto &&path) {
+			names += ",";
+			names += path;
+		});
+	}
 
 	undo_redo->create_action(TTR("Set Multiple:") + " " + names, UndoRedo::MERGE_ENDS);
 	for (decltype(p_paths.size()) i = 0; i < p_paths.size(); ++i) {
