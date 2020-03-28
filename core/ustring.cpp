@@ -946,12 +946,15 @@ std::vector<int> String::split_ints_mk(const std::vector<String> &p_splitters, b
 
 String String::join(std::vector<String> parts) {
 	String ret;
-	ret += parts.front();
 
-	std::for_each(parts.begin() + 1, parts.end(), [&](auto &&part) {
-		ret += *this;
-		ret += part;
-	});
+	if (!parts.empty()) {
+		ret += parts.front();
+
+		std::for_each(parts.begin() + 1, parts.end(), [&](auto &&part) {
+			ret += *this;
+			ret += part;
+		});
+	}
 
 	return ret;
 }
