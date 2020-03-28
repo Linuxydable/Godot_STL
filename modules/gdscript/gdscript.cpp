@@ -257,9 +257,10 @@ void GDScript::get_script_property_list(List<PropertyInfo> *p_list) const {
 			msort.push_back(ms);
 		}
 
-		std::sort(msort.rbegin(), msort.rend());
-		for (auto &&m : msort) {
+		std::sort(msort.begin(), msort.end());
+		std::reverse(msort.begin(), msort.end());
 
+		for (auto &&m : msort) {
 			props.push_front(sptr->member_info[m.name]);
 		}
 
@@ -1107,9 +1108,11 @@ void GDScriptInstance::get_property_list(List<PropertyInfo> *p_properties) const
 			msort.push_back(ms);
 		}
 
-		std::sort(msort.rbegin(), msort.rend());
-		for (auto &&m : msort) {
+		std::sort(msort.begin(), msort.end());
 
+		std::reverse(msort.begin(), msort.end());
+		
+		for (auto &&m : msort) {
 			props.push_front(sptr->member_info[m.name]);
 		}
 
