@@ -1201,24 +1201,28 @@ EditorFileSystemDirectory *EditorFileSystem::get_filesystem() {
 }
 
 void EditorFileSystem::_save_filesystem_cache(EditorFileSystemDirectory *p_dir, FileAccess *p_file) {
-
 	if (!p_dir)
 		return; //none
+
 	p_file->store_line("::" + p_dir->get_path() + "::" + String::num(p_dir->modified_time));
 
 	for (auto &&fi : p_dir->files) {
-
 		if (fi->import_group_file != String()) {
 			group_file_cache.insert(fi->import_group_file);
 		}
-		String s = fi->file + "::" + fi->type + "::" + itos(fi->modified_time) + "::" + itos(fi->import_modified_time) + "::" + itos(fi->import_valid) + "::" + fi->import_group_file + "::" + fi->script_class_name + "<>" + fi->script_class_extends + "<>" + fi->script_class_icon_path;
-		s += "::";
-		s += fi->deps.front();
 
-		std::for_each(fi->deps.begin() + 1, fi->deps.end(), [&s](const String &dep) {
-			s += "<>";
-			s += dep;
-		});
+		String s = fi->file + "::" + fi->type + "::" + itos(fi->modified_time) + "::" + itos(fi->import_modified_time) + "::" + itos(fi->import_valid) + "::" + fi->import_group_file + "::" + fi->script_class_name + "<>" + fi->script_class_extends + "<>" + fi->script_class_icon_path;
+
+		s += "::";
+
+		if(!fi->deps.empty()){
+			s += fi->deps.front();
+
+			std::for_each(fi->deps.begin() + 1, fi->deps.end(),
+					[&](auto &&dep) {
+						s += "<>" + dep;
+					});
+		}
 
 		p_file->store_line(s);
 	}
