@@ -1330,7 +1330,7 @@ void *NativeScriptLanguage::get_instance_binding_data(size_t p_idx, Object *p_ob
 	std::vector<void *> *binding_data = (std::vector<void *> *)p_object->get_script_instance_binding(lang_idx);
 
 	if (!binding_data)
-		return nullptr; // should never happen.
+		return NULL; // should never happen.
 
 	if (binding_data->size() <= p_idx) {
 		// okay, add new elements here.
@@ -1339,7 +1339,7 @@ void *NativeScriptLanguage::get_instance_binding_data(size_t p_idx, Object *p_ob
 		binding_data->resize(p_idx + 1);
 
 		for (auto i = old_size; i <= p_idx; ++i) {
-			(*binding_data)[i] = nullptr;
+			(*binding_data)[i] = NULL;
 		}
 	}
 
@@ -1361,7 +1361,7 @@ void *NativeScriptLanguage::alloc_instance_binding_data(Object *p_object) {
 	binding_data->resize(binding_functions.size());
 
 	for (decltype(binding_functions.size()) i = 0; i < binding_functions.size(); ++i) {
-		(*binding_data)[i] = nullptr;
+		(*binding_data)[i] = NULL;
 	}
 
 	binding_instances.insert(binding_data);
@@ -1450,12 +1450,12 @@ void NativeScriptLanguage::set_global_type_tag(int p_idx, StringName p_class_nam
 
 const void *NativeScriptLanguage::get_global_type_tag(int p_idx, StringName p_class_name) const {
 	if (!global_type_tags.has(p_idx))
-		return nullptr;
+		return NULL;
 
 	const HashMap<StringName, const void *> &tags = global_type_tags[p_idx];
 
 	if (!tags.has(p_class_name))
-		return nullptr;
+		return NULL;
 
 	const void *tag = tags.get(p_class_name);
 

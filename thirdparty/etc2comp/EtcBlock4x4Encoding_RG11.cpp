@@ -39,7 +39,7 @@ namespace Etc
 	//
 	Block4x4Encoding_RG11::Block4x4Encoding_RG11(void)
 	{
-		m_pencodingbitsRG11 = nullptr;
+		m_pencodingbitsRG11 = NULL;
 	}
 
 	Block4x4Encoding_RG11::~Block4x4Encoding_RG11(void) {}

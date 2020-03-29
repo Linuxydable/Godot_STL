@@ -787,7 +787,7 @@ public:
     /* the optional white list specifies a list of property names for which the caller
     wants animations for. Curves not matching this list will not be added to the
     animation layer. */
-    AnimationCurveNodeList Nodes(const char* const * target_prop_whitelist = nullptr, size_t whitelist_size = 0) const;
+    AnimationCurveNodeList Nodes(const char* const * target_prop_whitelist = NULL, size_t whitelist_size = 0) const;
 
 private:
     std::shared_ptr<const PropertyTable> props;
@@ -974,7 +974,7 @@ public:
     }
 
     int CompareTo(const Connection* c) const {
-        ai_assert( nullptr != c );
+        ai_assert( NULL != c );
 
         // note: can't subtract because this would overflow uint64_t
         if(InsertionOrder() > c->InsertionOrder()) {
@@ -987,7 +987,7 @@ public:
     }
 
     bool Compare(const Connection* c) const {
-        ai_assert( nullptr != c );
+        ai_assert( NULL != c );
 
         return InsertionOrder() < c->InsertionOrder();
     }

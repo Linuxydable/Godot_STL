@@ -1777,7 +1777,7 @@ void EditorNode::_edit_current() {
 
 		for (decltype(editor_table.size()) i = 0; i < editor_table.size(); ++i) {
 			if (editor_table[i] == main_plugin && !main_editor_buttons[i]->is_visible()) {
-				main_plugin = nullptr; //if button is not visible, then no plugin active
+				main_plugin = NULL; //if button is not visible, then no plugin active
 			}
 		}
 
@@ -3087,7 +3087,7 @@ Dictionary EditorNode::_get_main_scene_state() {
 
 void EditorNode::_set_main_scene_state(Dictionary p_state, Node *p_for_scene) {
 
-	if (get_edited_scene() != p_for_scene && p_for_scene != nullptr)
+	if (get_edited_scene() != p_for_scene && p_for_scene != NULL)
 		return; //not for this scene
 
 	changing_scene = false;
@@ -3600,7 +3600,7 @@ void EditorNode::stop_child_process() {
 }
 
 Ref<Script> EditorNode::get_object_custom_type_base(const Object *p_object) const {
-	ERR_FAIL_COND_V(!p_object, nullptr);
+	ERR_FAIL_COND_V(!p_object, NULL);
 
 	Ref<Script> script = p_object->get_script();
 
@@ -3800,7 +3800,7 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 	if (p_fallback.length() && gui_base->has_icon(p_fallback, "EditorIcons"))
 		return gui_base->get_icon(p_fallback, "EditorIcons");
 
-	return nullptr;
+	return NULL;
 }
 
 void EditorNode::progress_add_task(const String &p_task, const String &p_label, int p_steps, bool p_can_cancel) {
@@ -4326,7 +4326,7 @@ void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String 
 			// need_update
 			//find it, in a horribly inefficient way
 			int atidx = -1;
-			Control *node = nullptr;
+			Control *node = NULL;
 			for (uint8_t k = 0; k < DOCK_SLOT_MAX; ++k) {
 				if (!dock_slot[k]->has_node(name))
 					continue;
@@ -4897,7 +4897,7 @@ void EditorNode::add_control_to_dock(DockSlot p_slot, Control *p_control) {
 
 void EditorNode::remove_control_from_dock(Control *p_control) {
 
-	Control *dock = nullptr;
+	Control *dock = NULL;
 
 	auto it_find = std::find_if(std::begin(dock_slot), std::end(dock_slot), [&](const TabContainer *slot) {
 		if (p_control->get_parent() == slot) {

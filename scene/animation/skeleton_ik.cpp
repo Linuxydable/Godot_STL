@@ -48,7 +48,7 @@ FabrikInverseKinematic::ChainItem *FabrikInverseKinematic::ChainItem::find_child
 		return &(*it_find);
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 FabrikInverseKinematic::ChainItem *FabrikInverseKinematic::ChainItem::add_child(const BoneId p_bone_id) {
@@ -330,7 +330,7 @@ void FabrikInverseKinematic::solve(Task *p_task, real_t blending_delta, bool ove
 		if (!ci->children.empty())
 			ci = &ci->children.front();
 		else
-			ci = nullptr;
+			ci = NULL;
 	}
 }
 

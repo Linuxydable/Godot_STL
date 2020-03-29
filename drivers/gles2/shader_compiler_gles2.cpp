@@ -225,7 +225,7 @@ void ShaderCompilerGLES2::_dump_function_deps(SL::ShaderNode *p_node, const Stri
 
 		_dump_function_deps(p_node, E->get(), p_func_code, r_to_add, r_added);
 
-		SL::FunctionNode *fnode = nullptr;
+		SL::FunctionNode *fnode = NULL;
 
 		auto it = std::find_if(p_node->functions.begin(), p_node->functions.end(), [&E](const SL::ShaderNode::Function &func) {
 			if (func.name == E->get()) {
@@ -590,12 +590,12 @@ String ShaderCompilerGLES2::_dump_node_code(SL::Node *p_node, int p_level, Gener
 				code += _mkid(arr_node->name);
 			}
 
-			if (arr_node->call_expression != nullptr) {
+			if (arr_node->call_expression != NULL) {
 				code += ".";
 				code += _dump_node_code(arr_node->call_expression, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
 			}
 
-			if (arr_node->index_expression != nullptr) {
+			if (arr_node->index_expression != NULL) {
 				code += "[";
 				code += _dump_node_code(arr_node->index_expression, p_level, r_gen_code, p_actions, p_default_actions, p_assigning);
 				code += "]";
@@ -890,7 +890,7 @@ Error ShaderCompilerGLES2::compile(VS::ShaderMode p_mode, const String &p_code, 
 			print_line(itos(i + 1) + " " + shader[i]);
 		}
 
-		_err_print_error(nullptr, p_path.utf8().get_data(), parser.get_error_line(), parser.get_error_text().utf8().get_data(), ERR_HANDLER_SHADER);
+		_err_print_error(NULL, p_path.utf8().get_data(), parser.get_error_line(), parser.get_error_text().utf8().get_data(), ERR_HANDLER_SHADER);
 		return err;
 	}
 

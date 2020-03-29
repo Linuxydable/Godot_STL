@@ -274,7 +274,7 @@ void WSLClient::poll() {
 
 Ref<WebSocketPeer> WSLClient::get_peer(int p_peer_id) const {
 
-	ERR_FAIL_COND_V(p_peer_id != 1, nullptr);
+	ERR_FAIL_COND_V(p_peer_id != 1, NULL);
 
 	return _peer;
 }
@@ -293,7 +293,7 @@ NetworkedMultiplayerPeer::ConnectionStatus WSLClient::get_connection_status() co
 void WSLClient::disconnect_from_host(int p_code, String p_reason) {
 
 	_peer->close(p_code, p_reason);
-	_connection = Ref<StreamPeer>(nullptr);
+	_connection = Ref<StreamPeer>(NULL);
 	_tcp = Ref<StreamPeerTCP>(memnew(StreamPeerTCP));
 
 	_key = "";

@@ -249,7 +249,7 @@ ScriptEditorQuickOpen::ScriptEditorQuickOpen() {
 
 /////////////////////////////////
 
-ScriptEditor *ScriptEditor::script_editor = nullptr;
+ScriptEditor *ScriptEditor::script_editor = NULL;
 
 /*** SCRIPT EDITOR ******/
 
@@ -355,7 +355,7 @@ ScriptEditorBase *ScriptEditor::_get_current_editor() const {
 
 	int selected = tab_container->get_current_tab();
 	if (selected < 0 || selected >= tab_container->get_child_count())
-		return nullptr;
+		return NULL;
 
 	return Object::cast_to<ScriptEditorBase>(tab_container->get_child(selected));
 }
@@ -441,7 +441,7 @@ void ScriptEditor::_go_to_tab(int p_idx) {
 			Object::cast_to<ScriptEditorBase>(c)->ensure_focus();
 
 		Ref<Script> script = Object::cast_to<ScriptEditorBase>(c)->get_edited_resource();
-		if (script != nullptr) {
+		if (script != NULL) {
 			notify_script_changed(script);
 		}
 

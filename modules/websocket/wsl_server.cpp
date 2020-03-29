@@ -260,7 +260,7 @@ bool WSLServer::has_peer(int p_id) const {
 }
 
 Ref<WebSocketPeer> WSLServer::get_peer(int p_id) const {
-	ERR_FAIL_COND_V(!has_peer(p_id), nullptr);
+	ERR_FAIL_COND_V(!has_peer(p_id), NULL);
 	return _peer_map[p_id];
 }
 

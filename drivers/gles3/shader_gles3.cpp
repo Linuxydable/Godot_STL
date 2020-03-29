@@ -230,12 +230,12 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	CharString code_globals;
 	CharString material_string;
 
-	CustomCode *cc = nullptr;
+	CustomCode *cc = NULL;
 
 	if (conditional_version.code_version > 0) {
 		//do custom code related stuff
 
-		ERR_FAIL_COND_V(!custom_code_map.has(conditional_version.code_version), nullptr);
+		ERR_FAIL_COND_V(!custom_code_map.has(conditional_version.code_version), NULL);
 		cc = &custom_code_map[conditional_version.code_version];
 		v.code_version = cc->version;
 	}
@@ -244,7 +244,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 
 	v.id = glCreateProgram();
 
-	ERR_FAIL_COND_V(v.id == 0, nullptr);
+	ERR_FAIL_COND_V(v.id == 0, NULL);
 
 	/* VERTEX SHADER */
 
@@ -477,7 +477,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 			glDeleteShader(v.vert_id);
 			glDeleteProgram(v.id);
 			v.id = 0;
-			ERR_FAIL_COND_V(iloglen < 0, nullptr);
+			ERR_FAIL_COND_V(iloglen < 0, NULL);
 		}
 
 		if (iloglen == 0) {
@@ -672,7 +672,7 @@ void ShaderGLES3::setup(const char **p_conditional_defines, int p_conditional_co
 
 void ShaderGLES3::finish() {
 
-	const VersionKey *V = nullptr;
+	const VersionKey *V = NULL;
 	while ((V = version_map.next(V))) {
 
 		Version &v = version_map[*V];
@@ -685,7 +685,7 @@ void ShaderGLES3::finish() {
 
 void ShaderGLES3::clear_caches() {
 
-	const VersionKey *V = nullptr;
+	const VersionKey *V = NULL;
 	while ((V = version_map.next(V))) {
 
 		Version &v = version_map[*V];
@@ -698,7 +698,7 @@ void ShaderGLES3::clear_caches() {
 	version_map.clear();
 
 	custom_code_map.clear();
-	version = nullptr;
+	version = NULL;
 	last_custom_code = 1;
 	uniforms_dirty = true;
 }

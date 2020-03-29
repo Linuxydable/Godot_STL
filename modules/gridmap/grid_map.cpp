@@ -724,7 +724,7 @@ void GridMap::_notification(int p_what) {
 				_octant_exit_world(E->key());
 			}
 
-			navigation = nullptr;
+			navigation = NULL;
 
 			//_queue_octants_dirty(MAP_DIRTY_INSTANCES|MAP_DIRTY_TRANSFORMS);
 			//_update_octants_callback();
@@ -1125,7 +1125,7 @@ GridMap::GridMap() {
 	clip_above = true;
 	cell_scale = 1.0;
 
-	navigation = nullptr;
+	navigation = NULL;
 	set_notify_transform(true);
 	recreating_octants = false;
 }

@@ -195,7 +195,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		Set<String> unique_names;
 
 		GLTFSkeleton() :
-				godot_skeleton(nullptr) {
+				godot_skeleton(NULL) {
 		}
 	};
 

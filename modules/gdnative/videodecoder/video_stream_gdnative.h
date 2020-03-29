@@ -42,7 +42,7 @@ struct VideoDecoderGDNative {
 	std::vector<String> supported_extensions;
 
 	VideoDecoderGDNative() :
-			interface(nullptr),
+			interface(NULL),
 			plugin_name("none") {}
 
 	VideoDecoderGDNative(const godot_videodecoder_interface_gdnative *p_interface) :
@@ -89,7 +89,7 @@ public:
 
 	VideoDecoderGDNative *get_decoder(const String &extension) {
 		if (extensions.size() == 0 || !extensions.has(extension))
-			return nullptr;
+			return NULL;
 		return decoders[extensions[extension]];
 	}
 
@@ -103,7 +103,7 @@ public:
 		}
 
 		decoders.clear();
-		instance = nullptr;
+		instance = NULL;
 	}
 };
 

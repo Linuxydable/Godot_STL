@@ -192,7 +192,7 @@ Error ColladaImport::_create_scene_skeletons(Collada::Node *p_node) {
 
 Error ColladaImport::_create_scene(Collada::Node *p_node, Spatial *p_parent) {
 
-	Spatial *node = nullptr;
+	Spatial *node = NULL;
 
 	switch (p_node->type) {
 

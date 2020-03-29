@@ -66,7 +66,7 @@ void Polygon3DEditor::_notification(int p_what) {
 void Polygon3DEditor::_node_removed(Node *p_node) {
 
 	if (p_node == node) {
-		node = nullptr;
+		node = NULL;
 		if (imgeom->get_parent() == p_node)
 			p_node->remove_child(imgeom);
 		hide();

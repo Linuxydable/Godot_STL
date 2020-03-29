@@ -1144,7 +1144,7 @@ EditorExportPlatform::EditorExportPlatform() {
 
 ////
 
-EditorExport *EditorExport::singleton = nullptr;
+EditorExport *EditorExport::singleton = NULL;
 
 void EditorExport::_save() {
 
@@ -1703,7 +1703,7 @@ void EditorExportPlatformPC::set_fixup_embedded_pck_func(FixUpEmbeddedPckFunc p_
 EditorExportPlatformPC::EditorExportPlatformPC() {
 
 	chmod_flags = -1;
-	fixup_embedded_pck_func = nullptr;
+	fixup_embedded_pck_func = NULL;
 }
 
 ///////////////////////

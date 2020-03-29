@@ -579,7 +579,7 @@ CheckBox* EditorPropertyFlags::setup_add_checkbox(String p_option){
 	p_option = p_option.strip_edges();
 
 	if(p_option.empty() ){
-		return nullptr;
+		return NULL;
 	}
 
 	CheckBox *cb = memnew(CheckBox);

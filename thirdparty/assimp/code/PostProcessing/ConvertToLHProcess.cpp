@@ -63,7 +63,7 @@ namespace {
 
 template <typename aiMeshType>
 void flipUVs(aiMeshType* pMesh) {
-    if (pMesh == nullptr) { return; }
+    if (pMesh == NULL) { return; }
     // mirror texture y coordinate
     for (unsigned int tcIdx = 0; tcIdx < AI_MAX_NUMBER_OF_TEXTURECOORDS; tcIdx++) {
         if (!pMesh->HasTextureCoords(tcIdx)) {
@@ -158,7 +158,7 @@ void MakeLeftHandedProcess::ProcessNode( aiNode* pNode, const aiMatrix4x4& pPare
 // ------------------------------------------------------------------------------------------------
 // Converts a single mesh to left handed coordinates.
 void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh) {
-    if ( nullptr == pMesh ) {
+    if ( NULL == pMesh ) {
         ASSIMP_LOG_ERROR( "Nullptr to mesh found." );
         return;
     }
@@ -216,7 +216,7 @@ void MakeLeftHandedProcess::ProcessMesh( aiMesh* pMesh) {
 // ------------------------------------------------------------------------------------------------
 // Converts a single material to left handed coordinates.
 void MakeLeftHandedProcess::ProcessMaterial( aiMaterial* _mat) {
-    if ( nullptr == _mat ) {
+    if ( NULL == _mat ) {
         ASSIMP_LOG_ERROR( "Nullptr to aiMaterial found." );
         return;
     }

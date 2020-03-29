@@ -107,7 +107,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
     std::list<aiNode*> child_nodes;
     for (unsigned int i = 0; i < nd->mNumChildren; ++i) {
         CollectNewChildren(nd->mChildren[i],child_nodes);
-        nd->mChildren[i] = nullptr;
+        nd->mChildren[i] = NULL;
     }
 
     // Check whether we need this node; if not we can replace it by our own children (warn, danger of incest).
@@ -221,7 +221,7 @@ void OptimizeGraphProcess::CollectNewChildren(aiNode* nd, std::list<aiNode*>& no
         if (!child_nodes.empty()) {
             nd->mChildren = new aiNode*[child_nodes.size()];
         }
-        else nd->mChildren = nullptr;
+        else nd->mChildren = NULL;
     }
 
     nd->mNumChildren = static_cast<unsigned int>(child_nodes.size());

@@ -110,20 +110,20 @@ struct IndexFormat
 struct MeshDecl
 {
 	uint32_t vertexCount = 0;
-	const void *vertexPositionData = nullptr;
+	const void *vertexPositionData = NULL;
 	uint32_t vertexPositionStride = 0;
-	const void *vertexNormalData = nullptr; // optional
+	const void *vertexNormalData = NULL; // optional
 	uint32_t vertexNormalStride = 0; // optional
-	const void *vertexUvData = nullptr; // optional. The input UVs are provided as a hint to the chart generator.
+	const void *vertexUvData = NULL; // optional. The input UVs are provided as a hint to the chart generator.
 	uint32_t vertexUvStride = 0; // optional
 	uint32_t indexCount = 0;
-	const void *indexData = nullptr; // optional
+	const void *indexData = NULL; // optional
 	int32_t indexOffset = 0; // optional. Add this offset to all indices.
 	IndexFormat::Enum indexFormat = IndexFormat::UInt16;
 	
 	// Optional. indexCount / 3 (triangle count) in length.
 	// Don't atlas faces set to true. Ignored faces still exist in the output meshes, Vertex uv is set to (0, 0) and Vertex atlasIndex to -1.
-	const bool *faceIgnoreData = nullptr;
+	const bool *faceIgnoreData = NULL;
 
 	// Vertex positions within epsilon distance of each other are considered colocal.
 	float epsilon = 1.192092896e-07F;
@@ -150,12 +150,12 @@ struct UvMeshDecl
 {
 	uint32_t vertexCount = 0;
 	uint32_t vertexStride = 0;
-	const void *vertexUvData = nullptr;
+	const void *vertexUvData = NULL;
 	uint32_t indexCount = 0;
-	const void *indexData = nullptr; // optional
+	const void *indexData = NULL; // optional
 	int32_t indexOffset = 0; // optional. Add this offset to all indices.
 	IndexFormat::Enum indexFormat = IndexFormat::UInt16;
-	const uint32_t *faceMaterialData = nullptr; // Optional. Faces with different materials won't be assigned to the same chart. Must be indexCount / 3 in length.
+	const uint32_t *faceMaterialData = NULL; // Optional. Faces with different materials won't be assigned to the same chart. Must be indexCount / 3 in length.
 	bool rotateCharts = true;
 };
 
@@ -184,7 +184,7 @@ void ComputeCharts(Atlas *atlas, ChartOptions chartOptions = ChartOptions());
 typedef void (*ParameterizeFunc)(const float *positions, float *texcoords, uint32_t vertexCount, const uint32_t *indices, uint32_t indexCount);
 
 // Call after ComputeCharts. Can be called multiple times to re-parameterize charts with a different ParameterizeFunc.
-void ParameterizeCharts(Atlas *atlas, ParameterizeFunc func = nullptr);
+void ParameterizeCharts(Atlas *atlas, ParameterizeFunc func = NULL);
 
 struct PackOptions
 {
@@ -221,7 +221,7 @@ struct PackOptions
 void PackCharts(Atlas *atlas, PackOptions packOptions = PackOptions());
 
 // Equivalent to calling ComputeCharts, ParameterizeCharts and PackCharts in sequence. Can be called multiple times to regenerate with different options.
-void Generate(Atlas *atlas, ChartOptions chartOptions = ChartOptions(), ParameterizeFunc paramFunc = nullptr, PackOptions packOptions = PackOptions());
+void Generate(Atlas *atlas, ChartOptions chartOptions = ChartOptions(), ParameterizeFunc paramFunc = NULL, PackOptions packOptions = PackOptions());
 
 // Progress tracking.
 struct ProgressCategory
@@ -239,12 +239,12 @@ struct ProgressCategory
 // May be called from any thread. Return false to cancel.
 typedef bool (*ProgressFunc)(ProgressCategory::Enum category, int progress, void *userData);
 
-void SetProgressCallback(Atlas *atlas, ProgressFunc progressFunc = nullptr, void *progressUserData = nullptr);
+void SetProgressCallback(Atlas *atlas, ProgressFunc progressFunc = NULL, void *progressUserData = NULL);
 
 // Custom memory allocation.
 typedef void *(*ReallocFunc)(void *, size_t);
 typedef void (*FreeFunc)(void *);
-void SetAlloc(ReallocFunc reallocFunc, FreeFunc freeFunc = nullptr);
+void SetAlloc(ReallocFunc reallocFunc, FreeFunc freeFunc = NULL);
 
 // Custom print function.
 typedef int (*PrintFunc)(const char *, ...);

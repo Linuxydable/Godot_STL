@@ -96,12 +96,12 @@ aiReturn aiGetMaterialFloatArray(const aiMaterial* pMat,
     ai_real* pOut,
     unsigned int* pMax)
 {
-    ai_assert( pOut != nullptr );
-    ai_assert( pMat != nullptr );
+    ai_assert( pOut != NULL );
+    ai_assert( pMat != NULL );
 
     const aiMaterialProperty* prop;
     aiGetMaterialProperty(pMat,pKey,type,index, (const aiMaterialProperty**) &prop);
-    if ( nullptr == prop) {
+    if ( NULL == prop) {
         return AI_FAILURE;
     }
 
@@ -401,7 +401,7 @@ static const unsigned int DefaultNumAllocated = 5;
 // ------------------------------------------------------------------------------------------------
 // Construction. Actually the one and only way to get an aiMaterial instance
 aiMaterial::aiMaterial() 
-: mProperties( nullptr )
+: mProperties( NULL )
 , mNumProperties( 0 )
 , mNumAllocated( DefaultNumAllocated ) {
     // Allocate 5 entries by default
@@ -440,7 +440,7 @@ void aiMaterial::Clear()
 // ------------------------------------------------------------------------------------------------
 aiReturn aiMaterial::RemoveProperty ( const char* pKey,unsigned int type, unsigned int index )
 {
-    ai_assert( nullptr != pKey );
+    ai_assert( NULL != pKey );
 
     for (unsigned int i = 0; i < mNumProperties;++i) {
         aiMaterialProperty* prop = mProperties[i];

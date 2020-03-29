@@ -332,7 +332,7 @@ void ItemListEditor::edit(Node *p_item_list) {
 		return;
 	}
 
-	property_editor->edit(nullptr);
+	property_editor->edit(NULL);
 }
 
 bool ItemListEditor::handles(Object *p_object) const {

@@ -60,7 +60,7 @@ VertexTriangleAdjacency::VertexTriangleAdjacency(aiFace *pcFaces,
     const aiFace* const pcFaceEnd = pcFaces + iNumFaces;
     if (!iNumVertices)  {
         for (aiFace* pcFace = pcFaces; pcFace != pcFaceEnd; ++pcFace)   {
-            ai_assert( nullptr != pcFace );
+            ai_assert( NULL != pcFace );
             ai_assert(3 == pcFace->mNumIndices);
             iNumVertices = std::max(iNumVertices,pcFace->mIndices[0]);
             iNumVertices = std::max(iNumVertices,pcFace->mIndices[1]);

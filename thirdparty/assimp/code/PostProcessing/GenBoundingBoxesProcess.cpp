@@ -62,7 +62,7 @@ bool GenBoundingBoxesProcess::IsActive(unsigned int pFlags) const {
 }
 
 void checkMesh(aiMesh* mesh, aiVector3D& min, aiVector3D& max) {
-    ai_assert(nullptr != mesh);
+    ai_assert(NULL != mesh);
 
     if (0 == mesh->mNumVertices) {
         return;
@@ -93,13 +93,13 @@ void checkMesh(aiMesh* mesh, aiVector3D& min, aiVector3D& max) {
 }
 
 void GenBoundingBoxesProcess::Execute(aiScene* pScene) {
-    if (nullptr == pScene) {
+    if (NULL == pScene) {
         return;
     }
 
     for (unsigned int i = 0; i < pScene->mNumMeshes; ++i) {
         aiMesh* mesh = pScene->mMeshes[i];
-        if (nullptr == mesh) {
+        if (NULL == mesh) {
             continue;
         }
 

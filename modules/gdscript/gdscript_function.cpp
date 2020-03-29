@@ -270,7 +270,7 @@ Variant GDScriptFunction::call(GDScriptInstance *p_instance, const Variant **p_a
 
 	Variant self;
 	Variant retvalue;
-	Variant *stack = nullptr;
+	Variant *stack = NULL;
 	Variant **call_args;
 	int defarg = 0;
 
@@ -1821,7 +1821,7 @@ Variant GDScriptFunctionState::_signal_callback(const Variant **p_args, int p_ar
 
 bool GDScriptFunctionState::is_valid(bool p_extended_check) const {
 
-	if (function == nullptr)
+	if (function == NULL)
 		return false;
 
 	if (p_extended_check) {
@@ -1846,7 +1846,7 @@ Variant GDScriptFunctionState::resume(const Variant &p_arg) {
 
 	state.result = p_arg;
 	Variant::CallError err;
-	Variant ret = function->call(nullptr, nullptr, 0, err, &state);
+	Variant ret = function->call(NULL, NULL, 0, err, &state);
 
 	bool completed = true;
 
@@ -1896,12 +1896,12 @@ void GDScriptFunctionState::_bind_methods() {
 
 GDScriptFunctionState::GDScriptFunctionState() {
 
-	function = nullptr;
+	function = NULL;
 }
 
 GDScriptFunctionState::~GDScriptFunctionState() {
 
-	if (function != nullptr) {
+	if (function != NULL) {
 		//never called, deinitialize stack
 		for (decltype(state.stack_size) i = 0; i < state.stack_size; ++i) {
 			Variant *v = (Variant *)&state.stack[sizeof(Variant) * i];

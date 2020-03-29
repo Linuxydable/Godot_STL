@@ -475,7 +475,7 @@ Error AppxPackager::add_file(String p_file_name, const uint8_t *p_buffer, size_t
 
 	// Data for compression
 	z_stream strm;
-	FileAccess *strm_f = nullptr;
+	FileAccess *strm_f = NULL;
 	std::vector<uint8_t> strm_in;
 	strm_in.resize(BLOCK_SIZE);
 	std::vector<uint8_t> strm_out;
@@ -638,7 +638,7 @@ void AppxPackager::finish() {
 
 	package->close();
 	memdelete(package);
-	package = nullptr;
+	package = NULL;
 }
 
 AppxPackager::AppxPackager() {}
@@ -667,7 +667,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 		static const char *invalid_names[] = {
 			"CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7",
 			"COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
-			nullptr
+			NULL
 		};
 
 		const char **t = invalid_names;
@@ -723,7 +723,7 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 			"snow", "springGreen", "steelBlue", "tan", "teal", "thistle",
 			"tomato", "transparent", "turquoise", "violet", "wheat", "white",
 			"whiteSmoke", "yellow", "yellowGreen",
-			nullptr
+			NULL
 		};
 
 		const char **color = valid_colors;
@@ -873,22 +873,22 @@ class EditorExportPlatformUWP : public EditorExportPlatform {
 	std::vector<uint8_t> _get_image_data(const Ref<EditorExportPreset> &p_preset, const String &p_path) {
 
 		std::vector<uint8_t> data;
-		StreamTexture *image = nullptr;
+		StreamTexture *image = NULL;
 
 		if (p_path.find("StoreLogo") != -1) {
-			image = p_preset->get("images/store_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/store_logo")));
+			image = p_preset->get("images/store_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/store_logo")));
 		} else if (p_path.find("Square44x44Logo") != -1) {
-			image = p_preset->get("images/square44x44_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square44x44_logo")));
+			image = p_preset->get("images/square44x44_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square44x44_logo")));
 		} else if (p_path.find("Square71x71Logo") != -1) {
-			image = p_preset->get("images/square71x71_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square71x71_logo")));
+			image = p_preset->get("images/square71x71_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square71x71_logo")));
 		} else if (p_path.find("Square150x150Logo") != -1) {
-			image = p_preset->get("images/square150x150_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square150x150_logo")));
+			image = p_preset->get("images/square150x150_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square150x150_logo")));
 		} else if (p_path.find("Square310x310Logo") != -1) {
-			image = p_preset->get("images/square310x310_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square310x310_logo")));
+			image = p_preset->get("images/square310x310_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/square310x310_logo")));
 		} else if (p_path.find("Wide310x150Logo") != -1) {
-			image = p_preset->get("images/wide310x150_logo").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/wide310x150_logo")));
+			image = p_preset->get("images/wide310x150_logo").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/wide310x150_logo")));
 		} else if (p_path.find("SplashScreen") != -1) {
-			image = p_preset->get("images/splash_screen").is_zero() ? nullptr : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/splash_screen")));
+			image = p_preset->get("images/splash_screen").is_zero() ? NULL : Object::cast_to<StreamTexture>(((Object *)p_preset->get("images/splash_screen")));
 		} else {
 			ERR_PRINT("Unable to load logo");
 		}
@@ -1283,7 +1283,7 @@ public:
 			// get file name
 			unz_file_info info;
 			char fname[16834];
-			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16834, nullptr, 0, nullptr, 0);
+			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16834, NULL, 0, NULL, 0);
 
 			String path = fname;
 

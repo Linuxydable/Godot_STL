@@ -609,7 +609,7 @@ void RasterizerStorageGLES2::texture_allocate(RID p_texture, int p_width, int p_
 
 	if (p_flags & VS::TEXTURE_FLAG_USED_FOR_STREAMING) {
 		//prealloc if video
-		glTexImage2D(texture->target, 0, internal_format, texture->alloc_width, texture->alloc_height, 0, format, type, nullptr);
+		glTexImage2D(texture->target, 0, internal_format, texture->alloc_width, texture->alloc_height, 0, format, type, NULL);
 	}
 
 	texture->active = true;
@@ -2717,7 +2717,7 @@ AABB RasterizerStorageGLES2::mesh_get_aabb(RID p_mesh, RID p_skeleton) const {
 	if (mesh->custom_aabb != AABB())
 		return mesh->custom_aabb;
 
-	Skeleton *sk = nullptr;
+	Skeleton *sk = NULL;
 	if (p_skeleton.is_valid()) {
 		sk = skeleton_owner.get(p_skeleton);
 	}
@@ -4828,7 +4828,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 				glBindTexture(GL_TEXTURE_2D, rt->mip_maps[i].color);
 
 				for (uint32_t l = 0; l < level + 1; ++l) {
-					glTexImage2D(GL_TEXTURE_2D, l, color_internal_format, width, height, 0, color_format, color_type, nullptr);
+					glTexImage2D(GL_TEXTURE_2D, l, color_internal_format, width, height, 0, color_format, color_type, NULL);
 					width = MAX(1, (width / 2));
 					height = MAX(1, (height / 2));
 				}
@@ -4842,7 +4842,7 @@ void RasterizerStorageGLES2::_render_target_allocate(RenderTarget *rt) {
 				for (decltype(level) l = 0; l < level + 1; ++l) {
 					glGenTextures(1, &rt->mip_maps[i].sizes[l].color);
 					glBindTexture(GL_TEXTURE_2D, rt->mip_maps[i].sizes[l].color);
-					glTexImage2D(GL_TEXTURE_2D, 0, color_internal_format, width, height, 0, color_format, color_type, nullptr);
+					glTexImage2D(GL_TEXTURE_2D, 0, color_internal_format, width, height, 0, color_format, color_type, NULL);
 					width = MAX(1, (width / 2));
 					height = MAX(1, (height / 2));
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -5441,7 +5441,7 @@ bool RasterizerStorageGLES2::free(RID p_rid) {
 		while (shader->materials.first()) {
 			Material *m = shader->materials.first()->self();
 
-			m->shader = nullptr;
+			m->shader = NULL;
 			_material_make_dirty(m);
 
 			shader->materials.remove(shader->materials.first());
@@ -5877,7 +5877,7 @@ void RasterizerStorageGLES2::initialize() {
 
 	frame.count = 0;
 	frame.delta = 0;
-	frame.current_rt = nullptr;
+	frame.current_rt = NULL;
 	frame.clear_request = false;
 
 	glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, &config.max_vertex_texture_image_units);

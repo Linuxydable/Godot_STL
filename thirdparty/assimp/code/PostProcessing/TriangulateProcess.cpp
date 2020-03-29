@@ -494,12 +494,12 @@ bool TriangulateProcess::TriangulateMesh( aiMesh* pMesh)
             //    --curOut;
 
             //    delete[] f->mIndices;
-            //    f->mIndices = nullptr;
+            //    f->mIndices = NULL;
 
             //    for(aiFace* ff = f; ff != curOut; ++ff) {
             //        ff->mNumIndices = (ff+1)->mNumIndices;
             //        ff->mIndices = (ff+1)->mIndices;
-            //        (ff+1)->mIndices = nullptr;
+            //        (ff+1)->mIndices = NULL;
             //    }
             //    continue;
             //}

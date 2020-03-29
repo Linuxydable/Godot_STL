@@ -197,7 +197,7 @@ public:
     : blob()
     , mIOSystem(new Assimp::DefaultIOSystem())
     , mIsDefaultIOHandler(true)
-    , mProgressHandler( nullptr )
+    , mProgressHandler( NULL )
     , mIsDefaultProgressHandler( true )
     , mPostProcessingSteps()
     , mError()
@@ -274,9 +274,9 @@ bool Exporter::IsDefaultIOHandler() const {
 
 // ------------------------------------------------------------------------------------------------
 void Exporter::SetProgressHandler(ProgressHandler* pHandler) {
-    ai_assert(nullptr != pimpl);
+    ai_assert(NULL != pimpl);
 
-    if ( nullptr == pHandler) {
+    if ( NULL == pHandler) {
         // Release pointer in the possession of the caller
         pimpl->mProgressHandler = new DefaultProgressHandler();
         pimpl->mIsDefaultProgressHandler = true;
@@ -297,7 +297,7 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
                                                 unsigned int pPreprocessing, const ExportProperties* pProperties) {
     if (pimpl->blob) {
         delete pimpl->blob;
-        pimpl->blob = nullptr;
+        pimpl->blob = NULL;
     }
 
     std::shared_ptr<IOSystem> old = pimpl->mIOSystem;
@@ -306,7 +306,7 @@ const aiExportDataBlob* Exporter::ExportToBlob( const aiScene* pScene, const cha
 
     if (AI_SUCCESS != Export(pScene,pFormatId,blobio->GetMagicFileName(), pPreprocessing, pProperties)) {
         pimpl->mIOSystem = old;
-        return nullptr;
+        return NULL;
     }
 
     pimpl->blob = blobio->GetBlobChain();
@@ -363,7 +363,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
             try {
                 // Always create a full copy of the scene. We might optimize this one day,
                 // but for now it is the most pragmatic way.
-                aiScene* scenecopy_tmp = nullptr;
+                aiScene* scenecopy_tmp = NULL;
                 SceneCombiner::CopyScene(&scenecopy_tmp,pScene);
 
                 pimpl->mProgressHandler->UpdateFileWrite(1, 4);
@@ -440,7 +440,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                     }
 
                     bool exportPointCloud(false);
-                    if (nullptr != pProperties) {
+                    if (NULL != pProperties) {
                         exportPointCloud = pProperties->GetPropertyBool(AI_CONFIG_EXPORT_POINT_CLOUDS);
                     }
 
@@ -459,7 +459,7 @@ aiReturn Exporter::Export( const aiScene* pScene, const char* pFormatId, const c
                         }
                     }
                     ScenePrivateData* const privOut = ScenePriv(scenecopy.get());
-                    ai_assert(nullptr != privOut);
+                    ai_assert(NULL != privOut);
 
                     privOut->mPPStepsApplied |= pp;
                 }
@@ -497,7 +497,7 @@ const char* Exporter::GetErrorString() const {
 // ------------------------------------------------------------------------------------------------
 void Exporter::FreeBlob() {
     delete pimpl->blob;
-    pimpl->blob = nullptr;
+    pimpl->blob = NULL;
 
     pimpl->mError = "";
 }
@@ -510,7 +510,7 @@ const aiExportDataBlob* Exporter::GetBlob() const {
 // ------------------------------------------------------------------------------------------------
 const aiExportDataBlob* Exporter::GetOrphanedBlob() const {
     const aiExportDataBlob* tmp = pimpl->blob;
-    pimpl->blob = nullptr;
+    pimpl->blob = NULL;
     return tmp;
 }
 
@@ -522,7 +522,7 @@ size_t Exporter::GetExportFormatCount() const {
 // ------------------------------------------------------------------------------------------------
 const aiExportFormatDesc* Exporter::GetExportFormatDescription( size_t index ) const {
     if (index >= GetExportFormatCount()) {
-        return nullptr;
+        return NULL;
     }
 
     // Return from static storage if the requested index is built-in.

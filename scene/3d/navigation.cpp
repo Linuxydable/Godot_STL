@@ -271,8 +271,8 @@ void Navigation::_clip_path(std::vector<Vector3> &path, Polygon *from_poly, cons
 
 std::vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const Vector3 &p_end, bool p_optimize) {
 
-	Polygon *begin_poly = nullptr;
-	Polygon *end_poly = nullptr;
+	Polygon *begin_poly = NULL;
+	Polygon *end_poly = NULL;
 	Vector3 begin_point;
 	Vector3 end_point;
 	float begin_d = 1e20;
@@ -355,7 +355,7 @@ std::vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const V
 		}
 		//check open list
 
-		List<Polygon *>::Element *least_cost_poly = nullptr;
+		List<Polygon *>::Element *least_cost_poly = NULL;
 		float least_cost = 1e30;
 
 		//this could be faster (cache previous results)
@@ -511,7 +511,7 @@ std::vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const V
 				if (p != begin_poly)
 					p = p->edges[p->prev_edge].C;
 				else
-					p = nullptr;
+					p = NULL;
 			}
 
 			if (path[path.size() - 1] != begin_point)
@@ -663,7 +663,7 @@ Vector3 Navigation::get_closest_point_normal(const Vector3 &p_point) {
 Object *Navigation::get_closest_point_owner(const Vector3 &p_point) {
 
 	Vector3 closest_point;
-	Object *owner = nullptr;
+	Object *owner = NULL;
 	float closest_point_d = 1e20;
 
 	for (Map<int, NavMesh>::Element *E = navmesh_map.front(); E; E = E->next()) {

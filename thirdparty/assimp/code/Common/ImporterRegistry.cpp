@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -364,7 +364,7 @@ void GetImporterInstanceList(std::vector< BaseImporter* >& out)
 void DeleteImporterInstanceList(std::vector< BaseImporter* >& deleteList){
 	for(size_t i= 0; i<deleteList.size();++i){
 		delete deleteList[i];
-		deleteList[i]=nullptr;
+		deleteList[i]=NULL;
 	}//for
 }
 

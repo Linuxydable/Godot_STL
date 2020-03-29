@@ -1573,7 +1573,7 @@ Collada::Node *Collada::_parse_visual_scene_node(XMLParser &parser) {
 
 	String empty_draw_type = "";
 
-	Node *node = nullptr;
+	Node *node = NULL;
 
 	name = parser.has_attribute("name") ? parser.get_attribute_value_safe("name") : parser.get_attribute_value_safe("id");
 	if (name == "") {
@@ -2139,7 +2139,7 @@ void Collada::_create_skeletons(Collada::Node **p_node, NodeSkeleton *p_skeleton
 		NodeJoint *nj = static_cast<NodeJoint *>(node);
 		nj->owner = p_skeleton;
 	} else {
-		p_skeleton = nullptr;
+		p_skeleton = NULL;
 	}
 
 	for (auto &&child : node->children) {
@@ -2232,7 +2232,7 @@ void Collada::_merge_skeletons2(VisualScene *p_vscene) {
 
 		SkinControllerData &cd = E->get();
 
-		NodeSkeleton *skeleton = nullptr;
+		NodeSkeleton *skeleton = NULL;
 
 		for (Map<String, Transform>::Element *F = cd.bone_rest_map.front(); F; F = F->next()) {
 
@@ -2249,7 +2249,7 @@ void Collada::_merge_skeletons2(VisualScene *p_vscene) {
 			Node *node = state.scene_map[name];
 			ERR_CONTINUE(node->type != Node::TYPE_JOINT);
 
-			NodeSkeleton *sk = nullptr;
+			NodeSkeleton *sk = NULL;
 
 			while (node && !sk) {
 

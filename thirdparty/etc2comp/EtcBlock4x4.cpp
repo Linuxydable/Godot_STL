@@ -51,7 +51,7 @@ namespace Etc
 	//
 	Block4x4::Block4x4(void)
 	{
-		m_pimageSource = nullptr;
+		m_pimageSource = NULL;
 		m_uiSourceH = 0;
 		m_uiSourceV = 0;
 
@@ -59,18 +59,18 @@ namespace Etc
 		m_boolBorderPixels = false;
 		m_boolPunchThroughPixels = false;
 
-		m_pencoding = nullptr;
+		m_pencoding = NULL;
 
 		m_errormetric = ErrorMetric::NUMERIC;
 
 	}
 	Block4x4::~Block4x4()
 	{
-		m_pimageSource = nullptr;
+		m_pimageSource = NULL;
 		if (m_pencoding)
 		{
 			delete m_pencoding;
-			m_pencoding = nullptr;
+			m_pencoding = NULL;
 		}
 	}
 	// ----------------------------------------------------------------------------------------------------
@@ -272,7 +272,7 @@ namespace Etc
 				ColorFloatRGBA *pfrgbaSource = m_pimageSource->GetSourcePixel(uiSourcePixelH, uiSourcePixelV);
 
 				// if pixel extends beyond source image because of block padding
-				if (pfrgbaSource == nullptr)
+				if (pfrgbaSource == NULL)
 				{
 					m_afrgbaSource[uiPixel] = ColorFloatRGBA(0.0f, 0.0f, 0.0f, NAN);	// denotes border pixel
 					m_boolBorderPixels = true;

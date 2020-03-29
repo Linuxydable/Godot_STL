@@ -53,7 +53,7 @@
 #include "modules/gridmap/grid_map.h"
 #endif
 
-EditorNavigationMeshGenerator *EditorNavigationMeshGenerator::singleton = nullptr;
+EditorNavigationMeshGenerator *EditorNavigationMeshGenerator::singleton = NULL;
 
 void EditorNavigationMeshGenerator::_add_vertex(const Vector3 &p_vec3, std::vector<float> &p_verticies) {
 	p_verticies.push_back(p_vec3.x);
@@ -441,11 +441,11 @@ void EditorNavigationMeshGenerator::bake(Ref<NavigationMesh> p_nav_mesh, Node *p
 
 	if (vertices.size() > 0 && indices.size() > 0) {
 
-		rcHeightfield *hf = nullptr;
-		rcCompactHeightfield *chf = nullptr;
-		rcContourSet *cset = nullptr;
-		rcPolyMesh *poly_mesh = nullptr;
-		rcPolyMeshDetail *detail_mesh = nullptr;
+		rcHeightfield *hf = NULL;
+		rcCompactHeightfield *chf = NULL;
+		rcContourSet *cset = NULL;
+		rcPolyMesh *poly_mesh = NULL;
+		rcPolyMeshDetail *detail_mesh = NULL;
 
 		_build_recast_navigation_mesh(p_nav_mesh, &ep, hf, chf, cset, poly_mesh, detail_mesh, vertices, indices);
 

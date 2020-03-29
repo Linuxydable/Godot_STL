@@ -182,7 +182,7 @@ unsigned int GetMeshVFormatUnique(const aiMesh* pcMesh)
     ai_assert(NULL != pcMesh);
 
     // FIX: the hash may never be 0. Otherwise a comparison against
-    // nullptr could be successful
+    // NULL could be successful
     unsigned int iRet = 1;
 
     // normals

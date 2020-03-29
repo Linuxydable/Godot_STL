@@ -78,7 +78,7 @@ BaseImporter::~BaseImporter() {
 
 void BaseImporter::UpdateImporterScale( Importer* pImp )
 {
-    ai_assert(pImp != nullptr);
+    ai_assert(pImp != NULL);
     ai_assert(importerScale != 0.0);
     ai_assert(fileScale != 0.0);
 
@@ -96,8 +96,8 @@ aiScene* BaseImporter::ReadFile(Importer* pImp, const std::string& pFile, IOSyst
 
 
     m_progress = pImp->GetProgressHandler();
-    if (nullptr == m_progress) {
-        return nullptr;
+    if (NULL == m_progress) {
+        return NULL;
     }
 
     ai_assert(m_progress);
@@ -125,7 +125,7 @@ aiScene* BaseImporter::ReadFile(Importer* pImp, const std::string& pFile, IOSyst
         // extract error description
         m_ErrorText = err.what();
         ASSIMP_LOG_ERROR(m_ErrorText);
-        return nullptr;
+        return NULL;
     }
 
     // return what we gathered from the import.
@@ -141,10 +141,10 @@ void BaseImporter::SetupProperties(const Importer* pImp)
 // ------------------------------------------------------------------------------------------------
 void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
     const aiImporterDesc* desc = GetInfo();
-    ai_assert(desc != nullptr);
+    ai_assert(desc != NULL);
 
     const char* ext = desc->mFileExtensions;
-    ai_assert(ext != nullptr );
+    ai_assert(ext != NULL );
 
     const char* last = ext;
     do {
@@ -169,11 +169,11 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
     bool                tokensSol /* false */,
     bool                noAlphaBeforeTokens /* false */)
 {
-    ai_assert( nullptr != tokens );
+    ai_assert( NULL != tokens );
     ai_assert( 0 != numTokens );
     ai_assert( 0 != searchBytes);
 
-    if ( nullptr == pIOHandler ) {
+    if ( NULL == pIOHandler ) {
         return false;
     }
 
@@ -204,7 +204,7 @@ void BaseImporter::GetExtensionList(std::set<std::string>& extensions) {
 
         std::string token;
         for (unsigned int i = 0; i < numTokens; ++i ) {
-            ai_assert( nullptr != tokens[i] );
+            ai_assert( NULL != tokens[i] );
             const size_t len( strlen( tokens[ i ] ) );
             token.clear();
             const char *ptr( tokens[ i ] );
@@ -445,7 +445,7 @@ void BaseImporter::TextFileToBuffer(IOStream* stream,
     std::vector<char>& data,
     TextFileMode mode)
 {
-    ai_assert(nullptr != stream);
+    ai_assert(NULL != stream);
 
     const size_t fileSize = stream->FileSize();
     if (mode == FORBID_EMPTY) {
@@ -503,17 +503,17 @@ namespace Assimp {
 struct Assimp::BatchData {
     BatchData( IOSystem* pIO, bool validate )
     : pIOSystem( pIO )
-    , pImporter( nullptr )
+    , pImporter( NULL )
     , next_id(0xffff)
     , validate( validate ) {
-        ai_assert( nullptr != pIO );
+        ai_assert( NULL != pIO );
         
         pImporter = new Importer();
         pImporter->SetIOHandler( pIO );
     }
 
     ~BatchData() {
-        pImporter->SetIOHandler( nullptr ); /* get pointer back into our possession */
+        pImporter->SetIOHandler( NULL ); /* get pointer back into our possession */
         delete pImporter;
     }
 
@@ -540,7 +540,7 @@ typedef std::list<LoadRequest>::iterator LoadReqIt;
 
 // ------------------------------------------------------------------------------------------------
 BatchLoader::BatchLoader(IOSystem* pIO, bool validate ) {
-    ai_assert(nullptr != pIO);
+    ai_assert(NULL != pIO);
 
     m_data = new BatchData( pIO, validate );
 }
@@ -606,7 +606,7 @@ aiScene* BatchLoader::GetImport( unsigned int which )
             return sc;
         }
     }
-    return nullptr;
+    return NULL;
 }
 
 

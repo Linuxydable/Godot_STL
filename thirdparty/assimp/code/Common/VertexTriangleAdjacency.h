@@ -95,7 +95,7 @@ public:
      *  @return Number of referenced triangles */
     unsigned int& GetNumTrianglesPtr(unsigned int iVertIndex) {
         ai_assert( iVertIndex < mNumVertices );
-        ai_assert( nullptr != mLiveTriangles );
+        ai_assert( NULL != mLiveTriangles );
         return mLiveTriangles[iVertIndex];
     }
 

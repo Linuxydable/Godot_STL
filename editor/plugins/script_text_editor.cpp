@@ -732,7 +732,7 @@ static std::vector<Node *> _find_all_node_for_script(Node *p_base, Node *p_curre
 static Node *_find_node_for_script(Node *p_base, Node *p_current, const Ref<Script> &p_script) {
 
 	if (p_current->get_owner() != p_base && p_base != p_current)
-		return nullptr;
+		return NULL;
 	Ref<Script> c = p_current->get_script();
 	if (c == p_script)
 		return p_current;
@@ -742,7 +742,7 @@ static Node *_find_node_for_script(Node *p_base, Node *p_current, const Ref<Scri
 			return found;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 static void _find_changed_scripts_for_external_editor(Node *p_base, Node *p_current, Set<Ref<Script> > &r_scripts) {
@@ -1365,7 +1365,7 @@ void ScriptTextEditor::add_syntax_highlighter(SyntaxHighlighter *p_highlighter) 
 void ScriptTextEditor::set_syntax_highlighter(SyntaxHighlighter *p_highlighter) {
 	TextEdit *te = code_editor->get_text_edit();
 	te->_set_syntax_highlighting(p_highlighter);
-	if (p_highlighter != nullptr)
+	if (p_highlighter != NULL)
 		highlighter_menu->set_item_checked(highlighter_menu->get_item_idx_from_text(p_highlighter->get_name()), true);
 	else
 		highlighter_menu->set_item_checked(highlighter_menu->get_item_idx_from_text(TTR("Standard")), true);
@@ -1373,7 +1373,7 @@ void ScriptTextEditor::set_syntax_highlighter(SyntaxHighlighter *p_highlighter) 
 
 void ScriptTextEditor::_change_syntax_highlighter(int p_idx) {
 	Map<String, SyntaxHighlighter *>::Element *el = highlighters.front();
-	while (el != nullptr) {
+	while (el != NULL) {
 		highlighter_menu->set_item_checked(highlighter_menu->get_item_idx_from_text(el->key()), false);
 		el = el->next();
 	}
@@ -1463,7 +1463,7 @@ bool ScriptTextEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_
 static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const Ref<Script> &script) {
 
 	if (p_edited_scene != p_current_node && p_current_node->get_owner() != p_edited_scene)
-		return nullptr;
+		return NULL;
 
 	Ref<Script> scr = p_current_node->get_script();
 
@@ -1476,7 +1476,7 @@ static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const
 			return n;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 void ScriptTextEditor::drop_data_fw(const Point2 &p_point, const Variant &p_data, Control *p_from) {
@@ -1821,7 +1821,7 @@ ScriptTextEditor::ScriptTextEditor() {
 	convert_case->add_shortcut(ED_SHORTCUT("script_text_editor/capitalize", TTR("Capitalize"), KEY_MASK_SHIFT | KEY_F6), EDIT_CAPITALIZE);
 	convert_case->connect("id_pressed", this, "_edit_option");
 
-	highlighters[TTR("Standard")] = nullptr;
+	highlighters[TTR("Standard")] = NULL;
 	highlighter_menu = memnew(PopupMenu);
 	highlighter_menu->set_name("highlighter_menu");
 	edit_menu->get_popup()->add_child(highlighter_menu);
@@ -1887,7 +1887,7 @@ ScriptTextEditor::ScriptTextEditor() {
 
 ScriptTextEditor::~ScriptTextEditor() {
 	for (const Map<String, SyntaxHighlighter *>::Element *E = highlighters.front(); E; E = E->next()) {
-		if (E->get() != nullptr) {
+		if (E->get() != NULL) {
 			memdelete(E->get());
 		}
 	}
@@ -1899,7 +1899,7 @@ static ScriptEditorBase *create_editor(const RES &p_resource) {
 	if (Object::cast_to<Script>(*p_resource)) {
 		return memnew(ScriptTextEditor);
 	}
-	return nullptr;
+	return NULL;
 }
 
 void ScriptTextEditor::register_editor() {

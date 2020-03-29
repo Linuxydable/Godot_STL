@@ -894,9 +894,9 @@ GDScript::GDScript() :
 	_static_ref = this;
 	valid = false;
 	subclass_count = 0;
-	initializer = nullptr;
-	_base = nullptr;
-	_owner = nullptr;
+	initializer = NULL;
+	_base = NULL;
+	_owner = NULL;
 	tool = false;
 #ifdef TOOLS_ENABLED
 	source_changed_cache = false;
@@ -921,7 +921,7 @@ GDScript::~GDScript() {
 	}
 
 	for (Map<StringName, Ref<GDScript> >::Element *E = subclasses.front(); E; E = E->next()) {
-		E->get()->_owner = nullptr; //bye, you are no longer owned cause I died
+		E->get()->_owner = NULL; //bye, you are no longer owned cause I died
 	}
 
 #ifdef DEBUG_ENABLED
@@ -1320,7 +1320,7 @@ void GDScriptInstance::reload_members() {
 }
 
 GDScriptInstance::GDScriptInstance() {
-	owner = nullptr;
+	owner = NULL;
 	base_ref = false;
 }
 
@@ -1872,7 +1872,7 @@ String GDScriptLanguage::get_global_class_name(const String &p_path, String *r_b
 					if (subclass->extends_file) {
 						if (subclass->extends_class.size() == 0) {
 							get_global_class_name(subclass->extends_file, r_base_type);
-							subclass = nullptr;
+							subclass = NULL;
 							break;
 						} else {
 							std::vector<StringName> extend_classes = subclass->extends_class;
@@ -1913,20 +1913,20 @@ String GDScriptLanguage::get_global_class_name(const String &p_path, String *r_b
 									}
 								}
 								if (!found) {
-									subclass = nullptr;
+									subclass = NULL;
 									break;
 								}
 							}
 						}
 					} else if (subclass->extends_class.size() == 1) {
 						*r_base_type = subclass->extends_class[0];
-						subclass = nullptr;
+						subclass = NULL;
 					} else {
 						break;
 					}
 				} else {
 					*r_base_type = "Reference";
-					subclass = nullptr;
+					subclass = NULL;
 				}
 			}
 		}
@@ -2135,7 +2135,7 @@ GDScriptLanguage::GDScriptLanguage() {
 
 	} else {
 		_debug_max_call_stack = 0;
-		_call_stack = nullptr;
+		_call_stack = NULL;
 	}
 
 #ifdef DEBUG_ENABLED
@@ -2153,12 +2153,12 @@ GDScriptLanguage::~GDScriptLanguage() {
 
 	if (lock) {
 		memdelete(lock);
-		lock = nullptr;
+		lock = NULL;
 	}
 	if (_call_stack) {
 		memdelete_arr(_call_stack);
 	}
-	singleton = nullptr;
+	singleton = NULL;
 }
 
 /*************** RESOURCE ***************/

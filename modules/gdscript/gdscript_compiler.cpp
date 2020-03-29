@@ -1592,7 +1592,7 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 	codegen.stack_max = 0;
 	codegen.current_line = 0;
 	codegen.call_max = 0;
-	codegen.debug_stack = ScriptDebugger::get_singleton() != nullptr;
+	codegen.debug_stack = ScriptDebugger::get_singleton() != NULL;
 	std::vector<StringName> argnames;
 
 	int stack_level = 0;
@@ -1714,14 +1714,14 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 		gdfunc->_constant_count = codegen.constant_map.size();
 		gdfunc->constants.resize(codegen.constant_map.size());
 		gdfunc->_constants_ptr = gdfunc->constants.data();
-		const Variant *K = nullptr;
+		const Variant *K = NULL;
 		while ((K = codegen.constant_map.next(K))) {
 			int idx = codegen.constant_map[*K];
 			gdfunc->constants[idx] = *K;
 		}
 	} else {
 
-		gdfunc->_constants_ptr = nullptr;
+		gdfunc->_constants_ptr = NULL;
 		gdfunc->_constant_count = 0;
 	}
 	//global names
@@ -1736,7 +1736,7 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 		gdfunc->_global_names_count = gdfunc->global_names.size();
 
 	} else {
-		gdfunc->_global_names_ptr = nullptr;
+		gdfunc->_global_names_ptr = NULL;
 		gdfunc->_global_names_count = 0;
 	}
 
@@ -1761,7 +1761,7 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 
 	} else {
 
-		gdfunc->_code_ptr = nullptr;
+		gdfunc->_code_ptr = NULL;
 		gdfunc->_code_size = 0;
 	}
 
@@ -1772,7 +1772,7 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 		gdfunc->_default_arg_ptr = &gdfunc->default_arguments[0];
 	} else {
 		gdfunc->_default_arg_count = 0;
-		gdfunc->_default_arg_ptr = nullptr;
+		gdfunc->_default_arg_ptr = NULL;
 	}
 
 	gdfunc->_argument_count = p_func ? p_func->arguments.size() : 0;
@@ -1853,7 +1853,7 @@ Error GDScriptCompiler::_parse_class_level(GDScript *p_script, const GDScriptPar
 
 	p_script->native = Ref<GDScriptNativeClass>();
 	p_script->base = Ref<GDScript>();
-	p_script->_base = nullptr;
+	p_script->_base = NULL;
 	p_script->members.clear();
 	p_script->constants.clear();
 	for (Map<StringName, GDScriptFunction *>::Element *E = p_script->member_functions.front(); E; E = E->next()) {
@@ -1863,7 +1863,7 @@ Error GDScriptCompiler::_parse_class_level(GDScript *p_script, const GDScriptPar
 	p_script->member_indices.clear();
 	p_script->member_info.clear();
 	p_script->_signals.clear();
-	p_script->initializer = nullptr;
+	p_script->initializer = NULL;
 
 	p_script->tool = p_class->tool;
 	p_script->name = p_class->name;
@@ -2047,14 +2047,14 @@ Error GDScriptCompiler::_parse_class_blocks(GDScript *p_script, const GDScriptPa
 
 	if (!has_initializer) {
 		//create a constructor
-		Error err = _parse_function(p_script, p_class, nullptr);
+		Error err = _parse_function(p_script, p_class, NULL);
 		if (err)
 			return err;
 	}
 
 	if (!has_ready && p_class->ready->statements.size()) {
 		//create a constructor
-		Error err = _parse_function(p_script, p_class, nullptr, true);
+		Error err = _parse_function(p_script, p_class, NULL, true);
 		if (err)
 			return err;
 	}
@@ -2092,7 +2092,7 @@ Error GDScriptCompiler::_parse_class_blocks(GDScript *p_script, const GDScriptPa
 					/* STEP 2, INITIALIZE AND CONSTRUCT */
 
 					Variant::CallError ce;
-					p_script->initializer->call(instance, nullptr, 0, ce);
+					p_script->initializer->call(instance, NULL, 0, ce);
 
 					if (ce.error != Variant::CallError::CALL_OK) {
 						//well, tough luck, not goinna do anything here
@@ -2167,7 +2167,7 @@ Error GDScriptCompiler::compile(const GDScriptParser *p_parser, GDScript *p_scri
 	// Create scripts for subclasses beforehand so they can be referenced
 	_make_scripts(p_script, static_cast<const GDScriptParser::ClassNode *>(root), p_keep_state);
 
-	p_script->_owner = nullptr;
+	p_script->_owner = NULL;
 	Error err = _parse_class_level(p_script, static_cast<const GDScriptParser::ClassNode *>(root), p_keep_state);
 
 	if (err)

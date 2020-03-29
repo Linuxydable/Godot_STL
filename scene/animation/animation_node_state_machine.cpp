@@ -226,7 +226,7 @@ bool AnimationNodeStateMachinePlayback::_travel(AnimationNodeStateMachine *p_sta
 		}
 
 		//find the last cost transition
-		List<int>::Element *least_cost_transition = nullptr;
+		List<int>::Element *least_cost_transition = NULL;
 		float least_cost = 1e20;
 
 		for (List<int>::Element *E = open_list.front(); E; E = E->next()) {
@@ -517,7 +517,7 @@ void AnimationNodeStateMachine::get_parameter_list(List<PropertyInfo> *r_list) c
 	List<StringName> advance_conditions;
 	for (auto &&transition : transitions) {
 		StringName ac = transition.transition->get_advance_condition_name();
-		if (ac != StringName() && advance_conditions.find(ac) == nullptr) {
+		if (ac != StringName() && advance_conditions.find(ac) == NULL) {
 			advance_conditions.push_back(ac);
 		}
 	}

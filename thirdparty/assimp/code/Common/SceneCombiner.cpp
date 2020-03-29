@@ -162,7 +162,7 @@ void SceneCombiner::OffsetNodeMeshIndices (aiNode* node, unsigned int offset) {
 // ------------------------------------------------------------------------------------------------
 // Merges two scenes. Currently only used by the LWS loader.
 void SceneCombiner::MergeScenes(aiScene** _dest,std::vector<aiScene*>& src, unsigned int flags) {
-    if ( nullptr == _dest ) {
+    if ( NULL == _dest ) {
         return;
     }
 
@@ -240,7 +240,7 @@ void SceneCombiner::AttachToGraph ( aiScene* master, std::vector<NodeAttachmentI
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::MergeScenes(aiScene** _dest, aiScene* master, std::vector<AttachmentInfo>& srcList, unsigned int flags) {
-    if ( nullptr == _dest ) {
+    if ( NULL == _dest ) {
         return;
     }
 
@@ -699,7 +699,7 @@ void SceneCombiner::BuildUniqueBoneList(std::list<BoneWithHash>& asBones,
 void SceneCombiner::MergeBones(aiMesh* out,std::vector<aiMesh*>::const_iterator it,
     std::vector<aiMesh*>::const_iterator end)
 {
-    if ( nullptr == out || out->mNumBones == 0 ) {
+    if ( NULL == out || out->mNumBones == 0 ) {
         return;
     }
 
@@ -759,7 +759,7 @@ void SceneCombiner::MergeMeshes(aiMesh** _out, unsigned int /*flags*/,
     std::vector<aiMesh*>::const_iterator begin,
     std::vector<aiMesh*>::const_iterator end)
 {
-    if ( nullptr == _out ) {
+    if ( NULL == _out ) {
         return;
     }
 
@@ -904,7 +904,7 @@ void SceneCombiner::MergeMaterials(aiMaterial** dest,
         std::vector<aiMaterial*>::const_iterator begin,
         std::vector<aiMaterial*>::const_iterator end)
 {
-    if ( nullptr == dest ) {
+    if ( NULL == dest ) {
         return;
     }
 
@@ -983,7 +983,7 @@ void GetArrayCopy(Type*& dest, ai_uint num ) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1000,7 +1000,7 @@ void SceneCombiner::CopySceneFlat(aiScene** _dest,const aiScene* src) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src,bool allocate) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1008,10 +1008,10 @@ void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src,bool allocate) 
         *_dest = new aiScene();
     }
     aiScene* dest = *_dest;
-    ai_assert(nullptr != dest);
+    ai_assert(NULL != dest);
 
     // copy metadata
-    if ( nullptr != src->mMetaData ) {
+    if ( NULL != src->mMetaData ) {
         dest->mMetaData = new aiMetadata( *src->mMetaData );
     }
 
@@ -1059,7 +1059,7 @@ void SceneCombiner::CopyScene(aiScene** _dest,const aiScene* src,bool allocate) 
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy( aiMesh** _dest, const aiMesh* src ) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1095,7 +1095,7 @@ void SceneCombiner::Copy( aiMesh** _dest, const aiMesh* src ) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy (aiMaterial** _dest, const aiMaterial* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1126,7 +1126,7 @@ void SceneCombiner::Copy (aiMaterial** _dest, const aiMaterial* src) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy(aiTexture** _dest, const aiTexture* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1156,7 +1156,7 @@ void SceneCombiner::Copy(aiTexture** _dest, const aiTexture* src) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy( aiAnimation** _dest, const aiAnimation* src ) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1171,7 +1171,7 @@ void SceneCombiner::Copy( aiAnimation** _dest, const aiAnimation* src ) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy(aiNodeAnim** _dest, const aiNodeAnim* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1188,7 +1188,7 @@ void SceneCombiner::Copy(aiNodeAnim** _dest, const aiNodeAnim* src) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy( aiCamera** _dest,const  aiCamera* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1200,7 +1200,7 @@ void SceneCombiner::Copy( aiCamera** _dest,const  aiCamera* src) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy(aiLight** _dest, const aiLight* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1212,7 +1212,7 @@ void SceneCombiner::Copy(aiLight** _dest, const aiLight* src) {
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy(aiBone** _dest, const aiBone* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 
@@ -1251,7 +1251,7 @@ void SceneCombiner::Copy     (aiNode** _dest, const aiNode* src)
 
 // ------------------------------------------------------------------------------------------------
 void SceneCombiner::Copy(aiMetadata** _dest, const aiMetadata* src) {
-    if ( nullptr == _dest || nullptr == src ) {
+    if ( NULL == _dest || NULL == src ) {
         return;
     }
 

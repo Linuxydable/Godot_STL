@@ -55,7 +55,7 @@
 
 #endif
 
-ShaderGLES2 *ShaderGLES2::active = nullptr;
+ShaderGLES2 *ShaderGLES2::active = NULL;
 
 //#define DEBUG_SHADER
 
@@ -103,10 +103,10 @@ bool ShaderGLES2::bind() {
 }
 
 void ShaderGLES2::unbind() {
-	version = nullptr;
+	version = NULL;
 	glUseProgram(0);
 	uniforms_dirty = true;
-	active = nullptr;
+	active = NULL;
 }
 
 static void _display_error_with_code(const String &p_error, const std::vector<const char *> &p_code) {
@@ -196,19 +196,19 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 	CharString code_string2;
 	CharString code_globals;
 
-	CustomCode *cc = nullptr;
+	CustomCode *cc = NULL;
 
 	if (conditional_version.code_version > 0) {
 		cc = custom_code_map.getptr(conditional_version.code_version);
 
-		ERR_FAIL_COND_V(!cc, nullptr);
+		ERR_FAIL_COND_V(!cc, NULL);
 		v.code_version = cc->version;
 	}
 
 	// program
 
 	v.id = glCreateProgram();
-	ERR_FAIL_COND_V(v.id == 0, nullptr);
+	ERR_FAIL_COND_V(v.id == 0, NULL);
 
 	if (cc) {
 		for (auto &&c_define : cc->custom_defines) {
@@ -244,7 +244,7 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 #endif
 
 	v.vert_id = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(v.vert_id, strings.size(), &strings[0], nullptr);
+	glShaderSource(v.vert_id, strings.size(), &strings[0], NULL);
 	glCompileShader(v.vert_id);
 
 	GLint status;
@@ -320,7 +320,7 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 #endif
 
 	v.frag_id = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(v.frag_id, strings.size(), &strings[0], nullptr);
+	glShaderSource(v.frag_id, strings.size(), &strings[0], NULL);
 	glCompileShader(v.frag_id);
 
 	glGetShaderiv(v.frag_id, GL_COMPILE_STATUS, &status);
@@ -553,7 +553,7 @@ void ShaderGLES2::setup(
 }
 
 void ShaderGLES2::finish() {
-	const VersionKey *V = nullptr;
+	const VersionKey *V = NULL;
 
 	while ((V = version_map.next(V))) {
 		Version &v = version_map[*V];
@@ -565,7 +565,7 @@ void ShaderGLES2::finish() {
 }
 
 void ShaderGLES2::clear_caches() {
-	const VersionKey *V = nullptr;
+	const VersionKey *V = NULL;
 
 	while ((V = version_map.next(V))) {
 		Version &v = version_map[*V];
@@ -578,7 +578,7 @@ void ShaderGLES2::clear_caches() {
 	version_map.clear();
 
 	custom_code_map.clear();
-	version = nullptr;
+	version = NULL;
 	last_custom_code = 1;
 	uniforms_dirty = true;
 }
@@ -1093,7 +1093,7 @@ void ShaderGLES2::use_material(void *p_material) {
 }
 
 ShaderGLES2::ShaderGLES2() {
-	version = nullptr;
+	version = NULL;
 	last_custom_code = 1;
 	uniforms_dirty = true;
 }

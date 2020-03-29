@@ -76,8 +76,8 @@ public:
 
 		IVHACD::Parameters desc = _desc;
 		// Set our intercepting callback interfaces if non-null
-		desc.m_callback = desc.m_callback ? this : nullptr;
-		desc.m_logger = desc.m_logger ? this : nullptr;
+		desc.m_callback = desc.m_callback ? this : NULL;
+		desc.m_logger = desc.m_logger ? this : NULL;
 
 		if ( countPoints )
 		{
@@ -119,8 +119,8 @@ public:
 	{
 		HACD_FREE((void *)h.m_triangles);
 		HACD_FREE((void *)h.m_points);
-		h.m_triangles = nullptr;
-		h.m_points = nullptr;
+		h.m_triangles = NULL;
+		h.m_points = NULL;
 	}
 
 	virtual void GetConvexHull(const uint32_t index, VHACD::IVHACD::ConvexHull& ch) const final
@@ -138,12 +138,12 @@ public:
 			releaseHull(mHulls[i]);
 		}
 		delete[]mHulls;
-		mHulls = nullptr;
+		mHulls = NULL;
 		mHullCount = 0;
 		HACD_FREE(mVertices);
-		mVertices = nullptr;
+		mVertices = NULL;
 		HACD_FREE(mIndices);
-		mIndices = nullptr;
+		mIndices = NULL;
 	}
 
 
@@ -167,7 +167,7 @@ public:
 		{
 			mThread->join();	// Wait for the thread to fully exit before we delete the instance
 			delete mThread;
-			mThread = nullptr;
+			mThread = NULL;
 			Log("Convex Decomposition thread canceled\n");
 		}
 		mCancel = false; // clear the cancel semaphore
@@ -297,14 +297,14 @@ public:
 	}
 
 private:
-	double							*mVertices{ nullptr };
-	uint32_t						*mIndices{ nullptr };
+	double							*mVertices{ NULL };
+	uint32_t						*mIndices{ NULL };
 	std::atomic< uint32_t>			mHullCount{ 0 };
-	VHACD::IVHACD::ConvexHull		*mHulls{ nullptr };
-	VHACD::IVHACD::IUserCallback	*mCallback{ nullptr };
-	VHACD::IVHACD::IUserLogger		*mLogger{ nullptr };
-	VHACD::IVHACD					*mVHACD{ nullptr };
-	std::thread						*mThread{ nullptr };
+	VHACD::IVHACD::ConvexHull		*mHulls{ NULL };
+	VHACD::IVHACD::IUserCallback	*mCallback{ NULL };
+	VHACD::IVHACD::IUserLogger		*mLogger{ NULL };
+	VHACD::IVHACD					*mVHACD{ NULL };
+	std::thread						*mThread{ NULL };
 	std::atomic< bool >				mRunning{ false };
 	std::atomic<bool>				mCancel{ false };
 

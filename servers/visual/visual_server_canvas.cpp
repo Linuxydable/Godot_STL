@@ -99,7 +99,7 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 		p_canvas_item->material_owner = p_material_owner;
 	else {
 		p_material_owner = p_canvas_item;
-		p_canvas_item->material_owner = nullptr;
+		p_canvas_item->material_owner = NULL;
 	}
 
 	Color modulate(p_canvas_item->modulate.r * p_modulate.r, p_canvas_item->modulate.g * p_modulate.g
@@ -273,7 +273,7 @@ void VisualServerCanvas::render_canvas(Canvas *p_canvas, const Transform2D &p_tr
 		memset(z_last_list, 0, z_range * sizeof(RasterizerCanvas::Item *));
 
 		for(auto&& child_item : p_canvas->child_items){
-			_render_canvas_item(child_item.item, p_transform, p_clip_rect, Color(1, 1, 1, 1), 0, z_list, z_last_list, nullptr, nullptr);
+			_render_canvas_item(child_item.item, p_transform, p_clip_rect, Color(1, 1, 1, 1), 0, z_list, z_last_list, NULL, NULL);
 		}
 
 		for (uint32_t i = 0; i < z_range; ++i) {

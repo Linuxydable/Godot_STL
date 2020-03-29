@@ -1546,7 +1546,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 	bool error = false;
 	int current_node_id = f->node;
 	Variant return_value;
-	Variant *working_mem = nullptr;
+	Variant *working_mem = NULL;
 
 	int flow_stack_pos = p_flow_stack_pos;
 

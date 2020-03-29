@@ -497,7 +497,7 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 					if (line->antialiased)
 						glEnable(GL_LINE_SMOOTH);
 #endif
-					_draw_gui_primitive(2, verts, nullptr, nullptr);
+					_draw_gui_primitive(2, verts, NULL, NULL);
 
 #ifdef GLES_OVER_GL
 					if (line->antialiased)
@@ -513,7 +513,7 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 						line->to - t
 					};
 
-					_draw_gui_primitive(4, verts, nullptr, nullptr);
+					_draw_gui_primitive(4, verts, NULL, NULL);
 #ifdef GLES_OVER_GL
 					if (line->antialiased) {
 						glEnable(GL_LINE_SMOOTH);
@@ -620,7 +620,7 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 							untile = true;
 						}
 
-						_draw_gui_primitive(4, points, nullptr, uvs);
+						_draw_gui_primitive(4, points, NULL, uvs);
 
 						if (untile) {
 							glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -635,7 +635,7 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 						};
 
 						state.canvas_shader.set_uniform(CanvasShaderGLES2::COLOR_TEXPIXEL_SIZE, Vector2());
-						_draw_gui_primitive(4, points, nullptr, uvs);
+						_draw_gui_primitive(4, points, NULL, uvs);
 					}
 
 				} else {
@@ -885,10 +885,10 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 				glEnableVertexAttribArray(VS::ARRAY_VERTEX);
 				glEnableVertexAttribArray(VS::ARRAY_TEX_UV);
 
-				glVertexAttribPointer(VS::ARRAY_VERTEX, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), nullptr);
+				glVertexAttribPointer(VS::ARRAY_VERTEX, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), NULL);
 				glVertexAttribPointer(VS::ARRAY_TEX_UV, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), CAST_INT_TO_UCHAR_PTR((sizeof(float) * 2)));
 
-				glDrawElements(GL_TRIANGLES, 18 * 3 - (np->draw_center ? 0 : 6), GL_UNSIGNED_BYTE, nullptr);
+				glDrawElements(GL_TRIANGLES, 18 * 3 - (np->draw_center ? 0 : 6), GL_UNSIGNED_BYTE, NULL);
 
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -922,7 +922,7 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 
 				_bind_canvas_texture(RID(), RID());
 
-				_draw_polygon(indices, num_points * 3, num_points + 1, points, nullptr, &circle->color, true);
+				_draw_polygon(indices, num_points * 3, num_points + 1, points, NULL, &circle->color, true);
 			} break;
 
 			case Item::Command::TYPE_POLYGON: {
@@ -1149,13 +1149,13 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 				_bind_canvas_texture(RID(), RID());
 
 				if (pline->triangles.size()) {
-					_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.data(), nullptr, pline->triangle_colors.data(), pline->triangle_colors.size() == 1);
+					_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.data(), NULL, pline->triangle_colors.data(), pline->triangle_colors.size() == 1);
 #ifdef GLES_OVER_GL
 					glEnable(GL_LINE_SMOOTH);
 					if (pline->multiline) {
 						//needs to be different
 					} else {
-						_draw_generic(GL_LINE_LOOP, pline->lines.size(), pline->lines.data(), nullptr, pline->line_colors.data(), pline->line_colors.size() == 1);
+						_draw_generic(GL_LINE_LOOP, pline->lines.size(), pline->lines.data(), NULL, pline->line_colors.data(), pline->line_colors.size() == 1);
 					}
 					glDisable(GL_LINE_SMOOTH);
 #endif
@@ -1173,12 +1173,12 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *cur
 
 						while (todo) {
 							int to_draw = MIN(max_per_call, todo);
-							_draw_generic(GL_LINES, to_draw * 2, &pline->lines[offset], nullptr, pline->line_colors.size() == 1 ? pline->line_colors.data() : &pline->line_colors.data()[offset], pline->line_colors.size() == 1);
+							_draw_generic(GL_LINES, to_draw * 2, &pline->lines[offset], NULL, pline->line_colors.size() == 1 ? pline->line_colors.data() : &pline->line_colors.data()[offset], pline->line_colors.size() == 1);
 							todo -= to_draw;
 							offset += to_draw * 2;
 						}
 					} else {
-						_draw_generic(GL_LINES, pline->lines.size(), pline->lines.data(), nullptr, pline->line_colors.data(), pline->line_colors.size() == 1);
+						_draw_generic(GL_LINES, pline->lines.size(), pline->lines.data(), NULL, pline->line_colors.data(), pline->line_colors.size() == 1);
 					}
 
 #ifdef GLES_OVER_GL
@@ -1310,7 +1310,7 @@ void RasterizerCanvasGLES2::_copy_screen(const Rect2 &p_rect) {
 		2, 3, 0
 	};
 
-	_draw_polygon(indexpos, 6, 4, vertpos, uvpos, nullptr, false);
+	_draw_polygon(indexpos, 6, 4, vertpos, uvpos, NULL, false);
 
 	storage->shaders.copy.set_conditional(CopyShaderGLES2::USE_COPY_SECTION, false);
 	storage->shaders.copy.set_conditional(CopyShaderGLES2::USE_NO_ALPHA, false);
@@ -1334,16 +1334,16 @@ void RasterizerCanvasGLES2::_copy_texscreen(const Rect2 &p_rect) {
 
 void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, const Color &p_modulate, Light *p_light, const Transform2D &p_base_transform) {
 
-	Item *current_clip = nullptr;
+	Item *current_clip = NULL;
 
-	RasterizerStorageGLES2::Shader *shader_cache = nullptr;
+	RasterizerStorageGLES2::Shader *shader_cache = NULL;
 
 	bool rebind_shader = true;
 	bool prev_use_skeleton = false;
 	state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_SKELETON, false);
 
 	state.current_tex = RID();
-	state.current_tex_ptr = nullptr;
+	state.current_tex_ptr = NULL;
 	state.current_normal = RID();
 	state.canvas_texscreen_used = false;
 
@@ -1383,14 +1383,14 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 			}
 		}
 
-		RasterizerStorageGLES2::Skeleton *skeleton = nullptr;
+		RasterizerStorageGLES2::Skeleton *skeleton = NULL;
 
 		{
 			//skeleton handling
 			if (ci->skeleton.is_valid() && storage->skeleton_owner.owns(ci->skeleton)) {
 				skeleton = storage->skeleton_owner.get(ci->skeleton);
 				if (!skeleton->use_2d) {
-					skeleton = nullptr;
+					skeleton = NULL;
 				} else {
 					state.skeleton_transform = p_base_transform * skeleton->base_transform_2d;
 					state.skeleton_transform_inverse = state.skeleton_transform.affine_inverse();
@@ -1398,7 +1398,7 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 				}
 			}
 
-			bool use_skeleton = skeleton != nullptr;
+			bool use_skeleton = skeleton != NULL;
 			if (prev_use_skeleton != use_skeleton) {
 				rebind_shader = true;
 				state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_SKELETON, use_skeleton);
@@ -1421,13 +1421,13 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 
 		if (material != canvas_last_material || rebind_shader) {
 
-			RasterizerStorageGLES2::Shader *shader_ptr = nullptr;
+			RasterizerStorageGLES2::Shader *shader_ptr = NULL;
 
 			if (material_ptr) {
 				shader_ptr = material_ptr->shader;
 
 				if (shader_ptr && shader_ptr->mode != VS::SHADER_CANVAS_ITEM) {
-					shader_ptr = nullptr; // not a canvas item shader, don't use.
+					shader_ptr = NULL; // not a canvas item shader, don't use.
 				}
 			}
 
@@ -1582,7 +1582,7 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 		_set_uniforms();
 
 		if (unshaded || (state.uniforms.final_modulate.a > 0.001 && (!shader_cache || shader_cache->canvas_item.light_mode != RasterizerStorageGLES2::Shader::CanvasItem::LIGHT_MODE_LIGHT_ONLY) && !ci->light_masked))
-			_canvas_item_render_commands(p_item_list, nullptr, reclip, material_ptr);
+			_canvas_item_render_commands(p_item_list, NULL, reclip, material_ptr);
 
 		rebind_shader = true; // hacked in for now.
 
@@ -1661,9 +1661,9 @@ void RasterizerCanvasGLES2::canvas_render_items(Item *p_item_list, int p_z, cons
 					}
 
 					glActiveTexture(GL_TEXTURE0);
-					_canvas_item_render_commands(p_item_list, nullptr, reclip, material_ptr); //redraw using light
+					_canvas_item_render_commands(p_item_list, NULL, reclip, material_ptr); //redraw using light
 
-					state.using_light = nullptr;
+					state.using_light = NULL;
 				}
 
 				light = light->next_ptr;
@@ -2014,7 +2014,7 @@ void RasterizerCanvasGLES2::initialize() {
 		poly_size = MAX(poly_size, (2 + 2 + 4) * 4 * sizeof(float));
 		glGenBuffers(1, &data.polygon_buffer);
 		glBindBuffer(GL_ARRAY_BUFFER, data.polygon_buffer);
-		glBufferData(GL_ARRAY_BUFFER, poly_size, nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, poly_size, NULL, GL_DYNAMIC_DRAW);
 
 		data.polygon_buffer_size = poly_size;
 
@@ -2025,7 +2025,7 @@ void RasterizerCanvasGLES2::initialize() {
 		index_size *= 1024; // kb
 		glGenBuffers(1, &data.polygon_index_buffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, data.polygon_index_buffer);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_size, nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_size, NULL, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	}
 
@@ -2035,7 +2035,7 @@ void RasterizerCanvasGLES2::initialize() {
 		glGenBuffers(1, &data.ninepatch_vertices);
 		glBindBuffer(GL_ARRAY_BUFFER, data.ninepatch_vertices);
 
-		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (16 + 16) * 2, nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * (16 + 16) * 2, NULL, GL_DYNAMIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -2105,7 +2105,7 @@ void RasterizerCanvasGLES2::initialize() {
 
 	state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_PIXEL_SNAP, GLOBAL_DEF("rendering/quality/2d/use_pixel_snap", false));
 
-	state.using_light = nullptr;
+	state.using_light = NULL;
 	state.using_transparent_rt = false;
 	state.using_skeleton = false;
 }

@@ -117,7 +117,7 @@ namespace FBX {
 Element::Element(const Token& key_token, Parser& parser)
 : key_token(key_token)
 {
-    TokenPtr n = nullptr;
+    TokenPtr n = NULL;
     do {
         n = parser.AdvanceToNextToken();
         if(!n) {
@@ -280,7 +280,7 @@ uint64_t ParseTokenAsID(const Token& t, const char*& err_out)
     unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
     ai_assert(length > 0);
 
-    const char* out = nullptr;
+    const char* out = NULL;
     const uint64_t id = strtoul10_64(t.begin(),&out,&length);
     if (out > t.end()) {
         err_out = "failed to parse ID (text)";
@@ -326,7 +326,7 @@ size_t ParseTokenAsDim(const Token& t, const char*& err_out)
         return 0;
     }
 
-    const char* out = nullptr;
+    const char* out = NULL;
     const size_t id = static_cast<size_t>(strtoul10_64(t.begin() + 1,&out,&length));
     if (out > t.end()) {
         err_out = "failed to parse ID";
@@ -439,7 +439,7 @@ int64_t ParseTokenAsInt64(const Token& t, const char*& err_out)
     unsigned int length = static_cast<unsigned int>(t.end() - t.begin());
     ai_assert(length > 0);
 
-    const char* out = nullptr;
+    const char* out = NULL;
     const int64_t id = strtol10_64(t.begin(), &out, &length);
     if (out > t.end()) {
         err_out = "failed to parse Int64 (text)";
@@ -1196,7 +1196,7 @@ std::string ParseTokenAsString(const Token& t)
 
 bool HasElement( const Scope& sc, const std::string& index ) {
     const Element* el = sc[ index ];
-    if ( nullptr == el ) {
+    if ( NULL == el ) {
         return false;
     }
 

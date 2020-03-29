@@ -133,13 +133,13 @@ template <typename T>
 inline 
 T PropertyGet(const PropertyTable& in, const std::string& name, const T& defaultValue) {
     const Property* const prop = in.Get(name);
-    if( nullptr == prop) {
+    if( NULL == prop) {
         return defaultValue;
     }
 
     // strong typing, no need to be lenient
     const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
-    if( nullptr == tprop) {
+    if( NULL == tprop) {
         return defaultValue;
     }
 
@@ -151,18 +151,18 @@ template <typename T>
 inline 
 T PropertyGet(const PropertyTable& in, const std::string& name, bool& result, bool useTemplate=false ) {
     const Property* prop = in.Get(name);
-    if( nullptr == prop) {
+    if( NULL == prop) {
         if ( ! useTemplate ) {
             result = false;
             return T();
         }
         const PropertyTable* templ = in.TemplateProps();
-        if ( nullptr == templ ) {
+        if ( NULL == templ ) {
             result = false;
             return T();
         }
         prop = templ->Get(name);
-        if ( nullptr == prop ) {
+        if ( NULL == prop ) {
             result = false;
             return T();
         }
@@ -170,7 +170,7 @@ T PropertyGet(const PropertyTable& in, const std::string& name, bool& result, bo
 
     // strong typing, no need to be lenient
     const TypedProperty<T>* const tprop = prop->As< TypedProperty<T> >();
-    if( nullptr == tprop) {
+    if( NULL == tprop) {
         result = false;
         return T();
     }

@@ -79,8 +79,8 @@ aiNode::~aiNode() {
 }
 
 const aiNode *aiNode::FindNode(const char* name) const {
-    if (nullptr == name) {
-        return nullptr;
+    if (NULL == name) {
+        return NULL;
     }
     if (!::strcmp(mName.data, name)) {
         return this;
@@ -92,7 +92,7 @@ const aiNode *aiNode::FindNode(const char* name) const {
         }
     }
     // there is definitely no sub-node with this name
-    return nullptr;
+    return NULL;
 }
 
 aiNode *aiNode::FindNode(const char* name) {
@@ -105,17 +105,17 @@ aiNode *aiNode::FindNode(const char* name) {
         }
     }
     // there is definitely no sub-node with this name
-    return nullptr;
+    return NULL;
 }
 
 void aiNode::addChildren(unsigned int numChildren, aiNode **children) {
-    if (nullptr == children || 0 == numChildren) {
+    if (NULL == children || 0 == numChildren) {
         return;
     }
 
     for (unsigned int i = 0; i < numChildren; i++) {
         aiNode *child = children[i];
-        if (nullptr != child) {
+        if (NULL != child) {
             child->mParent = this;
         }
     }

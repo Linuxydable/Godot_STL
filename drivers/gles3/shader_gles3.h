@@ -131,7 +131,7 @@ private:
 				id(0),
 				vert_id(0),
 				frag_id(0),
-				uniform_location(nullptr),
+				uniform_location(NULL),
 				code_version(0),
 				ok(false) {}
 	};

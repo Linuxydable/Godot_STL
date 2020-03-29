@@ -616,10 +616,10 @@ void NavigationMeshInstance::_notification(int p_what) {
 
 			if (debug_view) {
 				debug_view->queue_delete();
-				debug_view = nullptr;
+				debug_view = NULL;
 			}
 
-			navigation = nullptr;
+			navigation = NULL;
 		} break;
 	}
 }
@@ -700,8 +700,8 @@ void NavigationMeshInstance::_changed_callback(Object *p_changed, const char *p_
 
 NavigationMeshInstance::NavigationMeshInstance() {
 
-	debug_view = nullptr;
-	navigation = nullptr;
+	debug_view = NULL;
+	navigation = NULL;
 	nav_id = -1;
 	enabled = true;
 	set_notify_transform(true);

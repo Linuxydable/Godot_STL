@@ -204,7 +204,7 @@ void CatmullClarkSubdivider::Subdivide (
     }
     InternSubdivide(&inmeshes.front(),inmeshes.size(),&outmeshes.front(),num);
     for (unsigned int i = 0; i < maptbl.size(); ++i) {
-        ai_assert(nullptr != outmeshes[i]);
+        ai_assert(NULL != outmeshes[i]);
         out[maptbl[i]] = outmeshes[i];
     }
 

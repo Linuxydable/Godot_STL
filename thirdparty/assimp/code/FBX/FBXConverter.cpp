@@ -149,7 +149,7 @@ namespace Assimp {
 
         static std::string getAncestorBaseName(const aiNode* node)
         {
-            const char* nodeName = nullptr;
+            const char* nodeName = NULL;
             size_t length = 0;
             while (node && (!nodeName || length == 0))
             {
@@ -197,14 +197,14 @@ namespace Assimp {
                     }
 
                     const Object* const object = con->SourceObject();
-                    if (nullptr == object) {
+                    if (NULL == object) {
                         FBXImporter::LogWarn("failed to convert source object for Model link");
                         continue;
                     }
 
                     const Model* const model = dynamic_cast<const Model*>(object);
 
-                    if (nullptr != model) {
+                    if (NULL != model) {
                         nodes_chain.clear();
                         post_nodes_chain.clear();
 
@@ -490,7 +490,7 @@ namespace Assimp {
 
             ai_assert(false);
 
-            return nullptr;
+            return NULL;
         }
 
         const char* FBXConverter::NameTransformationCompProperty(TransformationComp comp) {
@@ -535,7 +535,7 @@ namespace Assimp {
 
             ai_assert(false);
 
-            return nullptr;
+            return NULL;
         }
 
         aiVector3D FBXConverter::TransformationCompDefaultValue(TransformationComp comp)
@@ -1186,7 +1186,7 @@ namespace Assimp {
                             for (unsigned int k = 0; k < count; k++) {
                                 unsigned int index = outIndices[k];
                                 animMesh->mVertices[index] += vertex;
-                                if (animMesh->mNormals != nullptr) {
+                                if (animMesh->mNormals != NULL) {
                                     animMesh->mNormals[index] += normal;
                                     animMesh->mNormals[index].NormalizeSafe();
                                 }
@@ -1424,7 +1424,7 @@ namespace Assimp {
                                     continue;
                                 unsigned int index = translateIndexMap[outIndex];
                                 animMesh->mVertices[index] += vertex;
-                                if (animMesh->mNormals != nullptr) {
+                                if (animMesh->mNormals != NULL) {
                                     animMesh->mNormals[index] += normal;
                                     animMesh->mNormals[index].NormalizeSafe();
                                 }
@@ -1706,7 +1706,7 @@ namespace Assimp {
             path.Set(tex->RelativeFilename());
 
             const Video* media = tex->Media();
-            if (media != nullptr) {
+            if (media != NULL) {
                 bool textureReady = false; //tells if our texture is ready (if it was loaded or if it was found)
                 unsigned int index;
 
@@ -2233,13 +2233,13 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         std::string name = prefix + it->first;
 
         const Texture* const tex = (*it).second;
-        if (tex != nullptr)
+        if (tex != NULL)
         {
             aiString path;
             path.Set(tex->RelativeFilename());
 
             const Video* media = tex->Media();
-            if (media != nullptr && media->ContentLength() > 0) {
+            if (media != NULL && media->ContentLength() > 0) {
                 unsigned int index;
 
                 VideoMap::const_iterator it = textures_converted.find(media);
@@ -2682,7 +2682,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
                     target = node->Target();
                 }
                 if (node->Target() != target) {
-                    FBXImporter::LogWarn("Node target is nullptr type.");
+                    FBXImporter::LogWarn("Node target is NULL type.");
                 }
                 if (strictMode) {
                     ai_assert(node->Target() == target);
@@ -2813,7 +2813,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
 
                     const std::string& chain_name = NameTransformationChainNode(fixed_name, comp);
 
-                    aiNodeAnim* na = nullptr;
+                    aiNodeAnim* na = NULL;
                     switch (comp)
                     {
                     case TransformationComp_Rotation:
@@ -3313,7 +3313,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             double& max_time,
             double& min_time) {
             ai_assert(!keys.empty());
-            ai_assert(nullptr != valOut);
+            ai_assert(NULL != valOut);
 
             std::vector<unsigned int> next_pos;
             const size_t count(inputs.size());
@@ -3371,7 +3371,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
             Model::RotOrder order)
         {
             ai_assert(!keys.empty());
-            ai_assert(nullptr != valOut);
+            ai_assert(NULL != valOut);
 
             std::unique_ptr<aiVectorKey[]> temp(new aiVectorKey[keys.size()]);
             InterpolateKeys(temp.get(), keys, inputs, def_value, maxTime, minTime);
@@ -3528,7 +3528,7 @@ void FBXConverter::SetShadingPropertiesRaw(aiMaterial* out_mat, const PropertyTa
         }
 
         void FBXConverter::ConvertGlobalSettings() {
-            if (nullptr == out) {
+            if (NULL == out) {
                 return;
             }
 

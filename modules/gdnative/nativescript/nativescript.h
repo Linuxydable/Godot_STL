@@ -368,7 +368,7 @@ public:
 
 inline NativeScriptDesc *NativeScript::get_script_desc() const {
 	Map<StringName, NativeScriptDesc>::Element *E = NativeScriptLanguage::singleton->library_classes[lib_path].find(class_name);
-	return E ? &E->get() : nullptr;
+	return E ? &E->get() : NULL;
 }
 
 class NativeReloadNode : public Node {

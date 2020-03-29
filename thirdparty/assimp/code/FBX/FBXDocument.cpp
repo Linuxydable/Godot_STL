@@ -83,7 +83,7 @@ LazyObject::~LazyObject()
 const Object* LazyObject::Get(bool dieOnError)
 {
     if(IsBeingConstructed() || FailedToConstruct()) {
-        return nullptr;
+        return NULL;
     }
 
     if (object.get()) {
@@ -348,7 +348,7 @@ void Document::ReadGlobalSettings()
 {
     const Scope& sc = parser.GetRootScope();
     const Element* const ehead = sc["GlobalSettings"];
-    if ( nullptr == ehead || !ehead->Compound() ) {
+    if ( NULL == ehead || !ehead->Compound() ) {
         DOMWarning( "no GlobalSettings dictionary found" );
         globals.reset(new FileGlobalSettings(*this, std::make_shared<const PropertyTable>()));
         return;
@@ -544,7 +544,7 @@ const std::vector<const AnimationStack*>& Document::AnimationStacks() const
 LazyObject* Document::GetObject(uint64_t id) const
 {
     ObjectMap::const_iterator it = objects.find(id);
-    return it == objects.end() ? nullptr : (*it).second;
+    return it == objects.end() ? NULL : (*it).second;
 }
 
 #define MAX_CLASSNAMES 6
@@ -601,7 +601,7 @@ std::vector<const Connection*> Document::GetConnectionsSequenced(uint64_t id, bo
         for (size_t i = 0; i < c; ++i) {
             ai_assert(classnames[i]);
             if(static_cast<size_t>(std::distance(key.begin(),key.end())) == lengths[i] && !strncmp(classnames[i],obtype,lengths[i])) {
-                obtype = nullptr;
+                obtype = NULL;
                 break;
             }
         }

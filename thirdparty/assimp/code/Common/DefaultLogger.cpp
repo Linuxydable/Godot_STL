@@ -104,7 +104,7 @@ LogStream* LogStream::createDefaultStream(aiDefaultLogStream    streams,
 #ifdef WIN32
         return new Win32DebugLogStream();
 #else
-        return nullptr;
+        return NULL;
 #endif
 
         // Platform-independent default streams
@@ -113,7 +113,7 @@ LogStream* LogStream::createDefaultStream(aiDefaultLogStream    streams,
     case aiDefaultLogStream_STDOUT:
         return new StdOStreamLogStream(std::cout);
     case aiDefaultLogStream_FILE:
-        return (name && *name ? new FileLogStream(name,io) : nullptr );
+        return (name && *name ? new FileLogStream(name,io) : NULL );
     default:
         // We don't know this default log stream, so raise an assertion
         ai_assert(false);
@@ -213,10 +213,10 @@ void DefaultLogger::set( Logger *logger ) {
     std::lock_guard<std::mutex> lock(loggerMutex);
 #endif
 
-    if ( nullptr == logger ) {
+    if ( NULL == logger ) {
         logger = &s_pNullLogger;
     }
-    if ( nullptr != m_pLogger && !isNullLogger() ) {
+    if ( NULL != m_pLogger && !isNullLogger() ) {
         delete m_pLogger;
     }
 
@@ -295,7 +295,7 @@ void DefaultLogger::OnError( const char* message ) {
 // ----------------------------------------------------------------------------------
 //  Will attach a new stream
 bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity ) {
-    if ( nullptr == pStream ) {
+    if ( NULL == pStream ) {
         return false;
     }
 
@@ -321,7 +321,7 @@ bool DefaultLogger::attachStream( LogStream *pStream, unsigned int severity ) {
 // ----------------------------------------------------------------------------------
 //  Detach a stream
 bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity ) {
-    if ( nullptr == pStream ) {
+    if ( NULL == pStream ) {
         return false;
     }
 
@@ -335,7 +335,7 @@ bool DefaultLogger::detatchStream( LogStream *pStream, unsigned int severity ) {
             (*it)->m_uiErrorSeverity &= ~severity;
             if ( (*it)->m_uiErrorSeverity == 0 ) {
                 // don't delete the underlying stream 'cause the caller gains ownership again
-                (**it).m_pStream = nullptr;
+                (**it).m_pStream = NULL;
                 delete *it;
                 m_StreamArray.erase( it );
                 res = true;
@@ -368,7 +368,7 @@ DefaultLogger::~DefaultLogger() {
 // ----------------------------------------------------------------------------------
 //  Writes message to stream
 void DefaultLogger::WriteToStreams(const char *message, ErrorSeverity ErrorSev ) {
-    ai_assert(nullptr != message);
+    ai_assert(NULL != message);
 
     // Check whether this is a repeated message
     if (! ::strncmp( message,lastMsg, lastLen-1))

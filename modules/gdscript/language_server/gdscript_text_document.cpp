@@ -87,12 +87,12 @@ void GDScriptTextDocument::initialize() {
 
 		const HashMap<StringName, ClassMembers> &native_members = GDScriptLanguageProtocol::get_singleton()->get_workspace()->native_members;
 
-		const StringName *class_ptr = native_members.next(nullptr);
+		const StringName *class_ptr = native_members.next(NULL);
 		while (class_ptr) {
 
 			const ClassMembers &members = native_members.get(*class_ptr);
 
-			const String *name = members.next(nullptr);
+			const String *name = members.next(NULL);
 			while (name) {
 
 				const lsp::DocumentSymbol *symbol = members.get(*name);
@@ -224,7 +224,7 @@ Dictionary GDScriptTextDocument::resolve(const Dictionary &p_params) {
 	lsp::CompletionParams params;
 	Variant data = p_params["data"];
 
-	const lsp::DocumentSymbol *symbol = nullptr;
+	const lsp::DocumentSymbol *symbol = NULL;
 
 	if (data.get_type() == Variant::DICTIONARY) {
 

@@ -1264,7 +1264,7 @@ void Node::remove_child(Node *p_child) {
 		children[i]->notification(NOTIFICATION_MOVED_IN_PARENT);
 	}
 
-	p_child->data.parent = nullptr;
+	p_child->data.parent = NULL;
 	p_child->data.pos = -1;
 
 	// validate owner
@@ -1338,7 +1338,7 @@ Node *Node::get_node_or_null(const NodePath &p_path) const {
 
 		} else {
 
-			next = nullptr;
+			next = NULL;
 
 			auto it_child = std::find_if(current->data.children.begin(), current->data.children.end(), [&](const Node *child) {
 				if (child->data.name == name) {
@@ -1351,8 +1351,8 @@ Node *Node::get_node_or_null(const NodePath &p_path) const {
 				next = *it_child;
 			}
 
-			if (next == nullptr) {
-				return nullptr;
+			if (next == NULL) {
+				return NULL;
 			};
 		}
 		current = next;
@@ -1389,7 +1389,7 @@ Node *Node::find_node(const String &p_mask, bool p_recursive, bool p_owned) cons
 		if (ret)
 			return ret;
 	}
-	return nullptr;
+	return NULL;
 }
 
 Node *Node::get_parent() const {

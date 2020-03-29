@@ -62,7 +62,7 @@ namespace Etc
 	//
 	Block4x4Encoding_RGB8A1::Block4x4Encoding_RGB8A1(void)
 	{
-		m_pencodingbitsRGB8 = nullptr;
+		m_pencodingbitsRGB8 = NULL;
 		m_boolOpaque = false;
 		m_boolTransparent = false;
 		m_boolPunchThroughPixels = true;
@@ -557,8 +557,8 @@ namespace Etc
 		encodingTry.TryDifferentialHalf(&trys.m_half2);
 
 		// find best halves that are within differential range
-		DifferentialTrys::Try *ptryBest1 = nullptr;
-		DifferentialTrys::Try *ptryBest2 = nullptr;
+		DifferentialTrys::Try *ptryBest1 = NULL;
+		DifferentialTrys::Try *ptryBest2 = NULL;
 		encodingTry.m_fError = FLT_MAX;
 
 		// see if the best of each half are in differential range
@@ -605,8 +605,8 @@ namespace Etc
 				}
 			}
 			assert(encodingTry.m_fError < FLT_MAX);
-			assert(ptryBest1 != nullptr);
-			assert(ptryBest2 != nullptr);
+			assert(ptryBest1 != NULL);
+			assert(ptryBest2 != NULL);
 		}
 
 		if (encodingTry.m_fError < m_fError)
@@ -697,7 +697,7 @@ namespace Etc
 	void Block4x4Encoding_RGB8A1::TryDifferentialHalf(DifferentialTrys::Half *a_phalf)
 	{
 
-		a_phalf->m_ptryBest = nullptr;
+		a_phalf->m_ptryBest = NULL;
 		float fBestTryError = FLT_MAX;
 
 		a_phalf->m_uiTrys = 0;

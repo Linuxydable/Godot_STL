@@ -31,7 +31,7 @@ namespace Etc
 			inline void Init(Block4x4 *a_pblock)
 			{
 				m_pblock = a_pblock;
-				m_plinkNext = nullptr;
+				m_plinkNext = NULL;
 			}
 
 			inline Block4x4 * GetBlock(void)
@@ -55,7 +55,7 @@ namespace Etc
 
 				for (unsigned int uiStep = 0; uiStep < a_uiSteps; uiStep++)
 				{
-					if (plink == nullptr)
+					if (plink == NULL)
 					{
 						break;
 					}

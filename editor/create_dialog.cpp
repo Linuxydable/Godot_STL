@@ -412,7 +412,7 @@ void CreateDialog::_update_search() {
 		favorite->set_pressed(std::find(favorite_list.begin(), favorite_list.end(), to_select->get_text(0)) != favorite_list.end());
 	}
 
-	get_ok()->set_disabled(root->get_children() == nullptr);
+	get_ok()->set_disabled(root->get_children() == NULL);
 }
 
 void CreateDialog::_confirmed() {

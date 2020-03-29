@@ -1795,7 +1795,7 @@ CSGBrush *CSGPolygon::_build_brush() {
 	// set our bounding box
 
 	if (polygon.size() < 3)
-		return nullptr;
+		return NULL;
 
 	std::vector<Point2> final_polygon = polygon;
 
@@ -1806,9 +1806,9 @@ CSGBrush *CSGPolygon::_build_brush() {
 	std::vector<int> triangles = Geometry::triangulate_polygon(final_polygon);
 
 	if (triangles.size() < 3)
-		return nullptr;
+		return NULL;
 
-	Path *path = nullptr;
+	Path *path = NULL;
 	Ref<Curve3D> curve;
 
 	// get bounds for our polygon
@@ -1835,13 +1835,13 @@ CSGBrush *CSGPolygon::_build_brush() {
 
 	if (mode == MODE_PATH) {
 		if (!has_node(path_node))
-			return nullptr;
+			return NULL;
 		Node *n = get_node(path_node);
 		if (!n)
-			return nullptr;
+			return NULL;
 		path = Object::cast_to<Path>(n);
 		if (!path)
-			return nullptr;
+			return NULL;
 
 		if (path != path_cache) {
 			if (path_cache) {
@@ -1858,9 +1858,9 @@ CSGBrush *CSGPolygon::_build_brush() {
 		}
 		curve = path->get_curve();
 		if (curve.is_null())
-			return nullptr;
+			return NULL;
 		if (curve->get_baked_length() <= 0)
-			return nullptr;
+			return NULL;
 	}
 	CSGBrush *brush = memnew(CSGBrush);
 

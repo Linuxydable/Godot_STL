@@ -89,7 +89,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::get_native_symbol(const String &p_
 		class_name = ClassDB::get_parent_class(class_name);
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 const lsp::DocumentSymbol *GDScriptWorkspace::get_script_symbol(const String &p_path) const {
@@ -97,7 +97,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::get_script_symbol(const String &p_
 	if (S) {
 		return &(S->get()->get_symbols());
 	}
-	return nullptr;
+	return NULL;
 }
 
 void GDScriptWorkspace::reload_all_workspace_scripts() {
@@ -149,7 +149,7 @@ ExtendGDScriptParser *GDScriptWorkspace::get_parse_successed_script(const String
 	if (S) {
 		return S->get();
 	}
-	return nullptr;
+	return NULL;
 }
 
 ExtendGDScriptParser *GDScriptWorkspace::get_parse_result(const String &p_path) {
@@ -161,7 +161,7 @@ ExtendGDScriptParser *GDScriptWorkspace::get_parse_result(const String &p_path) 
 	if (S) {
 		return S->get();
 	}
-	return nullptr;
+	return NULL;
 }
 
 Array GDScriptWorkspace::symbol(const Dictionary &p_params) {
@@ -372,13 +372,13 @@ void GDScriptWorkspace::completion(const lsp::CompletionParams &p_params, List<S
 
 	if (const ExtendGDScriptParser *parser = get_parse_result(path)) {
 		String code = parser->get_text_for_completion(p_params.position);
-		GDScriptLanguage::get_singleton()->complete_code(code, path, nullptr, r_options, forced, call_hint);
+		GDScriptLanguage::get_singleton()->complete_code(code, path, NULL, r_options, forced, call_hint);
 	}
 }
 
 const lsp::DocumentSymbol *GDScriptWorkspace::resolve_symbol(const lsp::TextDocumentPositionParams &p_doc_pos, const String &p_symbol_name, bool p_func_requred) {
 
-	const lsp::DocumentSymbol *symbol = nullptr;
+	const lsp::DocumentSymbol *symbol = NULL;
 
 	String path = get_file_path(p_doc_pos.textDocument.uri);
 	if (const ExtendGDScriptParser *parser = get_parse_result(path)) {
@@ -406,7 +406,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::resolve_symbol(const lsp::TextDocu
 			} else {
 
 				ScriptLanguage::LookupResult ret;
-				if (OK == GDScriptLanguage::get_singleton()->lookup_code(parser->get_text_for_lookup_symbol(pos, symbol_identifier, p_func_requred), symbol_identifier, path, nullptr, ret)) {
+				if (OK == GDScriptLanguage::get_singleton()->lookup_code(parser->get_text_for_lookup_symbol(pos, symbol_identifier, p_func_requred), symbol_identifier, path, NULL, ret)) {
 
 					if (ret.type == ScriptLanguage::LookupResult::RESULT_SCRIPT_LOCATION) {
 
@@ -446,7 +446,7 @@ void GDScriptWorkspace::resolve_related_symbols(const lsp::TextDocumentPositionP
 		Vector2i offset;
 		symbol_identifier = parser->get_identifier_under_position(p_doc_pos.position, offset);
 
-		const StringName *class_ptr = native_members.next(nullptr);
+		const StringName *class_ptr = native_members.next(NULL);
 		while (class_ptr) {
 			const ClassMembers &members = native_members.get(*class_ptr);
 			if (const lsp::DocumentSymbol *const *symbol = members.getptr(symbol_identifier)) {
@@ -463,7 +463,7 @@ void GDScriptWorkspace::resolve_related_symbols(const lsp::TextDocumentPositionP
 			}
 
 			const HashMap<String, ClassMembers> &inner_classes = script->get_inner_classes();
-			const String *_class = inner_classes.next(nullptr);
+			const String *_class = inner_classes.next(NULL);
 			while (_class) {
 
 				const ClassMembers *inner_class = inner_classes.getptr(*_class);
@@ -492,7 +492,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::resolve_native_symbol(const lsp::N
 		}
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 void GDScriptWorkspace::resolve_document_links(const String &p_uri, List<lsp::DocumentLink> &r_list) {

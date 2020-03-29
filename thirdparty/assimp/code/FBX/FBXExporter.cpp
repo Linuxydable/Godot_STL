@@ -964,7 +964,7 @@ aiNode* get_node_for_mesh(unsigned int meshIndex, aiNode* node)
         aiNode* ret = get_node_for_mesh(meshIndex, node->mChildren[i]);
         if (ret) { return ret; }
     }
-    return nullptr;
+    return NULL;
 }
 
 aiMatrix4x4 get_world_transform(const aiNode* node, const aiScene* scene)
@@ -1416,7 +1416,7 @@ void FBXExporter::WriteObjects ()
         std::string path = it.first;
         // try get embedded texture
         const aiTexture* embedded_texture = mScene->GetEmbeddedTexture(it.first.c_str());
-        if (embedded_texture != nullptr) {
+        if (embedded_texture != NULL) {
             // change the path (use original filename, if available. If name is empty, concatenate texture index with file extension)
             std::stringstream newPath;
             if (embedded_texture->mFilename.length > 0) {
@@ -1790,7 +1790,7 @@ void FBXExporter::WriteObjects ()
         const std::set<const aiNode*, SortNodeByName> skeleton= skeleton_by_mesh[mi];
         for (const aiNode* bone_node : skeleton) {
             // if there's a bone for this node, find it
-            const aiBone* b = nullptr;
+            const aiBone* b = NULL;
             for (size_t bi = 0; bi < m->mNumBones; ++bi) {
                 // TODO: this probably should index by something else
                 const std::string name(m->mBones[bi]->mName.C_Str());

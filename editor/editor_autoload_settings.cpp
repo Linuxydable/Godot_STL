@@ -574,7 +574,7 @@ void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &
 	int order = ProjectSettings::get_singleton()->get_order("autoload/" + name);
 
 	AutoLoadInfo aux;
-	List<AutoLoadInfo>::Element *E = nullptr;
+	List<AutoLoadInfo>::Element *E = NULL;
 
 	if (!move_to_back) {
 		aux.order = order;
@@ -781,9 +781,9 @@ EditorAutoloadSettings::EditorAutoloadSettings() {
 			}
 		}
 
-		if (!info.is_singleton && !info.in_editor && info.node != nullptr) {
+		if (!info.is_singleton && !info.in_editor && info.node != NULL) {
 			memdelete(info.node);
-			info.node = nullptr;
+			info.node = NULL;
 		}
 	}
 

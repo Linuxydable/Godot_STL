@@ -546,7 +546,7 @@ void RigidBody::_direct_state_changed(Object *p_state) {
 		contact_monitor->locked = false;
 	}
 
-	state = nullptr;
+	state = NULL;
 }
 
 void RigidBody::_notification(int p_what) {
@@ -869,7 +869,7 @@ void RigidBody::set_contact_monitor(bool p_enabled) {
 		}
 
 		memdelete(contact_monitor);
-		contact_monitor = nullptr;
+		contact_monitor = NULL;
 	} else {
 
 		contact_monitor = memnew(ContactMonitor);
@@ -879,7 +879,7 @@ void RigidBody::set_contact_monitor(bool p_enabled) {
 
 bool RigidBody::is_contact_monitor_enabled() const {
 
-	return contact_monitor != nullptr;
+	return contact_monitor != NULL;
 }
 
 void RigidBody::set_axis_lock(PhysicsServer::BodyAxis p_axis, bool p_lock) {
@@ -1051,7 +1051,7 @@ RigidBody::RigidBody() :
 
 	mass = 1;
 	max_contacts_reported = 0;
-	state = nullptr;
+	state = NULL;
 
 	gravity_scale = 1;
 	linear_damp = -1;
@@ -1062,7 +1062,7 @@ RigidBody::RigidBody() :
 	ccd = false;
 
 	custom_integrator = false;
-	contact_monitor = nullptr;
+	contact_monitor = NULL;
 	can_sleep = true;
 
 	PhysicsServer::get_singleton()->body_set_force_integration_callback(get_rid(), this, "_direct_state_changed");
@@ -1440,12 +1440,12 @@ KinematicBody::KinematicBody() :
 KinematicBody::~KinematicBody() {
 
 	if (motion_cache.is_valid()) {
-		motion_cache->owner = nullptr;
+		motion_cache->owner = NULL;
 	}
 
 	for (auto &&collider : slide_colliders) {
 		if (collider.is_valid()) {
-			collider->owner = nullptr;
+			collider->owner = NULL;
 		}
 	}
 }
@@ -1465,7 +1465,7 @@ Vector3 KinematicCollision::get_remainder() const {
 	return collision.remainder;
 }
 Object *KinematicCollision::get_local_shape() const {
-	if (!owner) return nullptr;
+	if (!owner) return NULL;
 	uint32_t ownerid = owner->shape_find_owner(collision.local_shape);
 	return owner->shape_owner_get_owner(ownerid);
 }
@@ -1476,7 +1476,7 @@ Object *KinematicCollision::get_collider() const {
 		return ObjectDB::get_instance(collision.collider);
 	}
 
-	return nullptr;
+	return NULL;
 }
 ObjectID KinematicCollision::get_collider_id() const {
 
@@ -1493,7 +1493,7 @@ Object *KinematicCollision::get_collider_shape() const {
 		}
 	}
 
-	return nullptr;
+	return NULL;
 }
 int KinematicCollision::get_collider_shape_index() const {
 
@@ -1539,7 +1539,7 @@ KinematicCollision::KinematicCollision() {
 	collision.collider = 0;
 	collision.collider_shape = 0;
 	collision.local_shape = 0;
-	owner = nullptr;
+	owner = NULL;
 }
 
 ///////////////////////////////////////
@@ -2168,7 +2168,7 @@ void PhysicalBone::_notification(int p_what) {
 					parent_skeleton->unbind_physical_bone_from_bone(bone_id);
 				}
 			}
-			parent_skeleton = nullptr;
+			parent_skeleton = NULL;
 			update_bone_id();
 			break;
 		case NOTIFICATION_TRANSFORM_CHANGED:
@@ -2267,7 +2267,7 @@ void PhysicalBone::_bind_methods() {
 
 Skeleton *PhysicalBone::find_skeleton_parent(Node *p_parent) {
 	if (!p_parent) {
-		return nullptr;
+		return NULL;
 	}
 	Skeleton *s = Object::cast_to<Skeleton>(p_parent);
 	return s ? s : find_skeleton_parent(p_parent->get_parent());
@@ -2419,7 +2419,7 @@ void PhysicalBone::set_joint_type(JointType p_joint_type) {
 
 	if (joint_data)
 		memdelete(joint_data);
-	joint_data = nullptr;
+	joint_data = NULL;
 	switch (p_joint_type) {
 		case JOINT_TYPE_PIN:
 			joint_data = memnew(PinJointData);
@@ -2600,8 +2600,8 @@ PhysicalBone::PhysicalBone() :
 #ifdef TOOLS_ENABLED
 		gizmo_move_joint(false),
 #endif
-		joint_data(nullptr),
-		parent_skeleton(nullptr),
+		joint_data(NULL),
+		parent_skeleton(NULL),
 		static_body(false),
 		_internal_static_body(false),
 		simulate_physics(false),
@@ -2726,7 +2726,7 @@ void PhysicalBone::_stop_physics_simulation() {
 	PhysicsServer::get_singleton()->body_set_mode(get_rid(), PhysicsServer::BODY_MODE_STATIC);
 	PhysicsServer::get_singleton()->body_set_collision_layer(get_rid(), 0);
 	PhysicsServer::get_singleton()->body_set_collision_mask(get_rid(), 0);
-	PhysicsServer::get_singleton()->body_set_force_integration_callback(get_rid(), nullptr, "");
+	PhysicsServer::get_singleton()->body_set_force_integration_callback(get_rid(), NULL, "");
 	parent_skeleton->set_bone_global_pose_override(bone_id, Transform(), 0.0, false);
 	_internal_simulate_physics = false;
 }

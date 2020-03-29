@@ -129,8 +129,8 @@ IOStream* DefaultIOSystem::Open( const char* strFile, const char* strMode)
 #else
     file = ::fopen(strFile, strMode);
 #endif
-    if (nullptr == file)
-        return nullptr;
+    if (NULL == file)
+        return NULL;
 
     return new DefaultIOStream(file, (std::string) strFile);
 }
@@ -174,7 +174,7 @@ inline static void MakeAbsolutePath (const char* in, char* _out)
         MultiByteToWideChar(CP_UTF8, MB_PRECOMPOSED, in, -1, out16, PATHLIMIT);
         wchar_t* ret = ::_wfullpath(out16, in16, PATHLIMIT);
         if (ret) {
-            WideCharToMultiByte(CP_UTF8, MB_PRECOMPOSED, out16, -1, _out, PATHLIMIT, nullptr, nullptr);
+            WideCharToMultiByte(CP_UTF8, MB_PRECOMPOSED, out16, -1, _out, PATHLIMIT, NULL, NULL);
         }
         if (!ret) {
             // preserve the input path, maybe someone else is able to fix

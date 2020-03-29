@@ -96,7 +96,7 @@ void AudioDriverPulseAudio::detect_channels(bool capture) {
 		pa_operation *pa_op = pa_context_get_server_info(pa_ctx, &AudioDriverPulseAudio::pa_server_info_cb, (void *)this);
 		if (pa_op) {
 			while (pa_status == 0) {
-				int ret = pa_mainloop_iterate(pa_ml, 1, nullptr);
+				int ret = pa_mainloop_iterate(pa_ml, 1, NULL);
 				if (ret < 0) {
 					ERR_PRINT("pa_mainloop_iterate error");
 				}
@@ -126,7 +126,7 @@ void AudioDriverPulseAudio::detect_channels(bool capture) {
 
 	if (pa_op) {
 		while (pa_status == 0) {
-			int ret = pa_mainloop_iterate(pa_ml, 1, nullptr);
+			int ret = pa_mainloop_iterate(pa_ml, 1, NULL);
 			if (ret < 0) {
 				ERR_PRINT("pa_mainloop_iterate error");
 			}
@@ -201,7 +201,7 @@ Error AudioDriverPulseAudio::init_device() {
 	pa_map.map[7] = PA_CHANNEL_POSITION_SIDE_RIGHT;
 
 	pa_str = pa_stream_new(pa_ctx, "Sound", &spec, &pa_map);
-	if (pa_str == nullptr) {
+	if (pa_str == NULL) {
 		ERR_PRINTS("PulseAudio: pa_stream_new error: " + String(pa_strerror(pa_context_errno(pa_ctx))));
 		ERR_FAIL_V(ERR_CANT_OPEN);
 	}
@@ -218,9 +218,9 @@ Error AudioDriverPulseAudio::init_device() {
 	attr.maxlength = (uint32_t)-1;
 	attr.minreq = (uint32_t)-1;
 
-	const char *dev = device_name == "Default" ? nullptr : device_name.utf8().get_data();
+	const char *dev = device_name == "Default" ? NULL : device_name.utf8().get_data();
 	pa_stream_flags flags = pa_stream_flags(PA_STREAM_INTERPOLATE_TIMING | PA_STREAM_ADJUST_LATENCY | PA_STREAM_AUTO_TIMING_UPDATE);
-	int error_code = pa_stream_connect_playback(pa_str, dev, &attr, flags, nullptr, nullptr);
+	int error_code = pa_stream_connect_playback(pa_str, dev, &attr, flags, NULL, NULL);
 	ERR_FAIL_COND_V(error_code < 0, ERR_CANT_OPEN);
 
 	samples_in.resize(buffer_frames * channels);
@@ -242,31 +242,31 @@ Error AudioDriverPulseAudio::init() {
 	mix_rate = GLOBAL_DEF_RST("audio/mix_rate", DEFAULT_MIX_RATE);
 
 	pa_ml = pa_mainloop_new();
-	ERR_FAIL_COND_V(pa_ml == nullptr, ERR_CANT_OPEN);
+	ERR_FAIL_COND_V(pa_ml == NULL, ERR_CANT_OPEN);
 
 	pa_ctx = pa_context_new(pa_mainloop_get_api(pa_ml), "Godot");
-	ERR_FAIL_COND_V(pa_ctx == nullptr, ERR_CANT_OPEN);
+	ERR_FAIL_COND_V(pa_ctx == NULL, ERR_CANT_OPEN);
 
 	pa_ready = 0;
 	pa_context_set_state_callback(pa_ctx, pa_state_cb, (void *)this);
 
-	int ret = pa_context_connect(pa_ctx, nullptr, PA_CONTEXT_NOFLAGS, nullptr);
+	int ret = pa_context_connect(pa_ctx, NULL, PA_CONTEXT_NOFLAGS, NULL);
 	if (ret < 0) {
 		if (pa_ctx) {
 			pa_context_unref(pa_ctx);
-			pa_ctx = nullptr;
+			pa_ctx = NULL;
 		}
 
 		if (pa_ml) {
 			pa_mainloop_free(pa_ml);
-			pa_ml = nullptr;
+			pa_ml = NULL;
 		}
 
 		return ERR_CANT_OPEN;
 	}
 
 	while (pa_ready == 0) {
-		ret = pa_mainloop_iterate(pa_ml, 1, nullptr);
+		ret = pa_mainloop_iterate(pa_ml, 1, NULL);
 		if (ret < 0) {
 			ERR_PRINT("pa_mainloop_iterate error");
 		}
@@ -276,12 +276,12 @@ Error AudioDriverPulseAudio::init() {
 		if (pa_ctx) {
 			pa_context_disconnect(pa_ctx);
 			pa_context_unref(pa_ctx);
-			pa_ctx = nullptr;
+			pa_ctx = NULL;
 		}
 
 		if (pa_ml) {
 			pa_mainloop_free(pa_ml);
-			pa_ml = nullptr;
+			pa_ml = NULL;
 		}
 
 		return ERR_CANT_OPEN;
@@ -376,7 +376,7 @@ void AudioDriverPulseAudio::thread_func(void *p_udata) {
 
 		int ret;
 		do {
-			ret = pa_mainloop_iterate(ad->pa_ml, 0, nullptr);
+			ret = pa_mainloop_iterate(ad->pa_ml, 0, NULL);
 		} while (ret > 0);
 
 		if (avail_bytes > 0 && pa_stream_get_state(ad->pa_str) == PA_STREAM_READY) {
@@ -384,7 +384,7 @@ void AudioDriverPulseAudio::thread_func(void *p_udata) {
 			if (bytes > 0) {
 				size_t bytes_to_write = MIN(bytes, avail_bytes);
 				const void *ptr = ad->samples_out.data();
-				ret = pa_stream_write(ad->pa_str, (char *)ptr + write_ofs, bytes_to_write, nullptr, 0LL, PA_SEEK_RELATIVE);
+				ret = pa_stream_write(ad->pa_str, (char *)ptr + write_ofs, bytes_to_write, NULL, 0LL, PA_SEEK_RELATIVE);
 				if (ret != 0) {
 					ERR_PRINTS("PulseAudio: pa_stream_write error: " + String(pa_strerror(ret)));
 				} else {
@@ -431,7 +431,7 @@ void AudioDriverPulseAudio::thread_func(void *p_udata) {
 				pa_operation *pa_op = pa_context_get_server_info(ad->pa_ctx, &AudioDriverPulseAudio::pa_server_info_cb, (void *)ad);
 				if (pa_op) {
 					while (ad->pa_status == 0) {
-						ret = pa_mainloop_iterate(ad->pa_ml, 1, nullptr);
+						ret = pa_mainloop_iterate(ad->pa_ml, 1, NULL);
 						if (ret < 0) {
 							ERR_PRINT("pa_mainloop_iterate error");
 						}
@@ -462,7 +462,7 @@ void AudioDriverPulseAudio::thread_func(void *p_udata) {
 		if (ad->pa_rec_str && pa_stream_get_state(ad->pa_rec_str) == PA_STREAM_READY) {
 			size_t bytes = pa_stream_readable_size(ad->pa_rec_str);
 			if (bytes > 0) {
-				const void *ptr = nullptr;
+				const void *ptr = NULL;
 				size_t maxbytes = ad->capture_buffer.size() * sizeof(int16_t);
 
 				bytes = MIN(bytes, maxbytes);
@@ -554,7 +554,7 @@ Array AudioDriverPulseAudio::get_device_list() {
 	pa_devices.clear();
 	pa_devices.push_back("Default");
 
-	if (pa_ctx == nullptr) {
+	if (pa_ctx == NULL) {
 		return pa_devices;
 	}
 
@@ -565,7 +565,7 @@ Array AudioDriverPulseAudio::get_device_list() {
 	pa_operation *pa_op = pa_context_get_sink_info_list(pa_ctx, pa_sinklist_cb, (void *)this);
 	if (pa_op) {
 		while (pa_status == 0) {
-			int ret = pa_mainloop_iterate(pa_ml, 1, nullptr);
+			int ret = pa_mainloop_iterate(pa_ml, 1, NULL);
 			if (ret < 0) {
 				ERR_PRINT("pa_mainloop_iterate error");
 			}
@@ -612,7 +612,7 @@ void AudioDriverPulseAudio::finish_device() {
 	if (pa_str) {
 		pa_stream_disconnect(pa_str);
 		pa_stream_unref(pa_str);
-		pa_str = nullptr;
+		pa_str = NULL;
 	}
 }
 
@@ -629,21 +629,21 @@ void AudioDriverPulseAudio::finish() {
 	if (pa_ctx) {
 		pa_context_disconnect(pa_ctx);
 		pa_context_unref(pa_ctx);
-		pa_ctx = nullptr;
+		pa_ctx = NULL;
 	}
 
 	if (pa_ml) {
 		pa_mainloop_free(pa_ml);
-		pa_ml = nullptr;
+		pa_ml = NULL;
 	}
 
 	memdelete(thread);
 	if (mutex) {
 		memdelete(mutex);
-		mutex = nullptr;
+		mutex = NULL;
 	}
 
-	thread = nullptr;
+	thread = NULL;
 }
 
 Error AudioDriverPulseAudio::capture_init_device() {
@@ -683,12 +683,12 @@ Error AudioDriverPulseAudio::capture_init_device() {
 	attr.fragsize = input_buffer_size * sizeof(int16_t);
 
 	pa_rec_str = pa_stream_new(pa_ctx, "Record", &spec, &pa_rec_map);
-	if (pa_rec_str == nullptr) {
+	if (pa_rec_str == NULL) {
 		ERR_PRINTS("PulseAudio: pa_stream_new error: " + String(pa_strerror(pa_context_errno(pa_ctx))));
 		ERR_FAIL_V(ERR_CANT_OPEN);
 	}
 
-	const char *dev = capture_device_name == "Default" ? nullptr : capture_device_name.utf8().get_data();
+	const char *dev = capture_device_name == "Default" ? NULL : capture_device_name.utf8().get_data();
 	pa_stream_flags flags = pa_stream_flags(PA_STREAM_INTERPOLATE_TIMING | PA_STREAM_ADJUST_LATENCY | PA_STREAM_AUTO_TIMING_UPDATE);
 	int error_code = pa_stream_connect_record(pa_rec_str, dev, &attr, flags);
 	if (error_code < 0) {
@@ -712,7 +712,7 @@ void AudioDriverPulseAudio::capture_finish_device() {
 			ERR_PRINTS("PulseAudio: pa_stream_disconnect error: " + String(pa_strerror(ret)));
 		}
 		pa_stream_unref(pa_rec_str);
-		pa_rec_str = nullptr;
+		pa_rec_str = NULL;
 	}
 }
 
@@ -760,7 +760,7 @@ Array AudioDriverPulseAudio::capture_get_device_list() {
 	pa_rec_devices.clear();
 	pa_rec_devices.push_back("Default");
 
-	if (pa_ctx == nullptr) {
+	if (pa_ctx == NULL) {
 		return pa_rec_devices;
 	}
 
@@ -771,7 +771,7 @@ Array AudioDriverPulseAudio::capture_get_device_list() {
 	pa_operation *pa_op = pa_context_get_source_info_list(pa_ctx, pa_sourcelist_cb, (void *)this);
 	if (pa_op) {
 		while (pa_status == 0) {
-			int ret = pa_mainloop_iterate(pa_ml, 1, nullptr);
+			int ret = pa_mainloop_iterate(pa_ml, 1, NULL);
 			if (ret < 0) {
 				ERR_PRINT("pa_mainloop_iterate error");
 			}
@@ -797,12 +797,12 @@ String AudioDriverPulseAudio::capture_get_device() {
 }
 
 AudioDriverPulseAudio::AudioDriverPulseAudio() :
-		thread(nullptr),
-		mutex(nullptr),
-		pa_ml(nullptr),
-		pa_ctx(nullptr),
-		pa_str(nullptr),
-		pa_rec_str(nullptr),
+		thread(NULL),
+		mutex(NULL),
+		pa_ml(NULL),
+		pa_ctx(NULL),
+		pa_str(NULL),
+		pa_rec_str(NULL),
 		device_name("Default"),
 		new_device("Default"),
 		default_device(""),

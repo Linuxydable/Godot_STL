@@ -104,6 +104,6 @@ bool DropFaceNormalsProcess::DropMeshFaceNormals (aiMesh* pMesh) {
     }
     
     delete[] pMesh->mNormals;
-    pMesh->mNormals = nullptr;
+    pMesh->mNormals = NULL;
     return true;
 }

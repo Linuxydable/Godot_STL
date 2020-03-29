@@ -490,25 +490,25 @@ namespace pmx
 		this->model_comment.clear();
 		this->model_english_comment.clear();
 		this->vertex_count = 0;
-		this->vertices = nullptr;
+		this->vertices = NULL;
 		this->index_count = 0;
-		this->indices = nullptr;
+		this->indices = NULL;
 		this->texture_count = 0;
-		this->textures = nullptr;
+		this->textures = NULL;
 		this->material_count = 0;
-		this->materials = nullptr;
+		this->materials = NULL;
 		this->bone_count = 0;
-		this->bones = nullptr;
+		this->bones = NULL;
 		this->morph_count = 0;
-		this->morphs = nullptr;
+		this->morphs = NULL;
 		this->frame_count = 0;
-		this->frames = nullptr;
+		this->frames = NULL;
 		this->rigid_body_count = 0;
-		this->rigid_bodies = nullptr;
+		this->rigid_bodies = NULL;
 		this->joint_count = 0;
-		this->joints = nullptr;
+		this->joints = NULL;
 		this->soft_body_count = 0;
-		this->soft_bodies = nullptr;
+		this->soft_bodies = NULL;
 	}
 
 	void PmxModel::Read(std::istream *stream)

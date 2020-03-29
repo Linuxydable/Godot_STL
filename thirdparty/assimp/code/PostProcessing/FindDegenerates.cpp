@@ -109,7 +109,7 @@ static void removeMesh(aiScene* pScene, unsigned const index) {
     for (unsigned i = index; i < pScene->mNumMeshes - 1; ++i) {
         pScene->mMeshes[i] = pScene->mMeshes[i+1];
     }
-    pScene->mMeshes[pScene->mNumMeshes - 1] = nullptr;
+    pScene->mMeshes[pScene->mNumMeshes - 1] = NULL;
     --(pScene->mNumMeshes);
     delete delete_me;
 
@@ -274,13 +274,13 @@ evil_jump_outside:
                 if (&face_src != &face_dest) {
                     // clear source
                     face_src.mNumIndices = 0;
-                    face_src.mIndices = nullptr;
+                    face_src.mIndices = NULL;
                 }
             }
             else {
                 // Otherwise delete it if we don't need this face
                 delete[] face_src.mIndices;
-                face_src.mIndices = nullptr;
+                face_src.mIndices = NULL;
                 face_src.mNumIndices = 0;
             }
         }

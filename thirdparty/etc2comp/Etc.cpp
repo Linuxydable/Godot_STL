@@ -72,8 +72,8 @@ namespace Etc
 		int totalEncodingTime = 0;
 		for(unsigned int mip = 0; mip < a_uiMaxMipmaps && mipWidth >= 1 && mipHeight >= 1; mip++)
 		{
-			float* pImageData = nullptr;
-			float* pMipImage = nullptr;
+			float* pImageData = NULL;
+			float* pMipImage = NULL;
 
 			if(mip == 0)
 			{

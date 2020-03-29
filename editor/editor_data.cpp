@@ -270,7 +270,7 @@ EditorPlugin *EditorData::get_editor(Object *p_object) {
 			return plugin;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 EditorPlugin *EditorData::get_subeditor(Object *p_object) {
@@ -280,7 +280,7 @@ EditorPlugin *EditorData::get_subeditor(Object *p_object) {
 			return plugin;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 std::vector<EditorPlugin *> EditorData::get_subeditors(Object *p_object) {
@@ -300,7 +300,7 @@ EditorPlugin *EditorData::get_editor(String p_name) {
 			return plugin;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 void EditorData::copy_object_params(Object *p_object) {
@@ -446,7 +446,7 @@ UndoRedo &EditorData::get_undo_redo() {
 
 void EditorData::remove_editor_plugin(EditorPlugin *p_plugin) {
 
-	p_plugin->undo_redo = nullptr;
+	p_plugin->undo_redo = NULL;
 
 	auto it_find = std::find(editor_plugins.begin(), editor_plugins.end(), p_plugin);
 
@@ -466,7 +466,7 @@ int EditorData::get_editor_plugin_count() const {
 }
 EditorPlugin *EditorData::get_editor_plugin(int p_idx) {
 
-	ERR_FAIL_INDEX_V(p_idx, editor_plugins.size(), nullptr);
+	ERR_FAIL_INDEX_V(p_idx, editor_plugins.size(), NULL);
 	return editor_plugins[p_idx];
 }
 
@@ -493,7 +493,7 @@ Object *EditorData::instance_custom_type(const String &p_type, const String &p_i
 				Ref<Script> script = ct.script;
 
 				Object *ob = ClassDB::instance(p_inherits);
-				ERR_FAIL_COND_V(!ob, nullptr);
+				ERR_FAIL_COND_V(!ob, NULL);
 				if (ob->is_class("Node")) {
 					ob->call("set_name", p_type);
 				}
@@ -503,7 +503,7 @@ Object *EditorData::instance_custom_type(const String &p_type, const String &p_i
 		}
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 void EditorData::remove_custom_type(const String &p_type) {
@@ -527,7 +527,7 @@ int EditorData::add_edited_scene(int p_at_pos) {
 	if (p_at_pos < 0)
 		p_at_pos = edited_scene.size();
 	EditedScene es;
-	es.root = nullptr;
+	es.root = NULL;
 	es.path = String();
 	es.history_current = -1;
 	es.version = 0;
@@ -907,7 +907,7 @@ Object *EditorData::script_class_instance(const String &p_class) {
 			return obj;
 		}
 	}
-	return nullptr;
+	return NULL;
 }
 
 void EditorData::script_class_set_icon_path(const String &p_class, const String &p_icon_path) {
@@ -1001,7 +1001,7 @@ void EditorSelection::add_node(Node *p_node) {
 
 	changed = true;
 	nl_changed = true;
-	Object *meta = nullptr;
+	Object *meta = NULL;
 	for (List<Object *>::Element *E = editor_plugins.front(); E; E = E->next()) {
 
 		meta = E->get()->call("_get_editor_data", p_node);

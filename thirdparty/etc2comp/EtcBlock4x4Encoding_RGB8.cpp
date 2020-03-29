@@ -56,7 +56,7 @@ namespace Etc
 	Block4x4Encoding_RGB8::Block4x4Encoding_RGB8(void)
 	{
 
-		m_pencodingbitsRGB8 = nullptr;
+		m_pencodingbitsRGB8 = NULL;
 
 	}
 

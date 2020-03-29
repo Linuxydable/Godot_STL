@@ -289,12 +289,12 @@ void RigidCollisionObjectBullet::internal_shape_destroy_0(ShapeWrapper& shapeW, 
 	shapeW.shape->remove_owner(this, p_permanentlyFromThisBody);
 
 	if (shapeW.bt_shape == mainShape) {
-		mainShape = nullptr;
+		mainShape = NULL;
 	}
 
 	delete shapeW.bt_shape;
 
-	shapeW.bt_shape = nullptr;
+	shapeW.bt_shape = NULL;
 }
 
 void RigidCollisionObjectBullet::remove_shape_full(ShapeBullet *p_shape) {
@@ -380,7 +380,7 @@ bool RigidCollisionObjectBullet::is_shape_disabled(int p_index) {
 // need_update : use const ShapeWrapper& shape, not int p_index
 void RigidCollisionObjectBullet::shape_changed(int p_shape_index) {
 	if (shapes[p_shape_index].bt_shape == mainShape) {
-		mainShape = nullptr;
+		mainShape = NULL;
 	}
 
 	bulletdelete(shapes[p_shape_index].bt_shape);
@@ -394,7 +394,7 @@ void RigidCollisionObjectBullet::reload_shapes() {
 		bulletdelete(mainShape);
 	}
 
-	mainShape = nullptr;
+	mainShape = NULL;
 
 	// Reset shape if required
 	if (force_shape_reset) {

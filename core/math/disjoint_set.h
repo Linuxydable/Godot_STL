@@ -45,7 +45,7 @@ class DisjointSet {
 
 	struct Element {
 		T object;
-		Element *parent = nullptr;
+		Element *parent = NULL;
 		int rank = 0;
 	};
 
@@ -73,7 +73,7 @@ public:
 
 template <typename T, class C, class AL>
 DisjointSet<T, C, AL>::~DisjointSet() {
-	for (typename MapT::Element *itr = elements.front(); itr != nullptr; itr = itr->next()) {
+	for (typename MapT::Element *itr = elements.front(); itr != NULL; itr = itr->next()) {
 		memdelete_allocator<Element, AL>(itr->value());
 	}
 }
@@ -90,7 +90,7 @@ typename DisjointSet<T, C, AL>::Element *DisjointSet<T, C, AL>::get_parent(Eleme
 template <typename T, class C, class AL>
 typename DisjointSet<T, C, AL>::Element *DisjointSet<T, C, AL>::insert_or_get(T object) {
 	typename MapT::Element *itr = elements.find(object);
-	if (itr != nullptr) {
+	if (itr != NULL) {
 		return itr->value();
 	}
 
@@ -129,7 +129,7 @@ void DisjointSet<T, C, AL>::create_union(T a, T b) {
 
 template <typename T, class C, class AL>
 void DisjointSet<T, C, AL>::get_representatives(std::vector<T> &out_representatives) {
-	for (typename MapT::Element *itr = elements.front(); itr != nullptr; itr = itr->next()) {
+	for (typename MapT::Element *itr = elements.front(); itr != NULL; itr = itr->next()) {
 		Element *element = itr->value();
 		if (element->parent == element) {
 			out_representatives.push_back(element->object);
@@ -140,12 +140,12 @@ void DisjointSet<T, C, AL>::get_representatives(std::vector<T> &out_representati
 template <typename T, class C, class AL>
 void DisjointSet<T, C, AL>::get_members(std::vector<T> &out_members, T representative) {
 	typename MapT::Element *rep_itr = elements.find(representative);
-	ERR_FAIL_COND(rep_itr == nullptr);
+	ERR_FAIL_COND(rep_itr == NULL);
 
 	Element *rep_element = rep_itr->value();
 	ERR_FAIL_COND(rep_element->parent != rep_element);
 
-	for (typename MapT::Element *itr = elements.front(); itr != nullptr; itr = itr->next()) {
+	for (typename MapT::Element *itr = elements.front(); itr != NULL; itr = itr->next()) {
 		Element *parent = get_parent(itr->value());
 		if (parent == rep_element) {
 			out_members.push_back(itr->key());

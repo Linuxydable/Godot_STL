@@ -44,9 +44,9 @@ namespace Etc
 	Block4x4Encoding::Block4x4Encoding(void)
 	{
 
-		m_pblockParent = nullptr;
+		m_pblockParent = NULL;
 
-		m_pafrgbaSource = nullptr;
+		m_pafrgbaSource = NULL;
 
 		m_boolBorderPixels = false;
 

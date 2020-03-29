@@ -65,7 +65,7 @@ namespace Etc
 	Block4x4Encoding_R11::Block4x4Encoding_R11(void)
 	{
 
-		m_pencodingbitsR11 = nullptr;
+		m_pencodingbitsR11 = NULL;
 
 	}
 

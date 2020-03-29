@@ -41,7 +41,7 @@
 #include "editor_resource_preview.h"
 #include "editor_settings.h"
 
-EditorFileSystem *EditorFileSystem::singleton = nullptr;
+EditorFileSystem *EditorFileSystem::singleton = NULL;
 //the name is the version, to keep compatibility with different versions of Godot
 #define CACHE_FILE_NAME "filesystem_cache6"
 
@@ -88,7 +88,7 @@ int EditorFileSystemDirectory::get_subdir_count() const {
 
 EditorFileSystemDirectory *EditorFileSystemDirectory::get_subdir(int p_idx) {
 
-	ERR_FAIL_INDEX_V(p_idx, subdirs.size(), nullptr);
+	ERR_FAIL_INDEX_V(p_idx, subdirs.size(), NULL);
 	return subdirs[p_idx];
 }
 
@@ -335,7 +335,7 @@ void EditorFileSystem::_save_filesystem_cache() {
 	String fscache = EditorSettings::get_singleton()->get_project_settings_dir().plus_file(CACHE_FILE_NAME);
 
 	FileAccess *f = FileAccess::open(fscache, FileAccess::WRITE);
-	if (f == nullptr) {
+	if (f == NULL) {
 		ERR_PRINTS("Error writing fscache '" + fscache + "'.");
 	} else {
 		f->store_line(filesystem_settings_version_for_import);
@@ -1314,7 +1314,7 @@ bool EditorFileSystem::_find_file(const String &p_file, EditorFileSystemDirector
 
 String EditorFileSystem::get_file_type(const String &p_file) const {
 
-	EditorFileSystemDirectory *fs = nullptr;
+	EditorFileSystemDirectory *fs = NULL;
 	int cpos = -1;
 
 	if (!_find_file(p_file, &fs, cpos)) {
@@ -1364,7 +1364,7 @@ EditorFileSystemDirectory *EditorFileSystem::get_filesystem_path(const String &p
 	std::vector<String> path = f.split("/");
 
 	if (path.size() == 0)
-		return nullptr;
+		return NULL;
 
 	EditorFileSystemDirectory *fs = filesystem;
 
@@ -1378,7 +1378,7 @@ EditorFileSystemDirectory *EditorFileSystem::get_filesystem_path(const String &p
 		});
 
 		if (it_find == fs->subdirs.end()) {
-			return nullptr;
+			return NULL;
 		} else {
 			fs = *it_find;
 		}
@@ -1486,7 +1486,7 @@ void EditorFileSystem::_queue_update_script_classes() {
 
 void EditorFileSystem::update_file(const String &p_file) {
 
-	EditorFileSystemDirectory *fs = nullptr;
+	EditorFileSystemDirectory *fs = NULL;
 	int cpos = -1;
 
 	if (!_find_file(p_file, &fs, cpos)) {
@@ -1986,7 +1986,7 @@ void EditorFileSystem::reimport_files(const std::vector<String> &p_files) {
 		}
 
 		//group may have changed, so also update group reference
-		EditorFileSystemDirectory *fs = nullptr;
+		EditorFileSystemDirectory *fs = NULL;
 		int cpos = -1;
 		if (_find_file(file, &fs, cpos)) {
 

@@ -153,7 +153,7 @@ namespace Etc
 		{
 			if (a_uiH >= m_uiSourceWidth || a_uiV >= m_uiSourceHeight)
 			{
-				return nullptr;
+				return NULL;
 			}
 
 			return &m_pafrgbaSource[a_uiV*m_uiSourceWidth + a_uiH];

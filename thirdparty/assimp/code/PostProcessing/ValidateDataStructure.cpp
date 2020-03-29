@@ -1,4 +1,4 @@
-﻿/*
+/*
 ---------------------------------------------------------------------------
 Open Asset Import Library (assimp)
 ---------------------------------------------------------------------------
@@ -462,7 +462,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
             ReportError("aiMesh::mBones is NULL (aiMesh::mNumBones is %i)",
                 pMesh->mNumBones);
         }
-        std::unique_ptr<float[]> afSum(nullptr);
+        std::unique_ptr<float[]> afSum(NULL);
         if (pMesh->mNumVertices)
         {
             afSum.reset(new float[pMesh->mNumVertices]);
@@ -490,7 +490,7 @@ void ValidateDSProcess::Validate( const aiMesh* pMesh)
                 if (pMesh->mBones[i]->mName == pMesh->mBones[a]->mName)
                 {
                     const char *name = "unknown";
-                    if (nullptr != pMesh->mBones[ i ]->mName.C_Str()) {
+                    if (NULL != pMesh->mBones[ i ]->mName.C_Str()) {
                         name = pMesh->mBones[ i ]->mName.C_Str();
                     }
                     ReportError("aiMesh::mBones[%i], name = \"%s\" has the same name as "
@@ -576,7 +576,7 @@ void ValidateDSProcess::SearchForInvalidTextures(const aiMaterial* pMaterial,
     int iIndex = -1;
     for (unsigned int i = 0; i < pMaterial->mNumProperties;++i) {
         aiMaterialProperty* prop = pMaterial->mProperties[ i ];
-        ai_assert(nullptr != prop);
+        ai_assert(NULL != prop);
         if ( !::strcmp(prop->mKey.data,"$tex.file") && prop->mSemantic == static_cast<unsigned int>(type))  {
             iIndex = std::max(iIndex, (int) prop->mIndex);
             ++iNumIndices;

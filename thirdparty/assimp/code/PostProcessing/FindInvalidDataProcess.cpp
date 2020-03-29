@@ -172,7 +172,7 @@ inline
 const char* ValidateArrayContents(const T* /*arr*/, unsigned int /*size*/,
         const std::vector<bool>& /*dirtyMask*/, bool /*mayBeIdentical = false*/, bool /*mayBeZero = true*/)
 {
-    return nullptr;
+    return NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ const char* ValidateArrayContents<aiVector3D>(const aiVector3D* arr, unsigned in
     if (cnt > 1 && !b && !mayBeIdentical) {
         return "All vectors are identical";
     }
-    return nullptr;
+    return NULL;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -282,7 +282,7 @@ void FindInvalidDataProcess::ProcessAnimation (aiAnimation* anim) {
 
 // ------------------------------------------------------------------------------------------------
 void FindInvalidDataProcess::ProcessAnimationChannel (aiNodeAnim* anim) {
-    ai_assert( nullptr != anim );
+    ai_assert( NULL != anim );
     if (anim->mNumPositionKeys == 0 && anim->mNumRotationKeys == 0 && anim->mNumScalingKeys == 0) {
         ai_assert_entry();
         return;

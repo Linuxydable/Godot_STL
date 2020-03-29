@@ -164,7 +164,7 @@ float AnimationNode::blend_input(int p_input, float p_time, bool p_seek, float p
 
 	//inputs.write[p_input].last_pass = state->last_pass;
 	float activity = 0;
-	float ret = _blend_node(node_name, blend_tree->get_node_connection_array(node_name), nullptr, node, p_time, p_seek, p_blend, p_filter, p_optimize, &activity);
+	float ret = _blend_node(node_name, blend_tree->get_node_connection_array(node_name), NULL, node, p_time, p_seek, p_blend, p_filter, p_optimize, &activity);
 
 	std::vector<AnimationTree::Activity> *activity_ptr = state->tree->input_activity_map.getptr(base_path);
 
@@ -200,7 +200,7 @@ float AnimationNode::_blend_node(const StringName &p_subpath, const std::vector<
 
 		std::fill(p_node->blends.begin(), p_node->blends.end(), 0.f); //all to zero by default
 
-		const NodePath *K = nullptr;
+		const NodePath *K = NULL;
 		while ((K = filter.next(K))) {
 			if (!state->track_map.has(*K)) {
 				continue;
@@ -317,7 +317,7 @@ String AnimationNode::get_caption() const {
 
 void AnimationNode::add_input(const String &p_name) {
 	//root nodes can't add inputs
-	ERR_FAIL_COND(Object::cast_to<AnimationRootNode>(this) != nullptr);
+	ERR_FAIL_COND(Object::cast_to<AnimationRootNode>(this) != NULL);
 	Input input;
 	ERR_FAIL_COND(p_name.find(".") != -1 || p_name.find("/") != -1);
 	input.name = p_name;
@@ -375,7 +375,7 @@ Array AnimationNode::_get_filters() const {
 
 	Array paths;
 
-	const NodePath *K = nullptr;
+	const NodePath *K = NULL;
 	while ((K = filter.next(K))) {
 		paths.push_back(String(*K)); //use strings, so sorting is possible
 	}
@@ -828,11 +828,11 @@ void AnimationTree::_process_graph(float p_delta) {
 
 		if (started) {
 			//if started, seek
-			root->_pre_process(SceneStringNames::get_singleton()->parameters_base_path, nullptr, &state, 0, true, std::vector<StringName>{});
+			root->_pre_process(SceneStringNames::get_singleton()->parameters_base_path, NULL, &state, 0, true, std::vector<StringName>{});
 			started = false;
 		}
 
-		root->_pre_process(SceneStringNames::get_singleton()->parameters_base_path, nullptr, &state, p_delta, false, std::vector<StringName>{});
+		root->_pre_process(SceneStringNames::get_singleton()->parameters_base_path, NULL, &state, p_delta, false, std::vector<StringName>{});
 	}
 
 	if (!state.valid) {

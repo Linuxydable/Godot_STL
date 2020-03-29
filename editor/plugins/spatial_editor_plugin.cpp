@@ -304,7 +304,7 @@ ObjectID SpatialEditorViewport::_select_ray(const Point2 &p_pos, bool p_append, 
 
 	Node *edited_scene = get_tree()->get_edited_scene_root();
 	ObjectID closest = 0;
-	Node *item = nullptr;
+	Node *item = NULL;
 	float closest_dist = 1e20;
 	int selected_handle = -1;
 
@@ -391,7 +391,7 @@ void SpatialEditorViewport::_find_items_at_pos(const Point2 &p_pos, bool &r_incl
 		Vector3 normal;
 
 		int handle = -1;
-		bool inters = seg->intersect_ray(camera, p_pos, point, normal, nullptr, p_alt_select);
+		bool inters = seg->intersect_ray(camera, p_pos, point, normal, NULL, p_alt_select);
 
 		if (!inters)
 			continue;
@@ -3248,8 +3248,8 @@ void SpatialEditorViewport::_create_preview(const std::vector<String> &files) co
 		ERR_CONTINUE(res.is_null());
 		Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
 		Ref<Mesh> mesh = Ref<Mesh>(Object::cast_to<Mesh>(*res));
-		if (mesh != nullptr || scene != nullptr) {
-			if (mesh != nullptr) {
+		if (mesh != NULL || scene != NULL) {
+			if (mesh != NULL) {
 				MeshInstance *mesh_instance = memnew(MeshInstance);
 				mesh_instance->set_mesh(mesh);
 				preview_node->add_child(mesh_instance);
@@ -3300,10 +3300,10 @@ bool SpatialEditorViewport::_create_instance(Node *parent, String &path, const P
 	Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
 	Ref<Mesh> mesh = Ref<Mesh>(Object::cast_to<Mesh>(*res));
 
-	Node *instanced_scene = nullptr;
+	Node *instanced_scene = NULL;
 
-	if (mesh != nullptr || scene != nullptr) {
-		if (mesh != nullptr) {
+	if (mesh != NULL || scene != NULL) {
+		if (mesh != NULL) {
 			MeshInstance *mesh_instance = memnew(MeshInstance);
 			mesh_instance->set_mesh(mesh);
 			mesh_instance->set_name(path.get_file().get_basename());
@@ -3317,7 +3317,7 @@ bool SpatialEditorViewport::_create_instance(Node *parent, String &path, const P
 		}
 	}
 
-	if (instanced_scene == nullptr) {
+	if (instanced_scene == NULL) {
 		return false;
 	}
 
@@ -3328,7 +3328,7 @@ bool SpatialEditorViewport::_create_instance(Node *parent, String &path, const P
 		}
 	}
 
-	if (scene != nullptr) {
+	if (scene != NULL) {
 		instanced_scene->set_filename(ProjectSettings::get_singleton()->localize_path(path));
 	}
 
@@ -3368,7 +3368,7 @@ void SpatialEditorViewport::_perform_drop_data() {
 		}
 		Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
 		Ref<Mesh> mesh = Ref<Mesh>(Object::cast_to<Mesh>(*res));
-		if (mesh != nullptr || scene != nullptr) {
+		if (mesh != NULL || scene != NULL) {
 			bool success = _create_instance(target_node, path, drop_pos);
 			if (!success) {
 				error_files.push_back(path);
@@ -6291,8 +6291,8 @@ EditorSpatialGizmoPlugin::EditorSpatialGizmoPlugin() {
 
 EditorSpatialGizmoPlugin::~EditorSpatialGizmoPlugin() {
 	for (int i = 0; i < current_gizmos.size(); ++i) {
-		current_gizmos[i]->set_plugin(nullptr);
-		current_gizmos[i]->get_spatial_node()->set_gizmo(nullptr);
+		current_gizmos[i]->set_plugin(NULL);
+		current_gizmos[i]->get_spatial_node()->set_gizmo(NULL);
 	}
 	if (SpatialEditor::get_singleton()) {
 		SpatialEditor::get_singleton()->update_all_gizmos();

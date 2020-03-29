@@ -86,14 +86,14 @@ void ScaleProcess::Execute( aiScene* pScene ) {
     }
     
     ai_assert( mScale != 0 );
-    ai_assert( nullptr != pScene );
-    ai_assert( nullptr != pScene->mRootNode );
+    ai_assert( NULL != pScene );
+    ai_assert( NULL != pScene->mRootNode );
 
-    if ( nullptr == pScene ) {
+    if ( NULL == pScene ) {
         return;
     }
 
-    if ( nullptr == pScene->mRootNode ) {
+    if ( NULL == pScene->mRootNode ) {
         return;
     }
     
@@ -180,7 +180,7 @@ void ScaleProcess::traverseNodes( aiNode *node, unsigned int nested_node_id ) {
 }
 
 void ScaleProcess::applyScaling( aiNode *currentNode ) {
-    if ( nullptr != currentNode ) {
+    if ( NULL != currentNode ) {
         // Reconstruct matrix by transform rather than by scale 
         // This prevent scale values being changed which can
         // be meaningful in some cases 

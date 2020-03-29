@@ -308,7 +308,7 @@ Variant &Tween::_get_initial_val(InterpolateData &p_data) {
 			} else {
 				// Call the method and get the initial value from it
 				Variant::CallError error;
-				initial_val = object->call(p_data.target_key.front(), nullptr, 0, error);
+				initial_val = object->call(p_data.target_key.front(), NULL, 0, error);
 				ERR_FAIL_COND_V(error.error != Variant::CallError::CALL_OK, p_data.initial_val);
 			}
 			return initial_val;
@@ -347,7 +347,7 @@ Variant &Tween::_get_delta_val(InterpolateData &p_data) {
 			} else {
 				// We're looking at a method. Call the method on the target object
 				Variant::CallError error;
-				final_val = target->call(p_data.target_key.front(), nullptr, 0, error);
+				final_val = target->call(p_data.target_key.front(), NULL, 0, error);
 				ERR_FAIL_COND_V(error.error != Variant::CallError::CALL_OK, p_data.initial_val);
 			}
 
@@ -579,7 +579,7 @@ bool Tween::_apply_tween_value(InterpolateData &p_data, Variant &value) {
 				object->call(p_data.key.front(), (const Variant **)arg, 1, error);
 			} else {
 				// Don't pass any argument
-				object->call(p_data.key.front(), nullptr, 0, error);
+				object->call(p_data.key.front(), NULL, 0, error);
 			}
 
 			// Did we get an error from the function call?

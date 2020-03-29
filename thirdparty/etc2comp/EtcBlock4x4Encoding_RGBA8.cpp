@@ -75,7 +75,7 @@ namespace Etc
 	Block4x4Encoding_RGBA8::Block4x4Encoding_RGBA8(void)
 	{
 
-		m_pencodingbitsA8 = nullptr;
+		m_pencodingbitsA8 = NULL;
 
 	}
 	Block4x4Encoding_RGBA8::~Block4x4Encoding_RGBA8(void) {}

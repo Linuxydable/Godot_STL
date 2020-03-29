@@ -177,7 +177,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
                 outMeshes.push_back(mesh);
             } else {
                 delete mesh;
-                pScene->mMeshes[ i ] = nullptr;
+                pScene->mMeshes[ i ] = NULL;
                 bAnyChanges = true;
             }
 
@@ -228,7 +228,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
 
             out->mNumVertices = (3 == real ? numPolyVerts : out->mNumFaces * (real+1));
 
-            aiVector3D *vert(nullptr), *nor(nullptr), *tan(nullptr), *bit(nullptr);
+            aiVector3D *vert(NULL), *nor(NULL), *tan(NULL), *bit(NULL);
             aiVector3D *uv   [AI_MAX_NUMBER_OF_TEXTURECOORDS];
             aiColor4D  *cols [AI_MAX_NUMBER_OF_COLOR_SETS];
 
@@ -246,7 +246,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
             }
 
             for (unsigned int j = 0; j < AI_MAX_NUMBER_OF_TEXTURECOORDS;++j) {
-                uv[j] = nullptr;
+                uv[j] = NULL;
                 if (mesh->mTextureCoords[j]) {
                     uv[j] = out->mTextureCoords[j] = new aiVector3D[out->mNumVertices];
                 }
@@ -255,7 +255,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
             }
 
             for (unsigned int j = 0; j < AI_MAX_NUMBER_OF_COLOR_SETS;++j) {
-                cols[j] = nullptr;
+                cols[j] = NULL;
                 if (mesh->mColors[j]) {
                     cols[j] = out->mColors[j] = new aiColor4D[out->mNumVertices];
                 }
@@ -324,7 +324,7 @@ void SortByPTypeProcess::Execute( aiScene* pScene) {
                     in.mIndices[q] = outIdx++;
                 }
 
-                in.mIndices = nullptr;
+                in.mIndices = NULL;
                 ++outFaces;
             }
             ai_assert(outFaces == out->mFaces + out->mNumFaces);

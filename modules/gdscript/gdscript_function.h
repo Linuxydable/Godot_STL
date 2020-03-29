@@ -333,7 +333,7 @@ public:
 		return default_arguments[p_idx];
 	}
 
-	Variant call(GDScriptInstance *p_instance, const Variant **p_args, uint32_t p_argcount, Variant::CallError &r_err, CallState *p_state = nullptr);
+	Variant call(GDScriptInstance *p_instance, const Variant **p_args, uint32_t p_argcount, Variant::CallError &r_err, CallState *p_state = NULL);
 
 	_FORCE_INLINE_ MultiplayerAPI::RPCMode get_rpc_mode() const { return rpc_mode; }
 	GDScriptFunction();

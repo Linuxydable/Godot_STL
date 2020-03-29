@@ -763,7 +763,7 @@ StringName ClassDB::get_integer_constant_enum(const StringName &p_class, const S
 
 	while (type) {
 
-		const StringName *k = nullptr;
+		const StringName *k = NULL;
 		while ((k = type->enum_map.next(k))) {
 
 			List<StringName> &constants_list = type->enum_map.get(*k);

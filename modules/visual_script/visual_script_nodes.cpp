@@ -2516,7 +2516,7 @@ static Node *_find_script_node(Node *p_edited_scene, Node *p_current_node, const
 			return n;
 	}
 
-	return nullptr;
+	return NULL;
 }
 
 #endif

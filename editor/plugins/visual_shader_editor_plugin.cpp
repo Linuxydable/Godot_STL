@@ -2986,7 +2986,7 @@ Control *VisualShaderNodePluginDefault::create_editor(const Ref<Resource> &p_par
 	}
 
 	if (pinfo.empty())
-		return nullptr;
+		return NULL;
 
 	properties.clear();
 

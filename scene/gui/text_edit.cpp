@@ -6535,7 +6535,7 @@ void TextEdit::query_code_comple() {
 	bool ignored = completion_active && !completion_options.empty();
 	if (ignored) {
 		ScriptCodeCompletionOption::Kind kind = ScriptCodeCompletionOption::KIND_PLAIN_TEXT;
-		const ScriptCodeCompletionOption *previous_option = nullptr;
+		const ScriptCodeCompletionOption *previous_option = NULL;
 		for (auto &&current_option : completion_options) {
 			if (!previous_option) {
 				previous_option = &current_option;

@@ -892,7 +892,7 @@ const aiScene* Importer::ApplyCustomizedPostProcessing( BaseProcess *rootProcess
 // Helper function to check whether an extension is supported by ASSIMP
 bool Importer::IsExtensionSupported(const char* szExtension) const
 {
-    return nullptr != GetImporter(szExtension);
+    return NULL != GetImporter(szExtension);
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -930,7 +930,7 @@ BaseImporter* Importer::GetImporter (const char* szExtension) const
 // ------------------------------------------------------------------------------------------------
 // Find a loader plugin for a given file extension
 size_t Importer::GetImporterIndex (const char* szExtension) const {
-    ai_assert(nullptr != szExtension);
+    ai_assert(NULL != szExtension);
 
     ASSIMP_BEGIN_EXCEPTION_REGION();
 

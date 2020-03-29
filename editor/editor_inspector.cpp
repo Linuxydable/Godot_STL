@@ -864,7 +864,7 @@ void EditorInspectorPlugin::add_custom_control(Control *control) {
 
 void EditorInspectorPlugin::add_property_editor(const String &p_for_property, Control *p_prop) {
 
-	ERR_FAIL_COND(Object::cast_to<EditorProperty>(p_prop) == nullptr);
+	ERR_FAIL_COND(Object::cast_to<EditorProperty>(p_prop) == NULL);
 
 	AddedEditor ae;
 	ae.properties.push_back(p_for_property);
@@ -1443,7 +1443,7 @@ void EditorInspector::update_tree() {
 	String filter = search_box ? search_box->get_text() : "";
 	String group;
 	String group_base;
-	VBoxContainer *category_vbox = nullptr;
+	VBoxContainer *category_vbox = NULL;
 
 	List<PropertyInfo>
 			plist;

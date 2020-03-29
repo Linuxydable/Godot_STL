@@ -894,6 +894,6 @@ Skeleton::~Skeleton() {
 
 	//some skins may remain bound
 	for (Set<SkinReference *>::Element *E = skin_bindings.front(); E; E = E->next()) {
-		E->get()->skeleton_node = nullptr;
+		E->get()->skeleton_node = NULL;
 	}
 }

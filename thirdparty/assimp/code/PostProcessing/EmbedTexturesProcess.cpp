@@ -65,7 +65,7 @@ void EmbedTexturesProcess::SetupProperties(const Importer* pImp) {
 }
 
 void EmbedTexturesProcess::Execute(aiScene* pScene) {
-    if (pScene == nullptr || pScene->mRootNode == nullptr) return;
+    if (pScene == NULL || pScene->mRootNode == NULL) return;
 
     aiString path;
 

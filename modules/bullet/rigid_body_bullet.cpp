@@ -852,7 +852,7 @@ void RigidBodyBullet::on_enter_area(AreaBullet *p_area) {
 
 	// need_update : if areaWhereIamCount is equal to areasWhereIam.size() => iterator
 	for(int i = 0; i < areaWhereIamCount; ++i){
-		if(areasWhereIam[i] == nullptr) {
+		if(areasWhereIam[i] == NULL) {
 			// This area has the highest priority
 			areasWhereIam[i] = p_area;
 			break;

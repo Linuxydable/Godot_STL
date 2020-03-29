@@ -119,20 +119,20 @@ ASSIMP_API const char *aiGetBranchName() {
 // ------------------------------------------------------------------------------------------------
 ASSIMP_API aiScene::aiScene()
 : mFlags(0)
-, mRootNode(nullptr)
+, mRootNode(NULL)
 , mNumMeshes(0)
-, mMeshes(nullptr)
+, mMeshes(NULL)
 , mNumMaterials(0)
-, mMaterials(nullptr)
+, mMaterials(NULL)
 , mNumAnimations(0)
-, mAnimations(nullptr)
+, mAnimations(NULL)
 , mNumTextures(0)
-, mTextures(nullptr)
+, mTextures(NULL)
 , mNumLights(0)
-, mLights(nullptr)
+, mLights(NULL)
 , mNumCameras(0)
-, mCameras(nullptr)
-, mMetaData(nullptr)
+, mCameras(NULL)
+, mMetaData(NULL)
 , mPrivate(new Assimp::ScenePrivateData()) {
 	// empty
 }
@@ -178,7 +178,7 @@ ASSIMP_API aiScene::~aiScene() {
     delete [] mCameras;
 
     aiMetadata::Dealloc(mMetaData);
-    mMetaData = nullptr;
+    mMetaData = NULL;
 
     delete static_cast<Assimp::ScenePrivateData*>( mPrivate );
 }

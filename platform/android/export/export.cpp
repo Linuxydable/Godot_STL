@@ -307,7 +307,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 							int ec2;
 							String dp;
 
-							OS::get_singleton()->execute(adb, args, true, nullptr, &dp, &ec2);
+							OS::get_singleton()->execute(adb, args, true, NULL, &dp, &ec2);
 
 							std::vector<String> props = dp.split("\n");
 							String vendor;
@@ -513,7 +513,7 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 			".scn", // Binary scenes are usually already compressed
 			".stex", // Streamable textures are usually already compressed
 			// Trailer for easier processing
-			nullptr
+			NULL
 		};
 
 		for (const char **ext = unconditional_compress_ext; *ext; ++ext) {
@@ -564,11 +564,11 @@ class EditorExportPlatformAndroid : public EditorExportPlatform {
 		zipOpenNewFileInZip(ed->apk,
 				p_path.utf8().get_data(),
 				&zipfi,
-				nullptr,
+				NULL,
 				0,
-				nullptr,
+				NULL,
 				0,
-				nullptr,
+				NULL,
 				compression_method,
 				Z_DEFAULT_COMPRESSION);
 
@@ -2070,7 +2070,7 @@ public:
 			//get filename
 			unz_file_info info;
 			char fname[16384];
-			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16384, nullptr, 0, nullptr, 0);
+			ret = unzGetCurrentFileInfo(pkg, &info, fname, 16384, NULL, 0, NULL, 0);
 
 			bool skip = false;
 
@@ -2274,11 +2274,11 @@ public:
 			zipOpenNewFileInZip(unaligned_apk,
 					"assets/_cl_",
 					&zipfi,
-					nullptr,
+					NULL,
 					0,
-					nullptr,
+					NULL,
 					0,
-					nullptr,
+					NULL,
 					0, // No compress (little size gain and potentially slower startup)
 					Z_DEFAULT_COMPRESSION);
 
@@ -2286,7 +2286,7 @@ public:
 			zipCloseFileInZip(unaligned_apk);
 		}
 
-		zipClose(unaligned_apk, nullptr);
+		zipClose(unaligned_apk, NULL);
 		unzClose(pkg);
 
 		if (err != OK) {
@@ -2411,7 +2411,7 @@ public:
 
 			char fname[16384];
 			char extra[16384];
-			ret = unzGetCurrentFileInfo(tmp_unaligned, &info, fname, 16384, extra, 16384 - ZIP_ALIGNMENT, nullptr, 0);
+			ret = unzGetCurrentFileInfo(tmp_unaligned, &info, fname, 16384, extra, 16384 - ZIP_ALIGNMENT, NULL, 0);
 
 			String file = fname;
 
@@ -2443,9 +2443,9 @@ public:
 					&zipfi,
 					extra,
 					info.size_file_extra + padding,
-					nullptr,
+					NULL,
 					0,
-					nullptr,
+					NULL,
 					method,
 					level,
 					1); // raw write
@@ -2457,7 +2457,7 @@ public:
 			ret = unzGoToNextFile(tmp_unaligned);
 		}
 
-		zipClose(final_apk, nullptr);
+		zipClose(final_apk, NULL);
 		unzClose(tmp_unaligned);
 
 		CLEANUP_AND_RETURN(OK);

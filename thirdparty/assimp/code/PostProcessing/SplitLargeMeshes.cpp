@@ -69,7 +69,7 @@ bool SplitLargeMeshesProcess_Triangle::IsActive( unsigned int pFlags) const {
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void SplitLargeMeshesProcess_Triangle::Execute( aiScene* pScene) {
-    if (0xffffffff == this->LIMIT || nullptr == pScene ) {
+    if (0xffffffff == this->LIMIT || NULL == pScene ) {
         return;
     }
 
@@ -177,7 +177,7 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
             pcMesh->mNumVertices = iCnt;
 
             // allocate storage
-            if (pMesh->mVertices != nullptr) {
+            if (pMesh->mVertices != NULL) {
                 pcMesh->mVertices = new aiVector3D[iCnt];
             }
 
@@ -239,7 +239,7 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
                         // we'll waste some memory
                         if (iSubMeshes-1 == i) {
                             pc->mWeights = bone->mWeights;
-                            bone->mWeights = nullptr;
+                            bone->mWeights = NULL;
                         } else {
                             pc->mWeights = new aiVertexWeight[pc->mNumWeights];
                         }
@@ -285,7 +285,7 @@ void SplitLargeMeshesProcess_Triangle::SplitMesh(
                     piOut[v] = iIndexOut;
 
                     // copy positions
-                    if (pMesh->mVertices != nullptr) {
+                    if (pMesh->mVertices != NULL) {
                         pcMesh->mVertices[iIndexOut] = pMesh->mVertices[iIndex];
                     }
 
@@ -345,7 +345,7 @@ bool SplitLargeMeshesProcess_Vertex::IsActive( unsigned int pFlags) const {
 // ------------------------------------------------------------------------------------------------
 // Executes the post processing step on the given imported data.
 void SplitLargeMeshesProcess_Vertex::Execute( aiScene* pScene) {
-    if (0xffffffff == this->LIMIT || nullptr == pScene ) {
+    if (0xffffffff == this->LIMIT || NULL == pScene ) {
         return;
     }
 
@@ -551,7 +551,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
                                     iter != table.end();++iter) {
                                 // allocate the bone weight array if necessary
                                 BoneWeightList* pcWeightList = (BoneWeightList*)pcMesh->mBones[(*iter).first];
-                                if (nullptr == pcWeightList) {
+                                if (NULL == pcWeightList) {
                                     pcMesh->mBones[(*iter).first] = (aiBone*)(pcWeightList = new BoneWeightList());
                                 }
                                 pcWeightList->push_back(aiVertexWeight(pcMesh->mNumVertices,(*iter).second));
@@ -577,7 +577,7 @@ void SplitLargeMeshesProcess_Vertex::SplitMesh(
                     BoneWeightList* pcWeightList;
                     if ((pcWeightList = (BoneWeightList*)pcMesh->mBones[k])) {
                         aiBone* pcOldBone = pMesh->mBones[k];
-                        aiBone* pcOut( nullptr );
+                        aiBone* pcOut( NULL );
                         *ppCurrent++ = pcOut = new aiBone();
                         pcOut->mName = aiString(pcOldBone->mName);
                         pcOut->mOffsetMatrix = pcOldBone->mOffsetMatrix;

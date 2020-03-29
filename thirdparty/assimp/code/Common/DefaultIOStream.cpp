@@ -57,7 +57,7 @@ DefaultIOStream::~DefaultIOStream()
 {
     if (mFile) {
         ::fclose(mFile);
-        mFile = nullptr;
+        mFile = NULL;
     }
 }
 

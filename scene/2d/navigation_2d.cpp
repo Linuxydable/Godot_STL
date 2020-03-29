@@ -378,7 +378,7 @@ std::vector<Vector2> Navigation2D::get_simple_path(const Vector2 &p_start, const
 		}
 		//check open list
 
-		List<Polygon *>::Element *least_cost_poly = nullptr;
+		List<Polygon *>::Element *least_cost_poly = NULL;
 		float least_cost = 1e30;
 
 		//this could be faster (cache previous results)

@@ -59,13 +59,13 @@ namespace Etc
 	{
 		m_encodingStatus = EncodingStatus::SUCCESS;
 		m_warningsToCapture = EncodingStatus::SUCCESS;
-		m_pafrgbaSource = nullptr;
+		m_pafrgbaSource = NULL;
 
-		m_pablock = nullptr;
+		m_pablock = NULL;
 
 		m_encodingbitsformat = Block4x4EncodingBits::Format::UNKNOWN;
 		m_uiEncodingBitsBytes = 0;
-		m_paucEncodingBits = nullptr;
+		m_paucEncodingBits = NULL;
 
 		m_format = Format::UNKNOWN;
 		m_iNumOpaquePixels = 0;
@@ -100,7 +100,7 @@ namespace Etc
 
 		m_encodingbitsformat = Block4x4EncodingBits::Format::UNKNOWN;
 		m_uiEncodingBitsBytes = 0;
-		m_paucEncodingBits = nullptr;
+		m_paucEncodingBits = NULL;
 
 		m_errormetric = a_errormetric;
 		m_fEffort = 0.0f;
@@ -124,7 +124,7 @@ namespace Etc
 					Image *a_pimageSource, ErrorMetric a_errormetric)
 	{
 		m_encodingStatus = EncodingStatus::SUCCESS;
-		m_pafrgbaSource = nullptr;
+		m_pafrgbaSource = NULL;
 		m_uiSourceWidth = a_uiSourceWidth;
 		m_uiSourceHeight = a_uiSourceHeight;
 
@@ -183,16 +183,16 @@ namespace Etc
 	//
 	Image::~Image(void)
 	{
-		if (m_pablock != nullptr)
+		if (m_pablock != NULL)
 		{
 			delete[] m_pablock;
-			m_pablock = nullptr;
+			m_pablock = NULL;
 		}
 
-		/*if (m_paucEncodingBits != nullptr)
+		/*if (m_paucEncodingBits != NULL)
 		{
 			delete[] m_paucEncodingBits;
-			m_paucEncodingBits = nullptr;
+			m_paucEncodingBits = NULL;
 		}*/
 	}
 
@@ -249,7 +249,7 @@ namespace Etc
 			return m_encodingStatus;
 		}
 
-		assert(m_paucEncodingBits == nullptr);
+		assert(m_paucEncodingBits == NULL);
 		m_uiEncodingBitsBytes = GetNumberOfBlocks() * Block4x4EncodingBits::GetBytesPerBlock(m_encodingbitsformat);
 		m_paucEncodingBits = new unsigned char[m_uiEncodingBitsBytes];
 
@@ -385,7 +385,7 @@ namespace Etc
 
 		SortedBlockList::Link *plink = m_psortedblocklist->GetLinkToFirstBlock();
 		for (plink = plink->Advance(a_uiMultithreadingOffset);
-				plink != nullptr;
+				plink != NULL;
 				plink = plink->Advance(a_uiMultithreadingStride) )
 		{
 			if (uiIteratedBlocks >= a_uiMaxBlocks)

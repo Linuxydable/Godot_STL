@@ -780,7 +780,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 	}
 
 	if (dst_pkg_zip) {
-		zipClose(dst_pkg_zip, nullptr);
+		zipClose(dst_pkg_zip, NULL);
 	}
 
 	return err;

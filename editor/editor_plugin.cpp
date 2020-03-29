@@ -48,7 +48,7 @@ Array EditorInterface::_make_mesh_previews(const Array &p_meshes, int p_preview_
 		meshes.push_back(p_meshes[i]);
 	}
 
-	std::vector<Ref<Texture> > textures = make_mesh_previews(meshes, nullptr, p_preview_size);
+	std::vector<Ref<Texture> > textures = make_mesh_previews(meshes, NULL, p_preview_size);
 	Array ret;
 	for (auto &&texture : textures) {
 		ret.push_back(texture);
@@ -95,7 +95,7 @@ std::vector<Ref<Texture> > EditorInterface::make_mesh_previews(const std::vector
 		}
 
 		Transform mesh_xform;
-		if (p_transforms != nullptr) {
+		if (p_transforms != NULL) {
 			mesh_xform = (*p_transforms)[i];
 		}
 
@@ -192,7 +192,7 @@ Array EditorInterface::get_open_scenes() const {
 
 	int scns_amount = scenes.size();
 	for (int idx_scn = 0; idx_scn < scns_amount; idx_scn++) {
-		if (scenes[idx_scn].root == nullptr)
+		if (scenes[idx_scn].root == NULL)
 			continue;
 		ret.push_back(scenes[idx_scn].root->get_filename());
 	}
@@ -330,7 +330,7 @@ void EditorPlugin::remove_autoload_singleton(const String &p_name) {
 }
 
 ToolButton *EditorPlugin::add_control_to_bottom_panel(Control *p_control, const String &p_title) {
-	ERR_FAIL_NULL_V(p_control, nullptr);
+	ERR_FAIL_NULL_V(p_control, NULL);
 	return EditorNode::get_singleton()->add_bottom_panel_item(p_title, p_control);
 }
 
@@ -907,7 +907,7 @@ void EditorPlugin::_bind_methods() {
 }
 
 EditorPlugin::EditorPlugin() :
-		undo_redo(nullptr),
+		undo_redo(NULL),
 		input_event_forwarding_always_enabled(false),
 		force_draw_over_forwarding_enabled(false),
 		last_main_screen_name("") {

@@ -67,8 +67,8 @@ namespace Assimp    {
 */
 struct TTUpdateInfo {
     TTUpdateInfo() AI_NO_EXCEPT
-    : directShortcut(nullptr)
-    , mat(nullptr)
+    : directShortcut(NULL)
+    , mat(NULL)
     , semantic(0)
     , index(0) {
         // empty

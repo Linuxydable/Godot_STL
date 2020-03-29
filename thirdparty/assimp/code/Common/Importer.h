@@ -125,20 +125,20 @@ public:
 
 inline
 ImporterPimpl::ImporterPimpl() AI_NO_EXCEPT
-: mIOHandler( nullptr )
+: mIOHandler( NULL )
 , mIsDefaultHandler( false )
-, mProgressHandler( nullptr )
+, mProgressHandler( NULL )
 , mIsDefaultProgressHandler( false )
 , mImporter()
 , mPostProcessingSteps()
-, mScene( nullptr )
+, mScene( NULL )
 , mErrorString()
 , mIntProperties()
 , mFloatProperties()
 , mStringProperties()
 , mMatrixProperties()
 , bExtraVerbose( false )
-, mPPShared( nullptr ) {
+, mPPShared( NULL ) {
     // empty
 }
 //! @endcond

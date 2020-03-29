@@ -296,10 +296,10 @@ void EditorAssetInstaller::ok_pressed() {
 			}
 			msg += failed_files[i];
 		}
-		if (EditorNode::get_singleton() != nullptr)
+		if (EditorNode::get_singleton() != NULL)
 			EditorNode::get_singleton()->show_warning(msg);
 	} else {
-		if (EditorNode::get_singleton() != nullptr)
+		if (EditorNode::get_singleton() != NULL)
 			EditorNode::get_singleton()->show_warning(TTR("Package installed successfully!"), TTR("Success!"));
 	}
 	EditorFileSystem::get_singleton()->scan_changes();

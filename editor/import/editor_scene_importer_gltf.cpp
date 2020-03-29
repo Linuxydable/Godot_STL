@@ -1252,7 +1252,7 @@ Error EditorSceneImporterGLTF::_parse_images(GLTFState &state, const String &p_b
 		}
 
 		std::vector<uint8_t> data;
-		const uint8_t *data_ptr = nullptr;
+		const uint8_t *data_ptr = NULL;
 		int data_size = 0;
 
 		if (d.has("uri")) {
@@ -2318,7 +2318,7 @@ Error EditorSceneImporterGLTF::_parse_animations(GLTFState &state) {
 
 			ERR_FAIL_INDEX_V(node, state.nodes.size(), ERR_PARSE_ERROR);
 
-			GLTFAnimation::Track *track = nullptr;
+			GLTFAnimation::Track *track = NULL;
 
 			if (!animation.tracks.has(node)) {
 				animation.tracks[node] = GLTFAnimation::Track();
@@ -2431,7 +2431,7 @@ BoneAttachment *EditorSceneImporterGLTF::_generate_bone_attachment(GLTFState &st
 	BoneAttachment *bone_attachment = memnew(BoneAttachment);
 	print_verbose("glTF: Creating bone attachment for: " + gltf_node->name);
 
-	ERR_FAIL_COND_V(!bone_node->joint, nullptr);
+	ERR_FAIL_COND_V(!bone_node->joint, NULL);
 
 	bone_attachment->set_bone_name(bone_node->name);
 
@@ -2441,7 +2441,7 @@ BoneAttachment *EditorSceneImporterGLTF::_generate_bone_attachment(GLTFState &st
 MeshInstance *EditorSceneImporterGLTF::_generate_mesh_instance(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index) {
 	const GLTFNode *gltf_node = state.nodes[node_index];
 
-	ERR_FAIL_INDEX_V(gltf_node->mesh, state.meshes.size(), nullptr);
+	ERR_FAIL_INDEX_V(gltf_node->mesh, state.meshes.size(), NULL);
 
 	MeshInstance *mi = memnew(MeshInstance);
 	print_verbose("glTF: Creating mesh for: " + gltf_node->name);
@@ -2463,7 +2463,7 @@ MeshInstance *EditorSceneImporterGLTF::_generate_mesh_instance(GLTFState &state,
 Camera *EditorSceneImporterGLTF::_generate_camera(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index) {
 	const GLTFNode *gltf_node = state.nodes[node_index];
 
-	ERR_FAIL_INDEX_V(gltf_node->camera, state.cameras.size(), nullptr);
+	ERR_FAIL_INDEX_V(gltf_node->camera, state.cameras.size(), NULL);
 
 	Camera *camera = memnew(Camera);
 	print_verbose("glTF: Creating camera for: " + gltf_node->name);
@@ -2491,7 +2491,7 @@ void EditorSceneImporterGLTF::_generate_scene_node(GLTFState &state, Node *scene
 
 	const GLTFNode *gltf_node = state.nodes[node_index];
 
-	Spatial *current_node = nullptr;
+	Spatial *current_node = NULL;
 
 	// Is our parent a skeleton
 	Skeleton *active_skeleton = Object::cast_to<Skeleton>(scene_parent);
@@ -2500,10 +2500,10 @@ void EditorSceneImporterGLTF::_generate_scene_node(GLTFState &state, Node *scene
 		Skeleton *skeleton = state.skeletons[gltf_node->skeleton].godot_skeleton;
 
 		if (active_skeleton != skeleton) {
-			ERR_FAIL_COND_MSG(active_skeleton != nullptr, "glTF: Generating scene detected direct parented Skeletons");
+			ERR_FAIL_COND_MSG(active_skeleton != NULL, "glTF: Generating scene detected direct parented Skeletons");
 
 			// Add it to the scene if it has not already been added
-			if (skeleton->get_parent() == nullptr) {
+			if (skeleton->get_parent() == NULL) {
 				scene_parent->add_child(skeleton);
 				skeleton->set_owner(scene_root);
 			}
@@ -2514,7 +2514,7 @@ void EditorSceneImporterGLTF::_generate_scene_node(GLTFState &state, Node *scene
 	}
 
 	// If we have an active skeleton, and the node is node skinned, we need to create a bone attachment
-	if (current_node == nullptr && active_skeleton != nullptr && gltf_node->skin < 0) {
+	if (current_node == NULL && active_skeleton != NULL && gltf_node->skin < 0) {
 		BoneAttachment *bone_attachment = _generate_bone_attachment(state, active_skeleton, node_index);
 
 		scene_parent->add_child(bone_attachment);
@@ -2529,7 +2529,7 @@ void EditorSceneImporterGLTF::_generate_scene_node(GLTFState &state, Node *scene
 	}
 
 	// We still have not managed to make a node
-	if (current_node == nullptr) {
+	if (current_node == NULL) {
 		if (gltf_node->mesh >= 0) {
 			current_node = _generate_mesh_instance(state, scene_parent, node_index);
 		} else if (gltf_node->camera >= 0) {
@@ -2717,7 +2717,7 @@ void EditorSceneImporterGLTF::_import_animation(GLTFState &state, AnimationPlaye
 
 		if (node->skeleton >= 0) {
 			const Skeleton *sk = Object::cast_to<Skeleton>(state.scene_nodes.find(node_index)->get());
-			ERR_FAIL_COND(sk == nullptr);
+			ERR_FAIL_COND(sk == NULL);
 
 			const String path = ap->get_parent()->get_path_to(sk);
 			const String bone = node->name;
@@ -2871,12 +2871,12 @@ void EditorSceneImporterGLTF::_process_mesh_instances(GLTFState &state, Spatial 
 
 			Map<GLTFNodeIndex, Node *>::Element *mi_element = state.scene_nodes.find(node_i);
 			MeshInstance *mi = Object::cast_to<MeshInstance>(mi_element->get());
-			ERR_FAIL_COND(mi == nullptr);
+			ERR_FAIL_COND(mi == NULL);
 
 			const GLTFSkeletonIndex skel_i = state.skins[node->skin].skeleton;
 			const GLTFSkeleton &gltf_skeleton = state.skeletons[skel_i];
 			Skeleton *skeleton = gltf_skeleton.godot_skeleton;
-			ERR_FAIL_COND(skeleton == nullptr);
+			ERR_FAIL_COND(skeleton == NULL);
 
 			mi->get_parent()->remove_child(mi);
 			skeleton->add_child(mi);

@@ -79,21 +79,21 @@ const T* ProcessSimpleConnection(const Connection& con,
     bool is_object_property_conn,
     const char* name,
     const Element& element,
-    const char** propNameOut = nullptr)
+    const char** propNameOut = NULL)
 {
     if (is_object_property_conn && !con.PropertyName().length()) {
         DOMWarning("expected incoming " + std::string(name) +
             " link to be an object-object connection, ignoring",
             &element
             );
-        return nullptr;
+        return NULL;
     }
     else if (!is_object_property_conn && con.PropertyName().length()) {
         DOMWarning("expected incoming " + std::string(name) +
             " link to be an object-property connection, ignoring",
             &element
             );
-        return nullptr;
+        return NULL;
     }
 
     if(is_object_property_conn && propNameOut) {
@@ -107,7 +107,7 @@ const T* ProcessSimpleConnection(const Connection& con,
         DOMWarning("failed to read source object for incoming " + std::string(name) +
             " link, ignoring",
             &element);
-        return nullptr;
+        return NULL;
     }
 
     return dynamic_cast<const T*>(ob);

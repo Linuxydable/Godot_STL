@@ -597,7 +597,7 @@ void DependencyErrorDialog::show(Mode p_mode, const String &p_for_file, const st
 	set_title(TTR("Error loading:") + " " + p_for_file.get_file());
 	files->clear();
 
-	TreeItem *root = files->create_item(nullptr);
+	TreeItem *root = files->create_item(NULL);
 	for (auto &&r : report) {
 
 		String dep;
@@ -679,7 +679,7 @@ bool OrphanResourcesDialog::_fill_owners(EditorFileSystemDirectory *efsd, HashMa
 
 	for (int i = 0; i < efsd->get_subdir_count(); i++) {
 
-		TreeItem *dir_item = nullptr;
+		TreeItem *dir_item = NULL;
 		if (p_parent) {
 			dir_item = files->create_item(p_parent);
 			dir_item->set_text(0, efsd->get_subdir(i)->get_name());
@@ -734,7 +734,7 @@ bool OrphanResourcesDialog::_fill_owners(EditorFileSystemDirectory *efsd, HashMa
 
 void OrphanResourcesDialog::refresh() {
 	HashMap<String, int> refs;
-	_fill_owners(EditorFileSystem::get_singleton()->get_filesystem(), refs, nullptr);
+	_fill_owners(EditorFileSystem::get_singleton()->get_filesystem(), refs, NULL);
 	files->clear();
 	TreeItem *root = files->create_item();
 	_fill_owners(EditorFileSystem::get_singleton()->get_filesystem(), refs, root);

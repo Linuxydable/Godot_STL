@@ -119,7 +119,7 @@ void ImproveCacheLocalityProcess::Execute( aiScene* pScene) {
 // Improves the cache coherency of a specific mesh
 ai_real ImproveCacheLocalityProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshNum) {
     // TODO: rewrite this to use std::vector or boost::shared_array
-    ai_assert(nullptr != pMesh);
+    ai_assert(NULL != pMesh);
 
     // Check whether the input data is valid
     // - there must be vertices and faces

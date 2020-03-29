@@ -142,7 +142,7 @@ namespace Etc
 				{
 					pbucket->plinkFirst = pbucket->plinkLast = plinkBlock;
 				}
-				plinkBlock->SetNext(nullptr);
+				plinkBlock->SetNext(NULL);
 			}
 
 			m_uiSortedBlocks++;
@@ -156,21 +156,21 @@ namespace Etc
         }
 		//printf("num blocks already done: %d\n",numDone);
 		//link the blocks together across buckets
-		m_plinkFirst = nullptr;
-		m_plinkLast = nullptr;
+		m_plinkFirst = NULL;
+		m_plinkLast = NULL;
 		for (int iBucket = m_iBuckets - 1; iBucket >= 0; iBucket--)
 		{
 			Bucket *pbucket = &m_pabucket[iBucket];
 
 			if (pbucket->plinkFirst)
 			{
-				if (m_plinkFirst == nullptr)
+				if (m_plinkFirst == NULL)
 				{
 					m_plinkFirst = pbucket->plinkFirst;
 				}
 				else
 				{
-					assert(pbucket->plinkLast->GetNext() == nullptr);
+					assert(pbucket->plinkLast->GetNext() == NULL);
 					m_plinkLast->SetNext(pbucket->plinkFirst);
 				}
 
@@ -206,7 +206,7 @@ namespace Etc
             Bucket *pbucket = &m_pabucket[iBucket];
 
             unsigned int uiBlocks = 0;
-            for (Link *plink = pbucket->plinkFirst; plink != nullptr; plink = plink->GetNext() )
+            for (Link *plink = pbucket->plinkFirst; plink != NULL; plink = plink->GetNext() )
             {
                 uiBlocks++;
 

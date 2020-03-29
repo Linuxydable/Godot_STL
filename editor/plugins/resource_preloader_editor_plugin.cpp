@@ -177,7 +177,7 @@ void ResourcePreloaderEditor::_update_library() {
 
 	tree->clear();
 	tree->set_hide_root(true);
-	TreeItem *root = tree->create_item(nullptr);
+	TreeItem *root = tree->create_item(NULL);
 
 	List<StringName> rnames;
 	preloader->get_resource_list(&rnames);

@@ -110,18 +110,18 @@ Error MIDIDriverALSAMidi::open() {
 		return ERR_CANT_OPEN;
 
 	int i = 0;
-	for (void **n = hints; *n != nullptr; ++n) {
+	for (void **n = hints; *n != NULL; ++n) {
 		char *name = snd_device_name_get_hint(*n, "NAME");
 
-		if (name != nullptr) {
+		if (name != NULL) {
 			snd_rawmidi_t *midi_in;
-			int ret = snd_rawmidi_open(&midi_in, nullptr, name, SND_RAWMIDI_NONBLOCK);
+			int ret = snd_rawmidi_open(&midi_in, NULL, name, SND_RAWMIDI_NONBLOCK);
 			if (ret >= 0) {
 				connected_inputs.insert(connected_inputs.begin() + (i++), midi_in);
 			}
 		}
 
-		if (name != nullptr)
+		if (name != NULL)
 			free(name);
 	}
 	snd_device_name_free_hint(hints);
@@ -139,12 +139,12 @@ void MIDIDriverALSAMidi::close() {
 		Thread::wait_to_finish(thread);
 
 		memdelete(thread);
-		thread = nullptr;
+		thread = NULL;
 	}
 
 	if (mutex) {
 		memdelete(mutex);
-		mutex = nullptr;
+		mutex = NULL;
 	}
 
 	for (auto &&midi_in : connected_inputs) {
@@ -185,8 +185,8 @@ PoolStringArray MIDIDriverALSAMidi::get_connected_inputs() {
 
 MIDIDriverALSAMidi::MIDIDriverALSAMidi() {
 
-	mutex = nullptr;
-	thread = nullptr;
+	mutex = NULL;
+	thread = NULL;
 
 	exit_thread = false;
 }

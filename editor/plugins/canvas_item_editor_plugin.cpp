@@ -611,7 +611,7 @@ void CanvasItemEditor::_get_bones_at_pos(const Point2 &p_pos, std::vector<_Selec
 		Node2D *from_node = Object::cast_to<Node2D>(ObjectDB::get_instance(E->key().from));
 
 		std::vector<Vector2> bone_shape;
-		if (!_get_bone_shape(&bone_shape, nullptr, E))
+		if (!_get_bone_shape(&bone_shape, NULL, E))
 			continue;
 
 		// Check if the point is inside the Polygon2D
@@ -5574,8 +5574,8 @@ void CanvasItemEditorViewport::_create_preview(const std::vector<String> &files)
 		ERR_FAIL_COND(res.is_null());
 		Ref<Texture> texture = Ref<Texture>(Object::cast_to<Texture>(*res));
 		Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
-		if (texture != nullptr || scene != nullptr) {
-			if (texture != nullptr) {
+		if (texture != NULL || scene != NULL) {
+			if (texture != NULL) {
 				Sprite *sprite = memnew(Sprite);
 				sprite->set_texture(texture);
 				sprite->set_modulate(Color(1, 1, 1, 0.7f));
@@ -5751,7 +5751,7 @@ void CanvasItemEditorViewport::_perform_drop_data() {
 			continue;
 		}
 		Ref<PackedScene> scene = Ref<PackedScene>(Object::cast_to<PackedScene>(*res));
-		if (scene != nullptr && scene.is_valid()) {
+		if (scene != NULL && scene.is_valid()) {
 			if (!target_node) {
 				// Without root node act the same as "Load Inherited Scene"
 				Error err = EditorNode::get_singleton()->load_scene(path, false, true);
@@ -5766,7 +5766,7 @@ void CanvasItemEditorViewport::_perform_drop_data() {
 			}
 		} else {
 			Ref<Texture> texture = Ref<Texture>(Object::cast_to<Texture>(*res));
-			if (texture != nullptr && texture.is_valid()) {
+			if (texture != NULL && texture.is_valid()) {
 				Node *child;
 				if (default_type == "Light2D")
 					child = memnew(Light2D);

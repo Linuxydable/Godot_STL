@@ -694,7 +694,7 @@ public:
 		key_ofs = 0;
 		track = -1;
 		setting = false;
-		root_path = nullptr;
+		root_path = NULL;
 	}
 };
 
@@ -5390,7 +5390,7 @@ void AnimationTrackEditor::_edit_menu_pressed(int p_option) {
 			undo_redo->create_action(TTR("Paste Tracks"));
 			for (auto &&clipboard : track_clipboard) {
 				undo_redo->add_do_method(animation.ptr(), "add_track", clipboard.track_type);
-				Node *exists = nullptr;
+				Node *exists = NULL;
 				NodePath path = clipboard.base_path;
 
 				if (root) {

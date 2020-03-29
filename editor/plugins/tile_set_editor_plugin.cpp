@@ -724,7 +724,7 @@ void TileSetEditor::_on_texture_list_selected(int p_index) {
 		update_workspace_minsize();
 	} else {
 		current_item_index = -1;
-		preview->set_texture(nullptr);
+		preview->set_texture(NULL);
 		workspace->set_custom_minimum_size(Size2i());
 		update_workspace_tile_mode();
 	}

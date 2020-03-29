@@ -1506,12 +1506,12 @@ KinematicBody2D::KinematicBody2D() :
 }
 KinematicBody2D::~KinematicBody2D() {
 	if (motion_cache.is_valid()) {
-		motion_cache->owner = nullptr;
+		motion_cache->owner = NULL;
 	}
 
 	for (auto &&collider : slide_colliders) {
 		if (collider.is_valid()) {
-			collider->owner = nullptr;
+			collider->owner = NULL;
 		}
 	}
 }
@@ -1532,7 +1532,7 @@ Vector2 KinematicCollision2D::get_remainder() const {
 	return collision.remainder;
 }
 Object *KinematicCollision2D::get_local_shape() const {
-	if (!owner) return nullptr;
+	if (!owner) return NULL;
 	uint32_t ownerid = owner->shape_find_owner(collision.local_shape);
 	return owner->shape_owner_get_owner(ownerid);
 }

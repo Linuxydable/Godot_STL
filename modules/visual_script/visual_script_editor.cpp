@@ -181,7 +181,7 @@ public:
 		_change_notify();
 	}
 
-	VisualScriptEditorSignalEdit() { undo_redo = nullptr; }
+	VisualScriptEditorSignalEdit() { undo_redo = NULL; }
 };
 
 class VisualScriptEditorVariableEdit : public Object {
@@ -4917,10 +4917,10 @@ static ScriptEditorBase *create_editor(const RES &p_resource) {
 		return memnew(VisualScriptEditor);
 	}
 
-	return nullptr;
+	return NULL;
 }
 
-VisualScriptEditor::Clipboard *VisualScriptEditor::clipboard = nullptr;
+VisualScriptEditor::Clipboard *VisualScriptEditor::clipboard = NULL;
 
 void VisualScriptEditor::free_clipboard() {
 	if (clipboard)
@@ -4956,7 +4956,7 @@ Ref<VisualScriptNode> _VisualScriptEditor::create_node_custom(const String &p_na
 	return node;
 }
 
-_VisualScriptEditor *_VisualScriptEditor::singleton = nullptr;
+_VisualScriptEditor *_VisualScriptEditor::singleton = NULL;
 Map<String, RefPtr> _VisualScriptEditor::custom_nodes;
 
 _VisualScriptEditor::_VisualScriptEditor() {

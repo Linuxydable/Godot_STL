@@ -850,7 +850,7 @@ void GraphEdit::_gui_input(const Ref<InputEvent> &p_ev) {
 			if (in_box)
 				gn->set_selected(box_selection_mode_aditive);
 			else
-				gn->set_selected(previus_selected.find(gn) != nullptr);
+				gn->set_selected(previus_selected.find(gn) != NULL);
 		}
 
 		top_layer->update();
@@ -868,7 +868,7 @@ void GraphEdit::_gui_input(const Ref<InputEvent> &p_ev) {
 					if (!gn)
 						continue;
 
-					gn->set_selected(previus_selected.find(gn) != nullptr);
+					gn->set_selected(previus_selected.find(gn) != NULL);
 				}
 				top_layer->update();
 			} else {
@@ -918,7 +918,7 @@ void GraphEdit::_gui_input(const Ref<InputEvent> &p_ev) {
 
 		if (b->get_button_index() == BUTTON_LEFT && b->is_pressed()) {
 
-			GraphNode *gn = nullptr;
+			GraphNode *gn = NULL;
 
 			for (int i = get_child_count() - 1; i >= 0; --i) {
 
