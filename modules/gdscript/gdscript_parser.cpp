@@ -1295,7 +1295,7 @@ GDScriptParser::Node *GDScriptParser::_parse_expression(Node *p_parent, bool p_s
 #define _VALIDATE_ASSIGN                  \
 	if (!p_allow_assign || has_casting) { \
 		_set_error("Unexpected assign."); \
-		return NULL;                   \
+		return NULL;                      \
 	}                                     \
 	p_allow_assign = false;
 
@@ -3696,35 +3696,49 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 					return;
 				}
 
-				for (auto &&func : p_class->functions) {
-					if (func->name == name) {
-						_set_error("The function \"" + String(name) + "\" already exists in this class (at line " + itos(func->line) + ").");
-					}
-				}
-				for (auto &&func : p_class->static_functions) {
-					if (func->name == name) {
-						_set_error("The function \"" + String(name) + "\" already exists in this class (at line " + itos(func->line) + ").");
-					}
-				}
+				std::find_if(p_class->functions.begin(), p_class->functions.end(),
+						[&](auto &&func) {
+							if (func->name == name) {
+								_set_error("The function \"" + String(name) + "\" already exists in this class (at line " + itos(func->line) + ").");
+								return true;
+							}
+							return false;
+						});
+
+				std::find_if(p_class->static_functions.begin(), p_class->static_functions.end(),
+						[&](auto &&func) {
+							if (func->name == name) {
+								_set_error("The function \"" + String(name) + "\" already exists in this class (at line " + itos(func->line) + ").");
+								return true;
+							}
+							return false;
+						});
 
 #ifdef DEBUG_ENABLED
 				if (p_class->constant_expressions.has(name)) {
 					_add_warning(GDScriptWarning::FUNCTION_CONFLICTS_CONSTANT, -1, name);
 				}
-				for (auto &&var : p_class->variables) {
-					if (var.identifier == name) {
-						_add_warning(GDScriptWarning::FUNCTION_CONFLICTS_VARIABLE, -1, name);
-					}
-				}
-				for (auto &&subclass : p_class->subclasses) {
-					if (subclass->name == name) {
-						_add_warning(GDScriptWarning::FUNCTION_CONFLICTS_CONSTANT, -1, name);
-					}
-				}
+
+				std::find_if(p_class->variables.begin(), p_class->variables.end(),
+						[&](auto &&var) {
+							if (var.identifier == name) {
+								_add_warning(GDScriptWarning::FUNCTION_CONFLICTS_VARIABLE, -1, name);
+								return true;
+							}
+							return false;
+						});
+
+				std::find_if(p_class->subclasses.begin(), p_class->subclasses.end(),
+						[&](auto &&subclass) {
+							if (subclass->name == name) {
+								_add_warning(GDScriptWarning::FUNCTION_CONFLICTS_CONSTANT, -1, name);
+								return true;
+							}
+							return false;
+						});
 #endif // DEBUG_ENABLED
 
 				if (tokenizer->get_token() != GDScriptTokenizer::TK_PARENTHESIS_OPEN) {
-
 					_set_error("Expected \"(\" after the identifier (syntax: \"func <identifier>([arguments]):\" ).");
 					return;
 				}
@@ -3851,7 +3865,6 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 				rpc_mode = MultiplayerAPI::RPC_MODE_DISABLED;
 
 				if (name == "_init") {
-
 					if (_static) {
 						_set_error("The constructor cannot be static.");
 						return;
@@ -3913,7 +3926,6 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 
 				DataType return_type;
 				if (tokenizer->get_token() == GDScriptTokenizer::TK_FORWARD_ARROW) {
-
 					if (!_parse_type(return_type, true)) {
 						_set_error("Expected a return type for the function.");
 						return;
@@ -3921,7 +3933,6 @@ void GDScriptParser::_parse_class(ClassNode *p_class) {
 				}
 
 				if (!_enter_indent_block(block)) {
-
 					_set_error("Indented block expected.");
 					return;
 				}
