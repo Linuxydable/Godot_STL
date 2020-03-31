@@ -3076,10 +3076,11 @@ void GDScriptParser::_parse_block(BlockNode *p_block, bool p_static) {
 
 						bool constant = false;
 
-						for (auto &&arg : op->arguments) {
-							args.push_back(arg);
-							if (constant && arg->type == Node::TYPE_CONSTANT) {
-								ConstantNode *c = static_cast<ConstantNode *>(arg);
+						for (auto it_args = op->arguments.begin() + 1; it_args != op->arguments.end(); ++it_args) {
+							args.push_back(*it_args);
+							if (constant && (*it_args)->type == Node::TYPE_CONSTANT) {
+								ConstantNode *c = static_cast<ConstantNode *>(*it_args);
+
 								if (c->value.get_type() == Variant::REAL || c->value.get_type() == Variant::INT) {
 									constants.push_back(c->value);
 									constant = true;
