@@ -46,13 +46,13 @@ class VSet {
 		if(_data.empty() )
 			return 0;
 
-		typename std::vector<T>::size_type low = 0;
+		int low = 0;
 
-		auto high = _data.size() - 1;
+		int high = _data.size() - 1;
 
 		const T *a = &_data[0];
 
-		typename std::vector<T>::size_type middle = 0;
+		int middle = 0;
 
 #ifdef DEBUG_ENABLED
 		if (low > high)
