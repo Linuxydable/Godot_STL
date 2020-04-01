@@ -1296,7 +1296,7 @@ int NativeScriptLanguage::register_binding_functions(godot_instance_binding_func
 
 	if (it_binding_functions == binding_functions.end()) {
 		auto len = binding_functions.size();
-		binding_functions.resize(len + 1);
+		binding_functions.emplace_back(true, p_binding_functions);
 		return len;
 	}
 
