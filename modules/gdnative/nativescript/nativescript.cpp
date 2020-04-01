@@ -1286,22 +1286,21 @@ void NativeScriptLanguage::profiling_add_data(StringName p_signature, uint64_t p
 int NativeScriptLanguage::register_binding_functions(godot_instance_binding_functions p_binding_functions) {
 
 	// find index
-
 	auto it_binding_functions = std::find_if(binding_functions.begin(), binding_functions.end(),
-		[&](const Pair<bool, godot_instance_binding_functions>& binding_function){
-			if(!binding_function.first){
-				return true;
-			}
-			return false;
-		}
-	);
+			[&](auto &&binding_function) {
+				if (!binding_function.first) {
+					return true;
+				}
+				return false;
+			});
 
-	if(it_binding_functions == binding_functions.end() ){
-		binding_functions.push_back(Pair<bool, godot_instance_binding_functions>(true, p_binding_functions) );
-	}else{
-		(*it_binding_functions).first = true;
-		(*it_binding_functions).second = p_binding_functions;
+	if (it_binding_functions == binding_functions.end()) {
+		auto len = binding_functions.size();
+		binding_functions.emplace_back(true, p_binding_functions);
+		return len;
 	}
+
+	*it_binding_functions = { true, p_binding_functions };
 
 	return std::distance(binding_functions.begin(), it_binding_functions);
 }
