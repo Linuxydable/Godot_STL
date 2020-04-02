@@ -769,15 +769,16 @@ void PhysicsServerManager::set_default_server(const String &p_name, int p_priori
 }
 
 int PhysicsServerManager::find_server_id(const String &p_name) {
-	auto it_server = std::find_if(physics_servers.rbegin(), physics_servers.rend(), [&](const PhysicsServerManager::ClassInfo &server) {
-		if (p_name == server.name) {
-			return true;
-		}
-		return false;
-	});
+	auto it_server = std::find_if(physics_servers.begin(), physics_servers.end(),
+		[&](const PhysicsServerManager::ClassInfo &server) {
+			if (p_name == server.name) {
+				return true;
+			}
+			return false;
+		});
 
-	if (it_server != physics_servers.rend()) {
-		return std::distance(physics_servers.begin(), it_server.base()) - 1;
+	if (it_server != physics_servers.end()) {
+		return std::distance(physics_servers.begin(), it_server);
 	}
 
 	return -1;
