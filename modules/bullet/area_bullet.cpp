@@ -72,9 +72,11 @@ AreaBullet::AreaBullet() :
 
 AreaBullet::~AreaBullet() {
 	// signal are handled by godot, so just clear without notify
-	for(auto&& overlappingObject : overlappingObjects){
-		overlappingObject.object->on_exit_area(this);
-	}
+
+	std::for_each(overlappingObjects.rbegin(), overlappingObjects.rend(),
+			[&](auto &&overlappingObject) {
+				overlappingObject.object->on_exit_area(this);
+			});
 }
 
 void AreaBullet::dispatch_callbacks() {
