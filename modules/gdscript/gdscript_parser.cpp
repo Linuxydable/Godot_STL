@@ -6254,8 +6254,6 @@ GDScriptParser::DataType GDScriptParser::_reduce_node_type(Node *p_node) {
 		case Node::TYPE_IDENTIFIER: {
 			IdentifierNode *id = static_cast<IdentifierNode *>(p_node);
 
-			auto it_find = std::find(current_function->arguments.begin(), current_function->arguments.end(), id->name);
-
 			if (id->declared_block) {
 				node_type = id->declared_block->variables[id->name]->get_datatype();
 				id->declared_block->variables[id->name]->usages += 1;
@@ -6263,10 +6261,16 @@ GDScriptParser::DataType GDScriptParser::_reduce_node_type(Node *p_node) {
 			} else if (id->name == "#match_value") {
 				// It's a special id just for the match statetement, ignore
 				break;
-			} else if (current_function && it_find != current_function->arguments.end()) {
-				auto idx = std::distance(current_function->arguments.begin(), it_find);
-				node_type = current_function->argument_types[idx];
-				break;
+			} else if (current_function) {
+				auto it_find = std::find(current_function->arguments.begin(), current_function->arguments.end(), id->name);
+
+				if (it_find != current_function->arguments.end()) {
+					auto idx = std::distance(current_function->arguments.begin(), it_find);
+					node_type = current_function->argument_types[idx];
+					break;
+				}
+
+				node_type = _reduce_identifier_type(NULL, id->name, id->line, false);
 			} else {
 				node_type = _reduce_identifier_type(NULL, id->name, id->line, false);
 			}
