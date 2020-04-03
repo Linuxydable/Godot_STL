@@ -750,10 +750,10 @@ void SpaceBullet::check_ghost_overlaps() {
 						}
 					} else {
 						// need_update : try to remove std::distance
-						btCollisionObjectWrapper obA(NULL, it_area_shape->bt_shape, (*it_areas)->get_bt_ghost(), gjk_input.m_transformA, -1, std::distance((*it_areas)->shapes.rbegin(), it_area_shape));
+						btCollisionObjectWrapper obA(NULL, it_area_shape->bt_shape, (*it_areas)->get_bt_ghost(), gjk_input.m_transformA, -1, std::distance((*it_areas)->shapes.begin(), it_area_shape.base()) - 1);
 
 						// need_update : try to remove std::distance
-						btCollisionObjectWrapper obB(NULL, it_other_body_shape->bt_shape, otherObject->get_bt_collision_object(), gjk_input.m_transformB, -1, std::distance(otherObject->get_shapes_wrappers().rbegin(), it_other_body_shape));
+						btCollisionObjectWrapper obB(NULL, it_other_body_shape->bt_shape, otherObject->get_bt_collision_object(), gjk_input.m_transformB, -1, std::distance(otherObject->get_shapes_wrappers().begin(), it_other_body_shape.base()) - 1);
 
 						btCollisionAlgorithm *algorithm = dispatcher->findAlgorithm(&obA, &obB, NULL, BT_CONTACT_POINT_ALGORITHMS);
 
