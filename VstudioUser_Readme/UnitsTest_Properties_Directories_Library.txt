@@ -1,0 +1,1 @@
+$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64;D:\Projects\Godot_GNU_STL\core;D:\Projects\Godot_GNU_STL\platform;D:\Projects\Godot_GNU_STL\drivers;D:\Projects\Godot_GNU_STL\servers;D:\Projects\Godot_GNU_STL\modules;D:\Projects\Godot_GNU_STL\editor;D:\Projects\Godot_GNU_STL\scene;D:\Projects\Godot_GNU_STL\main
