@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -50,8 +50,8 @@ void PHashTranslation::generate(const Ref<Translation> &p_from) {
 
 	auto size = Math::larger_prime(keys.size());
 
-	std::vector<std::vector<Pair<int, CharString> > > buckets;
-	std::vector<Map<uint32_t, int> > table;
+	std::vector<std::vector<Pair<int, CharString>>> buckets;
+	std::vector<Map<uint32_t, int>> table;
 	std::vector<uint32_t> hfunc_table;
 	std::vector<_PHashTranslationCmp> compressed;
 
@@ -109,7 +109,7 @@ void PHashTranslation::generate(const Ref<Translation> &p_from) {
 
 	for (decltype(size) i = 0; i < size; ++i) {
 
-		const std::vector<Pair<int, CharString> > &b = buckets[i];
+		const std::vector<Pair<int, CharString>> &b = buckets[i];
 		Map<uint32_t, int> &t = table[i];
 
 		if (b.size() == 0)
@@ -141,8 +141,8 @@ void PHashTranslation::generate(const Ref<Translation> &p_from) {
 	hash_table.resize(size);
 	bucket_table.resize(bucket_table_size);
 
-	PoolVector<int>::Write htwb = hash_table.write();
-	PoolVector<int>::Write btwb = bucket_table.write();
+	int *htwb = hash_table.ptrw();
+	int *btwb = bucket_table.ptrw();
 
 	uint32_t *htw = (uint32_t *)&htwb[0];
 	uint32_t *btw = (uint32_t *)&btwb[0];
@@ -174,7 +174,7 @@ void PHashTranslation::generate(const Ref<Translation> &p_from) {
 	}
 
 	strings.resize(total_compression_size);
-	PoolVector<uint8_t>::Write cw = strings.write();
+	uint8_t *cw = strings.ptrw();
 
 	for (auto &&cmp : compressed) {
 		memcpy(&cw[cmp.offset], cmp.compressed.get_data(), cmp.compressed.size());
@@ -228,11 +228,11 @@ StringName PHashTranslation::get_message(const StringName &p_src_text) const {
 	CharString str = p_src_text.operator String().utf8();
 	uint32_t h = hash(0, str.get_data());
 
-	PoolVector<int>::Read htr = hash_table.read();
+	const int *htr = hash_table.ptr();
 	const uint32_t *htptr = (const uint32_t *)&htr[0];
-	PoolVector<int>::Read btr = bucket_table.read();
+	const int *btr = bucket_table.ptr();
 	const uint32_t *btptr = (const uint32_t *)&btr[0];
-	PoolVector<uint8_t>::Read sr = strings.read();
+	const uint8_t *sr = strings.ptr();
 	const char *sptr = (const char *)&sr[0];
 
 	uint32_t p = htptr[h % htsize];
@@ -279,9 +279,9 @@ StringName PHashTranslation::get_message(const StringName &p_src_text) const {
 
 void PHashTranslation::_get_property_list(List<PropertyInfo> *p_list) const {
 
-	p_list->push_back(PropertyInfo(Variant::POOL_INT_ARRAY, "hash_table"));
-	p_list->push_back(PropertyInfo(Variant::POOL_INT_ARRAY, "bucket_table"));
-	p_list->push_back(PropertyInfo(Variant::POOL_BYTE_ARRAY, "strings"));
+	p_list->push_back(PropertyInfo(Variant::PACKED_INT32_ARRAY, "hash_table"));
+	p_list->push_back(PropertyInfo(Variant::PACKED_INT32_ARRAY, "bucket_table"));
+	p_list->push_back(PropertyInfo(Variant::PACKED_BYTE_ARRAY, "strings"));
 	p_list->push_back(PropertyInfo(Variant::OBJECT, "load_from", PROPERTY_HINT_RESOURCE_TYPE, "Translation", PROPERTY_USAGE_EDITOR));
 }
 void PHashTranslation::_bind_methods() {

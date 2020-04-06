@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,17 +32,19 @@
 
 #include "core/io/file_access_buffered_fa.h"
 #include "core/project_settings.h"
+#if defined(OPENGL_ENABLED)
 #include "drivers/gles2/rasterizer_gles2.h"
-#include "drivers/gles3/rasterizer_gles3.h"
+#endif
 #include "drivers/unix/dir_access_unix.h"
 #include "drivers/unix/file_access_unix.h"
 #include "file_access_android.h"
 #include "main/main.h"
-#include "servers/visual/visual_server_raster.h"
-#include "servers/visual/visual_server_wrap_mt.h"
+#include "servers/rendering/rendering_server_raster.h"
+#include "servers/rendering/rendering_server_wrap_mt.h"
 
 #include "dir_access_jandroid.h"
 #include "file_access_jandroid.h"
+#include "net_socket_android.h"
 
 #include <dlfcn.h>
 
@@ -66,12 +68,10 @@ int OS_Android::get_video_driver_count() const {
 const char *OS_Android::get_video_driver_name(int p_driver) const {
 
 	switch (p_driver) {
-		case VIDEO_DRIVER_GLES3:
-			return "GLES3";
 		case VIDEO_DRIVER_GLES2:
 			return "GLES2";
 	}
-	ERR_FAIL_V_MSG(NULL, "Invalid video driver index: " + itos(p_driver) + ".");
+	ERR_FAIL_V_MSG(nullptr, "Invalid video driver index: " + itos(p_driver) + ".");
 }
 int OS_Android::get_audio_driver_count() const {
 
@@ -91,7 +91,7 @@ void OS_Android::initialize_core() {
 		FileAccess::make_default<FileAccessUnix>(FileAccess::ACCESS_RESOURCES);
 	else {
 #ifdef USE_JAVA_FILE_ACCESS
-		FileAccess::make_default<FileAccessBufferedFA<FileAccessJAndroid> >(FileAccess::ACCESS_RESOURCES);
+		FileAccess::make_default<FileAccessBufferedFA<FileAccessJAndroid>>(FileAccess::ACCESS_RESOURCES);
 #else
 		//FileAccess::make_default<FileAccessBufferedFA<FileAccessAndroid> >(FileAccess::ACCESS_RESOURCES);
 		FileAccess::make_default<FileAccessAndroid>(FileAccess::ACCESS_RESOURCES);
@@ -106,6 +106,8 @@ void OS_Android::initialize_core() {
 		DirAccess::make_default<DirAccessJAndroid>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccessUnix>(DirAccess::ACCESS_FILESYSTEM);
+
+	NetSocketAndroid::make_default();
 }
 
 void OS_Android::set_opengl_extensions(const char *p_gl_extensions) {
@@ -120,65 +122,41 @@ int OS_Android::get_current_video_driver() const {
 
 Error OS_Android::initialize(const VideoMode &p_desired, int p_video_driver, int p_audio_driver) {
 
-	bool use_gl3 = godot_java->get_gles_version_code() >= 0x00030000;
-	use_gl3 = use_gl3 && (GLOBAL_GET("rendering/quality/driver/driver_name") == "GLES3");
-	bool gl_initialization_error = false;
+	// FIXME: Add Vulkan support. Readd fallback code from Vulkan to GLES2?
 
-	while (true) {
-		if (use_gl3) {
-			if (RasterizerGLES3::is_viable() == OK) {
-				godot_java->gfx_init(false);
-				RasterizerGLES3::register_config();
-				RasterizerGLES3::make_current();
-				break;
-			} else {
-				if (GLOBAL_GET("rendering/quality/driver/fallback_to_gles2")) {
-					p_video_driver = VIDEO_DRIVER_GLES2;
-					use_gl3 = false;
-					continue;
-				} else {
-					gl_initialization_error = true;
-					break;
-				}
-			}
+#if defined(OPENGL_ENABLED)
+	if (video_driver_index == VIDEO_DRIVER_GLES2) {
+		bool gl_initialization_error = false;
+
+		if (RasterizerGLES2::is_viable() == OK) {
+			RasterizerGLES2::register_config();
+			RasterizerGLES2::make_current();
 		} else {
-			if (RasterizerGLES2::is_viable() == OK) {
-				godot_java->gfx_init(true);
-				RasterizerGLES2::register_config();
-				RasterizerGLES2::make_current();
-				break;
-			} else {
-				gl_initialization_error = true;
-				break;
-			}
+			gl_initialization_error = true;
+		}
+
+		if (gl_initialization_error) {
+			OS::get_singleton()->alert("Your device does not support any of the supported OpenGL versions.\n"
+									   "Please try updating your Android version.",
+					"Unable to initialize video driver");
+			return ERR_UNAVAILABLE;
 		}
 	}
-
-	if (gl_initialization_error) {
-		OS::get_singleton()->alert("Your device does not support any of the supported OpenGL versions.\n"
-								   "Please try updating your Android version.",
-				"Unable to initialize Video driver");
-		return ERR_UNAVAILABLE;
-	}
+#endif
 
 	video_driver_index = p_video_driver;
 
-	visual_server = memnew(VisualServerRaster);
+	rendering_server = memnew(RenderingServerRaster);
 	if (get_render_thread_mode() != RENDER_THREAD_UNSAFE) {
-		visual_server = memnew(VisualServerWrapMT(visual_server, false));
+		rendering_server = memnew(RenderingServerWrapMT(rendering_server, false));
 	}
 
-	visual_server->init();
+	rendering_server->init();
 
 	AudioDriverManager::initialize(p_audio_driver);
 
 	input = memnew(InputDefault);
 	input->set_fallback_mapping(godot_java->get_input_fallback_mapping());
-
-	///@TODO implement a subclass for Android and instantiate that instead
-	camera_server = memnew(CameraServer);
-
-	//power_manager = memnew(PowerAndroid);
 
 	return OK;
 }
@@ -195,8 +173,6 @@ void OS_Android::delete_main_loop() {
 }
 
 void OS_Android::finalize() {
-
-	memdelete(camera_server);
 
 	memdelete(input);
 }
@@ -218,6 +194,16 @@ void OS_Android::alert(const String &p_alert, const String &p_title) {
 bool OS_Android::request_permission(const String &p_name) {
 
 	return godot_java->request_permission(p_name);
+}
+
+bool OS_Android::request_permissions() {
+
+	return godot_java->request_permissions();
+}
+
+Vector<String> OS_Android::get_granted_permissions() const {
+
+	return godot_java->get_granted_permissions();
 }
 
 Error OS_Android::open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path) {
@@ -320,14 +306,14 @@ void OS_Android::main_loop_end() {
 void OS_Android::main_loop_focusout() {
 
 	if (main_loop)
-		main_loop->notification(MainLoop::NOTIFICATION_WM_FOCUS_OUT);
+		main_loop->notification(NOTIFICATION_WM_FOCUS_OUT);
 	audio_driver_android.set_pause(true);
 }
 
 void OS_Android::main_loop_focusin() {
 
 	if (main_loop)
-		main_loop->notification(MainLoop::NOTIFICATION_WM_FOCUS_IN);
+		main_loop->notification(NOTIFICATION_WM_FOCUS_IN);
 	audio_driver_android.set_pause(false);
 }
 
@@ -489,6 +475,25 @@ void OS_Android::process_hover(int p_type, Point2 p_pos) {
 	}
 }
 
+void OS_Android::process_double_tap(Point2 p_pos) {
+	Ref<InputEventMouseButton> ev;
+	ev.instance();
+	ev->set_position(p_pos);
+	ev->set_global_position(p_pos);
+	ev->set_pressed(false);
+	ev->set_doubleclick(true);
+	input->parse_input_event(ev);
+}
+
+void OS_Android::process_scroll(Point2 p_pos) {
+	Ref<InputEventPanGesture> ev;
+	ev.instance();
+	ev->set_position(p_pos);
+	ev->set_delta(p_pos - scroll_prev_pos);
+	input->parse_input_event(ev);
+	scroll_prev_pos = p_pos;
+}
+
 void OS_Android::process_accelerometer(const Vector3 &p_accelerometer) {
 
 	input->set_accelerometer(p_accelerometer);
@@ -526,10 +531,10 @@ int OS_Android::get_virtual_keyboard_height() const {
 	// return 0;
 }
 
-void OS_Android::show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect) {
+void OS_Android::show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect, int p_max_input_length) {
 
 	if (godot_io_java->has_vk()) {
-		godot_io_java->show_vk(p_existing_text);
+		godot_io_java->show_vk(p_existing_text, p_max_input_length);
 	} else {
 
 		ERR_PRINT("Virtual keyboard not available");
@@ -558,7 +563,7 @@ void OS_Android::init_video_mode(int p_video_width, int p_video_height) {
 void OS_Android::main_loop_request_go_back() {
 
 	if (main_loop)
-		main_loop->notification(MainLoop::NOTIFICATION_WM_GO_BACK_REQUEST);
+		main_loop->notification(NOTIFICATION_WM_GO_BACK_REQUEST);
 }
 
 void OS_Android::set_display_size(Size2 p_size) {
@@ -718,7 +723,6 @@ void OS_Android::vibrate_handheld(int p_duration_ms) {
 
 bool OS_Android::_check_internal_feature_support(const String &p_feature) {
 	if (p_feature == "mobile") {
-		//TODO support etc2 only if GLES3 driver is selected
 		return true;
 	}
 #if defined(__aarch64__)
@@ -745,10 +749,12 @@ OS_Android::OS_Android(GodotJavaWrapper *p_godot_java, GodotIOJavaWrapper *p_god
 	default_videomode.fullscreen = true;
 	default_videomode.resizable = false;
 
-	main_loop = NULL;
-	gl_extensions = NULL;
-	//rasterizer = NULL;
+	main_loop = nullptr;
+	gl_extensions = nullptr;
+	//rasterizer = nullptr;
 	use_gl2 = false;
+
+	rendering_server = nullptr;
 
 	godot_java = p_godot_java;
 	godot_io_java = p_godot_io_java;

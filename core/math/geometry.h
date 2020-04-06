@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -40,7 +40,7 @@
 #include "core/math/triangulate.h"
 #include "core/math/vector3.h"
 #include "core/object.h"
-#include "core/pool_vector.h"
+
 #include "core/print_string.h"
 
 class Geometry {
@@ -792,12 +792,12 @@ public:
 		END_ROUND
 	};
 
-	static std::vector<std::vector<Point2> > merge_polygons_2d(const std::vector<Point2> &p_polygon_a, const std::vector<Point2> &p_polygon_b) {
+	static std::vector<std::vector<Point2>> merge_polygons_2d(const std::vector<Point2> &p_polygon_a, const std::vector<Point2> &p_polygon_b) {
 
 		return _polypaths_do_operation(OPERATION_UNION, p_polygon_a, p_polygon_b);
 	}
 
-	static std::vector<std::vector<Point2> > clip_polygons_2d(const std::vector<Point2> &p_polygon_a, const std::vector<Point2> &p_polygon_b) {
+	static std::vector<std::vector<Point2>> clip_polygons_2d(const std::vector<Point2> &p_polygon_a, const std::vector<Point2> &p_polygon_b) {
 
 		return _polypaths_do_operation(OPERATION_DIFFERENCE, p_polygon_a, p_polygon_b);
 	}
@@ -827,9 +827,9 @@ public:
 		return _polypath_offset(p_polygon, p_delta, p_join_type, END_POLYGON);
 	}
 
-	static std::vector<std::vector<Point2> > offset_polyline_2d(const std::vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type) {
+	static std::vector<std::vector<Point2>> offset_polyline_2d(const std::vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type) {
 
-		ERR_FAIL_COND_V_MSG(p_end_type == END_POLYGON, std::vector<std::vector<Point2> >(), "Attempt to offset a polyline like a polygon (use offset_polygon_2d instead).");
+		ERR_FAIL_COND_V_MSG(p_end_type == END_POLYGON, std::vector<std::vector<Point2>>(), "Attempt to offset a polyline like a polygon (use offset_polygon_2d instead).");
 
 		return _polypath_offset(p_polygon, p_delta, p_join_type, p_end_type);
 	}
@@ -855,17 +855,8 @@ public:
 		return triangles;
 	}
 
-	static std::vector<std::vector<Vector2> > (*_decompose_func)(const std::vector<Vector2> &p_polygon);
-	static std::vector<std::vector<Vector2> > decompose_polygon(const std::vector<Vector2> &p_polygon) {
-
-		if (_decompose_func)
-			return _decompose_func(p_polygon);
-
-		return std::vector<std::vector<Vector2> >();
-	}
-
-	static bool is_polygon_clockwise(const std::vector<Vector2> &p_polygon) {
-		unsigned c = p_polygon.size();
+	static bool is_polygon_clockwise(const std::vector<std::vector> &p_polygon) {
+		int c = p_polygon.size();
 		if (c < 3)
 			return false;
 
@@ -899,11 +890,11 @@ public:
 		// Make point outside that won't intersect with points in segment from p_point.
 		further_away += (further_away - further_away_opposite) * Vector2(1.221313, 1.512312);
 
-		unsigned intersections = 0;
-		for (unsigned i = 0; i < c; i++) {
-			const Vector2 &v1 = p_polygon[i];
-			const Vector2 &v2 = p_polygon[(i + 1) % c];
-			if (segment_intersects_segment_2d(v1, v2, p_point, further_away, NULL)) {
+		int intersections = 0;
+		for (int i = 0; i < c; i++) {
+			const Vector2 &v1 = p[i];
+			const Vector2 &v2 = p[(i + 1) % c];
+			if (segment_intersects_segment_2d(v1, v2, p_point, further_away, nullptr)) {
 				intersections++;
 			}
 		}
@@ -911,10 +902,10 @@ public:
 		return (intersections & 1);
 	}
 
-	static PoolVector<PoolVector<Face3> > separate_objects(PoolVector<Face3> p_array);
+	static std::vector<std::vector<Face3>> separate_objects(std::vector<Face3> p_array);
 
 	// Create a "wrap" that encloses the given geometry.
-	static PoolVector<Face3> wrap_geometry(PoolVector<Face3> p_array, real_t *p_error = NULL);
+	static std::vector<Face3> wrap_geometry(std::vector<Face3> p_array, real_t *p_error = nullptr);
 
 	struct MeshData {
 
@@ -1021,19 +1012,19 @@ public:
 
 		return hull_points;
 	}
-	static std::vector<std::vector<Vector2> > decompose_polygon_in_convex(std::vector<Point2> polygon);
+	static std::vector<std::vector<Vector2>> decompose_polygon_in_convex(std::vector<Point2> polygon);
 
-	static MeshData build_convex_mesh(const PoolVector<Plane> &p_planes);
-	static PoolVector<Plane> build_sphere_planes(real_t p_radius, int p_lats, int p_lons, Vector3::Axis p_axis = Vector3::AXIS_Z);
-	static PoolVector<Plane> build_box_planes(const Vector3 &p_extents);
-	static PoolVector<Plane> build_cylinder_planes(real_t p_radius, real_t p_height, int p_sides, Vector3::Axis p_axis = Vector3::AXIS_Z);
-	static PoolVector<Plane> build_capsule_planes(real_t p_radius, real_t p_height, int p_sides, int p_lats, Vector3::Axis p_axis = Vector3::AXIS_Z);
+	static MeshData build_convex_mesh(const std::vector<Plane> &p_planes);
+	static std::vector<Plane> build_sphere_planes(real_t p_radius, int p_lats, int p_lons, Vector3::Axis p_axis = Vector3::AXIS_Z);
+	static std::vector<Plane> build_box_planes(const Vector3 &p_extents);
+	static std::vector<Plane> build_cylinder_planes(real_t p_radius, real_t p_height, int p_sides, Vector3::Axis p_axis = Vector3::AXIS_Z);
+	static std::vector<Plane> build_capsule_planes(real_t p_radius, real_t p_height, int p_sides, int p_lats, Vector3::Axis p_axis = Vector3::AXIS_Z);
 
 	static void make_atlas(const std::vector<Size2i> &p_rects, std::vector<Point2i> &r_result, Size2i &r_size);
 
 private:
-	static std::vector<std::vector<Point2> > _polypaths_do_operation(PolyBooleanOperation p_op, const std::vector<Point2> &p_polypath_a, const std::vector<Point2> &p_polypath_b, bool is_a_open = false);
-	static std::vector<std::vector<Point2> > _polypath_offset(const std::vector<Point2> &p_polypath, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type);
+	static std::vector<std::vector<Point2>> _polypaths_do_operation(PolyBooleanOperation p_op, const std::vector<Point2> &p_polypath_a, const std::vector<Point2> &p_polypath_b, bool is_a_open = false);
+	static std::vector<std::vector<Point2>> _polypath_offset(const std::vector<Point2> &p_polypath, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type);
 };
 
-#endif
+#endif // GEOMETRY_H

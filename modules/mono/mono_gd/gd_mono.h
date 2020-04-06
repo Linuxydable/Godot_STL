@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -91,7 +91,7 @@ public:
 		bool out_of_sync;
 
 		LoadedApiAssembly() :
-				assembly(NULL),
+				assembly(nullptr),
 				out_of_sync(false) {
 		}
 	};
@@ -105,7 +105,7 @@ private:
 	MonoDomain *root_domain;
 	MonoDomain *scripts_domain;
 
-	HashMap<uint32_t, HashMap<String, GDMonoAssembly *> > assemblies;
+	HashMap<uint32_t, HashMap<String, GDMonoAssembly *>> assemblies;
 
 	GDMonoAssembly *corlib_assembly;
 	GDMonoAssembly *project_assembly;
@@ -144,8 +144,10 @@ private:
 
 	void _register_internal_calls();
 
+#ifndef GD_MONO_SINGLE_APPDOMAIN
 	Error _load_scripts_domain();
 	Error _unload_scripts_domain();
+#endif
 
 	void _domain_assemblies_cleanup(uint32_t p_domain_id);
 
@@ -153,7 +155,8 @@ private:
 #ifdef TOOLS_ENABLED
 	uint64_t api_editor_hash;
 #endif
-	void _initialize_and_check_api_hashes();
+	void _init_godot_api_hashes();
+	void _init_exception_policy();
 
 	GDMonoLog *gdmono_log;
 
@@ -162,6 +165,7 @@ private:
 #endif
 
 	void add_mono_shared_libs_dir_to_path();
+	void determine_mono_dirs(String &r_assembly_rootdir, String &r_config_dir);
 
 protected:
 	static GDMono *singleton;
@@ -196,18 +200,18 @@ public:
 
 #ifdef TOOLS_ENABLED
 	bool copy_prebuilt_api_assembly(ApiAssemblyInfo::Type p_api_type, const String &p_config);
-	String update_api_assemblies_from_prebuilt(const String &p_config, const bool *p_core_api_out_of_sync = NULL, const bool *p_editor_api_out_of_sync = NULL);
+	String update_api_assemblies_from_prebuilt(const String &p_config, const bool *p_core_api_out_of_sync = nullptr, const bool *p_editor_api_out_of_sync = nullptr);
 #endif
 
 	static GDMono *get_singleton() { return singleton; }
 
-	GD_NORETURN static void unhandled_exception_hook(MonoObject *p_exc, void *p_user_data);
+	[[noreturn]] static void unhandled_exception_hook(MonoObject *p_exc, void *p_user_data);
 
 	UnhandledExceptionPolicy get_unhandled_exception_policy() const { return unhandled_exception_policy; }
 
 	// Do not use these, unless you know what you're doing
 	void add_assembly(uint32_t p_domain_id, GDMonoAssembly *p_assembly);
-	GDMonoAssembly **get_loaded_assembly(const String &p_name);
+	GDMonoAssembly *get_loaded_assembly(const String &p_name);
 
 	_FORCE_INLINE_ bool is_runtime_initialized() const { return runtime_initialized && !mono_runtime_is_shutting_down() /* stays true after shutdown finished */; }
 
@@ -261,7 +265,7 @@ public:
 			this->prev_domain = prev_domain;
 			mono_domain_set(p_domain, false);
 		} else {
-			this->prev_domain = NULL;
+			this->prev_domain = nullptr;
 		}
 	}
 

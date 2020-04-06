@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,6 +32,7 @@
 #define VECTOR3_H
 
 #include "core/math/math_funcs.h"
+#include "core/math/vector3i.h"
 #include "core/ustring.h"
 
 class Basis;
@@ -119,6 +120,8 @@ struct Vector3 {
 	_FORCE_INLINE_ Vector3 bounce(const Vector3 &p_normal) const;
 	_FORCE_INLINE_ Vector3 reflect(const Vector3 &p_normal) const;
 
+	bool is_equal_approx(const Vector3 &p_v) const;
+
 	/* Operators */
 
 	_FORCE_INLINE_ Vector3 &operator+=(const Vector3 &p_v);
@@ -145,6 +148,15 @@ struct Vector3 {
 	_FORCE_INLINE_ bool operator>=(const Vector3 &p_v) const;
 
 	operator String() const;
+	_FORCE_INLINE_ operator Vector3i() const {
+		return Vector3i(x, y, z);
+	}
+
+	_FORCE_INLINE_ Vector3(const Vector3i &p_ivec) {
+		x = p_ivec.x;
+		y = p_ivec.y;
+		z = p_ivec.z;
+	}
 
 	_FORCE_INLINE_ Vector3(real_t p_x, real_t p_y, real_t p_z) {
 		x = p_x;
@@ -330,11 +342,12 @@ Vector3 Vector3::operator-() const {
 
 bool Vector3::operator==(const Vector3 &p_v) const {
 
-	return (Math::is_equal_approx(x, p_v.x) && Math::is_equal_approx(y, p_v.y) && Math::is_equal_approx(z, p_v.z));
+	return x == p_v.x && y == p_v.y && z == p_v.z;
 }
 
 bool Vector3::operator!=(const Vector3 &p_v) const {
-	return (!Math::is_equal_approx(x, p_v.x) || !Math::is_equal_approx(y, p_v.y) || !Math::is_equal_approx(z, p_v.z));
+
+	return x != p_v.x || y != p_v.y || z != p_v.z;
 }
 
 bool Vector3::operator<(const Vector3 &p_v) const {
@@ -451,7 +464,7 @@ void Vector3::zero() {
 // slide returns the component of the vector along the given plane, specified by its normal vector.
 Vector3 Vector3::slide(const Vector3 &p_normal) const {
 #ifdef MATH_CHECKS
-	ERR_FAIL_COND_V(!p_normal.is_normalized(), Vector3());
+	ERR_FAIL_COND_V_MSG(!p_normal.is_normalized(), Vector3(), "The normal Vector3 must be normalized.");
 #endif
 	return *this - p_normal * this->dot(p_normal);
 }
@@ -462,7 +475,7 @@ Vector3 Vector3::bounce(const Vector3 &p_normal) const {
 
 Vector3 Vector3::reflect(const Vector3 &p_normal) const {
 #ifdef MATH_CHECKS
-	ERR_FAIL_COND_V(!p_normal.is_normalized(), Vector3());
+	ERR_FAIL_COND_V_MSG(!p_normal.is_normalized(), Vector3(), "The normal Vector3 must be normalized.");
 #endif
 	return 2.0 * p_normal * this->dot(p_normal) - *this;
 }

@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -64,9 +64,15 @@ EMSCRIPTEN_KEEPALIVE void _esws_on_close(void *obj, int code, char *reason, int 
 }
 }
 
-Error EMWSClient::connect_to_host(String p_host, String p_path, uint16_t p_port, bool p_ssl, const PoolVector<String> p_protocols, const Vector<String> p_custom_headers) {
+Error EMWSClient::connect_to_host(String p_host, String p_path, uint16_t p_port, bool p_ssl, const Vector<String> p_protocols, const Vector<String> p_custom_headers) {
 
-	String proto_string = p_protocols.join(",");
+	String proto_string;
+	for (int i = 0; i < p_protocols.size(); i++) {
+		if (i != 0)
+			proto_string += ",";
+		proto_string += p_protocols[i];
+	}
+
 	String str = "ws://";
 
 	if (p_custom_headers.size()) {
@@ -85,10 +91,14 @@ Error EMWSClient::connect_to_host(String p_host, String p_path, uint16_t p_port,
 	int peer_sock = EM_ASM_INT({
 		var proto_str = UTF8ToString($2);
 		var socket = null;
-		if (proto_str) {
-			socket = new WebSocket(UTF8ToString($1), proto_str.split(","));
-		} else {
-			socket = new WebSocket(UTF8ToString($1));
+		try {
+			if (proto_str) {
+				socket = new WebSocket(UTF8ToString($1), proto_str.split(","));
+			} else {
+				socket = new WebSocket(UTF8ToString($1));
+			}
+		} catch (e) {
+			return -1;
 		}
 		var c_ptr = Module.IDHandler.get($0);
 		socket.binaryType = "arraybuffer";
@@ -168,8 +178,10 @@ Error EMWSClient::connect_to_host(String p_host, String p_path, uint16_t p_port,
 		return Module.IDHandler.add(socket);
 	}, _js_id, str.utf8().get_data(), proto_string.utf8().get_data());
 	/* clang-format on */
+	if (peer_sock == -1)
+		return FAILED;
 
-	static_cast<Ref<EMWSPeer> >(_peer)->set_sock(peer_sock, _in_buf_size, _in_pkt_size);
+	static_cast<Ref<EMWSPeer>>(_peer)->set_sock(peer_sock, _in_buf_size, _in_pkt_size);
 
 	return OK;
 };
@@ -184,11 +196,11 @@ Ref<WebSocketPeer> EMWSClient::get_peer(int p_peer_id) const {
 
 NetworkedMultiplayerPeer::ConnectionStatus EMWSClient::get_connection_status() const {
 
-	if (_peer->is_connected_to_host())
+	if (_peer->is_connected_to_host()) {
+		if (_is_connecting)
+			return CONNECTION_CONNECTING;
 		return CONNECTION_CONNECTED;
-
-	if (_is_connecting)
-		return CONNECTION_CONNECTING;
+	}
 
 	return CONNECTION_DISCONNECTED;
 };

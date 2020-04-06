@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -31,8 +31,8 @@
 #ifndef ARVR_NODES_H
 #define ARVR_NODES_H
 
-#include "scene/3d/camera.h"
-#include "scene/3d/spatial.h"
+#include "scene/3d/camera_3d.h"
+#include "scene/3d/node_3d.h"
 #include "scene/resources/mesh.h"
 #include "servers/arvr/arvr_positional_tracker.h"
 
@@ -43,9 +43,9 @@
 /*
 	ARVRCamera is a subclass of camera which will register itself with its parent ARVROrigin and as a result is automatically positioned
 */
-class ARVRCamera : public Camera {
+class ARVRCamera : public Camera3D {
 
-	GDCLASS(ARVRCamera, Camera);
+	GDCLASS(ARVRCamera, Camera3D);
 
 protected:
 	void _notification(int p_what);
@@ -55,7 +55,7 @@ public:
 
 	virtual Vector3 project_local_ray_normal(const Point2 &p_pos) const;
 	virtual Point2 unproject_position(const Vector3 &p_pos) const;
-	virtual Vector3 project_position(const Point2 &p_point, float p_z_depth = 0) const;
+	virtual Vector3 project_position(const Point2 &p_point, float p_z_depth) const;
 	virtual std::vector<Plane> get_frustum() const;
 
 	ARVRCamera();
@@ -68,9 +68,9 @@ public:
 	It must be a child node of our ARVROrigin node
 */
 
-class ARVRController : public Spatial {
+class ARVRController : public Node3D {
 
-	GDCLASS(ARVRController, Spatial);
+	GDCLASS(ARVRController, Node3D);
 
 private:
 	int controller_id;
@@ -88,7 +88,7 @@ public:
 	String get_controller_name(void) const;
 
 	int get_joystick_id() const;
-	int is_button_pressed(int p_button) const;
+	bool is_button_pressed(int p_button) const;
 	float get_joystick_axis(int p_axis) const;
 
 	real_t get_rumble() const;
@@ -110,8 +110,8 @@ public:
 	It must be a child node of our ARVROrigin node
 */
 
-class ARVRAnchor : public Spatial {
-	GDCLASS(ARVRAnchor, Spatial);
+class ARVRAnchor : public Node3D {
+	GDCLASS(ARVRAnchor, Node3D);
 
 private:
 	int anchor_id;
@@ -149,9 +149,9 @@ public:
 	Our camera and controllers will always be child nodes and thus place relative to this origin point.
 	This node will automatically locate any camera child nodes and update its position while our ARVRController node will handle tracked controllers.
 */
-class ARVROrigin : public Spatial {
+class ARVROrigin : public Node3D {
 
-	GDCLASS(ARVROrigin, Spatial);
+	GDCLASS(ARVROrigin, Node3D);
 
 private:
 	ARVRCamera *tracked_camera;

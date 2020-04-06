@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -47,6 +47,7 @@
 #include "core/project_settings.h"
 
 #ifdef TOOLS_ENABLED
+#include "editor/editor_export.h"
 #include "editor/editor_node.h"
 #include "gdnative_library_editor_plugin.h"
 #include "gdnative_library_singleton_editor.h"
@@ -158,7 +159,7 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 		String additional_code = "extern void register_dynamic_symbol(char *name, void *address);\n"
 								 "extern void add_ios_init_callback(void (*cb)());\n";
 		String linker_flags = "";
-		for (unsigned int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
+		for (unsigned long i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
 			String full_name = lib->get_symbol_prefix() + expected_symbols[i].name;
 			String code = declare_pattern.replace("$name", full_name);
 			code = code.replace("$weak", expected_symbols[i].is_required ? "" : " __attribute__((weak))");
@@ -174,7 +175,7 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 
 		additional_code += String("void $prefixinit() {\n").replace("$prefix", lib->get_symbol_prefix());
 		String register_pattern = "  if (&$name) register_dynamic_symbol((char *)\"$name\", (void *)$name);\n";
-		for (unsigned int i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
+		for (unsigned long i = 0; i < sizeof(expected_symbols) / sizeof(expected_symbols[0]); ++i) {
 			String full_name = lib->get_symbol_prefix() + expected_symbols[i].name;
 			additional_code += register_pattern.replace("$name", full_name);
 		}
@@ -213,7 +214,7 @@ static godot_variant cb_standard_varcall(void *p_procedure_handle, godot_array *
 
 GDNativeCallRegistry *GDNativeCallRegistry::singleton;
 
-std::vector<Ref<GDNative> > singleton_gdnatives;
+std::vector<Ref<GDNative>> singleton_gdnatives;
 
 Ref<GDNativeLibraryResourceLoader> resource_loader_gdnlib;
 Ref<GDNativeLibraryResourceSaver> resource_saver_gdnlib;
@@ -277,7 +278,7 @@ void register_gdnative_types() {
 				proc_ptr);
 
 		if (err != OK) {
-			ERR_PRINTS("No " + lib->get_symbol_prefix() + "gdnative_singleton in \"" + singleton->get_library()->get_current_library_path() + "\" found");
+			ERR_PRINT("No " + lib->get_symbol_prefix() + "gdnative_singleton in \"" + singleton->get_library()->get_current_library_path() + "\" found");
 		} else {
 			singleton_gdnatives.push_back(singleton);
 			((void (*)())proc_ptr)();
@@ -325,7 +326,7 @@ void unregister_gdnative_types() {
 	print_line(String("dict:\t" )     + itos(sizeof(Dictionary)));
 	print_line(String("node_path:\t") + itos(sizeof(NodePath)));
 	print_line(String("plane:\t")     + itos(sizeof(Plane)));
-	print_line(String("poolarray:\t") + itos(sizeof(PoolByteArray)));
+	print_line(String("poolarray:\t") + itos(sizeof(PackedByteArray)));
 	print_line(String("quat:\t")      + itos(sizeof(Quat)));
 	print_line(String("rect2:\t")     + itos(sizeof(Rect2)));
 	print_line(String("aabb:\t")     + itos(sizeof(AABB)));

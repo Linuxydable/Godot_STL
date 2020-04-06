@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -62,7 +62,7 @@ void CollisionObjectBullet::ShapeWrapper::set_transform(const btTransform &p_tra
 }
 
 btTransform CollisionObjectBullet::ShapeWrapper::get_adjusted_transform() const {
-	if (shape->get_type() == PhysicsServer::SHAPE_HEIGHTMAP) {
+	if (shape->get_type() == PhysicsServer3D::SHAPE_HEIGHTMAP) {
 		const HeightMapShapeBullet *hm_shape = (const HeightMapShapeBullet *)shape; // should be safe to cast now
 		btTransform adjusted_transform;
 
@@ -92,16 +92,16 @@ void CollisionObjectBullet::ShapeWrapper::claim_bt_shape(const btVector3 &body_s
 CollisionObjectBullet::CollisionObjectBullet(Type p_type) :
 		RIDBullet(),
 		type(p_type),
-		instance_id(0),
+		instance_id(ObjectID()),
 		collisionLayer(0),
 		collisionMask(0),
 		collisionsEnabled(true),
 		m_isStatic(false),
 		ray_pickable(false),
-		bt_collision_object(NULL),
+		bt_collision_object(nullptr),
 		body_scale(1., 1., 1.),
 		force_shape_reset(false),
-		space(NULL),
+		space(nullptr),
 		isTransformChanged(false) {}
 
 CollisionObjectBullet::~CollisionObjectBullet() {
@@ -233,7 +233,7 @@ void CollisionObjectBullet::notify_transform_changed() {
 
 RigidCollisionObjectBullet::RigidCollisionObjectBullet(Type p_type) :
 		CollisionObjectBullet(p_type),
-		mainShape(NULL) {
+		mainShape(nullptr) {
 }
 
 RigidCollisionObjectBullet::~RigidCollisionObjectBullet() {
@@ -379,8 +379,9 @@ bool RigidCollisionObjectBullet::is_shape_disabled(int p_index) {
 
 // need_update : use const ShapeWrapper& shape, not int p_index
 void RigidCollisionObjectBullet::shape_changed(int p_shape_index) {
-	if (shapes[p_shape_index].bt_shape == mainShape) {
-		mainShape = NULL;
+	ShapeWrapper &shp = shapes[p_shape_index];
+	if (shp.bt_shape == mainShape) {
+		mainShape = nullptr;
 	}
 
 	bulletdelete(shapes[p_shape_index].bt_shape);
@@ -394,7 +395,7 @@ void RigidCollisionObjectBullet::reload_shapes() {
 		bulletdelete(mainShape);
 	}
 
-	mainShape = NULL;
+	mainShape = nullptr;
 
 	// Reset shape if required
 	if (force_shape_reset) {
@@ -444,4 +445,13 @@ void RigidCollisionObjectBullet::reload_shapes() {
 void RigidCollisionObjectBullet::body_scale_changed() {
 	CollisionObjectBullet::body_scale_changed();
 	reload_shapes();
+}
+
+void RigidCollisionObjectBullet::internal_shape_destroy(int p_index, bool p_permanentlyFromThisBody) {
+	ShapeWrapper &shp = shapes[p_index];
+	shp.shape->remove_owner(this, p_permanentlyFromThisBody);
+	if (shp.bt_shape == mainShape) {
+		mainShape = nullptr;
+	}
+	bulletdelete(shp.bt_shape);
 }

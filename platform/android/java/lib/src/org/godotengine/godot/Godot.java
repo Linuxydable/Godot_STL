@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -30,7 +30,6 @@
 
 package org.godotengine.godot;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -60,8 +59,10 @@ import android.os.Messenger;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.provider.Settings.Secure;
+import android.support.annotation.CallSuper;
 import android.support.annotation.Keep;
-import android.support.v4.content.ContextCompat;
+import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -86,23 +87,19 @@ import com.google.android.vending.expansion.downloader.IStub;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.lang.reflect.Method;
 import java.security.MessageDigest;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import javax.microedition.khronos.opengles.GL10;
 import org.godotengine.godot.input.GodotEditText;
-import org.godotengine.godot.payments.PaymentsManager;
+import org.godotengine.godot.plugin.GodotPlugin;
+import org.godotengine.godot.plugin.GodotPluginRegistry;
+import org.godotengine.godot.utils.GodotNetUtils;
+import org.godotengine.godot.utils.PermissionsUtil;
 import org.godotengine.godot.xr.XRMode;
 
-public abstract class Godot extends Activity implements SensorEventListener, IDownloaderClient {
+public abstract class Godot extends FragmentActivity implements SensorEventListener, IDownloaderClient {
 
-	static final int MAX_SINGLETONS = 64;
-	static final int REQUEST_RECORD_AUDIO_PERMISSION = 1;
-	static final int REQUEST_CAMERA_PERMISSION = 2;
-	static final int REQUEST_VIBRATE_PERMISSION = 3;
 	private IStub mDownloaderClientStub;
 	private TextView mStatusText;
 	private TextView mProgressFraction;
@@ -125,6 +122,8 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 	private boolean mStatePaused;
 	private boolean activityResumed;
 	private int mState;
+
+	private GodotPluginRegistry pluginRegistry;
 
 	static private Intent mCurrentIntent;
 
@@ -151,69 +150,6 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 		mPauseButton.setText(stringResourceID);
 	}
 
-	static public class SingletonBase {
-
-		protected void registerClass(String p_name, String[] p_methods) {
-
-			GodotLib.singleton(p_name, this);
-
-			Class clazz = getClass();
-			Method[] methods = clazz.getDeclaredMethods();
-			for (Method method : methods) {
-				boolean found = false;
-
-				for (String s : p_methods) {
-					if (s.equals(method.getName())) {
-						found = true;
-						break;
-					}
-				}
-				if (!found)
-					continue;
-
-				List<String> ptr = new ArrayList<String>();
-
-				Class[] paramTypes = method.getParameterTypes();
-				for (Class c : paramTypes) {
-					ptr.add(c.getName());
-				}
-
-				String[] pt = new String[ptr.size()];
-				ptr.toArray(pt);
-
-				GodotLib.method(p_name, method.getName(), method.getReturnType().getName(), pt);
-			}
-
-			Godot.singletons[Godot.singleton_count++] = this;
-		}
-
-		protected void onMainActivityResult(int requestCode, int resultCode, Intent data) {
-		}
-
-		protected void onMainRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-		}
-
-		protected void onMainPause() {}
-		protected void onMainResume() {}
-		protected void onMainDestroy() {}
-		protected boolean onMainBackPressed() { return false; }
-
-		protected void onGLDrawFrame(GL10 gl) {}
-		protected void onGLSurfaceChanged(GL10 gl, int width, int height) {} // singletons will always miss first onGLSurfaceChanged call
-		//protected void onGLSurfaceCreated(GL10 gl, EGLConfig config) {} // singletons won't be ready until first GodotLib.step()
-
-		public void registerMethods() {}
-	}
-
-	/*
-	protected List<SingletonBase> singletons = new ArrayList<SingletonBase>();
-	protected void instanceSingleton(SingletonBase s) {
-
-		s.registerMethods();
-		singletons.add(s);
-	}
-	*/
-
 	private String[] command_line;
 	private boolean use_apk_expansion;
 
@@ -227,36 +163,29 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 	private Sensor mGyroscope;
 
 	public static GodotIO io;
-
-	static SingletonBase[] singletons = new SingletonBase[MAX_SINGLETONS];
-	static int singleton_count = 0;
+	public static GodotNetUtils netUtils;
 
 	public interface ResultCallback {
 		public void callback(int requestCode, int resultCode, Intent data);
 	}
 	public ResultCallback result_callback;
 
-	private PaymentsManager mPaymentsManager = null;
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (requestCode == PaymentsManager.REQUEST_CODE_FOR_PURCHASE) {
-			mPaymentsManager.processPurchaseResponse(resultCode, data);
-		} else if (result_callback != null) {
+		if (result_callback != null) {
 			result_callback.callback(requestCode, resultCode, data);
 			result_callback = null;
-		};
-
-		for (int i = 0; i < singleton_count; i++) {
-
-			singletons[i].onMainActivityResult(requestCode, resultCode, data);
 		}
-	};
+
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			plugin.onMainActivityResult(requestCode, resultCode, data);
+		}
+	}
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-		for (int i = 0; i < singleton_count; i++) {
-			singletons[i].onMainRequestPermissionsResult(requestCode, permissions, grantResults);
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			plugin.onMainRequestPermissionsResult(requestCode, permissions, grantResults);
 		}
 
 		for (int i = 0; i < permissions.length; i++) {
@@ -265,12 +194,20 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 	};
 
 	/**
+	 * Invoked on the render thread when the Godot main loop has started.
+	 */
+	@CallSuper
+	protected void onGodotMainLoopStarted() {
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			plugin.onGodotMainLoopStarted();
+		}
+	}
+
+	/**
 	 * Used by the native code (java_godot_lib_jni.cpp) to complete initialization of the GLSurfaceView view and renderer.
 	 */
 	@Keep
 	private void onVideoInit() {
-		boolean use_gl3 = getGLESVersionCode() >= 0x00030000;
-
 		final FrameLayout layout = new FrameLayout(this);
 		layout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		setContentView(layout);
@@ -281,19 +218,18 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 		// ...add to FrameLayout
 		layout.addView(edittext);
 
-		mView = new GodotView(this, xrMode, use_gl3, use_32_bits, use_debug_opengl);
+		mView = new GodotView(this, xrMode, use_32_bits, use_debug_opengl);
 		layout.addView(mView, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		edittext.setView(mView);
 		io.setEdit(edittext);
 
-		final Godot godot = this;
 		mView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
 			@Override
 			public void onGlobalLayout() {
 				Point fullSize = new Point();
-				godot.getWindowManager().getDefaultDisplay().getSize(fullSize);
+				getWindowManager().getDefaultDisplay().getSize(fullSize);
 				Rect gameSize = new Rect();
-				godot.mView.getWindowVisibleDisplayFrame(gameSize);
+				mView.getWindowVisibleDisplayFrame(gameSize);
 
 				final int keyboardHeight = fullSize.y - gameSize.bottom;
 				GodotLib.setVirtualKeyboardHeight(keyboardHeight);
@@ -305,9 +241,23 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 			@Override
 			public void run() {
 				GodotLib.setup(current_command_line);
+
+				// Must occur after GodotLib.setup has completed.
+				for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+					plugin.onRegisterPluginWithGodotNative();
+				}
+
 				setKeepScreenOn("True".equals(GodotLib.getGlobal("display/window/energy_saving/keep_screen_on")));
 			}
 		});
+
+		// Include the returned non-null views in the Godot view hierarchy.
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			View pluginView = plugin.onMainCreateView(this);
+			if (pluginView != null) {
+				layout.addView(pluginView);
+			}
+		}
 	}
 
 	public void setKeepScreenOn(final boolean p_enabled) {
@@ -472,6 +422,7 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 		io = new GodotIO(this);
 		io.unique_id = Secure.getString(getContentResolver(), Secure.ANDROID_ID);
 		GodotLib.io = io;
+		netUtils = new GodotNetUtils(this);
 		mSensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
 		mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 		mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_GAME);
@@ -485,8 +436,6 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 		GodotLib.initialize(this, getAssets(), use_apk_expansion);
 
 		result_callback = null;
-
-		mPaymentsManager = PaymentsManager.createManager(this).initService();
 
 		godot_initialized = true;
 	}
@@ -504,6 +453,7 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 		Window window = getWindow();
 		window.addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
 		mClipboard = (ClipboardManager)getSystemService(Context.CLIPBOARD_SERVICE);
+		pluginRegistry = GodotPluginRegistry.initializePluginRegistry(this);
 
 		//check for apk expansion API
 		if (true) {
@@ -643,9 +593,8 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 	@Override
 	protected void onDestroy() {
 
-		if (mPaymentsManager != null) mPaymentsManager.destroy();
-		for (int i = 0; i < singleton_count; i++) {
-			singletons[i].onMainDestroy();
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			plugin.onMainDestroy();
 		}
 
 		GodotLib.ondestroy(this);
@@ -672,8 +621,8 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 
 		mSensorManager.unregisterListener(this);
 
-		for (int i = 0; i < singleton_count; i++) {
-			singletons[i].onMainPause();
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			plugin.onMainPause();
 		}
 	}
 
@@ -724,9 +673,8 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 					View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 		}
 
-		for (int i = 0; i < singleton_count; i++) {
-
-			singletons[i].onMainResume();
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			plugin.onMainResume();
 		}
 	}
 
@@ -819,8 +767,8 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 	public void onBackPressed() {
 		boolean shouldQuit = true;
 
-		for (int i = 0; i < singleton_count; i++) {
-			if (singletons[i].onMainBackPressed()) {
+		for (GodotPlugin plugin : pluginRegistry.getAllPlugins()) {
+			if (plugin.onMainBackPressed()) {
 				shouldQuit = false;
 			}
 		}
@@ -832,6 +780,17 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 					GodotLib.back();
 				}
 			});
+		}
+	}
+
+	/**
+	 * Queue a runnable to be run on the render thread.
+	 * <p>
+	 * This must be called after the render thread has started.
+	 */
+	public final void runOnRenderThread(@NonNull Runnable action) {
+		if (mView != null) {
+			mView.queueEvent(action);
 		}
 	}
 
@@ -959,8 +918,8 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 					int keyCode;
 					if ((keyCode = cc[i]) != 0) {
 						// Simulate key down and up...
-						GodotLib.key(0, keyCode, true);
-						GodotLib.key(0, keyCode, false);
+						GodotLib.key(0, 0, keyCode, true);
+						GodotLib.key(0, 0, keyCode, false);
 					}
 				}
 			}
@@ -968,37 +927,16 @@ public abstract class Godot extends Activity implements SensorEventListener, IDo
 		return true;
 	}
 
-	public PaymentsManager getPaymentsManager() {
-		return mPaymentsManager;
+	public boolean requestPermission(String p_name) {
+		return PermissionsUtil.requestPermission(p_name, this);
 	}
 
-	public boolean requestPermission(String p_name) {
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-			// Not necessary, asked on install already
-			return true;
-		}
+	public boolean requestPermissions() {
+		return PermissionsUtil.requestManifestPermissions(this);
+	}
 
-		if (p_name.equals("RECORD_AUDIO")) {
-			if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-				requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO }, REQUEST_RECORD_AUDIO_PERMISSION);
-				return false;
-			}
-		}
-
-		if (p_name.equals("CAMERA")) {
-			if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-				requestPermissions(new String[] { Manifest.permission.CAMERA }, REQUEST_CAMERA_PERMISSION);
-				return false;
-			}
-		}
-
-		if (p_name.equals("VIBRATE")) {
-			if (ContextCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED) {
-				requestPermissions(new String[] { Manifest.permission.VIBRATE }, REQUEST_VIBRATE_PERMISSION);
-				return false;
-			}
-		}
-		return true;
+	public String[] getGrantedPermissions() {
+		return PermissionsUtil.getGrantedPermissions(this);
 	}
 
 	/**

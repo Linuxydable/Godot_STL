@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -35,7 +35,7 @@
 #include "core/os/dir_access.h"
 #include "core/project_settings.h"
 
-static Map<String, std::vector<uint8_t> > *files = NULL;
+static Map<String, std::vector<uint8_t>> *files = nullptr;
 
 void FileAccessMemory::register_file(String p_name, std::vector<uint8_t> p_data) {
 
@@ -71,7 +71,7 @@ bool FileAccessMemory::file_exists(const String &p_name) {
 	String name = fix_path(p_name);
 	//name = DirAccess::normalize_path(name);
 
-	return files && (files->find(name) != NULL);
+	return files && (files->find(name) != nullptr);
 }
 
 Error FileAccessMemory::open_custom(const uint8_t *p_data, int p_len) {
@@ -101,12 +101,12 @@ Error FileAccessMemory::_open(const String &p_path, int p_mode_flags) {
 
 void FileAccessMemory::close() {
 
-	data = NULL;
+	data = nullptr;
 }
 
 bool FileAccessMemory::is_open() const {
 
-	return data != NULL;
+	return data != nullptr;
 }
 
 void FileAccessMemory::seek(size_t p_position) {
@@ -196,5 +196,5 @@ void FileAccessMemory::store_buffer(const uint8_t *p_src, int p_length) {
 
 FileAccessMemory::FileAccessMemory() {
 
-	data = NULL;
+	data = nullptr;
 }

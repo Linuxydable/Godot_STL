@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,7 +33,7 @@
 
 #include <vector>
 
-#include "scene/3d/skeleton.h"
+#include "scene/3d/skeleton_3d.h"
 #include "scene/resources/animation.h"
 
 class AnimationCache : public Object {
@@ -44,20 +44,20 @@ class AnimationCache : public Object {
 
 		RES resource;
 		Object *object;
-		Skeleton *skeleton; // haxor
+		Skeleton3D *skeleton; // haxor
 		Node *node;
-		Spatial *spatial;
+		Node3D *spatial;
 
 		int bone_idx;
 		std::vector<StringName> subpath;
 		bool valid;
 		Path() {
-			object = NULL;
-			skeleton = NULL;
-			node = NULL;
+			object = nullptr;
+			skeleton = nullptr;
+			node = nullptr;
 			bone_idx = -1;
 			valid = false;
-			spatial = NULL;
+			spatial = nullptr;
 		}
 	};
 
@@ -79,9 +79,9 @@ protected:
 	static void _bind_methods();
 
 public:
-	void set_track_transform(unsigned p_idx, const Transform &p_transform);
-	void set_track_value(unsigned p_idx, const Variant &p_value);
-	void call_track(unsigned p_idx, const StringName &p_method, const Variant **p_args, int p_argcount, Variant::CallError &r_error);
+	void set_track_transform(int p_idx, const Transform &p_transform);
+	void set_track_value(int p_idx, const Variant &p_value);
+	void call_track(int p_idx, const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error);
 
 	void set_all(float p_time, float p_delta = 0);
 

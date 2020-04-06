@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,6 +32,7 @@
 
 #include "core/crypto/crypto_core.h"
 #include "core/io/config_file.h"
+#include "core/io/file_access_pack.h" // PACK_HEADER_MAGIC, PACK_FORMAT_VERSION
 #include "core/io/resource_loader.h"
 #include "core/io/resource_saver.h"
 #include "core/io/zip_io.h"
@@ -357,12 +358,12 @@ Error EditorExportPlatform::_save_zip_file(void *p_userdata, const String &p_pat
 
 	zipOpenNewFileInZip(zip,
 			path.utf8().get_data(),
-			NULL,
-			NULL,
+			nullptr,
+			nullptr,
 			0,
-			NULL,
+			nullptr,
 			0,
-			NULL,
+			nullptr,
 			Z_DEFLATED,
 			Z_DEFAULT_COMPRESSION);
 
@@ -374,6 +375,12 @@ Error EditorExportPlatform::_save_zip_file(void *p_userdata, const String &p_pat
 	}
 
 	return OK;
+}
+
+Ref<ImageTexture> EditorExportPlatform::get_option_icon(int p_index) const {
+	Ref<Theme> theme = EditorNode::get_singleton()->get_editor_theme();
+	ERR_FAIL_COND_V(theme.is_null(), Ref<ImageTexture>());
+	return theme->get_icon("Play", "EditorIcons");
 }
 
 String EditorExportPlatform::find_export_template(String template_file_name, String *err) const {
@@ -574,14 +581,22 @@ String EditorExportPlugin::get_ios_cpp_code() const {
 	return ios_cpp_code;
 }
 
-void EditorExportPlugin::_export_file_script(const String &p_path, const String &p_type, const PoolVector<String> &p_features) {
+void EditorExportPlugin::add_ios_project_static_lib(const String &p_path) {
+	ios_project_static_libs.push_back(p_path);
+}
+
+std::vector<String> EditorExportPlugin::get_ios_project_static_libs() const {
+	return ios_project_static_libs;
+}
+
+void EditorExportPlugin::_export_file_script(const String &p_path, const String &p_type, const std::vector<String> &p_features) {
 
 	if (get_script_instance()) {
 		get_script_instance()->call("_export_file", p_path, p_type, p_features);
 	}
 }
 
-void EditorExportPlugin::_export_begin_script(const PoolVector<String> &p_features, bool p_debug, const String &p_path, int p_flags) {
+void EditorExportPlugin::_export_begin_script(const std::vector<String> &p_features, bool p_debug, const String &p_path, int p_flags) {
 
 	if (get_script_instance()) {
 		get_script_instance()->call("_export_begin", p_features, p_debug, p_path, p_flags);
@@ -609,6 +624,7 @@ void EditorExportPlugin::skip() {
 void EditorExportPlugin::_bind_methods() {
 
 	ClassDB::bind_method(D_METHOD("add_shared_object", "path", "tags"), &EditorExportPlugin::add_shared_object);
+	ClassDB::bind_method(D_METHOD("add_ios_project_static_lib", "path"), &EditorExportPlugin::add_ios_project_static_lib);
 	ClassDB::bind_method(D_METHOD("add_file", "path", "file", "remap"), &EditorExportPlugin::add_file);
 	ClassDB::bind_method(D_METHOD("add_ios_framework", "path"), &EditorExportPlugin::add_ios_framework);
 	ClassDB::bind_method(D_METHOD("add_ios_plist_content", "plist_content"), &EditorExportPlugin::add_ios_plist_content);
@@ -617,8 +633,8 @@ void EditorExportPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_ios_cpp_code", "code"), &EditorExportPlugin::add_ios_cpp_code);
 	ClassDB::bind_method(D_METHOD("skip"), &EditorExportPlugin::skip);
 
-	BIND_VMETHOD(MethodInfo("_export_file", PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::STRING, "type"), PropertyInfo(Variant::POOL_STRING_ARRAY, "features")));
-	BIND_VMETHOD(MethodInfo("_export_begin", PropertyInfo(Variant::POOL_STRING_ARRAY, "features"), PropertyInfo(Variant::BOOL, "is_debug"), PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::INT, "flags")));
+	BIND_VMETHOD(MethodInfo("_export_file", PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::STRING, "type"), PropertyInfo(Variant::PACKED_STRING_ARRAY, "features")));
+	BIND_VMETHOD(MethodInfo("_export_begin", PropertyInfo(Variant::PACKED_STRING_ARRAY, "features"), PropertyInfo(Variant::BOOL, "is_debug"), PropertyInfo(Variant::STRING, "path"), PropertyInfo(Variant::INT, "flags")));
 	BIND_VMETHOD(MethodInfo("_export_end"));
 }
 
@@ -656,7 +672,7 @@ EditorExportPlatform::FeatureContainers EditorExportPlatform::get_feature_contai
 
 EditorExportPlatform::ExportNotifier::ExportNotifier(EditorExportPlatform &p_platform, const Ref<EditorExportPreset> &p_preset, bool p_debug, const String &p_path, int p_flags) {
 	FeatureContainers features = p_platform.get_feature_containers(p_preset);
-	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	std::vector<Ref<EditorExportPlugin>> export_plugins = EditorExport::get_singleton()->get_export_plugins();
 	//initial export plugin callback
 	for (auto &&plugin : export_plugins) {
 		if (plugin->get_script_instance()) { //script based
@@ -668,10 +684,10 @@ EditorExportPlatform::ExportNotifier::ExportNotifier(EditorExportPlatform &p_pla
 }
 
 EditorExportPlatform::ExportNotifier::~ExportNotifier() {
-	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
-	for (auto &&plugin : export_plugins) {
-		if (plugin->get_script_instance()) {
-			plugin->_export_end_script();
+	std::vector<Ref<EditorExportPlugin>> export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	for (int i = 0; i < export_plugins.size(); i++) {
+		if (export_plugins[i]->get_script_instance()) {
+			export_plugins[i]->_export_end_script();
 		}
 		plugin->_export_end();
 	}
@@ -704,8 +720,8 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 	_edit_filter_list(paths, p_preset->get_include_filter(), false);
 	_edit_filter_list(paths, p_preset->get_exclude_filter(), true);
 
-	std::vector<Ref<EditorExportPlugin> > export_plugins = EditorExport::get_singleton()->get_export_plugins();
-	for (auto &&plugin : export_plugins) {
+	std::vector<Ref<EditorExportPlugin>> export_plugins = EditorExport::get_singleton()->get_export_plugins();
+	for (int i = 0; i < export_plugins.size(); i++) {
 
 		plugin->set_export_preset(p_preset);
 
@@ -723,7 +739,7 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 
 	FeatureContainers feature_containers = get_feature_containers(p_preset);
 	Set<String> &features = feature_containers.features;
-	PoolVector<String> &features_pv = feature_containers.features_pv;
+	std::vector<String> &features_pv = feature_containers.features_pv;
 
 	//store everything in the export medium
 	int idx = 0;
@@ -740,7 +756,7 @@ Error EditorExportPlatform::export_project_files(const Ref<EditorExportPreset> &
 			config.instance();
 			Error err = config->load(path + ".import");
 			if (err != OK) {
-				ERR_PRINTS("Could not parse: '" + path + "', not exported.");
+				ERR_PRINT("Could not parse: '" + path + "', not exported.");
 				continue;
 			}
 
@@ -963,11 +979,12 @@ Error EditorExportPlatform::save_pack(const Ref<EditorExportPreset> &p_preset, c
 
 	int64_t pck_start_pos = f->get_position();
 
-	f->store_32(0x43504447); //GDPC
-	f->store_32(1); //pack version
+	f->store_32(PACK_HEADER_MAGIC);
+	f->store_32(PACK_FORMAT_VERSION);
 	f->store_32(VERSION_MAJOR);
 	f->store_32(VERSION_MINOR);
-	f->store_32(0); //hmph
+	f->store_32(VERSION_PATCH);
+
 	for (int i = 0; i < 16; i++) {
 		//reserved
 		f->store_32(0);
@@ -1042,7 +1059,7 @@ Error EditorExportPlatform::save_pack(const Ref<EditorExportPreset> &p_preset, c
 
 		int64_t pck_size = f->get_position() - pck_start_pos;
 		f->store_64(pck_size);
-		f->store_32(0x43504447); //GDPC
+		f->store_32(PACK_HEADER_MAGIC);
 
 		if (r_embedded_size) {
 			*r_embedded_size = f->get_position() - embed_pos;
@@ -1061,7 +1078,7 @@ Error EditorExportPlatform::save_zip(const Ref<EditorExportPreset> &p_preset, co
 
 	FileAccess *src_f;
 	zlib_filefunc_def io = zipio_create_io_from_file(&src_f);
-	zipFile zip = zipOpen2(p_path.utf8().get_data(), APPEND_STATUS_CREATE, NULL, &io);
+	zipFile zip = zipOpen2(p_path.utf8().get_data(), APPEND_STATUS_CREATE, nullptr, &io);
 
 	ZipData zd;
 	zd.ep = &ep;
@@ -1071,7 +1088,7 @@ Error EditorExportPlatform::save_zip(const Ref<EditorExportPreset> &p_preset, co
 	if (err != OK && err != ERR_SKIP)
 		ERR_PRINT("Failed to export project files");
 
-	zipClose(zip, NULL);
+	zipClose(zip, nullptr);
 
 	return OK;
 }
@@ -1144,7 +1161,7 @@ EditorExportPlatform::EditorExportPlatform() {
 
 ////
 
-EditorExport *EditorExport::singleton = NULL;
+EditorExport *EditorExport::singleton = nullptr;
 
 void EditorExport::_save() {
 
@@ -1204,8 +1221,6 @@ void EditorExport::save_presets() {
 }
 
 void EditorExport::_bind_methods() {
-
-	ClassDB::bind_method("_save", &EditorExport::_save);
 }
 
 void EditorExport::add_export_platform(const Ref<EditorExportPlatform> &p_platform) {
@@ -1236,23 +1251,14 @@ void EditorExport::add_export_preset(const Ref<EditorExportPreset> &p_preset, in
 String EditorExportPlatform::test_etc2() const {
 
 	String driver = ProjectSettings::get_singleton()->get("rendering/quality/driver/driver_name");
-	bool driver_fallback = ProjectSettings::get_singleton()->get("rendering/quality/driver/fallback_to_gles2");
 	bool etc_supported = ProjectSettings::get_singleton()->get("rendering/vram_compression/import_etc");
 	bool etc2_supported = ProjectSettings::get_singleton()->get("rendering/vram_compression/import_etc2");
 
 	if (driver == "GLES2" && !etc_supported) {
 		return TTR("Target platform requires 'ETC' texture compression for GLES2. Enable 'Import Etc' in Project Settings.");
-	} else if (driver == "GLES3") {
-		String err;
-		if (!etc2_supported) {
-			err += TTR("Target platform requires 'ETC2' texture compression for GLES3. Enable 'Import Etc 2' in Project Settings.");
-		}
-		if (driver_fallback && !etc_supported) {
-			if (err != String())
-				err += "\n";
-			err += TTR("Target platform requires 'ETC' texture compression for the driver fallback to GLES2.\nEnable 'Import Etc' in Project Settings, or disable 'Driver Fallback Enabled'.");
-		}
-		return err;
+	} else if (driver == "Vulkan" && !etc2_supported) {
+		// FIXME: Review if this is true for Vulkan.
+		return TTR("Target platform requires 'ETC2' texture compression for Vulkan. Enable 'Import Etc 2' in Project Settings.");
 	}
 	return String();
 }
@@ -1289,7 +1295,7 @@ void EditorExport::remove_export_plugin(const Ref<EditorExportPlugin> &p_plugin)
 	}
 }
 
-std::vector<Ref<EditorExportPlugin> > EditorExport::get_export_plugins() {
+std::vector<Ref<EditorExportPlugin>> EditorExport::get_export_plugins() {
 
 	return export_plugins;
 }
@@ -1404,8 +1410,8 @@ void EditorExport::load_config() {
 bool EditorExport::poll_export_platforms() {
 
 	bool changed = false;
-	for (auto &&platform : export_platforms) {
-		if (platform->poll_devices()) {
+	for (int i = 0; i < export_platforms.size(); i++) {
+		if (export_platforms[i]->poll_export()) {
 			changed = true;
 		}
 	}
@@ -1419,7 +1425,7 @@ EditorExport::EditorExport() {
 	add_child(save_timer);
 	save_timer->set_wait_time(0.8);
 	save_timer->set_one_shot(true);
-	save_timer->connect("timeout", this, "_save");
+	save_timer->connect("timeout", callable_mp(this, &EditorExport::_save));
 	block_save = false;
 
 	singleton = this;
@@ -1471,7 +1477,7 @@ String EditorExportPlatformPC::get_os_name() const {
 
 	return os_name;
 }
-Ref<Texture> EditorExportPlatformPC::get_logo() const {
+Ref<Texture2D> EditorExportPlatformPC::get_logo() const {
 
 	return logo;
 }
@@ -1479,41 +1485,29 @@ Ref<Texture> EditorExportPlatformPC::get_logo() const {
 bool EditorExportPlatformPC::can_export(const Ref<EditorExportPreset> &p_preset, String &r_error, bool &r_missing_templates) const {
 
 	String err;
-	bool valid = true;
+	bool valid = false;
+
+	// Look for export templates (first official, and if defined custom templates).
+
 	bool use64 = p_preset->get("binary_format/64_bits");
+	bool dvalid = exists_export_template(use64 ? debug_file_64 : debug_file_32, &err);
+	bool rvalid = exists_export_template(use64 ? release_file_64 : release_file_32, &err);
 
-	if (use64 && (!exists_export_template(debug_file_64, &err) || !exists_export_template(release_file_64, &err))) {
-		valid = false;
+	if (p_preset->get("custom_template/debug") != "") {
+		dvalid = FileAccess::exists(p_preset->get("custom_template/debug"));
+		if (!dvalid) {
+			err += TTR("Custom debug template not found.") + "\n";
+		}
 	}
-
-	if (!use64 && (!exists_export_template(debug_file_32, &err) || !exists_export_template(release_file_32, &err))) {
-		valid = false;
-	}
-
-	String custom_debug_binary = p_preset->get("custom_template/debug");
-	String custom_release_binary = p_preset->get("custom_template/release");
-
-	if (custom_debug_binary == "" && custom_release_binary == "") {
-		if (!err.empty())
-			r_error = err;
-		r_missing_templates = !valid;
-		return valid;
-	}
-
-	bool dvalid = true;
-	bool rvalid = true;
-
-	if (!FileAccess::exists(custom_debug_binary)) {
-		dvalid = false;
-		err += TTR("Custom debug template not found.") + "\n";
-	}
-
-	if (!FileAccess::exists(custom_release_binary)) {
-		rvalid = false;
-		err += TTR("Custom release template not found.") + "\n";
+	if (p_preset->get("custom_template/release") != "") {
+		rvalid = FileAccess::exists(p_preset->get("custom_template/release"));
+		if (!rvalid) {
+			err += TTR("Custom release template not found.") + "\n";
+		}
 	}
 
 	valid = dvalid || rvalid;
+	r_missing_templates = !valid;
 
 	if (!err.empty())
 		r_error = err;
@@ -1594,7 +1588,7 @@ Error EditorExportPlatformPC::export_project(const Ref<EditorExportPreset> &p_pr
 
 			if (embedded_size >= 0x100000000 && !p_preset->get("binary_format/64_bits")) {
 				EditorNode::get_singleton()->show_warning(TTR("On 32-bit exports the embedded PCK cannot be bigger than 4 GiB."));
-				return ERR_UNAVAILABLE;
+				return ERR_INVALID_PARAMETER;
 			}
 
 			FixUpEmbeddedPckFunc fixup_func = get_fixup_embedded_pck_func();
@@ -1635,7 +1629,7 @@ void EditorExportPlatformPC::set_os_name(const String &p_name) {
 	os_name = p_name;
 }
 
-void EditorExportPlatformPC::set_logo(const Ref<Texture> &p_logo) {
+void EditorExportPlatformPC::set_logo(const Ref<Texture2D> &p_logo) {
 	logo = p_logo;
 }
 
@@ -1703,7 +1697,7 @@ void EditorExportPlatformPC::set_fixup_embedded_pck_func(FixUpEmbeddedPckFunc p_
 EditorExportPlatformPC::EditorExportPlatformPC() {
 
 	chmod_flags = -1;
-	fixup_embedded_pck_func = NULL;
+	fixup_embedded_pck_func = nullptr;
 }
 
 ///////////////////////

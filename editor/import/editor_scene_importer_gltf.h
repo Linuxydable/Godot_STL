@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -32,12 +32,12 @@
 #define EDITOR_SCENE_IMPORTER_GLTF_H
 
 #include "editor/import/resource_importer_scene.h"
-#include "scene/3d/skeleton.h"
-#include "scene/3d/spatial.h"
+#include "scene/3d/node_3d.h"
+#include "scene/3d/skeleton_3d.h"
 
 class AnimationPlayer;
-class BoneAttachment;
-class MeshInstance;
+class BoneAttachment3D;
+class MeshInstance3D;
 
 class EditorSceneImporterGLTF : public EditorSceneImporter {
 
@@ -172,7 +172,10 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 			min = 0;
 			max = 0;
 			sparse_count = 0;
+			sparse_indices_buffer_view = 0;
 			sparse_indices_byte_offset = 0;
+			sparse_indices_component_type = 0;
+			sparse_values_buffer_view = 0;
 			sparse_values_byte_offset = 0;
 		}
 	};
@@ -189,7 +192,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		std::vector<GLTFNodeIndex> roots;
 
 		// The created Skeleton for the scene
-		Skeleton *godot_skeleton;
+		Skeleton3D *godot_skeleton;
 
 		// Set of unique bone names for the skeleton
 		Set<String> unique_names;
@@ -228,6 +231,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		// A mapping from the joint indices (in the order of joints_original) to the
 		// Godot Skeleton's bone_indices
 		Map<int, int> joint_i_to_bone_i;
+		Map<int, StringName> joint_i_to_name;
 
 		// The Actual Skin that will be created as a mapping between the IBM's of this skin
 		// to the generated skeleton for the mesh instances.
@@ -259,6 +263,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	};
 
 	struct GLTFAnimation {
+		bool loop = false;
 
 		enum Interpolation {
 			INTERP_LINEAR,
@@ -279,7 +284,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 			Channel<Vector3> translation_track;
 			Channel<Quat> rotation_track;
 			Channel<Vector3> scale_track;
-			std::vector<Channel<float> > weight_tracks;
+			std::vector<Channel<float>> weight_tracks;
 		};
 
 		String name;
@@ -294,19 +299,21 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 		int minor_version;
 		std::vector<uint8_t> glb_data;
 
+		bool use_named_skin_binds;
+
 		std::vector<GLTFNode *> nodes;
-		std::vector<std::vector<uint8_t> > buffers;
+		std::vector<std::vector<uint8_t>> buffers;
 		std::vector<GLTFBufferView> buffer_views;
 		std::vector<GLTFAccessor> accessors;
 
 		std::vector<GLTFMesh> meshes; //meshes are loaded directly, no reason not to.
-		std::vector<Ref<Material> > materials;
+		std::vector<Ref<Material>> materials;
 
 		String scene_name;
 		std::vector<int> root_nodes;
 
 		std::vector<GLTFTexture> textures;
-		std::vector<Ref<Texture> > images;
+		std::vector<Ref<Texture2D>> images;
 
 		std::vector<GLTFSkin> skins;
 		std::vector<GLTFCamera> cameras;
@@ -331,7 +338,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	String _sanitize_bone_name(const String &name);
 	String _gen_unique_bone_name(GLTFState &state, const GLTFSkeletonIndex skel_i, const String &p_name);
 
-	Ref<Texture> _get_texture(GLTFState &state, const GLTFTextureIndex p_texture);
+	Ref<Texture2D> _get_texture(GLTFState &state, const GLTFTextureIndex p_texture);
 
 	Error _parse_json(const String &p_path, GLTFState &state);
 	Error _parse_glb(const String &p_path, GLTFState &state);
@@ -348,11 +355,11 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 	Error _decode_buffer_view(GLTFState &state, double *dst, const GLTFBufferViewIndex p_buffer_view, const int skip_every, const int skip_bytes, const int element_size, const int count, const GLTFType type, const int component_count, const int component_type, const int component_size, const bool normalized, const int byte_offset, const bool for_vertex);
 
 	std::vector<double> _decode_accessor(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	PoolVector<float> _decode_accessor_as_floats(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	PoolVector<int> _decode_accessor_as_ints(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	PoolVector<Vector2> _decode_accessor_as_vec2(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	PoolVector<Vector3> _decode_accessor_as_vec3(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
-	PoolVector<Color> _decode_accessor_as_color(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<float> _decode_accessor_as_floats(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<int> _decode_accessor_as_ints(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<Vector2> _decode_accessor_as_vec2(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<Vector3> _decode_accessor_as_vec3(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
+	std::vector<Color> _decode_accessor_as_color(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	std::vector<Quat> _decode_accessor_as_quat(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	std::vector<Transform2D> _decode_accessor_as_xform2d(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
 	std::vector<Basis> _decode_accessor_as_basis(GLTFState &state, const GLTFAccessorIndex p_accessor, const bool p_for_vertex);
@@ -388,15 +395,15 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 
 	Error _parse_animations(GLTFState &state);
 
-	BoneAttachment *_generate_bone_attachment(GLTFState &state, Skeleton *skeleton, const GLTFNodeIndex node_index);
-	MeshInstance *_generate_mesh_instance(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index);
-	Camera *_generate_camera(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index);
-	Spatial *_generate_spatial(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index);
+	BoneAttachment3D *_generate_bone_attachment(GLTFState &state, Skeleton3D *skeleton, const GLTFNodeIndex node_index);
+	MeshInstance3D *_generate_mesh_instance(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index);
+	Camera3D *_generate_camera(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index);
+	Node3D *_generate_spatial(GLTFState &state, Node *scene_parent, const GLTFNodeIndex node_index);
 
-	void _generate_scene_node(GLTFState &state, Node *scene_parent, Spatial *scene_root, const GLTFNodeIndex node_index);
-	Spatial *_generate_scene(GLTFState &state, const int p_bake_fps);
+	void _generate_scene_node(GLTFState &state, Node *scene_parent, Node3D *scene_root, const GLTFNodeIndex node_index);
+	Node3D *_generate_scene(GLTFState &state, const int p_bake_fps);
 
-	void _process_mesh_instances(GLTFState &state, Spatial *scene_root);
+	void _process_mesh_instances(GLTFState &state, Node3D *scene_root);
 
 	void _assign_scene_names(GLTFState &state);
 
@@ -408,7 +415,7 @@ class EditorSceneImporterGLTF : public EditorSceneImporter {
 public:
 	virtual uint32_t get_import_flags() const;
 	virtual void get_extensions(List<String> *r_extensions) const;
-	virtual Node *import_scene(const String &p_path, uint32_t p_flags, int p_bake_fps, List<String> *r_missing_deps = NULL, Error *r_err = NULL);
+	virtual Node *import_scene(const String &p_path, uint32_t p_flags, int p_bake_fps, List<String> *r_missing_deps = nullptr, Error *r_err = nullptr);
 	virtual Ref<Animation> import_animation(const String &p_path, uint32_t p_flags, int p_bake_fps);
 
 	EditorSceneImporterGLTF();

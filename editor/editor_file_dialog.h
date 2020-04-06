@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -62,15 +62,15 @@ public:
 		ACCESS_FILESYSTEM
 	};
 
-	enum Mode {
-		MODE_OPEN_FILE,
-		MODE_OPEN_FILES,
-		MODE_OPEN_DIR,
-		MODE_OPEN_ANY,
-		MODE_SAVE_FILE
+	enum FileMode {
+		FILE_MODE_OPEN_FILE,
+		FILE_MODE_OPEN_FILES,
+		FILE_MODE_OPEN_DIR,
+		FILE_MODE_OPEN_ANY,
+		FILE_MODE_SAVE_FILE
 	};
 
-	typedef Ref<Texture> (*GetIconFunc)(const String &);
+	typedef Ref<Texture2D> (*GetIconFunc)(const String &);
 	typedef void (*RegisterFunc)(EditorFileDialog *);
 
 	static GetIconFunc get_icon_func;
@@ -94,7 +94,7 @@ private:
 	Access access;
 	//Button *action;
 	VBoxContainer *vbox;
-	Mode mode;
+	FileMode mode;
 	bool can_create_dir;
 	LineEdit *dir;
 
@@ -102,16 +102,19 @@ private:
 	ToolButton *dir_next;
 	ToolButton *dir_up;
 
+	HBoxContainer *drives_container;
+	HBoxContainer *shortcuts_container;
 	OptionButton *drives;
 	ItemList *item_list;
 	PopupMenu *item_menu;
 	TextureRect *preview;
 	VBoxContainer *preview_vb;
 	HSplitContainer *list_hb;
+	HBoxContainer *file_box;
 	LineEdit *file;
+	OptionButton *filter;
 	AcceptDialog *mkdirerr;
 	AcceptDialog *exterr;
-	OptionButton *filter;
 	DirAccess *dir_access;
 	ConfirmationDialog *confirm_save;
 	DependencyRemoveDialog *remove_dialog;
@@ -189,10 +192,10 @@ private:
 	virtual void _post_popup();
 
 	void _save_to_recent();
-	//callback function is callback(String p_path,Ref<Texture> preview,Variant udata) preview null if could not load
+	//callback function is callback(String p_path,Ref<Texture2D> preview,Variant udata) preview null if could not load
 
-	void _thumbnail_result(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, const Variant &p_udata);
-	void _thumbnail_done(const String &p_path, const Ref<Texture> &p_preview, const Ref<Texture> &p_small_preview, const Variant &p_udata);
+	void _thumbnail_result(const String &p_path, const Ref<Texture2D> &p_preview, const Ref<Texture2D> &p_small_preview, const Variant &p_udata);
+	void _thumbnail_done(const String &p_path, const Ref<Texture2D> &p_preview, const Ref<Texture2D> &p_small_preview, const Variant &p_udata);
 	void _request_single_thumbnail(const String &p_path);
 
 	void _unhandled_input(const Ref<InputEvent> &p_event);
@@ -220,8 +223,8 @@ public:
 	void set_display_mode(DisplayMode p_mode);
 	DisplayMode get_display_mode() const;
 
-	void set_mode(Mode p_mode);
-	Mode get_mode() const;
+	void set_file_mode(FileMode p_mode);
+	FileMode get_file_mode() const;
 
 	VBoxContainer *get_vbox();
 	LineEdit *get_line_edit() { return file; }
@@ -266,7 +269,7 @@ public:
 	EditorLineEditFileChooser();
 };
 
-VARIANT_ENUM_CAST(EditorFileDialog::Mode);
+VARIANT_ENUM_CAST(EditorFileDialog::FileMode);
 VARIANT_ENUM_CAST(EditorFileDialog::Access);
 VARIANT_ENUM_CAST(EditorFileDialog::DisplayMode);
 

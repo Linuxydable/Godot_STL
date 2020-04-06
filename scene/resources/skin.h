@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -39,7 +39,8 @@ class Skin : public Resource {
 	GDCLASS(Skin, Resource)
 
 	struct Bind {
-		int bone;
+		int bone = -1;
+		StringName name;
 		Transform pose;
 	};
 
@@ -57,9 +58,11 @@ public:
 	inline int get_bind_count() const { return binds.size(); }
 
 	void add_bind(int p_bone, const Transform &p_pose);
+	void add_named_bind(const String &p_name, const Transform &p_pose);
 
-	void set_bind_bone(unsigned p_index, int p_bone);
-	void set_bind_pose(unsigned p_index, const Transform &p_pose);
+	void set_bind_bone(int p_index, int p_bone);
+	void set_bind_pose(int p_index, const Transform &p_pose);
+	void set_bind_name(int p_index, const StringName &p_name);
 
 	inline int get_bind_bone(unsigned p_index) const {
 #ifdef DEBUG_ENABLED
@@ -68,7 +71,14 @@ public:
 		return binds[p_index].bone;
 	}
 
-	inline Transform get_bind_pose(unsigned p_index) const {
+	inline StringName get_bind_name(int p_index) const {
+#ifdef DEBUG_ENABLED
+		ERR_FAIL_INDEX_V(p_index, bind_count, StringName());
+#endif
+		return binds_ptr[p_index].name;
+	}
+
+	inline Transform get_bind_pose(int p_index) const {
 #ifdef DEBUG_ENABLED
 		ERR_FAIL_INDEX_V(p_index, binds.size(), Transform());
 #endif

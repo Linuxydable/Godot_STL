@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -36,16 +36,17 @@
 #include "animation_blend_space_2d_editor.h"
 #include "animation_blend_tree_editor_plugin.h"
 #include "animation_state_machine_editor.h"
+#include "core/input/input_filter.h"
 #include "core/io/resource_loader.h"
 #include "core/math/delaunay.h"
-#include "core/os/input.h"
 #include "core/os/keyboard.h"
 #include "core/project_settings.h"
+#include "editor/editor_scale.h"
 #include "scene/animation/animation_blend_tree.h"
 #include "scene/animation/animation_player.h"
 #include "scene/gui/menu_button.h"
 #include "scene/gui/panel.h"
-#include "scene/main/viewport.h"
+#include "scene/main/window.h"
 #include "scene/scene_string_names.h"
 
 void AnimationTreeEditor::edit(AnimationTree *p_tree) {
@@ -60,7 +61,7 @@ void AnimationTreeEditor::edit(AnimationTree *p_tree) {
 		path = tree->get_meta("_tree_edit_path");
 		edit_path(path);
 	} else {
-		current_root = 0;
+		current_root = ObjectID();
 	}
 }
 
@@ -86,7 +87,7 @@ void AnimationTreeEditor::_update_path() {
 	b->set_button_group(group);
 	b->set_pressed(true);
 	b->set_focus_mode(FOCUS_NONE);
-	b->connect("pressed", this, "_path_button_pressed", varray(-1));
+	b->connect("pressed", callable_mp(this, &AnimationTreeEditor::_path_button_pressed), varray(-1));
 	path_hb->add_child(b);
 	for (decltype(button_path.size()) i = 0; i < button_path.size(); ++i) {
 		b = memnew(Button);
@@ -96,7 +97,7 @@ void AnimationTreeEditor::_update_path() {
 		path_hb->add_child(b);
 		b->set_pressed(true);
 		b->set_focus_mode(FOCUS_NONE);
-		b->connect("pressed", this, "_path_button_pressed", varray(i));
+		b->connect("pressed", callable_mp(this, &AnimationTreeEditor::_path_button_pressed), varray(i));
 	}
 }
 
@@ -129,7 +130,7 @@ void AnimationTreeEditor::edit_path(const std::vector<String> &p_path) {
 			}
 		}
 	} else {
-		current_root = 0;
+		current_root = ObjectID();
 		edited_path = button_path;
 	}
 
@@ -152,7 +153,7 @@ void AnimationTreeEditor::_about_to_show_root() {
 
 void AnimationTreeEditor::_notification(int p_what) {
 	if (p_what == NOTIFICATION_PROCESS) {
-		ObjectID root = 0;
+		ObjectID root;
 		if (tree && tree->get_tree_root().is_valid()) {
 			root = tree->get_tree_root()->get_instance_id();
 		}
@@ -168,10 +169,9 @@ void AnimationTreeEditor::_notification(int p_what) {
 }
 
 void AnimationTreeEditor::_bind_methods() {
-	ClassDB::bind_method("_path_button_pressed", &AnimationTreeEditor::_path_button_pressed);
 }
 
-AnimationTreeEditor *AnimationTreeEditor::singleton = NULL;
+AnimationTreeEditor *AnimationTreeEditor::singleton = nullptr;
 
 void AnimationTreeEditor::add_plugin(AnimationTreeNodeEditorPlugin *p_editor) {
 	ERR_FAIL_COND(p_editor->get_parent());
@@ -248,7 +248,6 @@ AnimationTreeEditor::AnimationTreeEditor() {
 
 	add_child(memnew(HSeparator));
 
-	current_root = 0;
 	singleton = this;
 	editor_base = memnew(PanelContainer);
 	editor_base->set_v_size_flags(SIZE_EXPAND_FILL);
@@ -291,7 +290,7 @@ AnimationTreeEditorPlugin::AnimationTreeEditorPlugin(EditorNode *p_node) {
 
 	editor = p_node;
 	anim_tree_editor = memnew(AnimationTreeEditor);
-	anim_tree_editor->set_custom_minimum_size(Size2(0, 300));
+	anim_tree_editor->set_custom_minimum_size(Size2(0, 300) * EDSCALE);
 
 	button = editor->add_bottom_panel_item(TTR("AnimationTree"), anim_tree_editor);
 	button->hide();

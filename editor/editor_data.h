@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -114,7 +114,7 @@ public:
 
 		String name;
 		Ref<Script> script;
-		Ref<Texture> icon;
+		Ref<Texture2D> icon;
 	};
 
 	struct EditedScene {
@@ -137,7 +137,7 @@ private:
 		String name;
 		Variant value;
 	};
-	Map<String, std::vector<CustomType> > custom_types;
+	Map<String, std::vector<CustomType>> custom_types;
 
 	List<PropertyData> clipboard;
 	UndoRedo undo_redo;
@@ -180,10 +180,10 @@ public:
 	void save_editor_global_states();
 	void restore_editor_global_states();
 
-	void add_custom_type(const String &p_type, const String &p_inherits, const Ref<Script> &p_script, const Ref<Texture> &p_icon);
+	void add_custom_type(const String &p_type, const String &p_inherits, const Ref<Script> &p_script, const Ref<Texture2D> &p_icon);
 	Object *instance_custom_type(const String &p_type, const String &p_inherits);
 	void remove_custom_type(const String &p_type);
-	const Map<String, std::vector<CustomType> > &get_custom_types() const { return custom_types; }
+	const Map<String, std::vector<CustomType>> &get_custom_types() const { return custom_types; }
 
 	// need update : int to const unsigned& p_at_pos, p_idx, p_to_idx
 	int add_edited_scene(int p_at_pos);
@@ -221,6 +221,8 @@ public:
 	bool script_class_is_parent(const String &p_class, const String &p_inherits);
 	StringName script_class_get_base(const String &p_class) const;
 	Object *script_class_instance(const String &p_class);
+
+	Ref<Script> script_class_load_script(const String &p_class) const;
 
 	StringName script_class_get_name(const String &p_path) const;
 	void script_class_set_name(const String &p_path, const StringName &p_class);
@@ -266,7 +268,7 @@ public:
 	template <class T>
 	T *get_node_editor_data(Node *p_node) {
 		if (!selection.has(p_node))
-			return NULL;
+			return nullptr;
 		return Object::cast_to<T>(selection[p_node]);
 	}
 
@@ -276,6 +278,7 @@ public:
 	void clear();
 
 	List<Node *> &get_selected_node_list();
+	List<Node *> get_full_selected_node_list();
 	Map<Node *, Object *> &get_selection() { return selection; }
 
 	EditorSelection();

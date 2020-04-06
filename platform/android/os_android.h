@@ -5,8 +5,8 @@
 /*                           GODOT ENGINE                                */
 /*                      https://godotengine.org                          */
 /*************************************************************************/
-/* Copyright (c) 2007-2019 Juan Linietsky, Ariel Manzur.                 */
-/* Copyright (c) 2014-2019 Godot Engine contributors (cf. AUTHORS.md)    */
+/* Copyright (c) 2007-2020 Juan Linietsky, Ariel Manzur.                 */
+/* Copyright (c) 2014-2020 Godot Engine contributors (cf. AUTHORS.md).   */
 /*                                                                       */
 /* Permission is hereby granted, free of charge, to any person obtaining */
 /* a copy of this software and associated documentation files (the       */
@@ -33,14 +33,11 @@
 
 #include "audio_driver_jandroid.h"
 #include "audio_driver_opensl.h"
-#include "core/os/input.h"
+#include "core/input/input_filter.h"
 #include "core/os/main_loop.h"
 #include "drivers/unix/os_unix.h"
-#include "main/input_default.h"
-//#include "power_android.h"
 #include "servers/audio_server.h"
-#include "servers/camera_server.h"
-#include "servers/visual/rasterizer.h"
+#include "servers/rendering/rasterizer.h"
 
 class GodotJavaWrapper;
 class GodotIOJavaWrapper;
@@ -71,15 +68,14 @@ public:
 private:
 	std::vector<TouchPos> touch;
 	Point2 hover_prev_pos; // needed to calculate the relative position on hover events
+	Point2 scroll_prev_pos; // needed to calculate the relative position on scroll events
 
 	bool use_gl2;
 	bool use_apk_expansion;
 
 	bool use_16bits_fbo;
 
-	VisualServer *visual_server;
-
-	CameraServer *camera_server;
+	RenderingServer *rendering_server;
 
 	mutable String data_dir_cache;
 
@@ -94,8 +90,6 @@ private:
 
 	GodotJavaWrapper *godot_java;
 	GodotIOJavaWrapper *godot_io_java;
-
-	//PowerAndroid *power_manager_func;
 
 	int video_driver_index;
 
@@ -125,6 +119,8 @@ public:
 
 	virtual void alert(const String &p_alert, const String &p_title = "ALERT!");
 	virtual bool request_permission(const String &p_name);
+	virtual bool request_permissions();
+	virtual Vector<String> get_granted_permissions() const;
 
 	virtual Error open_dynamic_library(const String p_path, void *&p_library_handle, bool p_also_set_library_path = false);
 
@@ -158,7 +154,7 @@ public:
 	virtual bool has_touchscreen_ui_hint() const;
 
 	virtual bool has_virtual_keyboard() const;
-	virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2());
+	virtual void show_virtual_keyboard(const String &p_existing_text, const Rect2 &p_screen_rect = Rect2(), int p_max_input_length = -1);
 	virtual void hide_virtual_keyboard();
 	virtual int get_virtual_keyboard_height() const;
 
@@ -188,6 +184,8 @@ public:
 	void process_gyroscope(const Vector3 &p_gyroscope);
 	void process_touch(int p_what, int p_pointer, const std::vector<TouchPos> &p_points);
 	void process_hover(int p_type, Point2 p_pos);
+	void process_double_tap(Point2 p_pos);
+	void process_scroll(Point2 p_pos);
 	void process_joy_event(JoypadEvent p_event);
 	void process_event(Ref<InputEvent> p_event);
 	void init_video_mode(int p_video_width, int p_video_height);
