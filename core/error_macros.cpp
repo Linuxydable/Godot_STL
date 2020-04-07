@@ -72,7 +72,7 @@ void _err_print_error(const char *p_function, const char *p_file, int p_line, co
 	_err_print_error(p_function, p_file, p_line, p_error, "", p_type);
 }
 
-void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, ErrorHandlerType p_type) {
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const Godot::String &p_error, ErrorHandlerType p_type) {
 	_err_print_error(p_function, p_file, p_line, p_error.utf8().get_data(), "", p_type);
 }
 
