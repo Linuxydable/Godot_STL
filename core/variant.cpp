@@ -1817,7 +1817,7 @@ Godot::String Variant::stringify(List<const void *> &stack) const {
 		case TRANSFORM2D: {
 
 			Transform2D mat32 = operator Transform2D();
-			return "(" + Variant(mat32.elements[0]).operator Godot::String() + ", " + Variant(mat32.elements[1]).operator String() + ", " + Variant(mat32.elements[2]).operator Godot::String() + ")";
+			return "(" + Variant(mat32.elements[0]).operator Godot::String() + ", " + Variant(mat32.elements[1]).operator Godot::String() + ", " + Variant(mat32.elements[2]).operator Godot::String() + ")";
 		} break;
 		case VECTOR3: return "(" + operator Vector3() + ")";
 		case VECTOR3I: return "(" + operator Vector3i() + ")";
