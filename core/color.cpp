@@ -273,7 +273,7 @@ Color Color::from_rgbe9995(uint32_t p_rgbe) {
 	return Color(rd, gd, bd, 1.0f);
 }
 
-static float _parse_col(const String &p_str, int p_ofs) {
+static float _parse_col(const Godot::String &p_str, int p_ofs) {
 
 	int ig = 0;
 
@@ -317,15 +317,15 @@ Color Color::contrasted() const {
 	return c;
 }
 
-Color Color::html(const String &p_color) {
+Color Color::html(const Godot::String &p_color) {
 
-	String color = p_color;
+	Godot::String color = p_color;
 	if (color.length() == 0)
 		return Color();
 	if (color[0] == '#')
 		color = color.substr(1, color.length() - 1);
 	if (color.length() == 3 || color.length() == 4) {
-		String exp_color;
+		Godot::String exp_color;
 		for (int i = 0; i < color.length(); i++) {
 			exp_color += color[i];
 			exp_color += color[i];
@@ -361,9 +361,9 @@ Color Color::html(const String &p_color) {
 	return Color(r / 255.0, g / 255.0, b / 255.0, a / 255.0);
 }
 
-bool Color::html_is_valid(const String &p_color) {
+bool Color::html_is_valid(const Godot::String &p_color) {
 
-	String color = p_color;
+	Godot::String color = p_color;
 
 	if (color.length() == 0)
 		return false;
@@ -405,9 +405,9 @@ bool Color::html_is_valid(const String &p_color) {
 	return true;
 }
 
-Color Color::named(const String &p_name) {
+Color Color::named(const Godot::String &p_name) {
 	if (_named_colors.empty()) _populate_named_colors(); // from color_names.inc
-	String name = p_name;
+	Godot::String name = p_name;
 	// Normalize name
 	name = name.replace(" ", "");
 	name = name.replace("-", "");
@@ -416,16 +416,16 @@ Color Color::named(const String &p_name) {
 	name = name.replace(".", "");
 	name = name.to_lower();
 
-	const Map<String, Color>::Element *color = _named_colors.find(name);
+	const Map<Godot::String, Color>::Element *color = _named_colors.find(name);
 	ERR_FAIL_NULL_V_MSG(color, Color(), "Invalid color name: " + p_name + ".");
 	return color->value();
 }
 
-String _to_hex(float p_val) {
+Godot::String _to_hex(float p_val) {
 
 	int v = Math::round(p_val * 255);
 	v = CLAMP(v, 0, 255);
-	String ret;
+	Godot::String ret;
 
 	for (int i = 0; i < 2; i++) {
 
@@ -437,16 +437,16 @@ String _to_hex(float p_val) {
 			c[0] = 'a' + lv - 10;
 
 		v >>= 4;
-		String cs = (const CharType *)c;
+		Godot::String cs = (const CharType *)c;
 		ret = cs + ret;
 	}
 
 	return ret;
 }
 
-String Color::to_html(bool p_alpha) const {
+Godot::String Color::to_html(bool p_alpha) const {
 
-	String txt;
+	Godot::String txt;
 	txt += _to_hex(r);
 	txt += _to_hex(g);
 	txt += _to_hex(b);
@@ -508,7 +508,7 @@ Color Color::from_hsv(float p_h, float p_s, float p_v, float p_a) const {
 	return Color(m + r, m + g, m + b, p_a);
 }
 
-Color::operator String() const {
+Color::operator Godot::String() const {
 
 	return rtos(r) + ", " + rtos(g) + ", " + rtos(b) + ", " + rtos(a);
 }
