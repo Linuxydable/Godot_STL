@@ -340,10 +340,6 @@ if selected_platform in platform_list:
         # both GCC and Clang. Both currently default to gnu11 and gnu++14.
         env.Prepend(CFLAGS=["-std=gnu11"])
         env.Prepend(CXXFLAGS=["-std=gnu++17"])
-    else:
-        # MSVC doesn't have clear C standard support, /std only covers C++.
-        # We apply it to CCFLAGS (both C and C++ code) in case it impacts C features.
-        env.Prepend(CCFLAGS=["/std:c++17"])
 
     # Enforce our minimal compiler version requirements
     cc_version = methods.get_compiler_version(env) or [-1, -1]
