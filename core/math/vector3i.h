@@ -98,7 +98,7 @@ struct Vector3i {
 	_FORCE_INLINE_ bool operator>(const Vector3i &p_v) const;
 	_FORCE_INLINE_ bool operator>=(const Vector3i &p_v) const;
 
-	operator String() const;
+	operator Godot::String() const;
 
 	_FORCE_INLINE_ Vector3i(int32_t p_x, int32_t p_y, int32_t p_z) {
 		x = p_x;
