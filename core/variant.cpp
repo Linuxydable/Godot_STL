@@ -40,7 +40,7 @@
 #include "scene/gui/control.h"
 #include "scene/main/node.h"
 
-String Variant::get_type_name(Variant::Type p_type) {
+Godot::String Variant::get_type_name(Variant::Type p_type) {
 
 	switch (p_type) {
 		case NIL: {
@@ -938,7 +938,7 @@ bool Variant::is_zero() const {
 		} break;
 		case STRING: {
 
-			return *reinterpret_cast<const String *>(_data._mem) == String();
+			return *reinterpret_cast<const Godot::String *>(_data._mem) == Godot::String();
 
 		} break;
 
@@ -1079,7 +1079,7 @@ bool Variant::is_zero() const {
 		} break;
 		case PACKED_STRING_ARRAY: {
 
-			return PackedArrayRef<String>::get_array(_data.packed_array).size() == 0;
+			return PackedArrayRef<Godot::String>::get_array(_data.packed_array).size() == 0;
 
 		} break;
 		case PACKED_VECTOR2_ARRAY: {
@@ -1219,7 +1219,7 @@ void Variant::reference(const Variant &p_variant) {
 		} break;
 		case STRING: {
 
-			memnew_placement(_data._mem, String(*reinterpret_cast<const String *>(p_variant._data._mem)));
+			memnew_placement(_data._mem, Godot::String(*reinterpret_cast<const Godot::String *>(p_variant._data._mem)));
 		} break;
 
 		// math types
@@ -1374,9 +1374,9 @@ void Variant::reference(const Variant &p_variant) {
 		} break;
 		case PACKED_STRING_ARRAY: {
 
-			_data.packed_array = static_cast<PackedArrayRef<String> *>(p_variant._data.packed_array)->reference();
+			_data.packed_array = static_cast<PackedArrayRef<Godot::String> *>(p_variant._data.packed_array)->reference();
 			if (!_data.packed_array) {
-				_data.packed_array = PackedArrayRef<String>::create();
+				_data.packed_array = PackedArrayRef<Godot::String>::create();
 			}
 
 		} break;
@@ -1433,7 +1433,7 @@ void Variant::clear() {
 	switch (type) {
 		case STRING: {
 
-			reinterpret_cast<String *>(_data._mem)->~String();
+			reinterpret_cast<Godot::String *>(_data._mem)->~String();
 		} break;
 		/*
 		// no point, they don't allocate memory
@@ -1554,7 +1554,7 @@ Variant::operator signed int() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1569,7 +1569,7 @@ Variant::operator unsigned int() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1585,7 +1585,7 @@ Variant::operator int64_t() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int64();
+		case STRING: return operator Godot::String().to_int64();
 		default: {
 
 			return 0;
@@ -1602,7 +1602,7 @@ Variant::operator long unsigned int() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._real;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1621,7 +1621,7 @@ Variant::operator uint64_t() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1648,7 +1648,7 @@ Variant::operator signed long() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._real;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1666,7 +1666,7 @@ Variant::operator unsigned long() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._real;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1685,7 +1685,7 @@ Variant::operator signed short() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1700,7 +1700,7 @@ Variant::operator unsigned short() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1715,7 +1715,7 @@ Variant::operator signed char() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1730,7 +1730,7 @@ Variant::operator unsigned char() const {
 		case BOOL: return _data._bool ? 1 : 0;
 		case INT: return _data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_int();
+		case STRING: return operator Godot::String().to_int();
 		default: {
 
 			return 0;
@@ -1751,7 +1751,7 @@ Variant::operator float() const {
 		case BOOL: return _data._bool ? 1.0 : 0.0;
 		case INT: return (float)_data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_double();
+		case STRING: return operator Godot::String().to_double();
 		default: {
 
 			return 0;
@@ -1766,7 +1766,7 @@ Variant::operator double() const {
 		case BOOL: return _data._bool ? 1.0 : 0.0;
 		case INT: return (double)_data._int;
 		case FLOAT: return _data._float;
-		case STRING: return operator String().to_double();
+		case STRING: return operator Godot::String().to_double();
 		default: {
 
 			return 0;
@@ -1779,7 +1779,7 @@ Variant::operator StringName() const {
 	if (type == STRING_NAME) {
 		return *reinterpret_cast<const StringName *>(_data._mem);
 	} else if (type == STRING) {
-		return *reinterpret_cast<const String *>(_data._mem);
+		return *reinterpret_cast<const Godot::String *>(_data._mem);
 	}
 
 	return StringName();
@@ -1787,8 +1787,8 @@ Variant::operator StringName() const {
 
 struct _VariantStrPair {
 
-	String key;
-	String value;
+	Godot::String key;
+	Godot::String value;
 
 	bool operator<(const _VariantStrPair &p) const {
 
@@ -1796,20 +1796,20 @@ struct _VariantStrPair {
 	}
 };
 
-Variant::operator String() const {
+Variant::operator Godot::String() const {
 	List<const void *> stack;
 
 	return stringify(stack);
 }
 
-String Variant::stringify(List<const void *> &stack) const {
+Godot::String Variant::stringify(List<const void *> &stack) const {
 	switch (type) {
 
 		case NIL: return "Null";
 		case BOOL: return _data._bool ? "True" : "False";
 		case INT: return itos(_data._int);
 		case FLOAT: return rtos(_data._float);
-		case STRING: return *reinterpret_cast<const String *>(_data._mem);
+		case STRING: return *reinterpret_cast<const Godot::String *>(_data._mem);
 		case VECTOR2: return "(" + operator Vector2() + ")";
 		case VECTOR2I: return "(" + operator Vector2i() + ")";
 		case RECT2: return "(" + operator Rect2() + ")";
@@ -1817,7 +1817,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case TRANSFORM2D: {
 
 			Transform2D mat32 = operator Transform2D();
-			return "(" + Variant(mat32.elements[0]).operator String() + ", " + Variant(mat32.elements[1]).operator String() + ", " + Variant(mat32.elements[2]).operator String() + ")";
+			return "(" + Variant(mat32.elements[0]).operator Godot::String() + ", " + Variant(mat32.elements[1]).operator String() + ", " + Variant(mat32.elements[2]).operator Godot::String() + ")";
 		} break;
 		case VECTOR3: return "(" + operator Vector3() + ")";
 		case VECTOR3I: return "(" + operator Vector3i() + ")";
@@ -1830,7 +1830,7 @@ String Variant::stringify(List<const void *> &stack) const {
 
 			Basis mat3 = operator Basis();
 
-			String mtx("(");
+			Godot::String mtx("(");
 			for (int i = 0; i < 3; i++) {
 
 				if (i != 0)
@@ -1843,7 +1843,7 @@ String Variant::stringify(List<const void *> &stack) const {
 					if (j != 0)
 						mtx += ", ";
 
-					mtx += Variant(mat3.elements[i][j]).operator String();
+					mtx += Variant(mat3.elements[i][j]).operator Godot::String();
 				}
 
 				mtx += ")";
@@ -1854,7 +1854,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case TRANSFORM: return operator Transform();
 		case STRING_NAME: return operator StringName();
 		case NODE_PATH: return operator NodePath();
-		case COLOR: return String::num(operator Color().r) + "," + String::num(operator Color().g) + "," + String::num(operator Color().b) + "," + String::num(operator Color().a);
+		case COLOR: return Godot::String::num(operator Color().r) + "," + Godot::String::num(operator Color().g) + "," + Godot::String::num(operator Color().b) + "," + Godot::String::num(operator Color().a);
 		case DICTIONARY: {
 
 			const Dictionary &d = *reinterpret_cast<const Dictionary *>(_data._mem);
@@ -1864,8 +1864,8 @@ String Variant::stringify(List<const void *> &stack) const {
 
 			stack.push_back(d.id());
 
-			//const String *K=nullptr;
-			String str("{");
+			//const Godot::String *K=nullptr;
+			Godot::String str("{");
 			List<Variant> keys;
 			d.get_key_list(&keys);
 
@@ -1896,7 +1896,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case PACKED_VECTOR2_ARRAY: {
 
 			std::vector<Vector2> vec = operator std::vector<Vector2>();
-			String str("[");
+			Godot::String str("[");
 			for (int i = 0; i < vec.size(); i++) {
 
 				if (i > 0)
@@ -1909,7 +1909,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case PACKED_VECTOR3_ARRAY: {
 
 			std::vector<Vector3> vec = operator std::vector<Vector3>();
-			String str("[");
+			Godot::String str("[");
 			for (int i = 0; i < vec.size(); i++) {
 
 				if (i > 0)
@@ -1921,8 +1921,8 @@ String Variant::stringify(List<const void *> &stack) const {
 		} break;
 		case PACKED_STRING_ARRAY: {
 
-			std::vector<String> vec = operator std::vector<String>();
-			String str("[");
+			std::vector<Godot::String> vec = operator std::vector<Godot::String>();
+			Godot::String str("[");
 			for (int i = 0; i < vec.size(); i++) {
 
 				if (i > 0)
@@ -1935,7 +1935,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case PACKED_INT32_ARRAY: {
 
 			std::vector<int32_t> vec = operator std::vector<int32_t>();
-			String str("[");
+			Godot::String str("[");
 			for (int i = 0; i < vec.size(); i++) {
 
 				if (i > 0)
@@ -1948,7 +1948,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case PACKED_INT64_ARRAY: {
 
 			std::vector<int64_t> vec = operator std::vector<int64_t>();
-			String str("[");
+			Godot::String str("[");
 			for (int i = 0; i < vec.size(); i++) {
 
 				if (i > 0)
@@ -1961,7 +1961,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case PACKED_FLOAT32_ARRAY: {
 
 			std::vector<float> vec = operator std::vector<float>();
-			String str("[");
+			Godot::String str("[");
 			for (int i = 0; i < vec.size(); i++) {
 
 				if (i > 0)
@@ -1974,7 +1974,7 @@ String Variant::stringify(List<const void *> &stack) const {
 		case PACKED_FLOAT64_ARRAY: {
 
 			std::vector<double> vec = operator std::vector<double>();
-			String str("[");
+			Godot::String str("[");
 			for (int i = 0; i < vec.size(); i++) {
 
 				if (i > 0)
@@ -1992,7 +1992,7 @@ String Variant::stringify(List<const void *> &stack) const {
 			}
 			stack.push_back(arr.id());
 
-			String str("[");
+			Godot::String str("[");
 			for (int i = 0; i < arr.size(); i++) {
 				if (i)
 					str += ", ";
@@ -2199,7 +2199,7 @@ Variant::operator Color() const {
 	if (type == COLOR)
 		return *reinterpret_cast<const Color *>(_data._mem);
 	else if (type == STRING)
-		return Color::html(operator String());
+		return Color::html(operator Godot::String());
 	else if (type == INT)
 		return Color::hex(operator int());
 	else
@@ -2211,7 +2211,7 @@ Variant::operator NodePath() const {
 	if (type == NODE_PATH)
 		return *reinterpret_cast<const NodePath *>(_data._mem);
 	else if (type == STRING)
-		return NodePath(operator String());
+		return NodePath(operator Godot::String());
 	else
 		return NodePath();
 }
@@ -2342,7 +2342,7 @@ inline DA _convert_array_from_variant(const Variant &p_variant) {
 			return _convert_array<DA, std::vector<double>>(p_variant.operator std::vector<double>());
 		}
 		case Variant::PACKED_STRING_ARRAY: {
-			return _convert_array<DA, std::vector<String>>(p_variant.operator std::vector<String>());
+			return _convert_array<DA, std::vector<Godot::String>>(p_variant.operator std::vector<Godot::String>());
 		}
 		case Variant::PACKED_VECTOR2_ARRAY: {
 			return _convert_array<DA, std::vector<Vector2>>(p_variant.operator std::vector<Vector2>());
@@ -2405,12 +2405,12 @@ Variant::operator std::vector<double>() const {
 		return _convert_array_from_variant<std::vector<double>>(*this);
 }
 
-Variant::operator std::vector<String>() const {
+Variant::operator std::vector<Godot::String>() const {
 
 	if (type == PACKED_STRING_ARRAY)
-		return static_cast<PackedArrayRef<String> *>(_data.packed_array)->array;
+		return static_cast<PackedArrayRef<Godot::String> *>(_data.packed_array)->array;
 	else
-		return _convert_array_from_variant<std::vector<String>>(*this);
+		return _convert_array_from_variant<std::vector<Godot::String>>(*this);
 }
 Variant::operator std::vector<Vector3>() const {
 
@@ -2499,7 +2499,7 @@ Variant::operator std::vector<Variant>() const {
 }
 Variant::operator std::vector<StringName>() const {
 
-	std::vector<String> from = operator std::vector<String>();
+	std::vector<Godot::String> from = operator std::vector<Godot::String>();
 	std::vector<StringName> to;
 	int len = from.size();
 	to.resize(len);
@@ -2528,7 +2528,7 @@ Variant::operator IP_Address() const {
 		}
 	}
 
-	return IP_Address(operator String());
+	return IP_Address(operator Godot::String());
 }
 
 Variant::Variant(bool p_bool) {
@@ -2623,22 +2623,22 @@ Variant::Variant(const StringName &p_string) {
 	type = STRING_NAME;
 	memnew_placement(_data._mem, StringName(p_string));
 }
-Variant::Variant(const String &p_string) {
+Variant::Variant(const Godot::String &p_string) {
 
 	type = STRING;
-	memnew_placement(_data._mem, String(p_string));
+	memnew_placement(_data._mem, Godot::String(p_string));
 }
 
 Variant::Variant(const char *const p_cstring) {
 
 	type = STRING;
-	memnew_placement(_data._mem, String((const char *)p_cstring));
+	memnew_placement(_data._mem, Godot::String((const char *)p_cstring));
 }
 
 Variant::Variant(const CharType *p_wstring) {
 
 	type = STRING;
-	memnew_placement(_data._mem, String(p_wstring));
+	memnew_placement(_data._mem, Godot::String(p_wstring));
 }
 Variant::Variant(const Vector3 &p_vector3) {
 
@@ -2832,10 +2832,10 @@ Variant::Variant(const std::vector<double> &p_float64_array) {
 	_data.packed_array = PackedArrayRef<double>::create(p_float64_array);
 }
 
-Variant::Variant(const std::vector<String> &p_string_array) {
+Variant::Variant(const std::vector<Godot::String> &p_string_array) {
 
 	type = PACKED_STRING_ARRAY;
-	_data.packed_array = PackedArrayRef<String>::create(p_string_array);
+	_data.packed_array = PackedArrayRef<Godot::String>::create(p_string_array);
 }
 Variant::Variant(const std::vector<Vector3> &p_vector3_array) {
 
@@ -2890,7 +2890,7 @@ Variant::Variant(const std::vector<Variant> &p_array) {
 Variant::Variant(const std::vector<StringName> &p_array) {
 
 	type = NIL;
-	std::vector<String> v;
+	std::vector<Godot::String> v;
 	int len = p_array.size();
 	v.resize(len);
 	for (int i = 0; i < len; i++)
@@ -2929,7 +2929,7 @@ void Variant::operator=(const Variant &p_variant) {
 		} break;
 		case STRING: {
 
-			*reinterpret_cast<String *>(_data._mem) = *reinterpret_cast<const String *>(p_variant._data._mem);
+			*reinterpret_cast<Godot::String *>(_data._mem) = *reinterpret_cast<const Godot::String *>(p_variant._data._mem);
 		} break;
 
 		// math types
@@ -3064,7 +3064,7 @@ void Variant::operator=(const Variant &p_variant) {
 		} break;
 		case PACKED_STRING_ARRAY: {
 
-			_data.packed_array = PackedArrayRef<String>::reference_from(_data.packed_array, p_variant._data.packed_array);
+			_data.packed_array = PackedArrayRef<Godot::String>::reference_from(_data.packed_array, p_variant._data.packed_array);
 		} break;
 		case PACKED_VECTOR2_ARRAY: {
 
@@ -3086,7 +3086,7 @@ void Variant::operator=(const Variant &p_variant) {
 Variant::Variant(const IP_Address &p_address) {
 
 	type = STRING;
-	memnew_placement(_data._mem, String(p_address));
+	memnew_placement(_data._mem, Godot::String(p_address));
 }
 
 Variant::Variant(const Variant &p_variant) {
@@ -3122,7 +3122,7 @@ uint32_t Variant::hash() const {
 		} break;
 		case STRING: {
 
-			return reinterpret_cast<const String *>(_data._mem)->hash();
+			return reinterpret_cast<const Godot::String *>(_data._mem)->hash();
 		} break;
 
 		// math types
@@ -3347,11 +3347,11 @@ uint32_t Variant::hash() const {
 		case PACKED_STRING_ARRAY: {
 
 			uint32_t hash = 5831;
-			const std::vector<String> &arr = PackedArrayRef<String>::get_array(_data.packed_array);
+			const std::vector<Godot::String> &arr = PackedArrayRef<Godot::String>::get_array(_data.packed_array);
 			int len = arr.size();
 
 			if (likely(len)) {
-				const String *r = arr.ptr();
+				const Godot::String *r = arr.ptr();
 
 				for (int i = 0; i < len; i++) {
 					hash = hash_djb2_one_32(r[i].hash(), hash);
@@ -3709,18 +3709,18 @@ Variant Variant::call(const StringName &p_method, VARIANT_ARG_DECLARE) {
 
 		case Callable::CallError::CALL_ERROR_INVALID_ARGUMENT: {
 
-			String err = "Invalid type for argument #" + itos(error.argument) + ", expected '" + Variant::get_type_name(Variant::Type(error.expected)) + "'.";
+			Godot::String err = "Invalid type for argument #" + itos(error.argument) + ", expected '" + Variant::get_type_name(Variant::Type(error.expected)) + "'.";
 			ERR_PRINT(err.utf8().get_data());
 
 		} break;
 		case Callable::CallError::CALL_ERROR_INVALID_METHOD: {
 
-			String err = "Invalid method '" + p_method + "' for type '" + Variant::get_type_name(type) + "'.";
+			Godot::String err = "Invalid method '" + p_method + "' for type '" + Variant::get_type_name(type) + "'.";
 			ERR_PRINT(err.utf8().get_data());
 		} break;
 		case Callable::CallError::CALL_ERROR_TOO_MANY_ARGUMENTS: {
 
-			String err = "Too many arguments for method '" + p_method + "'";
+			Godot::String err = "Too many arguments for method '" + p_method + "'";
 			ERR_PRINT(err.utf8().get_data());
 		} break;
 		default: {
@@ -3730,22 +3730,22 @@ Variant Variant::call(const StringName &p_method, VARIANT_ARG_DECLARE) {
 	return ret;
 }
 
-void Variant::construct_from_string(const String &p_string, Variant &r_value, ObjectConstruct p_obj_construct, void *p_construct_ud) {
+void Variant::construct_from_string(const Godot::String &p_string, Variant &r_value, ObjectConstruct p_obj_construct, void *p_construct_ud) {
 
 	r_value = Variant();
 }
 
-String Variant::get_construct_string() const {
+Godot::String Variant::get_construct_string() const {
 
-	String vars;
+	Godot::String vars;
 	VariantWriter::write_to_string(*this, vars);
 
 	return vars;
 }
 
-String Variant::get_call_error_text(Object *p_base, const StringName &p_method, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce) {
+Godot::String Variant::get_call_error_text(Object *p_base, const StringName &p_method, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce) {
 
-	String err_text;
+	Godot::String err_text;
 
 	if (ce.error == Callable::CallError::CALL_ERROR_INVALID_ARGUMENT) {
 		int errorarg = ce.argument;
@@ -3766,18 +3766,18 @@ String Variant::get_call_error_text(Object *p_base, const StringName &p_method, 
 		return "Call OK";
 	}
 
-	String class_name = p_base->get_class();
+	Godot::String class_name = p_base->get_class();
 	Ref<Script> script = p_base->get_script();
 	if (script.is_valid() && script->get_path().is_resource_file()) {
 
 		class_name += "(" + script->get_path().get_file() + ")";
 	}
-	return "'" + class_name + "::" + String(p_method) + "': " + err_text;
+	return "'" + class_name + "::" + Godot::String(p_method) + "': " + err_text;
 }
 
-String Variant::get_callable_error_text(const Callable &p_callable, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce) {
+Godot::String Variant::get_callable_error_text(const Callable &p_callable, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce) {
 
-	String err_text;
+	Godot::String err_text;
 
 	if (ce.error == Callable::CallError::CALL_ERROR_INVALID_ARGUMENT) {
 		int errorarg = ce.argument;
@@ -3798,10 +3798,10 @@ String Variant::get_callable_error_text(const Callable &p_callable, const Varian
 		return "Call OK";
 	}
 
-	return String(p_callable) + " : " + err_text;
+	return Godot::String(p_callable) + " : " + err_text;
 }
 
-String vformat(const String &p_text, const Variant &p1, const Variant &p2, const Variant &p3, const Variant &p4, const Variant &p5) {
+Godot::String vformat(const Godot::String &p_text, const Variant &p1, const Variant &p2, const Variant &p3, const Variant &p4, const Variant &p5) {
 
 	Array args;
 	if (p1.get_type() != Variant::NIL) {
@@ -3830,9 +3830,9 @@ String vformat(const String &p_text, const Variant &p1, const Variant &p2, const
 	}
 
 	bool error = false;
-	String fmt = p_text.sprintf(args, &error);
+	Godot::String fmt = p_text.sprintf(args, &error);
 
-	ERR_FAIL_COND_V_MSG(error, String(), fmt);
+	ERR_FAIL_COND_V_MSG(error, Godot::String(), fmt);
 
 	return fmt;
 }

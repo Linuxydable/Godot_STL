@@ -64,7 +64,7 @@ typedef std::vector<int32_t> PackedInt32Array;
 typedef std::vector<int64_t> PackedInt64Array;
 typedef std::vector<float> PackedFloat32Array;
 typedef std::vector<double> PackedFloat64Array;
-typedef std::vector<String> PackedStringArray;
+typedef std::vector<Godot::String> PackedStringArray;
 typedef std::vector<Vector2> PackedVector2Array;
 typedef std::vector<Vector3> PackedVector3Array;
 typedef std::vector<Color> PackedColorArray;
@@ -222,7 +222,7 @@ public:
 	_FORCE_INLINE_ Type get_type() const {
 		return type;
 	}
-	static String get_type_name(Variant::Type p_type);
+	static Godot::String get_type_name(Variant::Type p_type);
 	static bool can_convert(Type p_type_from, Type p_type_to);
 	static bool can_convert_strict(Type p_type_from, Type p_type_to);
 
@@ -258,7 +258,7 @@ public:
 	operator CharType() const;
 	operator float() const;
 	operator double() const;
-	operator String() const;
+	operator Godot::String() const;
 	operator StringName() const;
 	operator Vector2() const;
 	operator Vector2i() const;
@@ -292,7 +292,7 @@ public:
 	operator std::vector<int64_t>() const;
 	operator std::vector<float>() const;
 	operator std::vector<double>() const;
-	operator std::vector<String>() const;
+	operator std::vector<Godot::String>() const;
 	operator std::vector<Vector3>() const;
 	operator std::vector<Color>() const;
 	operator std::vector<Plane>() const;
@@ -329,7 +329,7 @@ public:
 	Variant(float p_float);
 	Variant(double p_double);
 	Variant(const ObjectID &p_id);
-	Variant(const String &p_string);
+	Variant(const Godot::String &p_string);
 	Variant(const StringName &p_string);
 	Variant(const char *const p_cstring);
 	Variant(const CharType *p_wstring);
@@ -360,7 +360,7 @@ public:
 	Variant(const std::vector<int64_t> &p_int64_array);
 	Variant(const std::vector<float> &p_float32_array);
 	Variant(const std::vector<double> &p_float64_array);
-	Variant(const std::vector<String> &p_string_array);
+	Variant(const std::vector<Godot::String> &p_string_array);
 	Variant(const std::vector<Vector3> &p_vector3_array);
 	Variant(const std::vector<Color> &p_color_array);
 	Variant(const std::vector<Face3> &p_face_array);
@@ -409,7 +409,7 @@ public:
 
 	};
 
-	static String get_operator_name(Operator p_op);
+	static Godot::String get_operator_name(Operator p_op);
 	static void evaluate(const Operator &p_op, const Variant &p_a, const Variant &p_b, Variant &r_ret, bool &r_valid);
 	static _FORCE_INLINE_ Variant evaluate(const Operator &p_op, const Variant &p_a, const Variant &p_b) {
 
@@ -428,8 +428,8 @@ public:
 	Variant call(const StringName &p_method, const Variant **p_args, int p_argcount, Callable::CallError &r_error);
 	Variant call(const StringName &p_method, const Variant &p_arg1 = Variant(), const Variant &p_arg2 = Variant(), const Variant &p_arg3 = Variant(), const Variant &p_arg4 = Variant(), const Variant &p_arg5 = Variant());
 
-	static String get_call_error_text(Object *p_base, const StringName &p_method, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce);
-	static String get_callable_error_text(const Callable &p_callable, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce);
+	static Godot::String get_call_error_text(Object *p_base, const StringName &p_method, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce);
+	static Godot::String get_callable_error_text(const Callable &p_callable, const Variant **p_argptrs, int p_argcount, const Callable::CallError &ce);
 
 	static Variant construct(const Variant::Type, const Variant **p_args, int p_argcount, Callable::CallError &r_error, bool p_strict = true);
 
@@ -463,7 +463,7 @@ public:
 
 	bool hash_compare(const Variant &p_variant) const;
 	bool booleanize() const;
-	String stringify(List<const void *> &stack) const;
+	Godot::String stringify(List<const void *> &stack) const;
 
 	void static_assign(const Variant &p_variant);
 	static void get_constructor_list(Variant::Type p_type, List<MethodInfo> *p_list);
@@ -471,11 +471,11 @@ public:
 	static bool has_constant(Variant::Type p_type, const StringName &p_value);
 	static Variant get_constant_value(Variant::Type p_type, const StringName &p_value, bool *r_valid = nullptr);
 
-	typedef String (*ObjectDeConstruct)(const Variant &p_object, void *ud);
-	typedef void (*ObjectConstruct)(const String &p_text, void *ud, Variant &r_value);
+	typedef Godot::String (*ObjectDeConstruct)(const Variant &p_object, void *ud);
+	typedef void (*ObjectConstruct)(const Godot::String &p_text, void *ud, Variant &r_value);
 
-	String get_construct_string() const;
-	static void construct_from_string(const String &p_string, Variant &r_value, ObjectConstruct p_obj_construct = nullptr, void *p_construct_ud = nullptr);
+	Godot::String get_construct_string() const;
+	static void construct_from_string(const Godot::String &p_string, Variant &r_value, ObjectConstruct p_obj_construct = nullptr, void *p_construct_ud = nullptr);
 
 	void operator=(const Variant &p_variant); // only this is enough for all the other types
 	Variant(const Variant &p_variant);
@@ -517,6 +517,6 @@ const Variant::ObjData &Variant::_get_obj() const {
 	return *reinterpret_cast<const ObjData *>(&_data._mem[0]);
 }
 
-String vformat(const String &p_text, const Variant &p1 = Variant(), const Variant &p2 = Variant(), const Variant &p3 = Variant(), const Variant &p4 = Variant(), const Variant &p5 = Variant());
+Godot::String vformat(const Godot::String &p_text, const Variant &p1 = Variant(), const Variant &p2 = Variant(), const Variant &p3 = Variant(), const Variant &p4 = Variant(), const Variant &p5 = Variant());
 
 #endif // VARIANT_H
