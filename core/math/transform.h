@@ -83,8 +83,8 @@ public:
 	_FORCE_INLINE_ AABB xform(const AABB &p_aabb) const;
 	_FORCE_INLINE_ AABB xform_inv(const AABB &p_aabb) const;
 
-	_FORCE_INLINE_ Vector<Vector3> xform(const Vector<Vector3> &p_array) const;
-	_FORCE_INLINE_ Vector<Vector3> xform_inv(const Vector<Vector3> &p_array) const;
+	_FORCE_INLINE_ std::vector<Vector3> xform(const std::vector<Vector3> &p_array) const;
+	_FORCE_INLINE_ std::vector<Vector3> xform_inv(const std::vector<Vector3> &p_array) const;
 
 	void operator*=(const Transform &p_transform);
 	Transform operator*(const Transform &p_transform) const;
@@ -209,13 +209,13 @@ _FORCE_INLINE_ AABB Transform::xform_inv(const AABB &p_aabb) const {
 	return ret;
 }
 
-Vector<Vector3> Transform::xform(const Vector<Vector3> &p_array) const {
+std::vector<Vector3> Transform::xform(const std::vector<Vector3> &p_array) const {
 
-	Vector<Vector3> array;
+	std::vector<Vector3> array;
 	array.resize(p_array.size());
 
-	const Vector3 *r = p_array.ptr();
-	Vector3 *w = array.ptrw();
+	const Vector3 *r = p_array.data();
+	Vector3 *w = array.data();
 
 	for (int i = 0; i < p_array.size(); ++i) {
 		w[i] = xform(r[i]);
@@ -223,13 +223,13 @@ Vector<Vector3> Transform::xform(const Vector<Vector3> &p_array) const {
 	return array;
 }
 
-Vector<Vector3> Transform::xform_inv(const Vector<Vector3> &p_array) const {
+std::vector<Vector3> Transform::xform_inv(const std::vector<Vector3> &p_array) const {
 
-	Vector<Vector3> array;
+	std::vector<Vector3> array;
 	array.resize(p_array.size());
 
-	const Vector3 *r = p_array.ptr();
-	Vector3 *w = array.ptrw();
+	const Vector3 *r = p_array.data();
+	Vector3 *w = array.data();
 
 	for (int i = 0; i < p_array.size(); ++i) {
 		w[i] = xform_inv(r[i]);
