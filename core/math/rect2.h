@@ -230,7 +230,7 @@ struct Rect2 {
 		return Rect2(Point2(position.x + MIN(size.x, 0), position.y + MIN(size.y, 0)), size.abs());
 	}
 
-	operator String() const { return String(position) + ", " + String(size); }
+	operator Godot::String() const { return Godot::String(position) + ", " + Godot::String(size); }
 
 	Rect2() {}
 	Rect2(real_t p_x, real_t p_y, real_t p_width, real_t p_height) :
@@ -390,7 +390,7 @@ struct Rect2i {
 		return Rect2i(Point2i(position.x + MIN(size.x, 0), position.y + MIN(size.y, 0)), size.abs());
 	}
 
-	operator String() const { return String(position) + ", " + String(size); }
+	operator Godot::String() const { return Godot::String(position) + ", " + Godot::String(size); }
 
 	operator Rect2() const { return Rect2(position, size); }
 	Rect2i(const Rect2 &p_r2) :
