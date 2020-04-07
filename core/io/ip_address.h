@@ -46,8 +46,8 @@ private:
 	bool wildcard;
 
 protected:
-	void _parse_ipv6(const String &p_string);
-	void _parse_ipv4(const String &p_string, int p_start, uint8_t *p_ret);
+	void _parse_ipv6(const Godot::String &p_string);
+	void _parse_ipv4(const Godot::String &p_string, int p_start, uint8_t *p_ret);
 
 public:
 	//operator Variant() const;
@@ -78,8 +78,8 @@ public:
 	const uint8_t *get_ipv6() const;
 	void set_ipv6(const uint8_t *p_buf);
 
-	operator String() const;
-	IP_Address(const String &p_string);
+	operator Godot::String() const;
+	IP_Address(const Godot::String &p_string);
 	IP_Address(uint32_t p_a, uint32_t p_b, uint32_t p_c, uint32_t p_d, bool is_v6 = false);
 	IP_Address() { clear(); }
 };

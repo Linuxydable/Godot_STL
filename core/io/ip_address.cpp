@@ -32,13 +32,13 @@
 /*
 IP_Address::operator Variant() const {
 
-	return operator String();
+	return operator Godot::String();
 }*/
 
 #include <stdio.h>
 #include <string.h>
 
-IP_Address::operator String() const {
+IP_Address::operator Godot::String() const {
 
 	if (wildcard)
 		return "*";
@@ -49,18 +49,18 @@ IP_Address::operator String() const {
 	if (is_ipv4())
 		// IPv4 address mapped to IPv6
 		return itos(field8[12]) + "." + itos(field8[13]) + "." + itos(field8[14]) + "." + itos(field8[15]);
-	String ret;
+	Godot::String ret;
 	for (int i = 0; i < 8; i++) {
 		if (i > 0)
 			ret = ret + ":";
 		uint16_t num = (field8[i * 2] << 8) + field8[i * 2 + 1];
-		ret = ret + String::num_int64(num, 16);
+		ret = ret + Godot::String::num_int64(num, 16);
 	};
 
 	return ret;
 }
 
-static void _parse_hex(const String &p_string, int p_start, uint8_t *p_dst) {
+static void _parse_hex(const Godot::String &p_string, int p_start, uint8_t *p_dst) {
 
 	uint16_t ret = 0;
 	for (int i = p_start; i < p_start + 4; i++) {
@@ -91,7 +91,7 @@ static void _parse_hex(const String &p_string, int p_start, uint8_t *p_dst) {
 	p_dst[1] = ret & 0xff;
 };
 
-void IP_Address::_parse_ipv6(const String &p_string) {
+void IP_Address::_parse_ipv6(const Godot::String &p_string) {
 
 	static const int parts_total = 8;
 	int parts[parts_total] = { 0 };
@@ -153,9 +153,9 @@ void IP_Address::_parse_ipv6(const String &p_string) {
 	};
 };
 
-void IP_Address::_parse_ipv4(const String &p_string, int p_start, uint8_t *p_ret) {
+void IP_Address::_parse_ipv4(const Godot::String &p_string, int p_start, uint8_t *p_ret) {
 
-	String ip;
+	Godot::String ip;
 	if (p_start != 0) {
 		ip = p_string.substr(p_start, p_string.length() - p_start);
 	} else {
@@ -203,7 +203,7 @@ void IP_Address::set_ipv6(const uint8_t *p_buf) {
 		field8[i] = p_buf[i];
 }
 
-IP_Address::IP_Address(const String &p_string) {
+IP_Address::IP_Address(const Godot::String &p_string) {
 
 	clear();
 
