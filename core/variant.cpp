@@ -3287,7 +3287,7 @@ uint32_t Variant::hash() const {
 			const std::vector<uint8_t> &arr = PackedArrayRef<uint8_t>::get_array(_data.packed_array);
 			int len = arr.size();
 			if (likely(len)) {
-				const uint8_t *r = arr.ptr();
+				const uint8_t *r = arr.data();
 				return hash_djb2_buffer((uint8_t *)&r[0], len);
 			} else {
 				return hash_djb2_one_64(0);
@@ -3299,7 +3299,7 @@ uint32_t Variant::hash() const {
 			const std::vector<int32_t> &arr = PackedArrayRef<int32_t>::get_array(_data.packed_array);
 			int len = arr.size();
 			if (likely(len)) {
-				const int32_t *r = arr.ptr();
+				const int32_t *r = arr.data();
 				return hash_djb2_buffer((uint8_t *)&r[0], len * sizeof(int32_t));
 			} else {
 				return hash_djb2_one_64(0);
@@ -3311,7 +3311,7 @@ uint32_t Variant::hash() const {
 			const std::vector<int64_t> &arr = PackedArrayRef<int64_t>::get_array(_data.packed_array);
 			int len = arr.size();
 			if (likely(len)) {
-				const int64_t *r = arr.ptr();
+				const int64_t *r = arr.data();
 				return hash_djb2_buffer((uint8_t *)&r[0], len * sizeof(int64_t));
 			} else {
 				return hash_djb2_one_64(0);
@@ -3324,7 +3324,7 @@ uint32_t Variant::hash() const {
 			int len = arr.size();
 
 			if (likely(len)) {
-				const float *r = arr.ptr();
+				const float *r = arr.data();
 				return hash_djb2_buffer((uint8_t *)&r[0], len * sizeof(float));
 			} else {
 				return hash_djb2_one_float(0.0);
@@ -3337,7 +3337,7 @@ uint32_t Variant::hash() const {
 			int len = arr.size();
 
 			if (likely(len)) {
-				const double *r = arr.ptr();
+				const double *r = arr.data();
 				return hash_djb2_buffer((uint8_t *)&r[0], len * sizeof(double));
 			} else {
 				return hash_djb2_one_float(0.0);
@@ -3351,7 +3351,7 @@ uint32_t Variant::hash() const {
 			int len = arr.size();
 
 			if (likely(len)) {
-				const Godot::String *r = arr.ptr();
+				const Godot::String *r = arr.data();
 
 				for (int i = 0; i < len; i++) {
 					hash = hash_djb2_one_32(r[i].hash(), hash);
@@ -3367,7 +3367,7 @@ uint32_t Variant::hash() const {
 			int len = arr.size();
 
 			if (likely(len)) {
-				const Vector2 *r = arr.ptr();
+				const Vector2 *r = arr.data();
 
 				for (int i = 0; i < len; i++) {
 					hash = hash_djb2_one_float(r[i].x, hash);
@@ -3384,7 +3384,7 @@ uint32_t Variant::hash() const {
 			int len = arr.size();
 
 			if (likely(len)) {
-				const Vector3 *r = arr.ptr();
+				const Vector3 *r = arr.data();
 
 				for (int i = 0; i < len; i++) {
 					hash = hash_djb2_one_float(r[i].x, hash);
@@ -3402,7 +3402,7 @@ uint32_t Variant::hash() const {
 			int len = arr.size();
 
 			if (likely(len)) {
-				const Color *r = arr.ptr();
+				const Color *r = arr.data();
 
 				for (int i = 0; i < len; i++) {
 					hash = hash_djb2_one_float(r[i].r, hash);
@@ -3452,8 +3452,8 @@ uint32_t Variant::hash() const {
 	if (l.size() != r.size())                                           \
 		return false;                                                   \
                                                                         \
-	const p_type *lr = l.ptr();                                         \
-	const p_type *rr = r.ptr();                                         \
+	const p_type *lr = l.data();                                         \
+	const p_type *rr = r.data();                                         \
                                                                         \
 	for (int i = 0; i < l.size(); ++i) {                                \
 		if (!p_compare_func((lr[i]), (rr[i])))                          \
