@@ -53,9 +53,9 @@ class StringName {
 	struct _Data {
 		SafeRefCount refcount;
 		const char *cname;
-		Godot::String name;
+		String name;
 
-		Godot::String get_name() const { return cname ? Godot::String(cname) : name; }
+		String get_name() const { return cname ? String(cname) : name; }
 		int idx;
 		uint32_t hash;
 		_Data *prev;
@@ -92,9 +92,9 @@ class StringName {
 public:
 	operator const void *() const { return (_data && (_data->cname || !_data->name.empty())) ? (void *)1 : 0; }
 
-	bool operator==(const Godot::String &p_name) const;
+	bool operator==(const String &p_name) const;
 	bool operator==(const char *p_name) const;
-	bool operator!=(const Godot::String &p_name) const;
+	bool operator!=(const String &p_name) const;
 	_FORCE_INLINE_ bool operator<(const StringName &p_name) const {
 
 		return _data < p_name._data;
@@ -116,21 +116,21 @@ public:
 	}
 	bool operator!=(const StringName &p_name) const;
 
-	_FORCE_INLINE_ operator Godot::String() const {
+	_FORCE_INLINE_ operator String() const {
 
 		if (_data) {
 			if (_data->cname)
-				return Godot::String(_data->cname);
+				return String(_data->cname);
 			else
 				return _data->name;
 		}
 
-		return Godot::String();
+		return String();
 	}
 
 	static StringName search(const char *p_name);
 	static StringName search(const CharType *p_name);
-	static StringName search(const Godot::String &p_name);
+	static StringName search(const String &p_name);
 
 	struct AlphCompare {
 
@@ -158,7 +158,7 @@ public:
 	void operator=(const StringName &p_name);
 	StringName(const char *p_name);
 	StringName(const StringName &p_name);
-	StringName(const Godot::String &p_name);
+	StringName(const String &p_name);
 	StringName(const StaticCString &p_static_string);
 	StringName();
 	~StringName();

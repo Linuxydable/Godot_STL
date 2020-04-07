@@ -32,9 +32,8 @@
 #define ERROR_MACROS_H
 
 #include "core/typedefs.h"
-#include "core/variant.h"
 
-class Godot::String;
+class String;
 
 enum ErrorHandlerType {
 	ERR_HANDLER_ERROR,
@@ -66,13 +65,13 @@ void remove_error_handler(ErrorHandlerList *p_handler);
 
 // Functions used by the error macros.
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
-void _err_print_error(const char *p_function, const char *p_file, int p_line, const Godot::String &p_error, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
 void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const char *p_message, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
-void _err_print_error(const char *p_function, const char *p_file, int p_line, const Godot::String &p_error, const char *p_message, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
-void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const Godot::String &p_message, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
-void _err_print_error(const char *p_function, const char *p_file, int p_line, const Godot::String &p_error, const Godot::String &p_message, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const char *p_message, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const char *p_error, const String &p_message, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
+void _err_print_error(const char *p_function, const char *p_file, int p_line, const String &p_error, const String &p_message, ErrorHandlerType p_type = ERR_HANDLER_ERROR);
 void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const char *p_message = "", bool fatal = false);
-void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const Godot::String &p_message, bool fatal = false);
+void _err_print_index_error(const char *p_function, const char *p_file, int p_line, int64_t p_index, int64_t p_size, const char *p_index_str, const char *p_size_str, const String &p_message, bool fatal = false);
 
 #ifdef __GNUC__
 //#define FUNCTION_STR __PRETTY_FUNCTION__ - too annoying
@@ -381,13 +380,12 @@ void _err_print_index_error(const char *p_function, const char *p_file, int p_li
  * If checking for null use ERR_FAIL_NULL_V_MSG instead.
  * If checking index bounds use ERR_FAIL_INDEX_V_MSG instead.
  */
-Variant ERR_FAIL_COND_V_MSG(bool m_cond, Variant m_retval, Godot::String m_msg) {
-	if (unlikely(m_cond)) {
-		_err_print_error(__FUNCTION__, __FILE__, __LINE__, "Condition \"" _STR(m_cond) "\" is true. returned: " _STR(m_retval), m_msg);
-		return m_retval;
-	} else
-		return NULL;
-}
+#define ERR_FAIL_COND_V_MSG(m_cond, m_retval, m_msg)                                                                                               \
+	if (unlikely(m_cond)) {                                                                                                                        \
+		_err_print_error(FUNCTION_STR, __FILE__, __LINE__, "Condition \"" _STR(m_cond) "\" is true. returned: " _STR(m_retval), DEBUG_STR(m_msg)); \
+		return m_retval;                                                                                                                           \
+	} else                                                                                                                                         \
+		((void)0)
 
 /**
  * Try using `ERR_CONTINUE_MSG`.

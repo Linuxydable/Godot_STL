@@ -72,7 +72,7 @@ public:
 
 	_FORCE_INLINE_ bool operator==(const Plane &p_plane) const;
 	_FORCE_INLINE_ bool operator!=(const Plane &p_plane) const;
-	operator Godot::String() const;
+	operator String() const;
 
 	_FORCE_INLINE_ Plane() :
 			d(0) {}

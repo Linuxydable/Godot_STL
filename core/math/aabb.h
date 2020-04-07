@@ -101,7 +101,7 @@ public:
 	_FORCE_INLINE_ void project_range_in_plane(const Plane &p_plane, real_t &r_min, real_t &r_max) const;
 	_FORCE_INLINE_ void expand_to(const Vector3 &p_vector); /** expand to contain a point if necessary */
 
-	operator Godot::String() const;
+	operator String() const;
 
 	_FORCE_INLINE_ AABB() {}
 	inline AABB(const Vector3 &p_pos, const Vector3 &p_size) :

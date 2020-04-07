@@ -64,15 +64,15 @@
 #define IS_HEX_DIGIT(m_d) (((m_d) >= '0' && (m_d) <= '9') || ((m_d) >= 'a' && (m_d) <= 'f') || ((m_d) >= 'A' && (m_d) <= 'F'))
 
 const char CharString::_null = 0;
-const CharType Godot::String::_null = 0;
+const CharType String::_null = 0;
 
 bool is_symbol(CharType c) {
 	return c != '_' && ((c >= '!' && c <= '/') || (c >= ':' && c <= '@') || (c >= '[' && c <= '`') || (c >= '{' && c <= '~') || c == '\t' || c == ' ');
 }
 
-bool select_word(const Godot::String &p_s, int p_col, int &r_beg, int &r_end) {
+bool select_word(const String &p_s, int p_col, int &r_beg, int &r_end) {
 
-	const Godot::String &s = p_s;
+	const String &s = p_s;
 	int beg = CLAMP(p_col, 0, s.length());
 	int end = beg;
 
@@ -155,7 +155,7 @@ void CharString::copy_from(const char *p_cstr) {
 	memcpy(ptrw(), p_cstr, len);
 }
 
-void Godot::String::copy_from(const char *p_cstr) {
+void String::copy_from(const char *p_cstr) {
 
 	if (!p_cstr) {
 
@@ -184,7 +184,7 @@ void Godot::String::copy_from(const char *p_cstr) {
 	}
 }
 
-void Godot::String::copy_from(const CharType *p_cstr, const int p_clip_to) {
+void String::copy_from(const CharType *p_cstr, const int p_clip_to) {
 
 	if (!p_cstr) {
 
@@ -210,7 +210,7 @@ void Godot::String::copy_from(const CharType *p_cstr, const int p_clip_to) {
 // p_char != nullptr
 // p_length > 0
 // p_length <= p_char strlen
-void Godot::String::copy_from_unchecked(const CharType *p_char, const int p_length) {
+void String::copy_from_unchecked(const CharType *p_char, const int p_length) {
 	resize(p_length + 1);
 	set(p_length, 0);
 
@@ -221,14 +221,14 @@ void Godot::String::copy_from_unchecked(const CharType *p_char, const int p_leng
 	}
 }
 
-void Godot::String::copy_from(const CharType &p_char) {
+void String::copy_from(const CharType &p_char) {
 
 	resize(2);
 	set(0, p_char);
 	set(1, 0);
 }
 
-bool Godot::String::operator==(const Godot::String &p_str) const {
+bool String::operator==(const String &p_str) const {
 
 	if (length() != p_str.length())
 		return false;
@@ -250,27 +250,27 @@ bool Godot::String::operator==(const Godot::String &p_str) const {
 	return true;
 }
 
-bool Godot::String::operator!=(const Godot::String &p_str) const {
+bool String::operator!=(const String &p_str) const {
 
 	return !(*this == p_str);
 }
 
-Godot::String Godot::String::operator+(const Godot::String &p_str) const {
+String String::operator+(const String &p_str) const {
 
-	Godot::String res = *this;
+	String res = *this;
 	res += p_str;
 	return res;
 }
 
 /*
-Godot::String Godot::String::operator+(CharType p_chr)  const {
+String String::operator+(CharType p_chr)  const {
 
-	Godot::String res=*this;
+	String res=*this;
 	res+=p_chr;
 	return res;
 }
 */
-Godot::String &Godot::String::operator+=(const Godot::String &p_str) {
+String &String::operator+=(const String &p_str) {
 
 	if (empty()) {
 		*this = p_str;
@@ -295,13 +295,13 @@ Godot::String &Godot::String::operator+=(const Godot::String &p_str) {
 	return *this;
 }
 
-Godot::String &Godot::String::operator+=(const CharType *p_str) {
+String &String::operator+=(const CharType *p_str) {
 
-	*this += Godot::String(p_str);
+	*this += String(p_str);
 	return *this;
 }
 
-Godot::String &Godot::String::operator+=(CharType p_char) {
+String &String::operator+=(CharType p_char) {
 
 	resize(size() ? size() + 1 : 2);
 	set(length(), 0);
@@ -310,7 +310,7 @@ Godot::String &Godot::String::operator+=(CharType p_char) {
 	return *this;
 }
 
-Godot::String &Godot::String::operator+=(const char *p_str) {
+String &String::operator+=(const char *p_str) {
 
 	if (!p_str || p_str[0] == 0)
 		return *this;
@@ -334,17 +334,17 @@ Godot::String &Godot::String::operator+=(const char *p_str) {
 	return *this;
 }
 
-void Godot::String::operator=(const char *p_str) {
+void String::operator=(const char *p_str) {
 
 	copy_from(p_str);
 }
 
-void Godot::String::operator=(const CharType *p_str) {
+void String::operator=(const CharType *p_str) {
 
 	copy_from(p_str);
 }
 
-bool Godot::String::operator==(const StrRange &p_str_range) const {
+bool String::operator==(const StrRange &p_str_range) const {
 
 	int len = p_str_range.len;
 
@@ -366,7 +366,7 @@ bool Godot::String::operator==(const StrRange &p_str_range) const {
 	return true;
 }
 
-bool Godot::String::operator==(const char *p_str) const {
+bool String::operator==(const char *p_str) const {
 
 	int len = 0;
 	const char *aux = p_str;
@@ -393,7 +393,7 @@ bool Godot::String::operator==(const char *p_str) const {
 	return true;
 }
 
-bool Godot::String::operator==(const CharType *p_str) const {
+bool String::operator==(const CharType *p_str) const {
 
 	int len = 0;
 	const CharType *aux = p_str;
@@ -420,17 +420,17 @@ bool Godot::String::operator==(const CharType *p_str) const {
 	return true;
 }
 
-bool Godot::String::operator!=(const char *p_str) const {
+bool String::operator!=(const char *p_str) const {
 
 	return (!(*this == p_str));
 }
 
-bool Godot::String::operator!=(const CharType *p_str) const {
+bool String::operator!=(const CharType *p_str) const {
 
 	return (!(*this == p_str));
 }
 
-bool Godot::String::operator<(const CharType *p_str) const {
+bool String::operator<(const CharType *p_str) const {
 
 	if (empty() && p_str[0] == 0)
 		return false;
@@ -440,12 +440,12 @@ bool Godot::String::operator<(const CharType *p_str) const {
 	return is_str_less(c_str(), p_str);
 }
 
-bool Godot::String::operator<=(const Godot::String &p_str) const {
+bool String::operator<=(const String &p_str) const {
 
 	return (*this < p_str) || (*this == p_str);
 }
 
-bool Godot::String::operator<(const char *p_str) const {
+bool String::operator<(const char *p_str) const {
 
 	if (empty() && p_str[0] == 0)
 		return false;
@@ -455,12 +455,12 @@ bool Godot::String::operator<(const char *p_str) const {
 	return is_str_less(c_str(), p_str);
 }
 
-bool Godot::String::operator<(const Godot::String &p_str) const {
+bool String::operator<(const String &p_str) const {
 
 	return operator<(p_str.c_str());
 }
 
-signed char Godot::String::nocasecmp_to(const Godot::String &p_str) const {
+signed char String::nocasecmp_to(const String &p_str) const {
 
 	if (empty() && p_str.empty())
 		return 0;
@@ -490,7 +490,7 @@ signed char Godot::String::nocasecmp_to(const Godot::String &p_str) const {
 	}
 }
 
-signed char Godot::String::casecmp_to(const Godot::String &p_str) const {
+signed char String::casecmp_to(const String &p_str) const {
 
 	if (empty() && p_str.empty())
 		return 0;
@@ -520,7 +520,7 @@ signed char Godot::String::casecmp_to(const Godot::String &p_str) const {
 	}
 }
 
-signed char Godot::String::naturalnocasecmp_to(const Godot::String &p_str) const {
+signed char String::naturalnocasecmp_to(const String &p_str) const {
 
 	const CharType *this_str = c_str();
 	const CharType *that_str = p_str.c_str();
@@ -582,18 +582,18 @@ signed char Godot::String::naturalnocasecmp_to(const Godot::String &p_str) const
 	return 0;
 }
 
-void Godot::String::erase(int p_pos, int p_chars) {
+void String::erase(int p_pos, int p_chars) {
 
 	*this = left(p_pos) + substr(p_pos + p_chars, length() - ((p_pos + p_chars)));
 }
 
-Godot::String Godot::String::capitalize() const {
+String String::capitalize() const {
 
-	Godot::String aux = this->camelcase_to_underscore(true).replace("_", " ").strip_edges();
-	Godot::String cap;
+	String aux = this->camelcase_to_underscore(true).replace("_", " ").strip_edges();
+	String cap;
 	for (int i = 0; i < aux.get_slice_count(" "); i++) {
 
-		Godot::String slice = aux.get_slicec(' ', i);
+		String slice = aux.get_slicec(' ', i);
 		if (slice.length() > 0) {
 
 			slice[0] = _find_upper(slice[0]);
@@ -606,9 +606,9 @@ Godot::String Godot::String::capitalize() const {
 	return cap;
 }
 
-Godot::String Godot::String::camelcase_to_underscore(bool lowercase) const {
+String String::camelcase_to_underscore(bool lowercase) const {
 	const CharType *cstr = c_str();
-	Godot::String new_string;
+	String new_string;
 	const char A = 'A', Z = 'Z';
 	const char a = 'a', z = 'z';
 	int start_index = 0;
@@ -648,9 +648,9 @@ Godot::String Godot::String::camelcase_to_underscore(bool lowercase) const {
 	return lowercase ? new_string.to_lower() : new_string;
 }
 
-Godot::String Godot::String::get_with_code_lines() const {
-	std::vector<Godot::String> lines = split("\n");
-	Godot::String ret;
+String String::get_with_code_lines() const {
+	Vector<String> lines = split("\n");
+	String ret;
 	for (int i = 0; i < lines.size(); i++) {
 		if (i > 0) {
 			ret += "\n";
@@ -659,7 +659,7 @@ Godot::String Godot::String::get_with_code_lines() const {
 	}
 	return ret;
 }
-int Godot::String::get_slice_count(Godot::String p_splitter) const {
+int String::get_slice_count(String p_splitter) const {
 
 	if (empty())
 		return 0;
@@ -678,7 +678,7 @@ int Godot::String::get_slice_count(Godot::String p_splitter) const {
 	return slices;
 }
 
-Godot::String Godot::String::get_slice(Godot::String p_splitter, int p_slice) const {
+String String::get_slice(String p_splitter, int p_slice) const {
 
 	if (empty() || p_splitter.empty())
 		return "";
@@ -716,13 +716,13 @@ Godot::String Godot::String::get_slice(Godot::String p_splitter, int p_slice) co
 	return ""; //no find!
 }
 
-Godot::String Godot::String::get_slicec(CharType p_splitter, int p_slice) const {
+String String::get_slicec(CharType p_splitter, int p_slice) const {
 
 	if (empty())
-		return Godot::String();
+		return String();
 
 	if (p_slice < 0)
-		return Godot::String();
+		return String();
 
 	const CharType *c = this->ptr();
 	int i = 0;
@@ -736,7 +736,7 @@ Godot::String Godot::String::get_slicec(CharType p_splitter, int p_slice) const 
 
 				return substr(prev, i - prev);
 			} else if (c[i] == 0) {
-				return Godot::String();
+				return String();
 			} else {
 				count++;
 				prev = i + 1;
@@ -747,9 +747,9 @@ Godot::String Godot::String::get_slicec(CharType p_splitter, int p_slice) const 
 	}
 }
 
-std::vector<Godot::String> Godot::String::split_spaces() const {
+std::vector<String> String::split_spaces() const {
 
-	std::vector<Godot::String> ret;
+	std::vector<String> ret;
 	int from = 0;
 	int i = 0;
 	int len = length();
@@ -784,9 +784,9 @@ std::vector<Godot::String> Godot::String::split_spaces() const {
 	return ret;
 }
 
-std::vector<Godot::String> Godot::String::split(const Godot::String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
+std::vector<String> String::split(const String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
 
-	std::vector<Godot::String> ret;
+	std::vector<String> ret;
 	int from = 0;
 	int len = length();
 
@@ -820,9 +820,9 @@ std::vector<Godot::String> Godot::String::split(const Godot::String &p_splitter,
 	return ret;
 }
 
-std::vector<Godot::String> Godot::String::rsplit(const Godot::String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
+std::vector<String> String::rsplit(const String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
 
-	std::vector<Godot::String> ret;
+	std::vector<String> ret;
 	const int len = length();
 	int remaining_len = len;
 
@@ -856,7 +856,7 @@ std::vector<Godot::String> Godot::String::rsplit(const Godot::String &p_splitter
 	return ret;
 }
 
-std::vector<float> Godot::String::split_floats(const Godot::String &p_splitter, bool p_allow_empty) const {
+std::vector<float> String::split_floats(const String &p_splitter, bool p_allow_empty) const {
 
 	std::vector<float> ret;
 	int from = 0;
@@ -868,7 +868,7 @@ std::vector<float> Godot::String::split_floats(const Godot::String &p_splitter, 
 		if (end < 0)
 			end = len;
 		if (p_allow_empty || (end > from))
-			ret.push_back(Godot::String::to_double(&c_str()[from]));
+			ret.push_back(String::to_double(&c_str()[from]));
 
 		if (end == len)
 			break;
@@ -879,7 +879,7 @@ std::vector<float> Godot::String::split_floats(const Godot::String &p_splitter, 
 	return ret;
 }
 
-std::vector<float> Godot::String::split_floats_mk(const std::vector<Godot::String> &p_splitters, bool p_allow_empty) const {
+std::vector<float> String::split_floats_mk(const std::vector<String> &p_splitters, bool p_allow_empty) const {
 
 	std::vector<float> ret;
 	int from = 0;
@@ -897,7 +897,7 @@ std::vector<float> Godot::String::split_floats_mk(const std::vector<Godot::Strin
 		}
 
 		if (p_allow_empty || (end > from)) {
-			ret.push_back(Godot::String::to_double(&c_str()[from]));
+			ret.push_back(String::to_double(&c_str()[from]));
 		}
 
 		if (end == len)
@@ -909,7 +909,7 @@ std::vector<float> Godot::String::split_floats_mk(const std::vector<Godot::Strin
 	return ret;
 }
 
-std::vector<int> Godot::String::split_ints(const Godot::String &p_splitter, bool p_allow_empty) const {
+std::vector<int> String::split_ints(const String &p_splitter, bool p_allow_empty) const {
 
 	std::vector<int> ret;
 	int from = 0;
@@ -921,7 +921,7 @@ std::vector<int> Godot::String::split_ints(const Godot::String &p_splitter, bool
 		if (end < 0)
 			end = len;
 		if (p_allow_empty || (end > from))
-			ret.push_back(Godot::String::to_int(&c_str()[from], end - from));
+			ret.push_back(String::to_int(&c_str()[from], end - from));
 
 		if (end == len)
 			break;
@@ -932,7 +932,7 @@ std::vector<int> Godot::String::split_ints(const Godot::String &p_splitter, bool
 	return ret;
 }
 
-std::vector<int> Godot::String::split_ints_mk(const std::vector<Godot::String> &p_splitters, bool p_allow_empty) const {
+std::vector<int> String::split_ints_mk(const std::vector<String> &p_splitters, bool p_allow_empty) const {
 
 	std::vector<int> ret;
 	int from = 0;
@@ -950,7 +950,7 @@ std::vector<int> Godot::String::split_ints_mk(const std::vector<Godot::String> &
 		}
 
 		if (p_allow_empty || (end > from))
-			ret.push_back(Godot::String::to_int(&c_str()[from], end - from));
+			ret.push_back(String::to_int(&c_str()[from], end - from));
 
 		if (end == len)
 			break;
@@ -961,8 +961,8 @@ std::vector<int> Godot::String::split_ints_mk(const std::vector<Godot::String> &
 	return ret;
 }
 
-Godot::String Godot::String::join(std::vector<Godot::String> parts) {
-	Godot::String ret;
+String String::join(std::vector<String> parts) {
+	String ret;
 
 	if (!parts.empty()) {
 		ret += parts.front();
@@ -976,19 +976,19 @@ Godot::String Godot::String::join(std::vector<Godot::String> parts) {
 	return ret;
 }
 
-CharType Godot::String::char_uppercase(CharType p_char) {
+CharType String::char_uppercase(CharType p_char) {
 
 	return _find_upper(p_char);
 }
 
-CharType Godot::String::char_lowercase(CharType p_char) {
+CharType String::char_lowercase(CharType p_char) {
 
 	return _find_lower(p_char);
 }
 
-Godot::String Godot::String::to_upper() const {
+String String::to_upper() const {
 
-	Godot::String upper = *this;
+	String upper = *this;
 
 	for (int i = 0; i < upper.size(); i++) {
 
@@ -1001,9 +1001,9 @@ Godot::String Godot::String::to_upper() const {
 	return upper;
 }
 
-Godot::String Godot::String::to_lower() const {
+String String::to_lower() const {
 
-	Godot::String lower = *this;
+	String lower = *this;
 
 	for (int i = 0; i < lower.size(); i++) {
 
@@ -1016,21 +1016,21 @@ Godot::String Godot::String::to_lower() const {
 	return lower;
 }
 
-const CharType *Godot::String::c_str() const {
+const CharType *String::c_str() const {
 
 	static const CharType zero = 0;
 
 	return size() ? &operator[](0) : &zero;
 }
 
-Godot::String Godot::String::md5(const uint8_t *p_md5) {
-	return Godot::String::hex_encode_buffer(p_md5, 16);
+String String::md5(const uint8_t *p_md5) {
+	return String::hex_encode_buffer(p_md5, 16);
 }
 
-Godot::String Godot::String::hex_encode_buffer(const uint8_t *p_buffer, int p_len) {
+String String::hex_encode_buffer(const uint8_t *p_buffer, int p_len) {
 	static const char hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
-	Godot::String ret;
+	String ret;
 	char v[2] = { 0, 0 };
 
 	for (int i = 0; i < p_len; i++) {
@@ -1043,12 +1043,12 @@ Godot::String Godot::String::hex_encode_buffer(const uint8_t *p_buffer, int p_le
 	return ret;
 }
 
-Godot::String Godot::String::chr(CharType p_char) {
+String String::chr(CharType p_char) {
 
 	CharType c[2] = { p_char, 0 };
-	return Godot::String(c);
+	return String(c);
 }
-Godot::String Godot::String::num(double p_num, int p_decimals) {
+String String::num(double p_num, int p_decimals) {
 
 #ifndef NO_USE_STDLIB
 
@@ -1121,8 +1121,8 @@ Godot::String Godot::String::num(double p_num, int p_decimals) {
 	return buf;
 #else
 
-	Godot::String s;
-	Godot::String sd;
+	String s;
+	String sd;
 	/* integer part */
 
 	bool neg = p_num < 0;
@@ -1175,7 +1175,7 @@ Godot::String Godot::String::num(double p_num, int p_decimals) {
 			}
 		}
 
-		Godot::String decimal;
+		String decimal;
 		for (int i = 0; i < digit; i++) {
 
 			char num[2] = { 0, 0 };
@@ -1205,7 +1205,7 @@ Godot::String Godot::String::num(double p_num, int p_decimals) {
 #endif
 }
 
-Godot::String Godot::String::num_int64(int64_t p_num, int base, bool capitalize_hex) {
+String String::num_int64(int64_t p_num, int base, bool capitalize_hex) {
 
 	bool sign = p_num < 0;
 
@@ -1219,7 +1219,7 @@ Godot::String Godot::String::num_int64(int64_t p_num, int base, bool capitalize_
 
 	if (sign)
 		chars++;
-	Godot::String s;
+	String s;
 	s.resize(chars + 1);
 	CharType *c = s.ptrw();
 	c[chars] = 0;
@@ -1242,7 +1242,7 @@ Godot::String Godot::String::num_int64(int64_t p_num, int base, bool capitalize_
 	return s;
 }
 
-Godot::String Godot::String::num_uint64(uint64_t p_num, int base, bool capitalize_hex) {
+String String::num_uint64(uint64_t p_num, int base, bool capitalize_hex) {
 
 	uint64_t n = p_num;
 
@@ -1252,7 +1252,7 @@ Godot::String Godot::String::num_uint64(uint64_t p_num, int base, bool capitaliz
 		chars++;
 	} while (n);
 
-	Godot::String s;
+	String s;
 	s.resize(chars + 1);
 	CharType *c = s.ptrw();
 	c[chars] = 0;
@@ -1272,10 +1272,10 @@ Godot::String Godot::String::num_uint64(uint64_t p_num, int base, bool capitaliz
 	return s;
 }
 
-Godot::String Godot::String::num_real(double p_num) {
+String String::num_real(double p_num) {
 
-	Godot::String s;
-	Godot::String sd;
+	String s;
+	String sd;
 	/* integer part */
 
 	bool neg = p_num < 0;
@@ -1322,7 +1322,7 @@ Godot::String Godot::String::num_real(double p_num) {
 			}
 		}
 
-		Godot::String decimal;
+		String decimal;
 		for (int i = 0; i < digit; i++) {
 
 			char num[2] = { 0, 0 };
@@ -1353,7 +1353,7 @@ Godot::String Godot::String::num_real(double p_num) {
 	return s;
 }
 
-Godot::String Godot::String::num_scientific(double p_num) {
+String String::num_scientific(double p_num) {
 
 #ifndef NO_USE_STDLIB
 
@@ -1380,11 +1380,11 @@ Godot::String Godot::String::num_scientific(double p_num) {
 	return buf;
 #else
 
-	return Godot::String::num(p_num);
+	return String::num(p_num);
 #endif
 }
 
-CharString Godot::String::ascii(bool p_allow_extended) const {
+CharString String::ascii(bool p_allow_extended) const {
 
 	if (!length())
 		return CharString();
@@ -1398,22 +1398,22 @@ CharString Godot::String::ascii(bool p_allow_extended) const {
 	return cs;
 }
 
-Godot::String Godot::String::utf8(const char *p_utf8, int p_len) {
+String String::utf8(const char *p_utf8, int p_len) {
 
-	Godot::String ret;
+	String ret;
 	ret.parse_utf8(p_utf8, p_len);
 
 	return ret;
 };
 
-bool Godot::String::parse_utf8(const char *p_utf8, int p_len) {
+bool String::parse_utf8(const char *p_utf8, int p_len) {
 
-#define _UNICERROR(m_err) print_line("Unicode parsing error: " + Godot::String(m_err) + ". Is the string valid UTF-8?");
+#define _UNICERROR(m_err) print_line("Unicode parsing error: " + String(m_err) + ". Is the string valid UTF-8?");
 
 	if (!p_utf8)
 		return true;
 
-	Godot::String aux;
+	String aux;
 
 	int cstr_size = 0;
 	int str_size = 0;
@@ -1562,7 +1562,7 @@ bool Godot::String::parse_utf8(const char *p_utf8, int p_len) {
 	return false;
 }
 
-CharString Godot::String::utf8() const {
+CharString String::utf8() const {
 
 	int l = length();
 	if (!l)
@@ -1644,29 +1644,32 @@ CharString Godot::String::utf8() const {
 }
 
 /*
-Godot::String::Godot::String(CharType p_char) {
+String::String(CharType p_char) {
 
 	shared=nullptr;
 	copy_from(p_char);
 }
 */
 
-Godot::String::String(const char *p_str) {
+String::String(const char *p_str) {
+
 	copy_from(p_str);
 }
 
-Godot::String::String(const CharType *p_str, int p_clip_to_len) {
+String::String(const CharType *p_str, int p_clip_to_len) {
+
 	copy_from(p_str, p_clip_to_len);
 }
 
-Godot::String::String(const StrRange &p_range) {
+String::String(const StrRange &p_range) {
+
 	if (!p_range.c_str)
 		return;
 
 	copy_from(p_range.c_str, p_range.len);
 }
 
-int Godot::String::hex_to_int(bool p_with_prefix) const {
+int String::hex_to_int(bool p_with_prefix) const {
 
 	if (p_with_prefix && length() < 3)
 		return 0;
@@ -1708,7 +1711,7 @@ int Godot::String::hex_to_int(bool p_with_prefix) const {
 	return hex * sign;
 }
 
-int64_t Godot::String::hex_to_int64(bool p_with_prefix) const {
+int64_t String::hex_to_int64(bool p_with_prefix) const {
 
 	if (p_with_prefix && length() < 3)
 		return 0;
@@ -1750,7 +1753,7 @@ int64_t Godot::String::hex_to_int64(bool p_with_prefix) const {
 	return hex * sign;
 }
 
-int64_t Godot::String::bin_to_int64(bool p_with_prefix) const {
+int64_t String::bin_to_int64(bool p_with_prefix) const {
 
 	if (p_with_prefix && length() < 3)
 		return 0;
@@ -1790,7 +1793,7 @@ int64_t Godot::String::bin_to_int64(bool p_with_prefix) const {
 	return binary * sign;
 }
 
-int Godot::String::to_int() const {
+int String::to_int() const {
 
 	if (length() == 0)
 		return 0;
@@ -1818,7 +1821,7 @@ int Godot::String::to_int() const {
 	return integer * sign;
 }
 
-int64_t Godot::String::to_int64() const {
+int64_t String::to_int64() const {
 
 	if (length() == 0)
 		return 0;
@@ -1846,7 +1849,7 @@ int64_t Godot::String::to_int64() const {
 	return integer * sign;
 }
 
-int Godot::String::to_int(const char *p_str, int p_len) {
+int String::to_int(const char *p_str, int p_len) {
 
 	int to = 0;
 	if (p_len >= 0)
@@ -1864,7 +1867,7 @@ int Godot::String::to_int(const char *p_str, int p_len) {
 		char c = p_str[i];
 		if (c >= '0' && c <= '9') {
 
-			ERR_FAIL_COND_V_MSG(integer > INT32_MAX / 10, sign == 1 ? INT32_MAX : INT32_MIN, "Cannot represent " + Godot::String(p_str).substr(0, to) + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
+			ERR_FAIL_COND_V_MSG(integer > INT32_MAX / 10, sign == 1 ? INT32_MAX : INT32_MIN, "Cannot represent " + String(p_str).substr(0, to) + " as integer, provided value is " + (sign == 1 ? "too big." : "too small."));
 			integer *= 10;
 			integer += c - '0';
 
@@ -1878,7 +1881,7 @@ int Godot::String::to_int(const char *p_str, int p_len) {
 	return integer * sign;
 }
 
-bool Godot::String::is_numeric() const {
+bool String::is_numeric() const {
 
 	if (length() == 0) {
 		return false;
@@ -2120,7 +2123,7 @@ done:
 #define READING_EXP 3
 #define READING_DONE 4
 
-double Godot::String::to_double(const char *p_str) {
+double String::to_double(const char *p_str) {
 
 #ifndef NO_USE_STDLIB
 	return built_in_strtod<char>(p_str);
@@ -2130,17 +2133,17 @@ double Godot::String::to_double(const char *p_str) {
 #endif
 }
 
-float Godot::String::to_float() const {
+float String::to_float() const {
 
 	return to_double();
 }
 
-double Godot::String::to_double(const CharType *p_str, const CharType **r_end) {
+double String::to_double(const CharType *p_str, const CharType **r_end) {
 
 	return built_in_strtod<CharType>(p_str, (CharType **)r_end);
 }
 
-int64_t Godot::String::to_int(const CharType *p_str, int p_len) {
+int64_t String::to_int(const CharType *p_str, int p_len) {
 
 	if (p_len == 0 || !p_str[0])
 		return 0;
@@ -2179,7 +2182,7 @@ int64_t Godot::String::to_int(const CharType *p_str, int p_len) {
 				if (c >= '0' && c <= '9') {
 
 					if (integer > INT64_MAX / 10) {
-						Godot::String number("");
+						String number("");
 						str = p_str;
 						while (*str && str != limit) {
 							number += *(str++);
@@ -2199,7 +2202,7 @@ int64_t Godot::String::to_int(const CharType *p_str, int p_len) {
 	return sign * integer;
 }
 
-double Godot::String::to_double() const {
+double String::to_double() const {
 
 	if (empty())
 		return 0;
@@ -2211,23 +2214,23 @@ double Godot::String::to_double() const {
 #endif
 }
 
-bool operator==(const char *p_chr, const Godot::String &p_str) {
+bool operator==(const char *p_chr, const String &p_str) {
 
 	return p_str == p_chr;
 }
 
-Godot::String operator+(const char *p_chr, const Godot::String &p_str) {
+String operator+(const char *p_chr, const String &p_str) {
 
-	Godot::String tmp = p_chr;
+	String tmp = p_chr;
 	tmp += p_str;
 	return tmp;
 }
-Godot::String operator+(CharType p_chr, const Godot::String &p_str) {
+String operator+(CharType p_chr, const String &p_str) {
 
-	return (Godot::String::chr(p_chr) + p_str);
+	return (String::chr(p_chr) + p_str);
 }
 
-uint32_t Godot::String::hash(const char *p_cstr) {
+uint32_t String::hash(const char *p_cstr) {
 
 	uint32_t hashv = 5381;
 	uint32_t c;
@@ -2238,7 +2241,7 @@ uint32_t Godot::String::hash(const char *p_cstr) {
 	return hashv;
 }
 
-uint32_t Godot::String::hash(const char *p_cstr, int p_len) {
+uint32_t String::hash(const char *p_cstr, int p_len) {
 
 	uint32_t hashv = 5381;
 	for (int i = 0; i < p_len; i++)
@@ -2247,7 +2250,7 @@ uint32_t Godot::String::hash(const char *p_cstr, int p_len) {
 	return hashv;
 }
 
-uint32_t Godot::String::hash(const CharType *p_cstr, int p_len) {
+uint32_t String::hash(const CharType *p_cstr, int p_len) {
 
 	uint32_t hashv = 5381;
 	for (int i = 0; i < p_len; i++)
@@ -2256,7 +2259,7 @@ uint32_t Godot::String::hash(const CharType *p_cstr, int p_len) {
 	return hashv;
 }
 
-uint32_t Godot::String::hash(const CharType *p_cstr) {
+uint32_t String::hash(const CharType *p_cstr) {
 
 	uint32_t hashv = 5381;
 	uint32_t c;
@@ -2267,7 +2270,7 @@ uint32_t Godot::String::hash(const CharType *p_cstr) {
 	return hashv;
 }
 
-uint32_t Godot::String::hash() const {
+uint32_t String::hash() const {
 
 	/* simple djb2 hashing */
 
@@ -2281,7 +2284,7 @@ uint32_t Godot::String::hash() const {
 	return hashv;
 }
 
-uint64_t Godot::String::hash64() const {
+uint64_t String::hash64() const {
 
 	/* simple djb2 hashing */
 
@@ -2295,29 +2298,29 @@ uint64_t Godot::String::hash64() const {
 	return hashv;
 }
 
-Godot::String Godot::String::md5_text() const {
+String String::md5_text() const {
 
 	CharString cs = utf8();
 	unsigned char hash[16];
 	CryptoCore::md5((unsigned char *)cs.ptr(), cs.length(), hash);
-	return Godot::String::hex_encode_buffer(hash, 16);
+	return String::hex_encode_buffer(hash, 16);
 }
 
-Godot::String Godot::String::sha1_text() const {
+String String::sha1_text() const {
 	CharString cs = utf8();
 	unsigned char hash[20];
 	CryptoCore::sha1((unsigned char *)cs.ptr(), cs.length(), hash);
-	return Godot::String::hex_encode_buffer(hash, 20);
+	return String::hex_encode_buffer(hash, 20);
 }
 
-Godot::String Godot::String::sha256_text() const {
+String String::sha256_text() const {
 	CharString cs = utf8();
 	unsigned char hash[32];
 	CryptoCore::sha256((unsigned char *)cs.ptr(), cs.length(), hash);
-	return Godot::String::hex_encode_buffer(hash, 32);
+	return String::hex_encode_buffer(hash, 32);
 }
 
-std::vector<uint8_t> Godot::String::md5_buffer() const {
+std::vector<uint8_t> String::md5_buffer() const {
 
 	CharString cs = utf8();
 	unsigned char hash[16];
@@ -2331,7 +2334,7 @@ std::vector<uint8_t> Godot::String::md5_buffer() const {
 	return ret;
 };
 
-std::vector<uint8_t> Godot::String::sha1_buffer() const {
+std::vector<uint8_t> String::sha1_buffer() const {
 	CharString cs = utf8();
 	unsigned char hash[20];
 	CryptoCore::sha1((unsigned char *)cs.ptr(), cs.length(), hash);
@@ -2345,7 +2348,7 @@ std::vector<uint8_t> Godot::String::sha1_buffer() const {
 	return ret;
 }
 
-std::vector<uint8_t> Godot::String::sha256_buffer() const {
+std::vector<uint8_t> String::sha256_buffer() const {
 	CharString cs = utf8();
 	unsigned char hash[32];
 	CryptoCore::sha256((unsigned char *)cs.ptr(), cs.length(), hash);
@@ -2358,7 +2361,7 @@ std::vector<uint8_t> Godot::String::sha256_buffer() const {
 	return ret;
 }
 
-Godot::String Godot::String::insert(int p_at_pos, const Godot::String &p_string) const {
+String String::insert(int p_at_pos, const String &p_string) const {
 
 	if (p_at_pos < 0)
 		return *this;
@@ -2366,17 +2369,17 @@ Godot::String Godot::String::insert(int p_at_pos, const Godot::String &p_string)
 	if (p_at_pos > length())
 		p_at_pos = length();
 
-	Godot::String pre;
+	String pre;
 	if (p_at_pos > 0)
 		pre = substr(0, p_at_pos);
 
-	Godot::String post;
+	String post;
 	if (p_at_pos < length())
 		post = substr(p_at_pos, length() - p_at_pos);
 
 	return pre + p_string + post;
 }
-Godot::String Godot::String::substr(int p_from, int p_chars) const {
+String String::substr(int p_from, int p_chars) const {
 
 	if (p_chars == -1)
 		p_chars = length() - p_from;
@@ -2391,15 +2394,15 @@ Godot::String Godot::String::substr(int p_from, int p_chars) const {
 
 	if (p_from == 0 && p_chars >= length()) {
 
-		return Godot::String(*this);
+		return String(*this);
 	}
 
-	Godot::String s = Godot::String();
+	String s = String();
 	s.copy_from_unchecked(&c_str()[p_from], p_chars);
 	return s;
 }
 
-int Godot::String::find_last(const Godot::String &p_str) const {
+int String::find_last(const String &p_str) const {
 
 	int pos = -1;
 	int findfrom = 0;
@@ -2413,7 +2416,7 @@ int Godot::String::find_last(const Godot::String &p_str) const {
 	return pos;
 }
 
-int Godot::String::find(const Godot::String &p_str, int p_from) const {
+int String::find(const String &p_str, int p_from) const {
 
 	if (p_from < 0)
 		return -1;
@@ -2454,7 +2457,7 @@ int Godot::String::find(const Godot::String &p_str, int p_from) const {
 	return -1;
 }
 
-int Godot::String::find(const char *p_str, int p_from) const {
+int String::find(const char *p_str, int p_from) const {
 
 	if (p_from < 0)
 		return -1;
@@ -2510,11 +2513,11 @@ int Godot::String::find(const char *p_str, int p_from) const {
 	return -1;
 }
 
-int Godot::String::find_char(const CharType &p_char, int p_from) const {
+int String::find_char(const CharType &p_char, int p_from) const {
 	return _cowdata.find(p_char, p_from);
 }
 
-int Godot::String::findmk(const std::vector<Godot::String> &p_keys, int p_from, int *r_key) const {
+int String::findmk(const std::vector<String> &p_keys, int p_from, int *r_key) const {
 
 	if (p_from < 0)
 		return -1;
@@ -2522,7 +2525,7 @@ int Godot::String::findmk(const std::vector<Godot::String> &p_keys, int p_from, 
 		return -1;
 
 	//int src_len=p_str.length();
-	const Godot::String *keys = &p_keys[0];
+	const String *keys = &p_keys[0];
 	int key_count = p_keys.size();
 	int len = length();
 
@@ -2568,7 +2571,7 @@ int Godot::String::findmk(const std::vector<Godot::String> &p_keys, int p_from, 
 	return -1;
 }
 
-int Godot::String::findn(const Godot::String &p_str, int p_from) const {
+int String::findn(const String &p_str, int p_from) const {
 
 	if (p_from < 0)
 		return -1;
@@ -2609,7 +2612,7 @@ int Godot::String::findn(const Godot::String &p_str, int p_from) const {
 	return -1;
 }
 
-int Godot::String::rfind(const Godot::String &p_str, int p_from) const {
+int String::rfind(const String &p_str, int p_from) const {
 
 	// establish a limit
 	int limit = length() - p_str.length();
@@ -2655,7 +2658,7 @@ int Godot::String::rfind(const Godot::String &p_str, int p_from) const {
 
 	return -1;
 }
-int Godot::String::rfindn(const Godot::String &p_str, int p_from) const {
+int String::rfindn(const String &p_str, int p_from) const {
 
 	// establish a limit
 	int limit = length() - p_str.length();
@@ -2705,7 +2708,7 @@ int Godot::String::rfindn(const Godot::String &p_str, int p_from) const {
 	return -1;
 }
 
-bool Godot::String::ends_with(const Godot::String &p_string) const {
+bool String::ends_with(const String &p_string) const {
 
 	int pos = find_last(p_string);
 	if (pos == -1)
@@ -2713,7 +2716,7 @@ bool Godot::String::ends_with(const Godot::String &p_string) const {
 	return pos + p_string.length() == length();
 }
 
-bool Godot::String::begins_with(const Godot::String &p_string) const {
+bool String::begins_with(const String &p_string) const {
 
 	if (p_string.length() > length())
 		return false;
@@ -2735,7 +2738,7 @@ bool Godot::String::begins_with(const Godot::String &p_string) const {
 	// only if i == l the p_string matches the beginning
 	return i == l;
 }
-bool Godot::String::begins_with(const char *p_string) const {
+bool String::begins_with(const char *p_string) const {
 
 	int l = length();
 	if (l == 0 || !p_string)
@@ -2755,27 +2758,27 @@ bool Godot::String::begins_with(const char *p_string) const {
 	return *p_string == 0;
 }
 
-bool Godot::String::is_enclosed_in(const Godot::String &p_string) const {
+bool String::is_enclosed_in(const String &p_string) const {
 
 	return begins_with(p_string) && ends_with(p_string);
 }
 
-bool Godot::String::is_subsequence_of(const Godot::String &p_string) const {
+bool String::is_subsequence_of(const String &p_string) const {
 
 	return _base_is_subsequence_of(p_string, false);
 }
 
-bool Godot::String::is_subsequence_ofi(const Godot::String &p_string) const {
+bool String::is_subsequence_ofi(const String &p_string) const {
 
 	return _base_is_subsequence_of(p_string, true);
 }
 
-bool Godot::String::is_quoted() const {
+bool String::is_quoted() const {
 
 	return is_enclosed_in("\"") || is_enclosed_in("'");
 }
 
-int Godot::String::_count(const Godot::String &p_string, int p_from, int p_to, bool p_case_insensitive) const {
+int String::_count(const String &p_string, int p_from, int p_to, bool p_case_insensitive) const {
 	if (p_string.empty()) {
 		return 0;
 	}
@@ -2784,7 +2787,7 @@ int Godot::String::_count(const Godot::String &p_string, int p_from, int p_to, b
 	if (len < slen) {
 		return 0;
 	}
-	Godot::String str;
+	String str;
 	if (p_from >= 0 && p_to >= 0) {
 		if (p_to == 0) {
 			p_to = len;
@@ -2792,7 +2795,7 @@ int Godot::String::_count(const Godot::String &p_string, int p_from, int p_to, b
 			return 0;
 		}
 		if (p_from == 0 && p_to == len) {
-			str = Godot::String();
+			str = String();
 			str.copy_from_unchecked(&c_str()[0], len);
 		} else {
 			str = substr(p_from, p_to - p_from);
@@ -2812,15 +2815,15 @@ int Godot::String::_count(const Godot::String &p_string, int p_from, int p_to, b
 	return c;
 }
 
-int Godot::String::count(const Godot::String &p_string, int p_from, int p_to) const {
+int String::count(const String &p_string, int p_from, int p_to) const {
 	return _count(p_string, p_from, p_to, false);
 }
 
-int Godot::String::countn(const Godot::String &p_string, int p_from, int p_to) const {
+int String::countn(const String &p_string, int p_from, int p_to) const {
 	return _count(p_string, p_from, p_to, true);
 }
 
-bool Godot::String::_base_is_subsequence_of(const Godot::String &p_string, bool case_insensitive) const {
+bool String::_base_is_subsequence_of(const String &p_string, bool case_insensitive) const {
 
 	int len = length();
 	if (len == 0) {
@@ -2855,9 +2858,9 @@ bool Godot::String::_base_is_subsequence_of(const Godot::String &p_string, bool 
 	return false;
 }
 
-std::vector<Godot::String> Godot::String::bigrams() const {
+std::vector<String> String::bigrams() const {
 	int n_pairs = length() - 1;
-	std::vector<Godot::String> b;
+	std::vector<String> b;
 	if (n_pairs <= 0) {
 		return b;
 	}
@@ -2869,7 +2872,7 @@ std::vector<Godot::String> Godot::String::bigrams() const {
 }
 
 // Similarity according to Sorensen-Dice coefficient
-float Godot::String::similarity(const Godot::String &p_string) const {
+float String::similarity(const String &p_string) const {
 	if (operator==(p_string)) {
 		// Equal strings are totally similar
 		return 1.0f;
@@ -2879,8 +2882,8 @@ float Godot::String::similarity(const Godot::String &p_string) const {
 		return 0.0f;
 	}
 
-	std::vector<Godot::String> src_bigrams = bigrams();
-	std::vector<Godot::String> tgt_bigrams = p_string.bigrams();
+	std::vector<String> src_bigrams = bigrams();
+	std::vector<String> tgt_bigrams = p_string.bigrams();
 
 	int src_size = src_bigrams.size();
 	int tgt_size = tgt_bigrams.size();
@@ -2913,7 +2916,7 @@ static bool _wildcard_match(const CharType *p_pattern, const CharType *p_string,
 	}
 }
 
-bool Godot::String::match(const Godot::String &p_wildcard) const {
+bool String::match(const String &p_wildcard) const {
 
 	if (!p_wildcard.length() || !length())
 		return false;
@@ -2921,35 +2924,35 @@ bool Godot::String::match(const Godot::String &p_wildcard) const {
 	return _wildcard_match(p_wildcard.c_str(), c_str(), true);
 }
 
-bool Godot::String::matchn(const Godot::String &p_wildcard) const {
+bool String::matchn(const String &p_wildcard) const {
 
 	if (!p_wildcard.length() || !length())
 		return false;
 	return _wildcard_match(p_wildcard.c_str(), c_str(), false);
 }
 
-Godot::String Godot::String::format(const Variant &values, Godot::String placeholder) const {
+String String::format(const Variant &values, String placeholder) const {
 
-	Godot::String new_string = Godot::String(this->ptr());
+	String new_string = String(this->ptr());
 
 	if (values.get_type() == Variant::ARRAY) {
 		Array values_arr = values;
 
 		for (int i = 0; i < values_arr.size(); i++) {
-			Godot::String i_as_str = Godot::String::num_int64(i);
+			String i_as_str = String::num_int64(i);
 
 			if (values_arr[i].get_type() == Variant::ARRAY) { //Array in Array structure [["name","RobotGuy"],[0,"godot"],["strength",9000.91]]
 				Array value_arr = values_arr[i];
 
 				if (value_arr.size() == 2) {
 					Variant v_key = value_arr[0];
-					Godot::String key = v_key;
+					String key = v_key;
 					if (key.left(1) == "\"" && key.right(key.length() - 1) == "\"") {
 						key = key.substr(1, key.length() - 2);
 					}
 
 					Variant v_val = value_arr[1];
-					Godot::String val = v_val;
+					String val = v_val;
 
 					if (val.left(1) == "\"" && val.right(val.length() - 1) == "\"") {
 						val = val.substr(1, val.length() - 2);
@@ -2957,11 +2960,11 @@ Godot::String Godot::String::format(const Variant &values, Godot::String placeho
 
 					new_string = new_string.replace(placeholder.replace("_", key), val);
 				} else {
-					ERR_PRINT(Godot::String("STRING.format Inner Array size != 2 ").ascii().get_data());
+					ERR_PRINT(String("STRING.format Inner Array size != 2 ").ascii().get_data());
 				}
 			} else { //Array structure ["RobotGuy","Logis","rookie"]
 				Variant v_val = values_arr[i];
-				Godot::String val = v_val;
+				String val = v_val;
 
 				if (val.left(1) == "\"" && val.right(val.length() - 1) == "\"") {
 					val = val.substr(1, val.length() - 2);
@@ -2980,8 +2983,8 @@ Godot::String Godot::String::format(const Variant &values, Godot::String placeho
 		d.get_key_list(&keys);
 
 		for (List<Variant>::Element *E = keys.front(); E; E = E->next()) {
-			Godot::String key = E->get();
-			Godot::String val = d[E->get()];
+			String key = E->get();
+			String val = d[E->get()];
 
 			if (key.left(1) == "\"" && key.right(key.length() - 1) == "\"") {
 				key = key.substr(1, key.length() - 2);
@@ -2994,15 +2997,15 @@ Godot::String Godot::String::format(const Variant &values, Godot::String placeho
 			new_string = new_string.replace(placeholder.replace("_", key), val);
 		}
 	} else {
-		ERR_PRINT(Godot::String("Invalid type: use Array or Dictionary.").ascii().get_data());
+		ERR_PRINT(String("Invalid type: use Array or Dictionary.").ascii().get_data());
 	}
 
 	return new_string;
 }
 
-Godot::String Godot::String::replace(const Godot::String &p_key, const Godot::String &p_with) const {
+String String::replace(const String &p_key, const String &p_with) const {
 
-	Godot::String new_string;
+	String new_string;
 	int search_from = 0;
 	int result = 0;
 
@@ -3023,9 +3026,9 @@ Godot::String Godot::String::replace(const Godot::String &p_key, const Godot::St
 	return new_string;
 }
 
-Godot::String Godot::String::replace(const char *p_key, const char *p_with) const {
+String String::replace(const char *p_key, const char *p_with) const {
 
-	Godot::String new_string;
+	String new_string;
 	int search_from = 0;
 	int result = 0;
 
@@ -3049,7 +3052,7 @@ Godot::String Godot::String::replace(const char *p_key, const char *p_with) cons
 	return new_string;
 }
 
-Godot::String Godot::String::replace_first(const Godot::String &p_key, const Godot::String &p_with) const {
+String String::replace_first(const String &p_key, const String &p_with) const {
 
 	int pos = find(p_key);
 	if (pos >= 0) {
@@ -3058,9 +3061,9 @@ Godot::String Godot::String::replace_first(const Godot::String &p_key, const God
 
 	return *this;
 }
-Godot::String Godot::String::replacen(const Godot::String &p_key, const Godot::String &p_with) const {
+String String::replacen(const String &p_key, const String &p_with) const {
 
-	Godot::String new_string;
+	String new_string;
 	int search_from = 0;
 	int result = 0;
 
@@ -3080,11 +3083,11 @@ Godot::String Godot::String::replacen(const Godot::String &p_key, const Godot::S
 	return new_string;
 }
 
-Godot::String Godot::String::repeat(int p_count) const {
+String String::repeat(int p_count) const {
 
 	ERR_FAIL_COND_V_MSG(p_count < 0, "", "Parameter count should be a positive number.");
 
-	Godot::String new_string;
+	String new_string;
 	const CharType *src = this->c_str();
 
 	new_string.resize(length() * p_count + 1);
@@ -3096,7 +3099,7 @@ Godot::String Godot::String::repeat(int p_count) const {
 	return new_string;
 }
 
-Godot::String Godot::String::left(int p_pos) const {
+String String::left(int p_pos) const {
 
 	if (p_pos <= 0)
 		return "";
@@ -3107,7 +3110,7 @@ Godot::String Godot::String::left(int p_pos) const {
 	return substr(0, p_pos);
 }
 
-Godot::String Godot::String::right(int p_pos) const {
+String String::right(int p_pos) const {
 
 	if (p_pos >= length())
 		return "";
@@ -3118,16 +3121,16 @@ Godot::String Godot::String::right(int p_pos) const {
 	return substr(p_pos, (length() - p_pos));
 }
 
-CharType Godot::String::ord_at(int p_idx) const {
+CharType String::ord_at(int p_idx) const {
 
 	ERR_FAIL_INDEX_V(p_idx, length(), 0);
 	return operator[](p_idx);
 }
 
-Godot::String Godot::String::dedent() const {
+String String::dedent() const {
 
-	Godot::String new_string;
-	Godot::String indent;
+	String new_string;
+	String indent;
 	bool has_indent = false;
 	bool has_text = false;
 	int line_start = 0;
@@ -3166,7 +3169,7 @@ Godot::String Godot::String::dedent() const {
 	return new_string;
 }
 
-Godot::String Godot::String::strip_edges(bool left, bool right) const {
+String String::strip_edges(bool left, bool right) const {
 
 	int len = length();
 	int beg = 0, end = len;
@@ -3197,9 +3200,9 @@ Godot::String Godot::String::strip_edges(bool left, bool right) const {
 	return substr(beg, end - beg);
 }
 
-Godot::String Godot::String::strip_escapes() const {
+String String::strip_escapes() const {
 
-	Godot::String new_string;
+	String new_string;
 	for (int i = 0; i < length(); i++) {
 
 		// Escape characters on first page of the ASCII table, before 32 (Space).
@@ -3211,7 +3214,7 @@ Godot::String Godot::String::strip_escapes() const {
 	return new_string;
 }
 
-Godot::String Godot::String::lstrip(const Godot::String &p_chars) const {
+String String::lstrip(const String &p_chars) const {
 
 	int len = length();
 	int beg;
@@ -3228,7 +3231,7 @@ Godot::String Godot::String::lstrip(const Godot::String &p_chars) const {
 	return substr(beg, len - beg);
 }
 
-Godot::String Godot::String::rstrip(const Godot::String &p_chars) const {
+String String::rstrip(const String &p_chars) const {
 
 	int len = length();
 	int end;
@@ -3245,10 +3248,10 @@ Godot::String Godot::String::rstrip(const Godot::String &p_chars) const {
 	return substr(0, end + 1);
 }
 
-Godot::String Godot::String::simplify_path() const {
+String String::simplify_path() const {
 
-	Godot::String s = *this;
-	Godot::String drive;
+	String s = *this;
+	String drive;
 	if (s.begins_with("local://")) {
 		drive = "local://";
 		s = s.substr(8, s.length());
@@ -3278,17 +3281,17 @@ Godot::String Godot::String::simplify_path() const {
 
 	s = s.replace("\\", "/");
 	while (true) { // in case of using 2 or more slash
-		Godot::String compare = s.replace("//", "/");
+		String compare = s.replace("//", "/");
 		if (s == compare)
 			break;
 		else
 			s = compare;
 	}
-	std::vector<Godot::String> dirs = s.split("/", false);
+	std::vector<String> dirs = s.split("/", false);
 
 	for (int i = 0; i < dirs.size(); i++) {
 
-		Godot::String d = dirs[i];
+		String d = dirs[i];
 		if (d == ".") {
 			dirs.erase(dirs.begin() + i);
 			i--;
@@ -3327,10 +3330,10 @@ static int _humanize_digits(int p_num) {
 		return 0;
 }
 
-Godot::String Godot::String::humanize_size(uint64_t p_size) {
+String String::humanize_size(uint64_t p_size) {
 
 	uint64_t _div = 1;
-	std::vector<Godot::String> prefixes;
+	std::vector<String> prefixes;
 	prefixes.push_back(RTR("B"));
 	prefixes.push_back(RTR("KiB"));
 	prefixes.push_back(RTR("MiB"));
@@ -3349,9 +3352,9 @@ Godot::String Godot::String::humanize_size(uint64_t p_size) {
 	const int digits = prefix_idx > 0 ? _humanize_digits(p_size / _div) : 0;
 	const double divisor = prefix_idx > 0 ? _div : 1;
 
-	return Godot::String::num(p_size / divisor).pad_decimals(digits) + " " + prefixes[prefix_idx];
+	return String::num(p_size / divisor).pad_decimals(digits) + " " + prefixes[prefix_idx];
 }
-bool Godot::String::is_abs_path() const {
+bool String::is_abs_path() const {
 
 	if (length() > 1)
 		return (operator[](0) == '/' || operator[](0) == '\\' || find(":/") != -1 || find(":\\") != -1);
@@ -3361,7 +3364,7 @@ bool Godot::String::is_abs_path() const {
 		return false;
 }
 
-bool Godot::String::is_valid_identifier() const {
+bool String::is_valid_identifier() const {
 
 	int len = length();
 
@@ -3388,11 +3391,11 @@ bool Godot::String::is_valid_identifier() const {
 
 //kind of poor should be rewritten properly
 
-Godot::String Godot::String::word_wrap(int p_chars_per_line) const {
+String String::word_wrap(int p_chars_per_line) const {
 
 	int from = 0;
 	int last_space = 0;
-	Godot::String ret;
+	String ret;
 	for (int i = 0; i < length(); i++) {
 		if (i - from >= p_chars_per_line) {
 			if (last_space == -1) {
@@ -3419,9 +3422,9 @@ Godot::String Godot::String::word_wrap(int p_chars_per_line) const {
 	return ret;
 }
 
-Godot::String Godot::String::http_escape() const {
+String String::http_escape() const {
 	const CharString temp = utf8();
-	Godot::String res;
+	String res;
 	for (int i = 0; i < temp.length(); ++i) {
 		char ord = temp[i];
 		if (ord == '.' || ord == '-' || ord == '_' || ord == '~' ||
@@ -3443,8 +3446,8 @@ Godot::String Godot::String::http_escape() const {
 	return res;
 }
 
-Godot::String Godot::String::http_unescape() const {
-	Godot::String res;
+String String::http_unescape() const {
+	String res;
 	for (int i = 0; i < length(); ++i) {
 		if (ord_at(i) == '%' && i + 2 < length()) {
 			CharType ord1 = ord_at(i + 1);
@@ -3462,12 +3465,12 @@ Godot::String Godot::String::http_unescape() const {
 			res += ord_at(i);
 		}
 	}
-	return Godot::String::utf8(res.ascii());
+	return String::utf8(res.ascii());
 }
 
-Godot::String Godot::String::c_unescape() const {
+String String::c_unescape() const {
 
-	Godot::String escaped = *this;
+	String escaped = *this;
 	escaped = escaped.replace("\\a", "\a");
 	escaped = escaped.replace("\\b", "\b");
 	escaped = escaped.replace("\\f", "\f");
@@ -3483,9 +3486,9 @@ Godot::String Godot::String::c_unescape() const {
 	return escaped;
 }
 
-Godot::String Godot::String::c_escape() const {
+String String::c_escape() const {
 
-	Godot::String escaped = *this;
+	String escaped = *this;
 	escaped = escaped.replace("\\", "\\\\");
 	escaped = escaped.replace("\a", "\\a");
 	escaped = escaped.replace("\b", "\\b");
@@ -3501,18 +3504,18 @@ Godot::String Godot::String::c_escape() const {
 	return escaped;
 }
 
-Godot::String Godot::String::c_escape_multiline() const {
+String String::c_escape_multiline() const {
 
-	Godot::String escaped = *this;
+	String escaped = *this;
 	escaped = escaped.replace("\\", "\\\\");
 	escaped = escaped.replace("\"", "\\\"");
 
 	return escaped;
 }
 
-Godot::String Godot::String::json_escape() const {
+String String::json_escape() const {
 
-	Godot::String escaped = *this;
+	String escaped = *this;
 	escaped = escaped.replace("\\", "\\\\");
 	escaped = escaped.replace("\b", "\\b");
 	escaped = escaped.replace("\f", "\\f");
@@ -3525,9 +3528,9 @@ Godot::String Godot::String::json_escape() const {
 	return escaped;
 }
 
-Godot::String Godot::String::xml_escape(bool p_escape_quotes) const {
+String String::xml_escape(bool p_escape_quotes) const {
 
-	Godot::String str = *this;
+	String str = *this;
 	str = str.replace("&", "&amp;");
 	str = str.replace("<", "&lt;");
 	str = str.replace(">", "&gt;");
@@ -3539,7 +3542,7 @@ Godot::String Godot::String::xml_escape(bool p_escape_quotes) const {
 	for (int i=1;i<32;i++) {
 
 		char chr[2]={i,0};
-		str=str.replace(chr,"&#"+Godot::String::num(i)+";");
+		str=str.replace(chr,"&#"+String::num(i)+";");
 	}*/
 	return str;
 }
@@ -3632,22 +3635,22 @@ static _FORCE_INLINE_ int _xml_unescape(const CharType *p_src, int p_src_len, Ch
 	return len;
 }
 
-Godot::String Godot::String::xml_unescape() const {
+String String::xml_unescape() const {
 
-	Godot::String str;
+	String str;
 	int l = length();
 	int len = _xml_unescape(c_str(), l, nullptr);
 	if (len == 0)
-		return Godot::String();
+		return String();
 	str.resize(len + 1);
 	_xml_unescape(c_str(), l, str.ptrw());
 	str[len] = 0;
 	return str;
 }
 
-Godot::String Godot::String::pad_decimals(int p_digits) const {
+String String::pad_decimals(int p_digits) const {
 
-	Godot::String s = *this;
+	String s = *this;
 	int c = s.find(".");
 
 	if (c == -1) {
@@ -3672,9 +3675,9 @@ Godot::String Godot::String::pad_decimals(int p_digits) const {
 	return s;
 }
 
-Godot::String Godot::String::pad_zeros(int p_digits) const {
+String String::pad_zeros(int p_digits) const {
 
-	Godot::String s = *this;
+	String s = *this;
 	int end = s.find(".");
 
 	if (end == -1) {
@@ -3702,25 +3705,25 @@ Godot::String Godot::String::pad_zeros(int p_digits) const {
 	return s;
 }
 
-Godot::String Godot::String::trim_prefix(const Godot::String &p_prefix) const {
+String String::trim_prefix(const String &p_prefix) const {
 
-	Godot::String s = *this;
+	String s = *this;
 	if (s.begins_with(p_prefix)) {
 		return s.substr(p_prefix.length(), s.length() - p_prefix.length());
 	}
 	return s;
 }
 
-Godot::String Godot::String::trim_suffix(const Godot::String &p_suffix) const {
+String String::trim_suffix(const String &p_suffix) const {
 
-	Godot::String s = *this;
+	String s = *this;
 	if (s.ends_with(p_suffix)) {
 		return s.substr(0, s.length() - p_suffix.length());
 	}
 	return s;
 }
 
-bool Godot::String::is_valid_integer() const {
+bool String::is_valid_integer() const {
 
 	int len = length();
 
@@ -3740,7 +3743,7 @@ bool Godot::String::is_valid_integer() const {
 	return true;
 }
 
-bool Godot::String::is_valid_hex_number(bool p_with_prefix) const {
+bool String::is_valid_hex_number(bool p_with_prefix) const {
 
 	int len = length();
 
@@ -3772,7 +3775,7 @@ bool Godot::String::is_valid_hex_number(bool p_with_prefix) const {
 	return true;
 };
 
-bool Godot::String::is_valid_float() const {
+bool String::is_valid_float() const {
 
 	int len = length();
 
@@ -3811,28 +3814,28 @@ bool Godot::String::is_valid_float() const {
 	return numbers_found;
 }
 
-Godot::String Godot::String::path_to_file(const Godot::String &p_path) const {
+String String::path_to_file(const String &p_path) const {
 
 	// Don't get base dir for src, this is expected to be a dir already.
-	Godot::String src = this->replace("\\", "/");
-	Godot::String dst = p_path.replace("\\", "/").get_base_dir();
-	Godot::String rel = src.path_to(dst);
+	String src = this->replace("\\", "/");
+	String dst = p_path.replace("\\", "/").get_base_dir();
+	String rel = src.path_to(dst);
 	if (rel == dst) // failed
 		return p_path;
 	else
 		return rel + p_path.get_file();
 }
 
-Godot::String Godot::String::path_to(const Godot::String &p_path) const {
+String String::path_to(const String &p_path) const {
 
-	Godot::String src = this->replace("\\", "/");
-	Godot::String dst = p_path.replace("\\", "/");
+	String src = this->replace("\\", "/");
+	String dst = p_path.replace("\\", "/");
 	if (!src.ends_with("/"))
 		src += "/";
 	if (!dst.ends_with("/"))
 		dst += "/";
 
-	Godot::String base;
+	String base;
 
 	if (src.begins_with("res://") && dst.begins_with("res://")) {
 
@@ -3851,8 +3854,8 @@ Godot::String Godot::String::path_to(const Godot::String &p_path) const {
 		//nothing
 	} else {
 		//dos style
-		Godot::String src_begin = src.get_slicec('/', 0);
-		Godot::String dst_begin = dst.get_slicec('/', 0);
+		String src_begin = src.get_slicec('/', 0);
+		String dst_begin = dst.get_slicec('/', 0);
 
 		if (src_begin != dst_begin)
 			return p_path; //impossible to do this
@@ -3863,8 +3866,8 @@ Godot::String Godot::String::path_to(const Godot::String &p_path) const {
 	}
 
 	//remove leading and trailing slash and split
-	std::vector<Godot::String> src_dirs = src.substr(1, src.length() - 2).split("/");
-	std::vector<Godot::String> dst_dirs = dst.substr(1, dst.length() - 2).split("/");
+	std::vector<String> src_dirs = src.substr(1, src.length() - 2).split("/");
+	std::vector<String> dst_dirs = dst.substr(1, dst.length() - 2).split("/");
 
 	//find common parent
 	int common_parent = 0;
@@ -3881,7 +3884,7 @@ Godot::String Godot::String::path_to(const Godot::String &p_path) const {
 
 	common_parent--;
 
-	Godot::String dir;
+	String dir;
 
 	for (int i = src_dirs.size() - 1; i > common_parent; i--) {
 
@@ -3898,33 +3901,33 @@ Godot::String Godot::String::path_to(const Godot::String &p_path) const {
 	return dir;
 }
 
-bool Godot::String::is_valid_html_color() const {
+bool String::is_valid_html_color() const {
 
 	return Color::html_is_valid(*this);
 }
 
-bool Godot::String::is_valid_filename() const {
+bool String::is_valid_filename() const {
 
-	Godot::String stripped = strip_edges();
+	String stripped = strip_edges();
 	if (*this != stripped) {
 		return false;
 	}
 
-	if (stripped == Godot::String()) {
+	if (stripped == String()) {
 		return false;
 	}
 
 	return !(find(":") != -1 || find("/") != -1 || find("\\") != -1 || find("?") != -1 || find("*") != -1 || find("\"") != -1 || find("|") != -1 || find("%") != -1 || find("<") != -1 || find(">") != -1);
 }
 
-bool Godot::String::is_valid_ip_address() const {
+bool String::is_valid_ip_address() const {
 
 	if (find(":") >= 0) {
 
-		std::vector<Godot::String> ip = split(":");
+		std::vector<String> ip = split(":");
 		for (int i = 0; i < ip.size(); i++) {
 
-			Godot::String n = ip[i];
+			String n = ip[i];
 			if (n.empty())
 				continue;
 			if (n.is_valid_hex_number(false)) {
@@ -3938,12 +3941,12 @@ bool Godot::String::is_valid_ip_address() const {
 		};
 
 	} else {
-		std::vector<Godot::String> ip = split(".");
+		std::vector<String> ip = split(".");
 		if (ip.size() != 4)
 			return false;
 		for (int i = 0; i < ip.size(); i++) {
 
-			Godot::String n = ip[i];
+			String n = ip[i];
 			if (!n.is_valid_integer())
 				return false;
 			int val = n.to_int();
@@ -3955,21 +3958,21 @@ bool Godot::String::is_valid_ip_address() const {
 	return true;
 }
 
-bool Godot::String::is_resource_file() const {
+bool String::is_resource_file() const {
 
 	return begins_with("res://") && find("::") == -1;
 }
 
-bool Godot::String::is_rel_path() const {
+bool String::is_rel_path() const {
 
 	return !is_abs_path();
 }
 
-Godot::String Godot::String::get_base_dir() const {
+String String::get_base_dir() const {
 
 	int basepos = find("://");
-	Godot::String rs;
-	Godot::String base;
+	String rs;
+	String base;
 	if (basepos != -1) {
 		int end = basepos + 3;
 		rs = substr(end, length());
@@ -3991,7 +3994,7 @@ Godot::String Godot::String::get_base_dir() const {
 	return base + rs.substr(0, sep);
 }
 
-Godot::String Godot::String::get_file() const {
+String String::get_file() const {
 
 	int sep = MAX(find_last("/"), find_last("\\"));
 	if (sep == -1)
@@ -4000,7 +4003,7 @@ Godot::String Godot::String::get_file() const {
 	return substr(sep + 1, length());
 }
 
-Godot::String Godot::String::get_extension() const {
+String String::get_extension() const {
 
 	int pos = find_last(".");
 	if (pos < 0 || pos < MAX(find_last("/"), find_last("\\")))
@@ -4009,7 +4012,7 @@ Godot::String Godot::String::get_extension() const {
 	return substr(pos + 1, length());
 }
 
-Godot::String Godot::String::plus_file(const Godot::String &p_file) const {
+String String::plus_file(const String &p_file) const {
 	if (empty())
 		return p_file;
 	if (operator[](length() - 1) == '/' || (p_file.size() > 0 && p_file.operator[](0) == '/'))
@@ -4017,10 +4020,10 @@ Godot::String Godot::String::plus_file(const Godot::String &p_file) const {
 	return *this + "/" + p_file;
 }
 
-Godot::String Godot::String::percent_encode() const {
+String String::percent_encode() const {
 
 	CharString cs = utf8();
-	Godot::String encoded;
+	String encoded;
 	for (int i = 0; i < cs.length(); i++) {
 		uint8_t c = cs[i];
 		if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-' || c == '_' || c == '~' || c == '.') {
@@ -4039,7 +4042,7 @@ Godot::String Godot::String::percent_encode() const {
 
 	return encoded;
 }
-Godot::String Godot::String::percent_decode() const {
+String String::percent_decode() const {
 
 	CharString pe;
 
@@ -4073,10 +4076,10 @@ Godot::String Godot::String::percent_decode() const {
 		pe += c;
 	}
 
-	return Godot::String::utf8(pe.ptr());
+	return String::utf8(pe.ptr());
 }
 
-Godot::String Godot::String::property_name_encode() const {
+String String::property_name_encode() const {
 	// Escape and quote strings with extended ASCII or further Unicode characters
 	// as well as '"', '=' or ' ' (32)
 	const CharType *cstr = c_str();
@@ -4089,7 +4092,7 @@ Godot::String Godot::String::property_name_encode() const {
 	return *this;
 }
 
-Godot::String Godot::String::get_basename() const {
+String String::get_basename() const {
 
 	int pos = find_last(".");
 	if (pos < 0 || pos < MAX(find_last("/"), find_last("\\")))
@@ -4098,29 +4101,29 @@ Godot::String Godot::String::get_basename() const {
 	return substr(0, pos);
 }
 
-Godot::String itos(int64_t p_val) {
+String itos(int64_t p_val) {
 
-	return Godot::String::num_int64(p_val);
+	return String::num_int64(p_val);
 }
 
-Godot::String uitos(uint64_t p_val) {
+String uitos(uint64_t p_val) {
 
-	return Godot::String::num_uint64(p_val);
+	return String::num_uint64(p_val);
 }
 
-Godot::String rtos(double p_val) {
+String rtos(double p_val) {
 
-	return Godot::String::num(p_val);
+	return String::num(p_val);
 }
 
-Godot::String rtoss(double p_val) {
+String rtoss(double p_val) {
 
-	return Godot::String::num_scientific(p_val);
+	return String::num_scientific(p_val);
 }
 
 // Right-pad with a character.
-Godot::String Godot::String::rpad(int min_length, const Godot::String &character) const {
-	Godot::String s = *this;
+String String::rpad(int min_length, const String &character) const {
+	String s = *this;
 	int padding = min_length - s.length();
 	if (padding > 0) {
 		for (int i = 0; i < padding; i++)
@@ -4130,8 +4133,8 @@ Godot::String Godot::String::rpad(int min_length, const Godot::String &character
 	return s;
 }
 // Left-pad with a character.
-Godot::String Godot::String::lpad(int min_length, const Godot::String &character) const {
-	Godot::String s = *this;
+String String::lpad(int min_length, const String &character) const {
+	String s = *this;
 	int padding = min_length - s.length();
 	if (padding > 0) {
 		for (int i = 0; i < padding; i++)
@@ -4145,8 +4148,8 @@ Godot::String Godot::String::lpad(int min_length, const Godot::String &character
 //   "fish %s pie" % "frog"
 //   "fish %s %d pie" % ["frog", 12]
 // In case of an error, the string returned is the error description and "error" is true.
-Godot::String Godot::String::sprintf(const Array &values, bool *error) const {
-	Godot::String formatted;
+String String::sprintf(const Array &values, bool *error) const {
+	String formatted;
 	CharType *self = (CharType *)c_str();
 	bool in_format = false;
 	int value_index = 0;
@@ -4194,11 +4197,11 @@ Godot::String Godot::String::sprintf(const Array &values, bool *error) const {
 							break;
 					}
 					// Get basic number.
-					Godot::String str = Godot::String::num_int64(ABS(value), base, capitalize);
+					String str = String::num_int64(ABS(value), base, capitalize);
 					int number_len = str.length();
 
 					// Padding.
-					Godot::String pad_char = pad_with_zeroes ? Godot::String("0") : Godot::String(" ");
+					String pad_char = pad_with_zeroes ? String("0") : String(" ");
 					if (left_justified) {
 						str = str.rpad(min_chars, pad_char);
 					} else {
@@ -4228,7 +4231,7 @@ Godot::String Godot::String::sprintf(const Array &values, bool *error) const {
 					}
 
 					double value = values[value_index];
-					Godot::String str = Godot::String::num(value, min_decimals);
+					String str = String::num(value, min_decimals);
 
 					// Pad decimals out.
 					str = str.pad_decimals(min_decimals);
@@ -4251,12 +4254,12 @@ Godot::String Godot::String::sprintf(const Array &values, bool *error) const {
 
 					break;
 				}
-				case 's': { // Godot::String
+				case 's': { // String
 					if (value_index >= values.size()) {
 						return "not enough arguments for format string";
 					}
 
-					Godot::String str = values[value_index];
+					String str = values[value_index];
 					// Padding.
 					if (left_justified) {
 						str = str.rpad(min_chars);
@@ -4275,7 +4278,7 @@ Godot::String Godot::String::sprintf(const Array &values, bool *error) const {
 					}
 
 					// Convert to character.
-					Godot::String str;
+					String str;
 					if (values[value_index].is_num()) {
 						int value = values[value_index];
 						if (value < 0) {
@@ -4401,11 +4404,11 @@ Godot::String Godot::String::sprintf(const Array &values, bool *error) const {
 	return formatted;
 }
 
-Godot::String Godot::String::quote(Godot::String quotechar) const {
+String String::quote(String quotechar) const {
 	return quotechar + *this + quotechar;
 }
 
-Godot::String Godot::String::unquote() const {
+String String::unquote() const {
 	if (!is_quoted()) {
 		return *this;
 	}
@@ -4414,7 +4417,7 @@ Godot::String Godot::String::unquote() const {
 }
 
 #ifdef TOOLS_ENABLED
-Godot::String TTR(const Godot::String &p_text) {
+String TTR(const String &p_text) {
 	if (TranslationServer::get_singleton()) {
 		return TranslationServer::get_singleton()->tool_translate(p_text);
 	}
@@ -4422,10 +4425,10 @@ Godot::String TTR(const Godot::String &p_text) {
 	return p_text;
 }
 
-Godot::String DTR(const Godot::String &p_text) {
+String DTR(const String &p_text) {
 	if (TranslationServer::get_singleton()) {
 		// Comes straight from the XML, so remove indentation and any trailing whitespace.
-		const Godot::String text = p_text.dedent().strip_edges();
+		const String text = p_text.dedent().strip_edges();
 		return TranslationServer::get_singleton()->doc_translate(text);
 	}
 
@@ -4433,10 +4436,10 @@ Godot::String DTR(const Godot::String &p_text) {
 }
 #endif
 
-Godot::String RTR(const Godot::String &p_text) {
+String RTR(const String &p_text) {
 	if (TranslationServer::get_singleton()) {
-		Godot::String rtr = TranslationServer::get_singleton()->tool_translate(p_text);
-		if (rtr == Godot::String() || rtr == p_text) {
+		String rtr = TranslationServer::get_singleton()->tool_translate(p_text);
+		if (rtr == String() || rtr == p_text) {
 			return TranslationServer::get_singleton()->translate(p_text);
 		} else {
 			return rtr;

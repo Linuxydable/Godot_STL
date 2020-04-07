@@ -52,7 +52,7 @@ void NodePath::_update_hash_cache() const {
 
 void NodePath::prepend_period() {
 
-	if (data->path.size() && data->path[0].operator Godot::String() != ".") {
+	if (data->path.size() && data->path[0].operator String() != ".") {
 		data->path.insert(data->path.begin(), ".");
 		data->hash_cache_valid = false;
 	}
@@ -161,23 +161,23 @@ void NodePath::operator=(const NodePath &p_path) {
 	}
 }
 
-NodePath::operator Godot::String() const {
+NodePath::operator String() const {
 
 	if (!data)
-		return Godot::String();
+		return String();
 
-	Godot::String ret;
+	String ret;
 	if (data->absolute)
 		ret = "/";
 
 	for (decltype(data->path.size()) i = 0; i < data->path.size(); ++i) {
 		if (i > 0)
 			ret += "/";
-		ret += data->path[i].operator Godot::String();
+		ret += data->path[i].operator String();
 	}
 
 	for (auto &&spath : data->subpath) {
-		ret += ":" + spath.operator Godot::String();
+		ret += ":" + spath.operator String();
 	}
 
 	return ret;
@@ -212,10 +212,10 @@ StringName NodePath::get_concatenated_subnames() const {
 
 	if (!data->concatenated_subpath) {
 		int spc = data->subpath.size();
-		Godot::String concatenated;
+		String concatenated;
 		const StringName *ssn = data->subpath.data();
 		for (int i = 0; i < spc; i++) {
-			concatenated += i == 0 ? ssn[i].operator Godot::String() : ":" + ssn[i];
+			concatenated += i == 0 ? ssn[i].operator String() : ":" + ssn[i];
 		}
 		data->concatenated_subpath = concatenated;
 	}
@@ -270,7 +270,7 @@ NodePath NodePath::get_as_property_path() const {
 	} else {
 		std::vector<StringName> new_path = data->subpath;
 
-		Godot::String initial_subname = data->path[0];
+		String initial_subname = data->path[0];
 
 		for (int i = 1; i < data->path.size(); i++) {
 			initial_subname += "/" + data->path[i];
@@ -320,10 +320,10 @@ void NodePath::simplify() {
 	for (int i = 0; i < data->path.size(); i++) {
 		if (data->path.size() == 1)
 			break;
-		if (data->path[i].operator Godot::String() == ".") {
+		if (data->path[i].operator String() == ".") {
 			data->path.erase(data->path.begin() + i);
 			i--;
-		} else if (data->path[i].operator Godot::String() == ".." && i > 0 && data->path[i - 1].operator Godot::String() != "." && data->path[i - 1].operator Godot::String() != "..") {
+		} else if (data->path[i].operator String() == ".." && i > 0 && data->path[i - 1].operator String() != "." && data->path[i - 1].operator String() != "..") {
 			//remove both
 			data->path.erase(data->path.begin() + i - 1);
 			data->path.erase(data->path.begin() + i - 1);
@@ -344,14 +344,14 @@ NodePath NodePath::simplified() const {
 	return np;
 }
 
-NodePath::NodePath(const Godot::String &p_path) {
+NodePath::NodePath(const String &p_path) {
 
 	data = nullptr;
 
 	if (p_path.length() == 0)
 		return;
 
-	Godot::String path = p_path;
+	String path = p_path;
 	std::vector<StringName> subpath;
 
 	bool absolute = (path[0] == '/');
@@ -368,7 +368,7 @@ NodePath::NodePath(const Godot::String &p_path) {
 
 			if (path[i] == ':' || path[i] == 0) {
 
-				Godot::String str = path.substr(from, i - from);
+				String str = path.substr(from, i - from);
 				if (str == "") {
 					if (path[i] == 0) continue; // Allow end-of-path :
 
@@ -421,7 +421,7 @@ NodePath::NodePath(const Godot::String &p_path) {
 
 			if (!last_is_slash) {
 
-				Godot::String name = path.substr(from, i - from);
+				String name = path.substr(from, i - from);
 				ERR_FAIL_INDEX(slice, data->path.size());
 				data->path[slice++] = name;
 			}

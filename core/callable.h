@@ -94,7 +94,7 @@ public:
 
 	void operator=(const Callable &p_callable);
 
-	operator Godot::String() const;
+	operator String() const;
 
 	Callable(const Object *p_object, const StringName &p_method);
 	Callable(ObjectID p_object, const StringName &p_method);
@@ -115,7 +115,7 @@ public:
 
 	//for every type that inherits, these must always be the same for this type
 	virtual uint32_t hash() const = 0;
-	virtual Godot::String get_as_text() const = 0;
+	virtual String get_as_text() const = 0;
 	virtual CompareEqualFunc get_compare_equal_func() const = 0;
 	virtual CompareLessFunc get_compare_less_func() const = 0;
 	virtual ObjectID get_object() const = 0; //must always be able to provide an object
@@ -146,10 +146,10 @@ public:
 	bool operator!=(const Signal &p_signal) const;
 	bool operator<(const Signal &p_signal) const;
 
-	operator Godot::String() const;
+	operator String() const;
 
 	Error emit(const Variant **p_arguments, int p_argcount) const;
-	Error connect(const Callable &p_callable, const std::vector<Variant> &p_binds = std::vector<Variant>(), uint32_t p_flags = 0);
+	Error connect(const Callable &p_callable, const Vector<Variant> &p_binds = Vector<Variant>(), uint32_t p_flags = 0);
 	void disconnect(const Callable &p_callable);
 	bool is_connected(const Callable &p_callable) const;
 

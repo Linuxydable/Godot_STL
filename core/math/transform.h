@@ -83,8 +83,8 @@ public:
 	_FORCE_INLINE_ AABB xform(const AABB &p_aabb) const;
 	_FORCE_INLINE_ AABB xform_inv(const AABB &p_aabb) const;
 
-	_FORCE_INLINE_ std::vector<Vector3> xform(const std::vector<Vector3> &p_array) const;
-	_FORCE_INLINE_ std::vector<Vector3> xform_inv(const std::vector<Vector3> &p_array) const;
+	_FORCE_INLINE_ Vector<Vector3> xform(const Vector<Vector3> &p_array) const;
+	_FORCE_INLINE_ Vector<Vector3> xform_inv(const Vector<Vector3> &p_array) const;
 
 	void operator*=(const Transform &p_transform);
 	Transform operator*(const Transform &p_transform) const;
@@ -106,7 +106,7 @@ public:
 		origin.z = tz;
 	}
 
-	operator Godot::String() const;
+	operator String() const;
 
 	Transform(real_t xx, real_t xy, real_t xz, real_t yx, real_t yy, real_t yz, real_t zx, real_t zy, real_t zz, real_t ox, real_t oy, real_t oz);
 	Transform(const Basis &p_basis, const Vector3 &p_origin = Vector3());
@@ -209,13 +209,13 @@ _FORCE_INLINE_ AABB Transform::xform_inv(const AABB &p_aabb) const {
 	return ret;
 }
 
-std::vector<Vector3> Transform::xform(const std::vector<Vector3> &p_array) const {
+Vector<Vector3> Transform::xform(const Vector<Vector3> &p_array) const {
 
-	std::vector<Vector3> array;
+	Vector<Vector3> array;
 	array.resize(p_array.size());
 
-	const Vector3 *r = p_array.data();
-	Vector3 *w = array.data();
+	const Vector3 *r = p_array.ptr();
+	Vector3 *w = array.ptrw();
 
 	for (int i = 0; i < p_array.size(); ++i) {
 		w[i] = xform(r[i]);
@@ -223,13 +223,13 @@ std::vector<Vector3> Transform::xform(const std::vector<Vector3> &p_array) const
 	return array;
 }
 
-std::vector<Vector3> Transform::xform_inv(const std::vector<Vector3> &p_array) const {
+Vector<Vector3> Transform::xform_inv(const Vector<Vector3> &p_array) const {
 
-	std::vector<Vector3> array;
+	Vector<Vector3> array;
 	array.resize(p_array.size());
 
-	const Vector3 *r = p_array.data();
-	Vector3 *w = array.data();
+	const Vector3 *r = p_array.ptr();
+	Vector3 *w = array.ptrw();
 
 	for (int i = 0; i < p_array.size(); ++i) {
 		w[i] = xform_inv(r[i]);

@@ -40,7 +40,7 @@
 template <class T>
 class CharProxy {
 	friend class CharString;
-	friend class Godot::String;
+	friend class String;
 
 	const int _index;
 	CowData<T> &_cowdata;
@@ -123,8 +123,6 @@ struct StrRange {
 		len = p_len;
 	}
 };
-
-namespace Godot {
 
 class String {
 
@@ -369,21 +367,19 @@ public:
 	String(const StrRange &p_range);
 };
 
-} // namespace Godot
+bool operator==(const char *p_chr, const String &p_str);
 
-bool operator==(const char *p_chr, const Godot::String &p_str);
+String operator+(const char *p_chr, const String &p_str);
+String operator+(CharType p_chr, const String &p_str);
 
-Godot::String operator+(const char *p_chr, const Godot::String &p_str);
-Godot::String operator+(CharType p_chr, const Godot::String &p_str);
-
-Godot::String itos(int64_t p_val);
-Godot::String uitos(uint64_t p_val);
-Godot::String rtos(double p_val);
-Godot::String rtoss(double p_val); //scientific version
+String itos(int64_t p_val);
+String uitos(uint64_t p_val);
+String rtos(double p_val);
+String rtoss(double p_val); //scientific version
 
 struct NoCaseComparator {
 
-	bool operator()(const Godot::String &p_a, const Godot::String &p_b) const {
+	bool operator()(const String &p_a, const String &p_b) const {
 
 		return p_a.nocasecmp_to(p_b) < 0;
 	}
@@ -391,7 +387,7 @@ struct NoCaseComparator {
 
 struct NaturalNoCaseComparator {
 
-	bool operator()(const Godot::String &p_a, const Godot::String &p_b) const {
+	bool operator()(const String &p_a, const String &p_b) const {
 
 		return p_a.naturalnocasecmp_to(p_b) < 0;
 	}
@@ -424,24 +420,24 @@ _FORCE_INLINE_ bool is_str_less(const L *l_ptr, const R *r_ptr) {
 // and doc translate for the class reference (DTR).
 #ifdef TOOLS_ENABLED
 // Gets parsed.
-Godot::String TTR(const Godot::String &);
-Godot::String DTR(const Godot::String &);
+String TTR(const String &);
+String DTR(const String &);
 // Use for C strings.
 #define TTRC(m_value) (m_value)
 // Use to avoid parsing (for use later with C strings).
 #define TTRGET(m_value) TTR(m_value)
 
 #else
-#define TTR(m_value) (Godot::String())
-#define DTR(m_value) (Godot::String())
+#define TTR(m_value) (String())
+#define DTR(m_value) (String())
 #define TTRC(m_value) (m_value)
 #define TTRGET(m_value) (m_value)
 #endif
 
 // Runtime translate for the public node API.
-Godot::String RTR(const Godot::String &);
+String RTR(const String &);
 
 bool is_symbol(CharType c);
-bool select_word(const Godot::String &p_s, int p_col, int &r_beg, int &r_end);
+bool select_word(const String &p_s, int p_col, int &r_beg, int &r_end);
 
 #endif // USTRING_H

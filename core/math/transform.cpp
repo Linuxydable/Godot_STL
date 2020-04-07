@@ -209,9 +209,9 @@ Transform Transform::operator*(const Transform &p_transform) const {
 	return t;
 }
 
-Transform::operator Godot::String() const {
+Transform::operator String() const {
 
-	return basis.operator Godot::String() + " - " + origin.operator Godot::String();
+	return basis.operator String() + " - " + origin.operator String();
 }
 
 Transform::Transform(const Basis &p_basis, const Vector3 &p_origin) :
