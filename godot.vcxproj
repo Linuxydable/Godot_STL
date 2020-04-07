@@ -170,6 +170,10 @@
     <ClInclude Include="core\crypto\crypto.h" />
     <ClInclude Include="core\crypto\crypto_core.h" />
     <ClInclude Include="core\crypto\hashing_context.h" />
+    <ClInclude Include="core\input\default_controller_mappings.h" />
+    <ClInclude Include="core\input\input_event.h" />
+    <ClInclude Include="core\input\input_filter.h" />
+    <ClInclude Include="core\input\input_map.h" />
     <ClInclude Include="core\io\compression.h" />
     <ClInclude Include="core\io\config_file.h" />
     <ClInclude Include="core\io\file_access_buffered.h" />
@@ -1337,6 +1341,9 @@
     <ClCompile Include="core\crypto\crypto.cpp" />
     <ClCompile Include="core\crypto\crypto_core.cpp" />
     <ClCompile Include="core\crypto\hashing_context.cpp" />
+    <ClCompile Include="core\input\input_event.cpp" />
+    <ClCompile Include="core\input\input_filter.cpp" />
+    <ClCompile Include="core\input\input_map.cpp" />
     <ClCompile Include="core\io\compression.cpp" />
     <ClCompile Include="core\io\config_file.cpp" />
     <ClCompile Include="core\io\file_access_buffered.cpp" />

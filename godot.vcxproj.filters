@@ -1131,6 +1131,9 @@
     <Filter Include="Source Files\thirdparty\zstd\decompress">
       <UniqueIdentifier>{CCC189D4-8FDA-240D-6D3C-69DF08D38C4E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\core\input">
+      <UniqueIdentifier>{7fa7f269-383d-4563-b4c0-8ed9e7d8b6f9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\bind\core_bind.h">
@@ -4627,6 +4630,18 @@
     </ClInclude>
     <ClInclude Include="thirdparty\zstd\decompress\zstd_decompress_block.h">
       <Filter>Header Files\thirdparty\zstd\decompress</Filter>
+    </ClInclude>
+    <ClInclude Include="core\input\default_controller_mappings.h">
+      <Filter>Header Files\core\input</Filter>
+    </ClInclude>
+    <ClInclude Include="core\input\input_event.h">
+      <Filter>Header Files\core\input</Filter>
+    </ClInclude>
+    <ClInclude Include="core\input\input_filter.h">
+      <Filter>Header Files\core\input</Filter>
+    </ClInclude>
+    <ClInclude Include="core\input\input_map.h">
+      <Filter>Header Files\core\input</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -9465,6 +9480,15 @@
     </ClCompile>
     <ClCompile Include="thirdparty\zstd\decompress\zstd_decompress_block.c">
       <Filter>Source Files\thirdparty\zstd\decompress</Filter>
+    </ClCompile>
+    <ClCompile Include="core\input\input_event.cpp">
+      <Filter>Header Files\core\input</Filter>
+    </ClCompile>
+    <ClCompile Include="core\input\input_filter.cpp">
+      <Filter>Header Files\core\input</Filter>
+    </ClCompile>
+    <ClCompile Include="core\input\input_map.cpp">
+      <Filter>Header Files\core\input</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
