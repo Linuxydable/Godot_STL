@@ -160,7 +160,7 @@ public:
 
 	Basis slerp(const Basis &target, const real_t &t) const;
 
-	operator String() const;
+	operator Godot::String() const;
 
 	/* create / set */
 
