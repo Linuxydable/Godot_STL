@@ -2456,7 +2456,7 @@ Variant::operator std::vector<Plane>() const {
 		return planes;
 
 	planes.resize(va_size);
-	Plane *w = planes.ptrw();
+	Plane *w = planes.data();
 
 	for (int i = 0; i < va_size; i++)
 		w[i] = va[i];
@@ -2473,8 +2473,8 @@ Variant::operator std::vector<Face3>() const {
 		return faces;
 
 	faces.resize(va_size / 3);
-	Face3 *w = faces.ptrw();
-	const Vector3 *r = va.ptr();
+	Face3 *w = faces.data();
+	const Vector3 *r = va.data();
 
 	for (int i = 0; i < va_size; i++)
 		w[i / 3].vertex[i % 3] = r[i];
@@ -2491,7 +2491,7 @@ Variant::operator std::vector<Variant>() const {
 		return variants;
 
 	variants.resize(va_size);
-	Variant *w = variants.ptrw();
+	Variant *w = variants.data();
 	for (int i = 0; i < va_size; i++)
 		w[i] = va[i];
 
@@ -2524,7 +2524,7 @@ Variant::operator IP_Address() const {
 
 		std::vector<int> addr = operator std::vector<int>();
 		if (addr.size() == 4) {
-			return IP_Address(addr.get(0), addr.get(1), addr.get(2), addr.get(3));
+			return IP_Address(addr[0], addr[1], addr[2], addr[3]);
 		}
 	}
 
@@ -2861,8 +2861,8 @@ Variant::Variant(const std::vector<Face3> &p_face_array) {
 	vertices.resize(face_count * 3);
 
 	if (face_count) {
-		const Face3 *r = p_face_array.ptr();
-		Vector3 *w = vertices.ptrw();
+		const Face3 *r = p_face_array.data();
+		Vector3 *w = vertices.data();
 
 		for (int i = 0; i < face_count; i++) {
 
@@ -2894,7 +2894,7 @@ Variant::Variant(const std::vector<StringName> &p_array) {
 	int len = p_array.size();
 	v.resize(len);
 	for (int i = 0; i < len; i++)
-		v.set(i, p_array[i]);
+		v[i] = p_array[i];
 	*this = v;
 }
 
