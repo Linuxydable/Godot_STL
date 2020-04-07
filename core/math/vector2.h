@@ -147,7 +147,7 @@ struct Vector2 {
 	Vector2 snapped(const Vector2 &p_by) const;
 	real_t aspect() const { return width / height; }
 
-	operator String() const { return String::num(x) + ", " + String::num(y); }
+	operator Godot::String() const { return Godot::String::num(x) + ", " + Godot::String::num(y); }
 
 	_FORCE_INLINE_ Vector2(real_t p_x, real_t p_y) {
 		x = p_x;
@@ -321,7 +321,7 @@ struct Vector2i {
 	Vector2i sign() const { return Vector2i(SGN(x), SGN(y)); }
 	Vector2i abs() const { return Vector2i(ABS(x), ABS(y)); }
 
-	operator String() const { return String::num(x) + ", " + String::num(y); }
+	operator Godot::String() const { return Godot::String::num(x) + ", " + Godot::String::num(y); }
 
 	operator Vector2() const { return Vector2(x, y); }
 	inline Vector2i(const Vector2 &p_vec2) {
