@@ -414,8 +414,8 @@ struct PtrToArg<std::vector<Face3>> {
 		int len = dvs->size() / 3;
 		ret.resize(len);
 		{
-			const Vector3 *r = dvs->ptr();
-			Face3 *w = ret.ptrw();
+			const Vector3 *r = dvs->data();
+			Face3 *w = ret.data();
 			for (int i = 0; i < len; i++) {
 				w[i].vertex[0] = r[i * 3 + 0];
 				w[i].vertex[1] = r[i * 3 + 1];
@@ -429,8 +429,8 @@ struct PtrToArg<std::vector<Face3>> {
 		int len = p_vec.size();
 		arr->resize(len * 3);
 		{
-			const Face3 *r = p_vec.ptr();
-			Vector3 *w = arr->ptrw();
+			const Face3 *r = p_vec.data();
+			Vector3 *w = arr->data();
 			for (int i = 0; i < len; i++) {
 				w[i * 3 + 0] = r[i].vertex[0];
 				w[i * 3 + 1] = r[i].vertex[1];
@@ -447,8 +447,8 @@ struct PtrToArg<const std::vector<Face3> &> {
 		int len = dvs->size() / 3;
 		ret.resize(len);
 		{
-			const Vector3 *r = dvs->ptr();
-			Face3 *w = ret.ptrw();
+			const Vector3 *r = dvs->data();
+			Face3 *w = ret.data();
 			for (int i = 0; i < len; i++) {
 				w[i].vertex[0] = r[i * 3 + 0];
 				w[i].vertex[1] = r[i * 3 + 1];
