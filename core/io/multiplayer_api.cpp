@@ -427,7 +427,7 @@ void MultiplayerAPI::_process_rpc(Node *p_node, const uint16_t p_rpc_method_id, 
 
 	Callable::CallError ce;
 
-	p_node->call(name, (const Variant **)argp.ptr(), argc, ce);
+	p_node->call(name, (const Variant **)argp.data(), argc, ce);
 	if (ce.error != Callable::CallError::CALL_OK) {
 		String error = Variant::get_call_error_text(p_node, name, (const Variant **)argp.data(), argc, ce);
 		error = "RPC - " + error;
@@ -896,7 +896,7 @@ void MultiplayerAPI::_send_rpc(Node *p_from, int p_to, bool p_unreliable, bool p
 		} else if (p_argcount == 1 && p_arg[0]->get_type() == Variant::PACKED_BYTE_ARRAY) {
 			byte_only_or_no_args = true;
 			// Special optimization when only the byte vector is sent.
-			const Vector<uint8_t> data = *p_arg[0];
+			const std::vector<uint8_t> data = *p_arg[0];
 			MAKE_ROOM(ofs + data.size());
 			copymem(&packet_cache[ofs], data.data(), sizeof(uint8_t) * data.size());
 			ofs += data.size();
@@ -921,7 +921,7 @@ void MultiplayerAPI::_send_rpc(Node *p_from, int p_to, bool p_unreliable, bool p
 	ERR_FAIL_COND(name_id_compression > 1);
 
 	// We can now set the meta
-	packet_cache.write[0] = command_type + (node_id_compression << NODE_ID_COMPRESSION_SHIFT) + (name_id_compression << NAME_ID_COMPRESSION_SHIFT) + ((byte_only_or_no_args ? 1 : 0) << BYTE_ONLY_OR_NO_ARGS_SHIFT);
+	packet_cache[0] = command_type + (node_id_compression << NODE_ID_COMPRESSION_SHIFT) + (name_id_compression << NAME_ID_COMPRESSION_SHIFT) + ((byte_only_or_no_args ? 1 : 0) << BYTE_ONLY_OR_NO_ARGS_SHIFT);
 
 #ifdef DEBUG_ENABLED
 	_profile_bandwidth_data("out", ofs);
@@ -1142,7 +1142,7 @@ void MultiplayerAPI::rsetp(Node *p_node, int p_peer_id, bool p_unreliable, const
 	_send_rpc(p_node, p_peer_id, p_unreliable, true, p_property, &vptr, 1);
 }
 
-Error MultiplayerAPI::send_bytes(Vector<uint8_t> p_data, int p_to, NetworkedMultiplayerPeer::TransferMode p_mode) {
+Error MultiplayerAPI::send_bytes(std::vector<uint8_t> p_data, int p_to, NetworkedMultiplayerPeer::TransferMode p_mode) {
 
 	ERR_FAIL_COND_V_MSG(p_data.size() < 1, ERR_INVALID_DATA, "Trying to send an empty raw packet.");
 	ERR_FAIL_COND_V_MSG(!network_peer.is_valid(), ERR_UNCONFIGURED, "Trying to send a raw packet while no network peer is active.");
@@ -1163,11 +1163,11 @@ void MultiplayerAPI::_process_raw(int p_from, const uint8_t *p_packet, int p_pac
 
 	ERR_FAIL_COND_MSG(p_packet_len < 2, "Invalid packet received. Size too small.");
 
-	Vector<uint8_t> out;
+	std::vector<uint8_t> out;
 	int len = p_packet_len - 1;
 	out.resize(len);
 	{
-		uint8_t *w = out.ptrw();
+		uint8_t *w = out.data();
 		memcpy(&w[0], &p_packet[1], len);
 	}
 	emit_signal("network_peer_packet", p_from, out);
