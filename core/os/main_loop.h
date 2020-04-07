@@ -33,7 +33,7 @@
 
 #include <vector>
 
-#include "core/os/input_event.h"
+#include "core/input/input_event.h"
 #include "core/reference.h"
 #include "core/script_language.h"
 
