@@ -32,16 +32,16 @@
 
 #include "core/io/marshalls.h"
 
-Error StreamPeer::_put_data(const Vector<uint8_t> &p_data) {
+Error StreamPeer::_put_data(const std::vector<uint8_t> &p_data) {
 
 	int len = p_data.size();
 	if (len == 0)
 		return OK;
-	const uint8_t *r = p_data.ptr();
+	const uint8_t *r = p_data.data();
 	return put_data(&r[0], len);
 }
 
-Array StreamPeer::_put_partial_data(const Vector<uint8_t> &p_data) {
+Array StreamPeer::_put_partial_data(const std::vector<uint8_t> &p_data) {
 
 	Array ret;
 
@@ -52,7 +52,7 @@ Array StreamPeer::_put_partial_data(const Vector<uint8_t> &p_data) {
 		return ret;
 	}
 
-	const uint8_t *r = p_data.ptr();
+	const uint8_t *r = p_data.data();
 	int sent;
 	Error err = put_partial_data(&r[0], len, sent);
 
@@ -68,16 +68,16 @@ Array StreamPeer::_get_data(int p_bytes) {
 
 	Array ret;
 
-	Vector<uint8_t> data;
+	std::vector<uint8_t> data;
 	data.resize(p_bytes);
 	if (data.size() != p_bytes) {
 
 		ret.push_back(ERR_OUT_OF_MEMORY);
-		ret.push_back(Vector<uint8_t>());
+		ret.push_back(std::vector<uint8_t>());
 		return ret;
 	}
 
-	uint8_t *w = data.ptrw();
+	uint8_t *w = data.data();
 	Error err = get_data(&w[0], p_bytes);
 
 	ret.push_back(err);
@@ -89,16 +89,16 @@ Array StreamPeer::_get_partial_data(int p_bytes) {
 
 	Array ret;
 
-	Vector<uint8_t> data;
+	std::vector<uint8_t> data;
 	data.resize(p_bytes);
 	if (data.size() != p_bytes) {
 
 		ret.push_back(ERR_OUT_OF_MEMORY);
-		ret.push_back(Vector<uint8_t>());
+		ret.push_back(std::vector<uint8_t>());
 		return ret;
 	}
 
-	uint8_t *w = data.ptrw();
+	uint8_t *w = data.data();
 	int received;
 	Error err = get_partial_data(&w[0], p_bytes, received);
 
@@ -452,7 +452,7 @@ Error StreamPeerBuffer::put_data(const uint8_t *p_data, int p_bytes) {
 		data.resize(pointer + p_bytes);
 	}
 
-	uint8_t *w = data.ptrw();
+	uint8_t *w = data.data();
 	copymem(&w[pointer], p_data, p_bytes);
 
 	pointer += p_bytes;
@@ -487,7 +487,7 @@ Error StreamPeerBuffer::get_partial_data(uint8_t *p_buffer, int p_bytes, int &r_
 		r_received = p_bytes;
 	}
 
-	const uint8_t *r = data.ptr();
+	const uint8_t *r = data.data();
 	copymem(p_buffer, r + pointer, r_received);
 
 	pointer += r_received;
@@ -522,13 +522,13 @@ void StreamPeerBuffer::resize(int p_size) {
 	data.resize(p_size);
 }
 
-void StreamPeerBuffer::set_data_array(const Vector<uint8_t> &p_data) {
+void StreamPeerBuffer::set_data_array(const std::vector<uint8_t> &p_data) {
 
 	data = p_data;
 	pointer = 0;
 }
 
-Vector<uint8_t> StreamPeerBuffer::get_data_array() const {
+std::vector<uint8_t> StreamPeerBuffer::get_data_array() const {
 
 	return data;
 }
