@@ -147,7 +147,7 @@ struct Vector3 {
 	_FORCE_INLINE_ bool operator>(const Vector3 &p_v) const;
 	_FORCE_INLINE_ bool operator>=(const Vector3 &p_v) const;
 
-	operator String() const;
+	operator Godot::String() const;
 	_FORCE_INLINE_ operator Vector3i() const {
 		return Vector3i(x, y, z);
 	}
