@@ -47,7 +47,7 @@ class VMap;
 
 template <class T>
 class CowData {
-	friend class String;
+	friend class Godot::String;
 	friend class CharString;
 	template <class TV, class VV>
 	friend class VMap;
