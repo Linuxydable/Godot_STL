@@ -32,6 +32,7 @@
 #define ERROR_MACROS_H
 
 #include "core/typedefs.h"
+#include "core/variant.h"
 
 class Godot::String;
 
