@@ -72,9 +72,9 @@ void StringName::cleanup() {
 			lost_strings++;
 			if (OS::get_singleton()->is_stdout_verbose()) {
 				if (d->cname) {
-					print_line("Orphan StringName: " + String(d->cname));
+					print_line("Orphan StringName: " + Godot::String(d->cname));
 				} else {
-					print_line("Orphan StringName: " + String(d->name));
+					print_line("Orphan StringName: " + Godot::String(d->name));
 				}
 			}
 
@@ -113,7 +113,7 @@ void StringName::unref() {
 	_data = nullptr;
 }
 
-bool StringName::operator==(const String &p_name) const {
+bool StringName::operator==(const Godot::String &p_name) const {
 
 	if (!_data) {
 
@@ -133,7 +133,7 @@ bool StringName::operator==(const char *p_name) const {
 	return (_data->get_name() == p_name);
 }
 
-bool StringName::operator!=(const String &p_name) const {
+bool StringName::operator!=(const Godot::String &p_name) const {
 
 	return !(operator==(p_name));
 }
@@ -180,7 +180,7 @@ StringName::StringName(const char *p_name) {
 
 	MutexLock lock(mutex);
 
-	uint32_t hash = String::hash(p_name);
+	uint32_t hash = Godot::String::hash(p_name);
 
 	uint32_t idx = hash & STRING_TABLE_MASK;
 
@@ -224,7 +224,7 @@ StringName::StringName(const StaticCString &p_static_string) {
 
 	MutexLock lock(mutex);
 
-	uint32_t hash = String::hash(p_static_string.ptr);
+	uint32_t hash = Godot::String::hash(p_static_string.ptr);
 
 	uint32_t idx = hash & STRING_TABLE_MASK;
 
@@ -258,13 +258,13 @@ StringName::StringName(const StaticCString &p_static_string) {
 	_table[idx] = _data;
 }
 
-StringName::StringName(const String &p_name) {
+StringName::StringName(const Godot::String &p_name) {
 
 	_data = nullptr;
 
 	ERR_FAIL_COND(!configured);
 
-	if (p_name == String())
+	if (p_name == Godot::String())
 		return;
 
 	MutexLock lock(mutex);
@@ -311,7 +311,7 @@ StringName StringName::search(const char *p_name) {
 
 	MutexLock lock(mutex);
 
-	uint32_t hash = String::hash(p_name);
+	uint32_t hash = Godot::String::hash(p_name);
 	uint32_t idx = hash & STRING_TABLE_MASK;
 
 	_Data *_data = _table[idx];
@@ -341,7 +341,7 @@ StringName StringName::search(const CharType *p_name) {
 
 	MutexLock lock(mutex);
 
-	uint32_t hash = String::hash(p_name);
+	uint32_t hash = Godot::String::hash(p_name);
 
 	uint32_t idx = hash & STRING_TABLE_MASK;
 
@@ -361,7 +361,7 @@ StringName StringName::search(const CharType *p_name) {
 
 	return StringName(); //does not exist
 }
-StringName StringName::search(const String &p_name) {
+StringName StringName::search(const Godot::String &p_name) {
 
 	ERR_FAIL_COND_V(p_name == "", StringName());
 
