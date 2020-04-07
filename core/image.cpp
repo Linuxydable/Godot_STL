@@ -471,8 +471,8 @@ void Image::convert(Format p_new_format) {
 
 	Image new_img(width, height, 0, p_new_format);
 
-	const uint8_t *rptr = data.ptr();
-	uint8_t *wptr = new_img.data.ptrw();
+	const uint8_t *rptr = data.data();
+	uint8_t *wptr = new_img.data.data();
 
 	int conversion_type = format | p_new_format << 8;
 
@@ -934,10 +934,10 @@ void Image::resize(int p_width, int p_height, Interpolation p_interpolation) {
 	}
 	// --
 
-	const uint8_t *r = data.ptr();
+	const uint8_t *r = data.data();
 	const unsigned char *r_ptr = r;
 
-	uint8_t *w = dst.data.ptrw();
+	uint8_t *w = dst.data.data();
 	unsigned char *w_ptr = w;
 
 	switch (p_interpolation) {
@@ -1003,7 +1003,7 @@ void Image::resize(int p_width, int p_height, Interpolation p_interpolation) {
 						_get_mipmap_offset_and_size(mip2, offs, src_width, src_height);
 						src_ptr = r_ptr + offs;
 						// Switch to write to the second destination image
-						w = dst2.data.ptrw();
+						w = dst2.data.data();
 						w_ptr = w;
 					}
 				}
@@ -1034,7 +1034,7 @@ void Image::resize(int p_width, int p_height, Interpolation p_interpolation) {
 
 			if (interpolate_mipmaps) {
 				// Switch to read again from the first scaled mipmap to overlay it over the second
-				r = dst.data.ptr();
+				r = dst.data.data();
 				_overlay(r, w, mip1_weight, p_width, p_height, get_format_pixel_size(format));
 			}
 
@@ -1125,8 +1125,8 @@ void Image::crop_from_point(int p_x, int p_y, int p_width, int p_height) {
 	Image dst(p_width, p_height, 0, format);
 
 	{
-		const uint8_t *r = data.ptr();
-		uint8_t *w = dst.data.ptrw();
+		const uint8_t *r = data.data();
+		uint8_t *w = dst.data.data();
 
 		int m_h = p_y + p_height;
 		int m_w = p_x + p_width;
@@ -1166,7 +1166,7 @@ void Image::flip_y() {
 	}
 
 	{
-		uint8_t *w = data.ptrw();
+		uint8_t *w = data.data();
 		uint8_t up[16];
 		uint8_t down[16];
 		uint32_t pixel_size = get_format_pixel_size(format);
@@ -1199,7 +1199,7 @@ void Image::flip_x() {
 	}
 
 	{
-		uint8_t *w = data.ptrw();
+		uint8_t *w = data.data();
 		uint8_t up[16];
 		uint8_t down[16];
 		uint32_t pixel_size = get_format_pixel_size(format);
@@ -1331,12 +1331,12 @@ void Image::expand_x2_hq2x() {
 	if (current != FORMAT_RGBA8)
 		convert(FORMAT_RGBA8);
 
-	Vector<uint8_t> dest;
+	std::vector<uint8_t> dest;
 	dest.resize(width * 2 * height * 2 * 4);
 
 	{
-		const uint8_t *r = data.ptr();
-		uint8_t *w = dest.ptrw();
+		const uint8_t *r = data.data();
+		uint8_t *w = dest.data();
 
 		ERR_FAIL_COND(!r);
 
@@ -1364,7 +1364,7 @@ void Image::shrink_x2() {
 	if (mipmaps) {
 
 		//just use the lower mipmap as base and copy all
-		Vector<uint8_t> new_img;
+		std::vector<uint8_t> new_img;
 
 		int ofs = get_mipmap_offset(1);
 
@@ -1373,8 +1373,8 @@ void Image::shrink_x2() {
 		ERR_FAIL_COND(new_img.size() == 0);
 
 		{
-			uint8_t *w = new_img.ptrw();
-			const uint8_t *r = data.ptr();
+			uint8_t *w = new_img.data();
+			const uint8_t *r = data.data();
 
 			copymem(w, &r[ofs], new_size);
 		}
@@ -1385,7 +1385,7 @@ void Image::shrink_x2() {
 
 	} else {
 
-		Vector<uint8_t> new_img;
+		std::vector<uint8_t> new_img;
 
 		ERR_FAIL_COND(!_can_modify(format));
 		int ps = get_format_pixel_size(format);
@@ -1394,8 +1394,8 @@ void Image::shrink_x2() {
 		ERR_FAIL_COND(data.size() == 0);
 
 		{
-			uint8_t *w = new_img.ptrw();
-			const uint8_t *r = data.ptr();
+			uint8_t *w = new_img.data();
+			const uint8_t *r = data.data();
 
 			switch (format) {
 
@@ -1468,7 +1468,7 @@ Error Image::generate_mipmaps(bool p_renormalize) {
 
 	data.resize(size);
 
-	uint8_t *wp = data.ptrw();
+	uint8_t *wp = data.data();
 
 	int prev_ofs = 0;
 	int prev_h = height;
@@ -1561,7 +1561,7 @@ Error Image::generate_mipmaps(bool p_renormalize) {
 
 Error Image::generate_mipmap_roughness(RoughnessChannel p_roughness_channel, const Ref<Image> &p_normal_map) {
 
-	Vector<double> normal_sat_vec; //summed area table
+	std::vector<double> normal_sat_vec; //summed area table
 	double *normal_sat = nullptr; //summed area table for normalmap
 	int normal_w = 0, normal_h = 0;
 
@@ -1577,7 +1577,7 @@ Error Image::generate_mipmap_roughness(RoughnessChannel p_roughness_channel, con
 
 	normal_sat_vec.resize(normal_w * normal_h * 3);
 
-	normal_sat = normal_sat_vec.ptrw();
+	normal_sat = normal_sat_vec.data();
 
 	//create summed area table
 
@@ -1622,7 +1622,7 @@ Error Image::generate_mipmap_roughness(RoughnessChannel p_roughness_channel, con
 
 	_get_dst_image_size(width, height, format, mmcount);
 
-	uint8_t *base_ptr = data.ptrw();
+	uint8_t *base_ptr = data.data();
 
 	for (int i = 1; i <= mmcount; i++) {
 
@@ -1737,12 +1737,12 @@ Error Image::generate_mipmap_roughness(RoughnessChannel p_roughness_channel, con
 		{
 			int size = get_mipmap_byte_size(i);
 			print_line("size for mimpap " + itos(i) + ": " + itos(size));
-			Vector<uint8_t> imgdata;
+			std::vector<uint8_t> imgdata;
 			imgdata.resize(size);
 
 
-			uint8_t* wr = imgdata.ptrw();
-			copymem(wr.ptr(), ptr, size);
+			uint8_t* wr = imgdata.data();
+			copymem(wr.data(), ptr, size);
 			wr = uint8_t*();
 			Ref<Image> im;
 			im.instance();
@@ -1775,7 +1775,7 @@ bool Image::empty() const {
 	return (data.size() == 0);
 }
 
-Vector<uint8_t> Image::get_data() const {
+std::vector<uint8_t> Image::get_data() const {
 
 	return data;
 }
@@ -1791,7 +1791,7 @@ void Image::create(int p_width, int p_height, bool p_use_mipmaps, Format p_forma
 	data.resize(size);
 
 	{
-		uint8_t *w = data.ptrw();
+		uint8_t *w = data.data();
 		zeromem(w, size);
 	}
 
@@ -1801,7 +1801,7 @@ void Image::create(int p_width, int p_height, bool p_use_mipmaps, Format p_forma
 	format = p_format;
 }
 
-void Image::create(int p_width, int p_height, bool p_use_mipmaps, Format p_format, const Vector<uint8_t> &p_data) {
+void Image::create(int p_width, int p_height, bool p_use_mipmaps, Format p_format, const std::vector<uint8_t> &p_data) {
 
 	ERR_FAIL_INDEX(p_width - 1, MAX_WIDTH);
 	ERR_FAIL_INDEX(p_height - 1, MAX_HEIGHT);
@@ -1932,7 +1932,7 @@ void Image::create(const char **p_xpm) {
 
 					status = READING_PIXELS;
 					create(size_width, size_height, 0, has_alpha ? FORMAT_RGBA8 : FORMAT_RGB8);
-					w = data.ptrw();
+					w = data.data();
 					pixel_size = has_alpha ? 4 : 3;
 				}
 			} break;
@@ -2003,7 +2003,7 @@ bool Image::is_invisible() const {
 	int w, h;
 	_get_mipmap_offset_and_size(1, len, w, h);
 
-	const uint8_t *r = data.ptr();
+	const uint8_t *r = data.data();
 	const unsigned char *data_ptr = r;
 
 	bool detected = false;
@@ -2048,7 +2048,7 @@ Image::AlphaMode Image::detect_alpha() const {
 	int w, h;
 	_get_mipmap_offset_and_size(1, len, w, h);
 
-	const uint8_t *r = data.ptr();
+	const uint8_t *r = data.data();
 	const unsigned char *data_ptr = r;
 
 	bool bit = false;
@@ -2105,9 +2105,9 @@ Error Image::save_png(const String &p_path) const {
 	return save_png_func(p_path, Ref<Image>((Image *)this));
 }
 
-Vector<uint8_t> Image::save_png_to_buffer() const {
+std::vector<uint8_t> Image::save_png_to_buffer() const {
 	if (save_png_buffer_func == nullptr) {
-		return Vector<uint8_t>();
+		return std::vector<uint8_t>();
 	}
 
 	return save_png_buffer_func(Ref<Image>((Image *)this));
@@ -2245,7 +2245,7 @@ Image::Image(int p_width, int p_height, bool p_use_mipmaps, Format p_format) {
 	create(p_width, p_height, p_use_mipmaps, p_format);
 }
 
-Image::Image(int p_width, int p_height, bool p_mipmaps, Format p_format, const Vector<uint8_t> &p_data) {
+Image::Image(int p_width, int p_height, bool p_mipmaps, Format p_format, const std::vector<uint8_t> &p_data) {
 
 	width = 0;
 	height = 0;
@@ -2319,10 +2319,10 @@ void Image::blit_rect(const Ref<Image> &p_src, const Rect2 &p_src_rect, const Po
 	Point2 src_underscan = Point2(MIN(0, p_src_rect.position.x), MIN(0, p_src_rect.position.y));
 	Rect2i dest_rect = Rect2i(0, 0, width, height).clip(Rect2i(p_dest - src_underscan, clipped_src_rect.size));
 
-	uint8_t *wp = data.ptrw();
+	uint8_t *wp = data.data();
 	uint8_t *dst_data_ptr = wp;
 
-	const uint8_t *rp = p_src->data.ptr();
+	const uint8_t *rp = p_src->data.data();
 	const uint8_t *src_data_ptr = rp;
 
 	int pixel_size = get_format_pixel_size(format);
@@ -2374,10 +2374,10 @@ void Image::blit_rect_mask(const Ref<Image> &p_src, const Ref<Image> &p_mask, co
 	Point2 src_underscan = Point2(MIN(0, p_src_rect.position.x), MIN(0, p_src_rect.position.y));
 	Rect2i dest_rect = Rect2i(0, 0, width, height).clip(Rect2i(p_dest - src_underscan, clipped_src_rect.size));
 
-	uint8_t *wp = data.ptrw();
+	uint8_t *wp = data.data();
 	uint8_t *dst_data_ptr = wp;
 
-	const uint8_t *rp = p_src->data.ptr();
+	const uint8_t *rp = p_src->data.data();
 	const uint8_t *src_data_ptr = rp;
 
 	int pixel_size = get_format_pixel_size(format);
@@ -2512,7 +2512,7 @@ void Image::blend_rect_mask(const Ref<Image> &p_src, const Ref<Image> &p_mask, c
 void Image::fill(const Color &c) {
 	ERR_FAIL_COND_MSG(!_can_modify(format), "Cannot fill in compressed or custom image formats.");
 
-	uint8_t *wp = data.ptrw();
+	uint8_t *wp = data.data();
 	uint8_t *dst_data_ptr = wp;
 
 	int pixel_size = get_format_pixel_size(format);
@@ -2549,12 +2549,12 @@ void (*Image::_image_decompress_bptc)(Image *) = nullptr;
 void (*Image::_image_decompress_etc1)(Image *) = nullptr;
 void (*Image::_image_decompress_etc2)(Image *) = nullptr;
 
-Vector<uint8_t> (*Image::lossy_packer)(const Ref<Image> &, float) = nullptr;
-Ref<Image> (*Image::lossy_unpacker)(const Vector<uint8_t> &) = nullptr;
-Vector<uint8_t> (*Image::lossless_packer)(const Ref<Image> &) = nullptr;
-Ref<Image> (*Image::lossless_unpacker)(const Vector<uint8_t> &) = nullptr;
-Vector<uint8_t> (*Image::basis_universal_packer)(const Ref<Image> &, Image::UsedChannels) = nullptr;
-Ref<Image> (*Image::basis_universal_unpacker)(const Vector<uint8_t> &) = nullptr;
+std::vector<uint8_t> (*Image::lossy_packer)(const Ref<Image> &, float) = nullptr;
+Ref<Image> (*Image::lossy_unpacker)(const std::vector<uint8_t> &) = nullptr;
+std::vector<uint8_t> (*Image::lossless_packer)(const Ref<Image> &) = nullptr;
+Ref<Image> (*Image::lossless_unpacker)(const std::vector<uint8_t> &) = nullptr;
+std::vector<uint8_t> (*Image::basis_universal_packer)(const Ref<Image> &, Image::UsedChannels) = nullptr;
+Ref<Image> (*Image::basis_universal_unpacker)(const std::vector<uint8_t> &) = nullptr;
 
 void Image::_set_data(const Dictionary &p_data) {
 
@@ -2568,7 +2568,7 @@ void Image::_set_data(const Dictionary &p_data) {
 	int dheight = p_data["height"];
 	String dformat = p_data["format"];
 	bool dmipmaps = p_data["mipmaps"];
-	Vector<uint8_t> ddata = p_data["data"];
+	std::vector<uint8_t> ddata = p_data["data"];
 	Format ddformat = FORMAT_MAX;
 	for (int i = 0; i < FORMAT_MAX; i++) {
 		if (dformat == get_format_name(Format(i))) {
@@ -2825,7 +2825,7 @@ Color Image::get_pixel(int p_x, int p_y) const {
 #endif
 
 	uint32_t ofs = p_y * width + p_x;
-	return _get_color_at_ofs(data.ptr(), ofs);
+	return _get_color_at_ofs(data.data(), ofs);
 }
 
 void Image::set_pixelv(const Point2 &p_dst, const Color &p_color) {
@@ -2839,7 +2839,7 @@ void Image::set_pixel(int p_x, int p_y, const Color &p_color) {
 #endif
 
 	uint32_t ofs = p_y * width + p_x;
-	_set_color_at_ofs(data.ptrw(), ofs, p_color);
+	_set_color_at_ofs(data.data, ofs, p_color);
 }
 
 Image::UsedChannels Image::detect_used_channels(CompressSource p_source) {
@@ -3069,7 +3069,7 @@ void Image::normalmap_to_xy() {
 
 	{
 		int len = data.size() / 4;
-		uint8_t *data_ptr = data.ptrw();
+		uint8_t *data_ptr = data.data();
 
 		for (int i = 0; i < len; i++) {
 
@@ -3111,12 +3111,12 @@ Ref<Image> Image::get_image_from_mipmap(int p_mipamp) const {
 	int ofs, size, w, h;
 	get_mipmap_offset_size_and_dimensions(p_mipamp, ofs, size, w, h);
 
-	Vector<uint8_t> new_data;
+	std::vector<uint8_t> new_data;
 	new_data.resize(size);
 
 	{
-		uint8_t *wr = new_data.ptrw();
-		const uint8_t *rd = data.ptr();
+		uint8_t *wr = new_data.data();
+		const uint8_t *rd = data.data();
 		copymem(wr, rd + ofs, size);
 	}
 
@@ -3135,12 +3135,12 @@ void Image::bumpmap_to_normalmap(float bump_scale) {
 	ERR_FAIL_COND(!_can_modify(format));
 	convert(Image::FORMAT_RF);
 
-	Vector<uint8_t> result_image; //rgba output
+	std::vector<uint8_t> result_image; //rgba output
 	result_image.resize(width * height * 4);
 
 	{
-		const uint8_t *rp = data.ptr();
-		uint8_t *wp = result_image.ptrw();
+		const uint8_t *rp = data.data();
+		uint8_t *wp = result_image.data();
 
 		ERR_FAIL_COND(!rp);
 
@@ -3186,7 +3186,7 @@ void Image::srgb_to_linear() {
 	if (format == FORMAT_RGBA8) {
 
 		int len = data.size() / 4;
-		uint8_t *data_ptr = data.ptrw();
+		uint8_t *data_ptr = data.data();
 
 		for (int i = 0; i < len; i++) {
 
@@ -3198,7 +3198,7 @@ void Image::srgb_to_linear() {
 	} else if (format == FORMAT_RGB8) {
 
 		int len = data.size() / 3;
-		uint8_t *data_ptr = data.ptrw();
+		uint8_t *data_ptr = data.data();
 
 		for (int i = 0; i < len; i++) {
 
@@ -3217,7 +3217,7 @@ void Image::premultiply_alpha() {
 	if (format != FORMAT_RGBA8)
 		return; //not needed
 
-	uint8_t *data_ptr = data.ptrw();
+	uint8_t *data_ptr = data.data();
 
 	for (int i = 0; i < height; i++) {
 		for (int j = 0; j < width; j++) {
@@ -3239,10 +3239,10 @@ void Image::fix_alpha_edges() {
 	if (format != FORMAT_RGBA8)
 		return; //not needed
 
-	Vector<uint8_t> dcopy = data;
-	const uint8_t *srcptr = dcopy.ptr();
+	std::vector<uint8_t> dcopy = data;
+	const uint8_t *srcptr = dcopy.data();
 
-	uint8_t *data_ptr = data.ptrw();
+	uint8_t *data_ptr = data.data();
 
 	const int max_radius = 4;
 	const int alpha_threshold = 20;
@@ -3302,15 +3302,15 @@ String Image::get_format_name(Format p_format) {
 	return format_names[p_format];
 }
 
-Error Image::load_png_from_buffer(const Vector<uint8_t> &p_array) {
+Error Image::load_png_from_buffer(const std::vector<uint8_t> &p_array) {
 	return _load_from_buffer(p_array, _png_mem_loader_func);
 }
 
-Error Image::load_jpg_from_buffer(const Vector<uint8_t> &p_array) {
+Error Image::load_jpg_from_buffer(const std::vector<uint8_t> &p_array) {
 	return _load_from_buffer(p_array, _jpg_mem_loader_func);
 }
 
-Error Image::load_webp_from_buffer(const Vector<uint8_t> &p_array) {
+Error Image::load_webp_from_buffer(const std::vector<uint8_t> &p_array) {
 	return _load_from_buffer(p_array, _webp_mem_loader_func);
 }
 
@@ -3319,7 +3319,7 @@ void Image::convert_rg_to_ra_rgba8() {
 	ERR_FAIL_COND(!data.size());
 
 	int s = data.size();
-	uint8_t *w = data.ptrw();
+	uint8_t *w = data.data();
 	for (int i = 0; i < s; i += 4) {
 		w[i + 3] = w[i + 1];
 		w[i + 1] = 0;
@@ -3331,7 +3331,7 @@ void Image::convert_ra_rgba8_to_rg() {
 	ERR_FAIL_COND(!data.size());
 
 	int s = data.size();
-	uint8_t *w = data.ptrw();
+	uint8_t *w = data.data();
 	for (int i = 0; i < s; i += 4) {
 		w[i + 1] = w[i + 3];
 		w[i + 2] = 0;
@@ -3339,13 +3339,13 @@ void Image::convert_ra_rgba8_to_rg() {
 	}
 }
 
-Error Image::_load_from_buffer(const Vector<uint8_t> &p_array, ImageMemLoadFunc p_loader) {
+Error Image::_load_from_buffer(const std::vector<uint8_t> &p_array, ImageMemLoadFunc p_loader) {
 	int buffer_size = p_array.size();
 
 	ERR_FAIL_COND_V(buffer_size == 0, ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V(!p_loader, ERR_INVALID_PARAMETER);
 
-	const uint8_t *r = p_array.ptr();
+	const uint8_t *r = p_array.data();
 
 	Ref<Image> image = p_loader(r, buffer_size);
 	ERR_FAIL_COND_V(!image.is_valid(), ERR_PARSE_ERROR);
