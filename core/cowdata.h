@@ -39,7 +39,6 @@
 
 #include <string.h>
 
-template <class T>
 class String;
 class CharString;
 template <class T, class V>
