@@ -855,7 +855,7 @@ public:
 		return triangles;
 	}
 
-	static bool is_polygon_clockwise(const std::vector<std::vector> &p_polygon) {
+	static bool is_polygon_clockwise(const std::vector<Vector2> &p_polygon) {
 		int c = p_polygon.size();
 		if (c < 3)
 			return false;
@@ -876,6 +876,8 @@ public:
 		unsigned c = p_polygon.size();
 		if (c < 3)
 			return false;
+
+		const Vector2 *p = p_polygon.data();
 
 		Vector2 further_away(-1e20, -1e20);
 		Vector2 further_away_opposite(1e20, 1e20);
