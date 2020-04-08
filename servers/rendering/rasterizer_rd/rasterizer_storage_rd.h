@@ -64,7 +64,7 @@ public:
 	struct MaterialData {
 
 		void update_uniform_buffer(const Map<StringName, ShaderLanguage::ShaderNode::Uniform> &p_uniforms, const uint32_t *p_uniform_offsets, const Map<StringName, Variant> &p_parameters, uint8_t *p_buffer, uint32_t p_buffer_size, bool p_use_linear_color);
-		void update_textures(const Map<StringName, Variant> &p_parameters, const Map<StringName, RID> &p_default_textures, const Vector<ShaderCompilerRD::GeneratedCode::Texture> &p_texture_uniforms, RID *p_textures, bool p_use_linear_color);
+		void update_textures(const Map<StringName, Variant> &p_parameters, const Map<StringName, RID> &p_default_textures, const std::vector<ShaderCompilerRD::GeneratedCode::Texture> &p_texture_uniforms, RID *p_textures, bool p_use_linear_color);
 
 		virtual void set_render_priority(int p_priority) = 0;
 		virtual void set_next_pass(RID p_pass) = 0;
@@ -136,7 +136,7 @@ private:
 		String path;
 
 		RID proxy_to;
-		Vector<RID> proxies;
+		std::vector<RID> proxies;
 
 		RS::TextureDetectCallback detect_3d_callback = nullptr;
 		void *detect_3d_callback_ud = nullptr;
@@ -256,9 +256,9 @@ private:
 
 			AABB aabb;
 
-			Vector<AABB> bone_aabbs;
+			std::vector<AABB> bone_aabbs;
 
-			Vector<RID> blend_shapes;
+			std::vector<RID> blend_shapes;
 			RID blend_shape_base_buffer; //source buffer goes here when using blend shapes, and main one is uncompressed
 
 			RID material;
@@ -276,12 +276,12 @@ private:
 		Surface **surfaces = nullptr;
 		uint32_t surface_count = 0;
 
-		Vector<AABB> bone_aabbs;
+		std::vector<AABB> bone_aabbs;
 
 		AABB aabb;
 		AABB custom_aabb;
 
-		Vector<RID> material_cache;
+		std::vector<RID> material_cache;
 
 		RasterizerScene::InstanceDependency instance_dependency;
 	};
@@ -307,7 +307,7 @@ private:
 		uint32_t color_offset_cache = 0;
 		uint32_t custom_data_offset_cache = 0;
 
-		Vector<float> data_cache; //used if individual setting is used
+		std::vector<float> data_cache; //used if individual setting is used
 		bool *data_cache_dirty_regions = nullptr;
 		uint32_t data_cache_used_dirty_regions = 0;
 
@@ -335,7 +335,7 @@ private:
 	struct Skeleton {
 		bool use_2d = false;
 		int size = 0;
-		Vector<float> data;
+		std::vector<float> data;
 		RID buffer;
 
 		bool dirty = false;
@@ -414,7 +414,7 @@ private:
 		uint32_t octree_buffer_size = 0;
 		uint32_t data_buffer_size = 0;
 
-		Vector<int> level_counts;
+		std::vector<int> level_counts;
 
 		int cell_count = 0;
 
@@ -472,7 +472,7 @@ private:
 			RID mipmap_copy_fb;
 		};
 
-		Vector<BackbufferMipmap> backbuffer_mipmaps;
+		std::vector<BackbufferMipmap> backbuffer_mipmaps;
 		RID backbuffer_uniform_set;
 
 		//texture generated for this owner (nor RD).
@@ -498,8 +498,8 @@ public:
 	/* TEXTURE API */
 
 	virtual RID texture_2d_create(const Ref<Image> &p_image);
-	virtual RID texture_2d_layered_create(const Vector<Ref<Image>> &p_layers, RS::TextureLayeredType p_layered_type);
-	virtual RID texture_3d_create(const Vector<Ref<Image>> &p_slices); //all slices, then all the mipmaps, must be coherent
+	virtual RID texture_2d_layered_create(const std::vector<Ref<Image>> &p_layers, RS::TextureLayeredType p_layered_type);
+	virtual RID texture_3d_create(const std::vector<Ref<Image>> &p_slices); //all slices, then all the mipmaps, must be coherent
 	virtual RID texture_proxy_create(RID p_base);
 
 	virtual void _texture_2d_update(RID p_texture, const Ref<Image> &p_image, int p_layer, bool p_immediate);
@@ -622,7 +622,7 @@ public:
 	virtual void mesh_set_blend_shape_mode(RID p_mesh, RS::BlendShapeMode p_mode);
 	virtual RS::BlendShapeMode mesh_get_blend_shape_mode(RID p_mesh) const;
 
-	virtual void mesh_surface_update_region(RID p_mesh, int p_surface, int p_offset, const Vector<uint8_t> &p_data);
+	virtual void mesh_surface_update_region(RID p_mesh, int p_surface, int p_offset, const std::vector<uint8_t> &p_data);
 
 	virtual void mesh_surface_set_material(RID p_mesh, int p_surface, RID p_material);
 	virtual RID mesh_surface_get_material(RID p_mesh, int p_surface) const;
@@ -648,11 +648,11 @@ public:
 		if (mesh->material_cache.empty()) {
 			mesh->material_cache.resize(mesh->surface_count);
 			for (uint32_t i = 0; i < r_surface_count; i++) {
-				mesh->material_cache.write[i] = mesh->surfaces[i]->material;
+				mesh->material_cache[i] = mesh->surfaces[i]->material;
 			}
 		}
 
-		return mesh->material_cache.ptr();
+		return mesh->material_cache.data();
 	}
 
 	_FORCE_INLINE_ RS::PrimitiveType mesh_surface_get_primitive(RID p_mesh, uint32_t p_surface_index) {
@@ -748,8 +748,8 @@ public:
 	Color multimesh_instance_get_color(RID p_multimesh, int p_index) const;
 	Color multimesh_instance_get_custom_data(RID p_multimesh, int p_index) const;
 
-	void multimesh_set_buffer(RID p_multimesh, const Vector<float> &p_buffer);
-	Vector<float> multimesh_get_buffer(RID p_multimesh) const;
+	void multimesh_set_buffer(RID p_multimesh, const std::vector<float> &p_buffer);
+	std::vector<float> multimesh_get_buffer(RID p_multimesh) const;
 
 	void multimesh_set_visible_instances(RID p_multimesh, int p_visible);
 	int multimesh_get_visible_instances(RID p_multimesh) const;
@@ -782,7 +782,7 @@ public:
 	_FORCE_INLINE_ RID multimesh_get_3d_uniform_set(RID p_multimesh, RID p_shader, uint32_t p_set) const {
 		MultiMesh *multimesh = multimesh_owner.getornull(p_multimesh);
 		if (!multimesh->uniform_set_3d.is_valid()) {
-			Vector<RD::Uniform> uniforms;
+			std::vector<RD::Uniform> uniforms;
 			RD::Uniform u;
 			u.type = RD::UNIFORM_TYPE_STORAGE_BUFFER;
 			u.binding = 0;
@@ -830,7 +830,7 @@ public:
 			return RID();
 		}
 		if (!skeleton->uniform_set_3d.is_valid()) {
-			Vector<RD::Uniform> uniforms;
+			std::vector<RD::Uniform> uniforms;
 			RD::Uniform u;
 			u.type = RD::UNIFORM_TYPE_STORAGE_BUFFER;
 			u.binding = 0;
@@ -970,15 +970,15 @@ public:
 
 	RID gi_probe_create();
 
-	void gi_probe_allocate(RID p_gi_probe, const Transform &p_to_cell_xform, const AABB &p_aabb, const Vector3i &p_octree_size, const Vector<uint8_t> &p_octree_cells, const Vector<uint8_t> &p_data_cells, const Vector<uint8_t> &p_distance_field, const Vector<int> &p_level_counts);
+	void gi_probe_allocate(RID p_gi_probe, const Transform &p_to_cell_xform, const AABB &p_aabb, const Vector3i &p_octree_size, const std::vector<uint8_t> &p_octree_cells, const std::vector<uint8_t> &p_data_cells, const std::vector<uint8_t> &p_distance_field, const std::vector<int> &p_level_counts);
 
 	AABB gi_probe_get_bounds(RID p_gi_probe) const;
 	Vector3i gi_probe_get_octree_size(RID p_gi_probe) const;
-	Vector<uint8_t> gi_probe_get_octree_cells(RID p_gi_probe) const;
-	Vector<uint8_t> gi_probe_get_data_cells(RID p_gi_probe) const;
-	Vector<uint8_t> gi_probe_get_distance_field(RID p_gi_probe) const;
+	std::vector<uint8_t> gi_probe_get_octree_cells(RID p_gi_probe) const;
+	std::vector<uint8_t> gi_probe_get_data_cells(RID p_gi_probe) const;
+	std::vector<uint8_t> gi_probe_get_distance_field(RID p_gi_probe) const;
 
-	Vector<int> gi_probe_get_level_counts(RID p_gi_probe) const;
+	std::vector<int> gi_probe_get_level_counts(RID p_gi_probe) const;
 	Transform gi_probe_get_to_cell_xform(RID p_gi_probe) const;
 
 	void gi_probe_set_dynamic_range(RID p_gi_probe, float p_range);
@@ -1023,12 +1023,12 @@ public:
 
 	void lightmap_capture_set_bounds(RID p_capture, const AABB &p_bounds) {}
 	AABB lightmap_capture_get_bounds(RID p_capture) const { return AABB(); }
-	void lightmap_capture_set_octree(RID p_capture, const Vector<uint8_t> &p_octree) {}
+	void lightmap_capture_set_octree(RID p_capture, const std::vector<uint8_t> &p_octree) {}
 	RID lightmap_capture_create() {
 		return RID();
 	}
-	Vector<uint8_t> lightmap_capture_get_octree(RID p_capture) const {
-		return Vector<uint8_t>();
+	std::vector<uint8_t> lightmap_capture_get_octree(RID p_capture) const {
+		return std::vector<uint8_t>();
 	}
 	void lightmap_capture_set_octree_cell_transform(RID p_capture, const Transform &p_xform) {}
 	Transform lightmap_capture_get_octree_cell_transform(RID p_capture) const { return Transform(); }
@@ -1036,7 +1036,7 @@ public:
 	int lightmap_capture_get_octree_cell_subdiv(RID p_capture) const { return 0; }
 	void lightmap_capture_set_energy(RID p_capture, float p_energy) {}
 	float lightmap_capture_get_energy(RID p_capture) const { return 0.0; }
-	const Vector<LightmapCaptureOctree> *lightmap_capture_get_octree_ptr(RID p_capture) const {
+	const std::vector<LightmapCaptureOctree> *lightmap_capture_get_octree_ptr(RID p_capture) const {
 		return nullptr;
 	}
 
