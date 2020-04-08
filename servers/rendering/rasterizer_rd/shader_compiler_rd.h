@@ -50,7 +50,7 @@ public:
 
 	struct GeneratedCode {
 
-		Vector<String> defines;
+		std::vector<String> defines;
 		struct Texture {
 			StringName name;
 			ShaderLanguage::DataType type;
@@ -59,9 +59,9 @@ public:
 			ShaderLanguage::TextureRepeat repeat;
 		};
 
-		Vector<Texture> texture_uniforms;
+		std::vector<Texture> texture_uniforms;
 
-		Vector<uint32_t> uniform_offsets;
+		std::vector<uint32_t> uniform_offsets;
 		uint32_t uniform_total_size;
 		String uniforms;
 		String vertex_global;
