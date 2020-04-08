@@ -153,7 +153,7 @@
     <NMakeCleanCommandLine Condition="'$(Configuration)|$(Platform)'=='release|x64'">echo Starting SCons &amp;&amp; cmd /V /C set "plat=$(PlatformTarget)" ^&amp; (if "$(PlatformTarget)"=="x64" (set "plat=x86_amd64")) ^&amp; set "tools=yes" ^&amp; (if "$(Configuration)"=="release" (set "tools=no")) ^&amp; call "D:\Programs\VisualStudio\VC\Auxiliary\Build\vcvarsall.bat" !plat! ^&amp; scons --directory="$(ProjectDir.TrimEnd('\'))" --clean platform=windows progress=no target=$(Configuration) tools=!tools! -j8 warnings=no</NMakeCleanCommandLine>
     <NMakeOutput Condition="'$(Configuration)|$(Platform)'=='release|x64'">bin\godot.windows.opt.64.exe</NMakeOutput>
     <NMakePreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='release|x64'">DEBUG_MEMORY_ALLOC;DISABLE_FORCED_INLINE;DEBUG_ENABLED;DEBUG_MEMORY_ENABLED;D3D_DEBUG_INFO;WINDOWS_ENABLED;OPENGL_ENABLED;WASAPI_ENABLED;WINMIDI_ENABLED;TYPED_METHOD_BIND;WIN32;MSVC;WINVER=0x0601;_WIN32_WINNT=0x0601;NOMINMAX;_WIN64;PTRCALL_ENABLED;TOOLS_ENABLED;GDSCRIPT_ENABLED;MINIZIP_ENABLED;ZSTD_STATIC_LINKING_ONLY;GLAD_ENABLED;GLES_OVER_GL;FREETYPE_ENABLED;SVG_ENABLED</NMakePreprocessorDefinitions>
-    <NMakeIncludeSearchPath Condition="'$(Configuration)|$(Platform)'=='release|x64'">D:\Projects\Godot_GNU_STL\thirdparty\nanosvg;D:\Projects\Godot_GNU_STL\thirdparty\freetype\include;D:\Projects\Godot_GNU_STL\thirdparty\libpng;D:\Projects\Godot_GNU_STL\thirdparty\glad;D:\Projects\Godot_GNU_STL\thirdparty\zstd;D:\Projects\Godot_GNU_STL\thirdparty\zlib;D:\Projects\Godot_GNU_STL\platform\windows;D:\Projects\Godot_GNU_STL</NMakeIncludeSearchPath>
+    <NMakeIncludeSearchPath Condition="'$(Configuration)|$(Platform)'=='release|x64'">D:\Projects\Godot_GNU_STL\thirdparty\nanosvg;D:\Projects\Godot_GNU_STL\thirdparty\freetype\include;D:\Projects\Godot_GNU_STL\thirdparty\libpng;D:\Projects\Godot_GNU_STL\thirdparty\glad;D:\Projects\Godot_GNU_STL\thirdparty\zstd;D:\Projects\Godot_GNU_STL\thirdparty\zlib;D:\Projects\Godot_GNU_STL\platform\windows;D:\Projects\Godot_GNU_STL;D:\Projects\Godot_GNU_STL\thirdparty\vulkan\include</NMakeIncludeSearchPath>
     <NMakeForcedIncludes Condition="'$(Configuration)|$(Platform)'=='release|x64'">$(NMakeForcedIncludes)</NMakeForcedIncludes>
     <NMakeAssemblySearchPath Condition="'$(Configuration)|$(Platform)'=='release|x64'">$(NMakeAssemblySearchPath)</NMakeAssemblySearchPath>
     <NMakeForcedUsingAssemblies Condition="'$(Configuration)|$(Platform)'=='release|x64'">$(NMakeForcedUsingAssemblies)</NMakeForcedUsingAssemblies>
@@ -1308,6 +1308,27 @@
     <ClInclude Include="thirdparty\squish\singlecolourfit.h" />
     <ClInclude Include="thirdparty\squish\squish.h" />
     <ClInclude Include="thirdparty\tinyexr\tinyexr.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vk_icd.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vk_layer.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vk_platform.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vk_sdk_platform.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan.hpp" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_android.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_core.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_fuchsia.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_ggp.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_ios.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_macos.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_metal.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_vi.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_wayland.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_win32.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_xcb.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_xlib.h" />
+    <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_xlib_xrandr.h" />
+    <ClInclude Include="thirdparty\vulkan\vk_enum_string_helper.h" />
+    <ClInclude Include="thirdparty\vulkan\vk_mem_alloc.h" />
     <ClInclude Include="thirdparty\wslay\wslay_event.h" />
     <ClInclude Include="thirdparty\wslay\wslay_frame.h" />
     <ClInclude Include="thirdparty\wslay\wslay_net.h" />
@@ -2913,6 +2934,7 @@
     <ClCompile Include="thirdparty\vhacd\src\vhacdMesh.cpp" />
     <ClCompile Include="thirdparty\vhacd\src\vhacdRaycastMesh.cpp" />
     <ClCompile Include="thirdparty\vhacd\src\vhacdVolume.cpp" />
+    <ClCompile Include="thirdparty\vulkan\vk_mem_alloc.cpp" />
     <ClCompile Include="thirdparty\wslay\wslay_event.c" />
     <ClCompile Include="thirdparty\wslay\wslay_frame.c" />
     <ClCompile Include="thirdparty\wslay\wslay_net.c" />

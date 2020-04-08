@@ -166,7 +166,7 @@ class VulkanContext {
 	Error _create_swap_chain();
 	Error _create_semaphores();
 
-	Vector<VkCommandBuffer> command_buffer_queue;
+	std::vector<VkCommandBuffer> command_buffer_queue;
 	int command_buffer_count;
 
 protected:
