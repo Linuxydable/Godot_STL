@@ -310,7 +310,7 @@ Node *SceneState::instance(GenEditState p_edit_state) const {
 	//do connections
 
 	int cc = connections.size();
-	const ConnectionData *cdata = connections.ptr();
+	const ConnectionData *cdata = connections.data();
 
 	for (int i = 0; i < cc; i++) {
 
@@ -1114,7 +1114,7 @@ void SceneState::set_bundled_scene(const Dictionary &p_dictionary) {
 
 		int namecount = snames.size();
 		names.resize(namecount);
-		const String *r = snames.ptr();
+		const String *r = snames.data();
 		for (int i = 0; i < names.size(); i++)
 			names[i] = r[i];
 	}
@@ -1210,7 +1210,7 @@ Dictionary SceneState::get_bundled_scene() const {
 
 	if (names.size()) {
 
-		String *r = rnames.ptrw();
+		String *r = rnames.data();
 
 		for (decltype(names.size()) i = 0; i < names.size(); ++i)
 			r[i] = names[i];

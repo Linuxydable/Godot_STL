@@ -105,7 +105,7 @@ class SceneState : public Reference {
 
 	static bool disable_placeholders;
 
-	Vector<String> _get_node_groups(int p_idx) const;
+	std::vector<String> _get_node_groups(int p_idx) const;
 
 	int _find_base_scene_node_remap_key(int p_idx) const;
 
