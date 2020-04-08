@@ -43,10 +43,10 @@ String WSLPeer::generate_key() {
 	// Random key
 	RandomNumberGenerator rng;
 	rng.set_seed(OS::get_singleton()->get_unix_time());
-	Vector<uint8_t> bkey;
+	std::vector<uint8_t> bkey;
 	int len = 16; // 16 bytes, as per RFC
 	bkey.resize(len);
-	uint8_t *w = bkey.ptrw();
+	uint8_t *w = bkey.data();
 	for (int i = 0; i < len; i++) {
 		w[i] = (uint8_t)rng.randi_range(0, 255);
 	}
@@ -260,7 +260,7 @@ Error WSLPeer::get_packet(const uint8_t **r_buffer, int &r_buffer_size) {
 		return ERR_UNAVAILABLE;
 
 	int read = 0;
-	uint8_t *rw = _packet_buffer.ptrw();
+	uint8_t *rw = _packet_buffer.data();
 	_in_buffer.read_packet(rw, _packet_buffer.size(), &_is_string, read);
 
 	*r_buffer = rw;
