@@ -58,7 +58,7 @@ public:
 	};
 
 	typedef DisplayServer *(*CreateFunction)(const String &, WindowMode, uint32_t, const Size2i &, Error &r_error);
-	typedef Vector<String> (*GetRenderingDriversFunction)();
+	typedef std::vector<String> (*GetRenderingDriversFunction)();
 
 private:
 	static void _input_set_mouse_mode(InputFilter::MouseMode p_mode);
@@ -191,7 +191,7 @@ public:
 
 	typedef int WindowID;
 
-	virtual Vector<DisplayServer::WindowID> get_window_list() const = 0;
+	virtual std::vector<DisplayServer::WindowID> get_window_list() const = 0;
 
 	enum WindowFlags {
 		WINDOW_FLAG_RESIZE_DISABLED,
@@ -321,7 +321,7 @@ public:
 	virtual void native_video_unpause();
 	virtual void native_video_stop();
 
-	virtual Error dialog_show(String p_title, String p_description, Vector<String> p_buttons, const Callable &p_callback);
+	virtual Error dialog_show(String p_title, String p_description, std::vector<String> p_buttons, const Callable &p_callback);
 	virtual Error dialog_input_text(String p_title, String p_description, String p_partial, const Callable &p_callback);
 
 	enum LatinKeyboardVariant {
@@ -370,7 +370,7 @@ public:
 	static void register_create_function(const char *p_name, CreateFunction p_function, GetRenderingDriversFunction p_get_drivers);
 	static int get_create_function_count();
 	static const char *get_create_function_name(int p_index);
-	static Vector<String> get_create_function_rendering_drivers(int p_index);
+	static std::vector<String> get_create_function_rendering_drivers(int p_index);
 	static DisplayServer *create(int p_index, const String &p_rendering_driver, WindowMode p_mode, uint32_t p_flags, const Vector2i &p_resolution, Error &r_error);
 
 	DisplayServer();
