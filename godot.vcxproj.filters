@@ -3392,16 +3392,7 @@
     <ClInclude Include="servers\camera_server.h">
       <Filter>Header Files\servers</Filter>
     </ClInclude>
-    <ClInclude Include="servers\physics_2d_server.h">
-      <Filter>Header Files\servers</Filter>
-    </ClInclude>
-    <ClInclude Include="servers\physics_server.h">
-      <Filter>Header Files\servers</Filter>
-    </ClInclude>
     <ClInclude Include="servers\register_server_types.h">
-      <Filter>Header Files\servers</Filter>
-    </ClInclude>
-    <ClInclude Include="servers\visual_server.h">
       <Filter>Header Files\servers</Filter>
     </ClInclude>
     <ClInclude Include="thirdparty\assimp\code\Common\BaseProcess.h">
@@ -4710,6 +4701,24 @@
       <Filter>Header Files\thirdparty\vulkan</Filter>
     </ClInclude>
     <ClInclude Include="servers\physics_server_2d.h">
+      <Filter>Header Files\servers</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\display_server.h">
+      <Filter>Header Files\servers</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\navigation_server_2d.h">
+      <Filter>Header Files\servers</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\navigation_server_3d.h">
+      <Filter>Header Files\servers</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\physics_server_3d.h">
+      <Filter>Header Files\servers</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering_server.h">
+      <Filter>Header Files\servers</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\server_wrap_mt_common.h">
       <Filter>Header Files\servers</Filter>
     </ClInclude>
   </ItemGroup>
@@ -9560,6 +9569,21 @@
       <Filter>Header Files\thirdparty\vulkan</Filter>
     </ClCompile>
     <ClCompile Include="servers\physics_server_2d.cpp">
+      <Filter>Header Files\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\display_server.cpp">
+      <Filter>Header Files\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\navigation_server_2d.cpp">
+      <Filter>Header Files\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\navigation_server_3d.cpp">
+      <Filter>Header Files\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\physics_server_3d.cpp">
+      <Filter>Header Files\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering_server.cpp">
       <Filter>Header Files\servers</Filter>
     </ClCompile>
   </ItemGroup>

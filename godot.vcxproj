@@ -872,6 +872,9 @@
     <ClInclude Include="servers\audio\audio_stream.h" />
     <ClInclude Include="servers\audio\reverb_sw.h" />
     <ClInclude Include="servers\camera\camera_feed.h" />
+    <ClInclude Include="servers\display_server.h" />
+    <ClInclude Include="servers\navigation_server_2d.h" />
+    <ClInclude Include="servers\navigation_server_3d.h" />
     <ClInclude Include="servers\physics\joints\cone_twist_joint_sw.h" />
     <ClInclude Include="servers\physics\joints\generic_6dof_joint_sw.h" />
     <ClInclude Include="servers\physics\joints\hinge_joint_sw.h" />
@@ -909,6 +912,9 @@
     <ClInclude Include="servers\physics_2d\space_2d_sw.h" />
     <ClInclude Include="servers\physics_2d\step_2d_sw.h" />
     <ClInclude Include="servers\physics_server_2d.h" />
+    <ClInclude Include="servers\physics_server_3d.h" />
+    <ClInclude Include="servers\rendering_server.h" />
+    <ClInclude Include="servers\server_wrap_mt_common.h" />
     <ClInclude Include="servers\visual\rasterizer.h" />
     <ClInclude Include="servers\visual\shader_language.h" />
     <ClInclude Include="servers\visual\shader_types.h" />
@@ -922,10 +928,7 @@
     <ClInclude Include="servers\arvr_server.h" />
     <ClInclude Include="servers\audio_server.h" />
     <ClInclude Include="servers\camera_server.h" />
-    <ClInclude Include="servers\physics_2d_server.h" />
-    <ClInclude Include="servers\physics_server.h" />
     <ClInclude Include="servers\register_server_types.h" />
-    <ClInclude Include="servers\visual_server.h" />
     <ClInclude Include="thirdparty\assimp\code\Common\BaseProcess.h" />
     <ClInclude Include="thirdparty\assimp\code\Common\Importer.h" />
     <ClInclude Include="thirdparty\assimp\code\Common\ScenePreprocessor.h" />
@@ -2097,6 +2100,9 @@
     <ClCompile Include="servers\audio\audio_stream.cpp" />
     <ClCompile Include="servers\audio\reverb_sw.cpp" />
     <ClCompile Include="servers\camera\camera_feed.cpp" />
+    <ClCompile Include="servers\display_server.cpp" />
+    <ClCompile Include="servers\navigation_server_2d.cpp" />
+    <ClCompile Include="servers\navigation_server_3d.cpp" />
     <ClCompile Include="servers\physics\joints\cone_twist_joint_sw.cpp" />
     <ClCompile Include="servers\physics\joints\generic_6dof_joint_sw.cpp" />
     <ClCompile Include="servers\physics\joints\hinge_joint_sw.cpp" />
@@ -2134,6 +2140,8 @@
     <ClCompile Include="servers\physics_2d\space_2d_sw.cpp" />
     <ClCompile Include="servers\physics_2d\step_2d_sw.cpp" />
     <ClCompile Include="servers\physics_server_2d.cpp" />
+    <ClCompile Include="servers\physics_server_3d.cpp" />
+    <ClCompile Include="servers\rendering_server.cpp" />
     <ClCompile Include="servers\visual\rasterizer.cpp" />
     <ClCompile Include="servers\visual\shader_language.cpp" />
     <ClCompile Include="servers\visual\shader_types.cpp" />

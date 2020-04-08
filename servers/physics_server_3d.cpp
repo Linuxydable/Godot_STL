@@ -182,20 +182,20 @@ int PhysicsShapeQueryParameters3D::get_collision_mask() const {
 	return collision_mask;
 }
 
-void PhysicsShapeQueryParameters3D::set_exclude(const Vector<RID> &p_exclude) {
+void PhysicsShapeQueryParameters3D::set_exclude(const std::vector<RID> &p_exclude) {
 
 	exclude.clear();
 	for (int i = 0; i < p_exclude.size(); i++)
 		exclude.insert(p_exclude[i]);
 }
 
-Vector<RID> PhysicsShapeQueryParameters3D::get_exclude() const {
+std::vector<RID> PhysicsShapeQueryParameters3D::get_exclude() const {
 
-	Vector<RID> ret;
+	std::vector<RID> ret;
 	ret.resize(exclude.size());
 	int idx = 0;
 	for (Set<RID>::Element *E = exclude.front(); E; E = E->next()) {
-		ret.write[idx] = E->get();
+		ret[idx] = E->get();
 	}
 	return ret;
 }
@@ -260,7 +260,7 @@ PhysicsShapeQueryParameters3D::PhysicsShapeQueryParameters3D() {
 
 /////////////////////////////////////
 
-Dictionary PhysicsDirectSpaceState3D::_intersect_ray(const Vector3 &p_from, const Vector3 &p_to, const Vector<RID> &p_exclude, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas) {
+Dictionary PhysicsDirectSpaceState3D::_intersect_ray(const Vector3 &p_from, const Vector3 &p_to, const std::vector<RID> &p_exclude, uint32_t p_collision_mask, bool p_collide_with_bodies, bool p_collide_with_areas) {
 
 	RayResult inters;
 	Set<RID> exclude;
@@ -287,9 +287,9 @@ Array PhysicsDirectSpaceState3D::_intersect_shape(const Ref<PhysicsShapeQueryPar
 
 	ERR_FAIL_COND_V(!p_shape_query.is_valid(), Array());
 
-	Vector<ShapeResult> sr;
+	std::vector<ShapeResult> sr;
 	sr.resize(p_max_results);
-	int rc = intersect_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->margin, sr.ptrw(), sr.size(), p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
+	int rc = intersect_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->margin, sr.data(), sr.size(), p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
 	Array ret;
 	ret.resize(rc);
 	for (int i = 0; i < rc; i++) {
@@ -323,10 +323,10 @@ Array PhysicsDirectSpaceState3D::_collide_shape(const Ref<PhysicsShapeQueryParam
 
 	ERR_FAIL_COND_V(!p_shape_query.is_valid(), Array());
 
-	Vector<Vector3> ret;
+	std::vector<Vector3> ret;
 	ret.resize(p_max_results * 2);
 	int rc = 0;
-	bool res = collide_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->margin, ret.ptrw(), p_max_results, rc, p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
+	bool res = collide_shape(p_shape_query->shape, p_shape_query->transform, p_shape_query->margin, ret.data(), p_max_results, rc, p_shape_query->exclude, p_shape_query->collision_mask, p_shape_query->collide_with_bodies, p_shape_query->collide_with_areas);
 	if (!res)
 		return Array();
 	Array r;
@@ -734,7 +734,7 @@ PhysicsServer3D::~PhysicsServer3D() {
 	singleton = nullptr;
 }
 
-Vector<PhysicsServer3DManager::ClassInfo> PhysicsServer3DManager::physics_servers;
+std::vector<PhysicsServer3DManager::ClassInfo> PhysicsServer3DManager::physics_servers;
 int PhysicsServer3DManager::default_server_id = -1;
 int PhysicsServer3DManager::default_server_priority = -1;
 const String PhysicsServer3DManager::setting_property_name("physics/3d/physics_engine");
