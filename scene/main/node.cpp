@@ -488,7 +488,7 @@ uint16_t Node::rpc_config(const StringName &p_method, MultiplayerAPI::RPCMode p_
 		return ((uint16_t)data.rpc_properties.size() - 1) | (1 << 15);
 	} else {
 		int c_mid = (~(1 << 15)) & mid;
-		data.rpc_methods.write[c_mid].mode = p_mode;
+		data.rpc_methods[c_mid].mode = p_mode;
 		return mid;
 	}
 }
@@ -505,7 +505,7 @@ uint16_t Node::rset_config(const StringName &p_property, MultiplayerAPI::RPCMode
 		return ((uint16_t)data.rpc_properties.size() - 1) | (1 << 15);
 	} else {
 		int c_pid = (~(1 << 15)) & pid;
-		data.rpc_properties.write[c_pid].mode = p_mode;
+		data.rpc_properties[c_pid].mode = p_mode;
 		return pid;
 	}
 }
@@ -803,7 +803,7 @@ String Node::get_rpc_md5() const {
 		rpc_list += String(data.rpc_properties[i].name);
 	}
 	if (get_script_instance()) {
-		Vector<ScriptNetData> rpc = get_script_instance()->get_rpc_methods();
+		std::vector<ScriptNetData> rpc = get_script_instance()->get_rpc_methods();
 		for (int i = 0; i < rpc.size(); i += 1) {
 			rpc_list += String(rpc[i].name);
 		}

@@ -125,8 +125,8 @@ private:
 		Node *pause_owner;
 
 		int network_master;
-		Vector<NetData> rpc_methods;
-		Vector<NetData> rpc_properties;
+		std::vector<NetData> rpc_methods;
+		std::vector<NetData> rpc_properties;
 
 		// variables used to properly sort the node when processing, ignored otherwise
 		//should move all the stuff below to bits
