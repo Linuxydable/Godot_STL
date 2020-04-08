@@ -46,7 +46,7 @@ class ShaderRD {
 
 	//versions
 	CharString general_defines;
-	Vector<CharString> variant_defines;
+	std::vector<CharString> variant_defines;
 
 	struct Version {
 		CharString uniforms;
@@ -57,7 +57,7 @@ class ShaderRD {
 		CharString fragment_light;
 		CharString fragment_globals;
 		CharString fragment_code;
-		Vector<CharString> custom_defines;
+		std::vector<CharString> custom_defines;
 
 		RID *variants; //same size as version defines
 
@@ -105,8 +105,8 @@ protected:
 public:
 	RID version_create();
 
-	void version_set_code(RID p_version, const String &p_uniforms, const String &p_vertex_globals, const String &p_vertex_code, const String &p_fragment_globals, const String &p_fragment_light, const String &p_fragment_code, const Vector<String> &p_custom_defines);
-	void version_set_compute_code(RID p_version, const String &p_uniforms, const String &p_compute_globals, const String &p_compute_code, const Vector<String> &p_custom_defines);
+	void version_set_code(RID p_version, const String &p_uniforms, const String &p_vertex_globals, const String &p_vertex_code, const String &p_fragment_globals, const String &p_fragment_light, const String &p_fragment_code, const std::vector<String> &p_custom_defines);
+	void version_set_compute_code(RID p_version, const String &p_uniforms, const String &p_compute_globals, const String &p_compute_code, const std::vector<String> &p_custom_defines);
 
 	_FORCE_INLINE_ RID version_get_shader(RID p_version, int p_variant) {
 		ERR_FAIL_INDEX_V(p_variant, variant_defines.size(), RID());
@@ -129,7 +129,7 @@ public:
 
 	bool version_free(RID p_version);
 
-	void initialize(const Vector<String> &p_variant_defines, const String &p_general_defines = "");
+	void initialize(const std::vector<String> &p_variant_defines, const String &p_general_defines = "");
 	virtual ~ShaderRD();
 };
 

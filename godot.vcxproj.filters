@@ -1137,6 +1137,9 @@
     <Filter Include="Header Files\thirdparty\vulkan">
       <UniqueIdentifier>{490a734d-c947-47be-9e5c-80c29b4c8c5b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\servers\rendering">
+      <UniqueIdentifier>{a03a90b7-6921-49db-a4bb-f3a7ab0c1ccb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\bind\core_bind.h">
@@ -4720,6 +4723,36 @@
     </ClInclude>
     <ClInclude Include="servers\server_wrap_mt_common.h">
       <Filter>Header Files\servers</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rasterizer.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rendering_device.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rendering_server_canvas.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rendering_server_globals.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rendering_server_raster.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rendering_server_scene.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rendering_server_viewport.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\rendering_server_wrap_mt.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\shader_language.h">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="servers\rendering\shader_types.h">
+      <Filter>Header Files\servers\rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -9585,6 +9618,36 @@
     </ClCompile>
     <ClCompile Include="servers\rendering_server.cpp">
       <Filter>Header Files\servers</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rasterizer.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rendering_device.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rendering_server_canvas.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rendering_server_globals.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rendering_server_raster.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rendering_server_scene.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rendering_server_viewport.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\rendering_server_wrap_mt.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\shader_language.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\rendering\shader_types.cpp">
+      <Filter>Header Files\servers\rendering</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
