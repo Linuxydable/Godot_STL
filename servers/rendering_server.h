@@ -48,8 +48,8 @@ class RenderingServer : public Object {
 	int mm_policy;
 
 	void _camera_set_orthogonal(RID p_camera, float p_size, float p_z_near, float p_z_far);
-	void _canvas_item_add_style_box(RID p_item, const Rect2 &p_rect, const Rect2 &p_source, RID p_texture, const Vector<float> &p_margins, const Color &p_modulate = Color(1, 1, 1));
-	Array _get_array_from_surface(uint32_t p_format, Vector<uint8_t> p_vertex_data, int p_vertex_len, Vector<uint8_t> p_index_data, int p_index_len) const;
+	void _canvas_item_add_style_box(RID p_item, const Rect2 &p_rect, const Rect2 &p_source, RID p_texture, const std::vector<float> &p_margins, const Color &p_modulate = Color(1, 1, 1));
+	Array _get_array_from_surface(uint32_t p_format, std::vector<uint8_t> p_vertex_data, int p_vertex_len, std::vector<uint8_t> p_index_data, int p_index_len) const;
 
 protected:
 	RID _make_test_cube();
@@ -58,7 +58,7 @@ protected:
 	RID white_texture;
 	RID test_material;
 
-	Error _surface_set_data(Array p_arrays, uint32_t p_format, uint32_t *p_offsets, uint32_t p_stride, Vector<uint8_t> &r_vertex_array, int p_vertex_array_len, Vector<uint8_t> &r_index_array, int p_index_array_len, AABB &r_aabb, Vector<AABB> &r_bone_aabb);
+	Error _surface_set_data(Array p_arrays, uint32_t p_format, uint32_t *p_offsets, uint32_t p_stride, std::vector<uint8_t> &r_vertex_array, int p_vertex_array_len, std::vector<uint8_t> &r_index_array, int p_index_array_len, AABB &r_aabb, std::vector<AABB> &r_bone_aabb);
 
 	static RenderingServer *(*create_func)();
 	static void _bind_methods();
@@ -95,8 +95,8 @@ public:
 	};
 
 	virtual RID texture_2d_create(const Ref<Image> &p_image) = 0;
-	virtual RID texture_2d_layered_create(const Vector<Ref<Image>> &p_layers, TextureLayeredType p_layered_type) = 0;
-	virtual RID texture_3d_create(const Vector<Ref<Image>> &p_slices) = 0; //all slices, then all the mipmaps, must be coherent
+	virtual RID texture_2d_layered_create(const std::vector<Ref<Image>> &p_layers, TextureLayeredType p_layered_type) = 0;
+	virtual RID texture_3d_create(const std::vector<Ref<Image>> &p_slices) = 0; //all slices, then all the mipmaps, must be coherent
 	virtual RID texture_proxy_create(RID p_base) = 0;
 
 	virtual void texture_2d_update_immediate(RID p_texture, const Ref<Image> &p_image, int p_layer = 0) = 0; //mostly used for video and streaming
@@ -251,25 +251,25 @@ public:
 		PrimitiveType primitive = PRIMITIVE_MAX;
 
 		uint32_t format = 0;
-		Vector<uint8_t> vertex_data;
+		std::vector<uint8_t> vertex_data;
 		uint32_t vertex_count = 0;
-		Vector<uint8_t> index_data;
+		std::vector<uint8_t> index_data;
 		uint32_t index_count = 0;
 
 		AABB aabb;
 		struct LOD {
 			float edge_length;
-			Vector<uint8_t> index_data;
+			std::vector<uint8_t> index_data;
 		};
-		Vector<LOD> lods;
-		Vector<AABB> bone_aabbs;
+		std::vector<LOD> lods;
+		std::vector<AABB> bone_aabbs;
 
-		Vector<Vector<uint8_t>> blend_shapes;
+		std::vector<std::vector<uint8_t>> blend_shapes;
 
 		RID material;
 	};
 
-	virtual RID mesh_create_from_surfaces(const Vector<SurfaceData> &p_surfaces) = 0;
+	virtual RID mesh_create_from_surfaces(const std::vector<SurfaceData> &p_surfaces) = 0;
 	virtual RID mesh_create() = 0;
 
 	virtual uint32_t mesh_surface_get_format_offset(uint32_t p_format, int p_vertex_len, int p_index_len, int p_array_index) const;
@@ -295,7 +295,7 @@ public:
 	virtual void mesh_set_blend_shape_mode(RID p_mesh, BlendShapeMode p_mode) = 0;
 	virtual BlendShapeMode mesh_get_blend_shape_mode(RID p_mesh) const = 0;
 
-	virtual void mesh_surface_update_region(RID p_mesh, int p_surface, int p_offset, const Vector<uint8_t> &p_data) = 0;
+	virtual void mesh_surface_update_region(RID p_mesh, int p_surface, int p_offset, const std::vector<uint8_t> &p_data) = 0;
 
 	virtual void mesh_surface_set_material(RID p_mesh, int p_surface, RID p_material) = 0;
 	virtual RID mesh_surface_get_material(RID p_mesh, int p_surface) const = 0;
@@ -335,8 +335,8 @@ public:
 	virtual Color multimesh_instance_get_color(RID p_multimesh, int p_index) const = 0;
 	virtual Color multimesh_instance_get_custom_data(RID p_multimesh, int p_index) const = 0;
 
-	virtual void multimesh_set_buffer(RID p_multimesh, const Vector<float> &p_buffer) = 0;
-	virtual Vector<float> multimesh_get_buffer(RID p_multimesh) const = 0;
+	virtual void multimesh_set_buffer(RID p_multimesh, const std::vector<float> &p_buffer) = 0;
+	virtual std::vector<float> multimesh_get_buffer(RID p_multimesh) const = 0;
 
 	virtual void multimesh_set_visible_instances(RID p_multimesh, int p_visible) = 0;
 	virtual int multimesh_get_visible_instances(RID p_multimesh) const = 0;
@@ -464,14 +464,14 @@ public:
 
 	virtual RID gi_probe_create() = 0;
 
-	virtual void gi_probe_allocate(RID p_gi_probe, const Transform &p_to_cell_xform, const AABB &p_aabb, const Vector3i &p_octree_size, const Vector<uint8_t> &p_octree_cells, const Vector<uint8_t> &p_data_cells, const Vector<uint8_t> &p_distance_field, const Vector<int> &p_level_counts) = 0;
+	virtual void gi_probe_allocate(RID p_gi_probe, const Transform &p_to_cell_xform, const AABB &p_aabb, const Vector3i &p_octree_size, const std::vector<uint8_t> &p_octree_cells, const std::vector<uint8_t> &p_data_cells, const std::vector<uint8_t> &p_distance_field, const std::vector<int> &p_level_counts) = 0;
 
 	virtual AABB gi_probe_get_bounds(RID p_gi_probe) const = 0;
 	virtual Vector3i gi_probe_get_octree_size(RID p_gi_probe) const = 0;
-	virtual Vector<uint8_t> gi_probe_get_octree_cells(RID p_gi_probe) const = 0;
-	virtual Vector<uint8_t> gi_probe_get_data_cells(RID p_gi_probe) const = 0;
-	virtual Vector<uint8_t> gi_probe_get_distance_field(RID p_gi_probe) const = 0;
-	virtual Vector<int> gi_probe_get_level_counts(RID p_gi_probe) const = 0;
+	virtual std::vector<uint8_t> gi_probe_get_octree_cells(RID p_gi_probe) const = 0;
+	virtual std::vector<uint8_t> gi_probe_get_data_cells(RID p_gi_probe) const = 0;
+	virtual std::vector<uint8_t> gi_probe_get_distance_field(RID p_gi_probe) const = 0;
+	virtual std::vector<int> gi_probe_get_level_counts(RID p_gi_probe) const = 0;
 	virtual Transform gi_probe_get_to_cell_xform(RID p_gi_probe) const = 0;
 
 	virtual void gi_probe_set_dynamic_range(RID p_gi_probe, float p_range) = 0;
@@ -509,12 +509,12 @@ public:
 	virtual RID lightmap_capture_create() = 0;
 	virtual void lightmap_capture_set_bounds(RID p_capture, const AABB &p_bounds) = 0;
 	virtual AABB lightmap_capture_get_bounds(RID p_capture) const = 0;
-	virtual void lightmap_capture_set_octree(RID p_capture, const Vector<uint8_t> &p_octree) = 0;
+	virtual void lightmap_capture_set_octree(RID p_capture, const std::vector<uint8_t> &p_octree) = 0;
 	virtual void lightmap_capture_set_octree_cell_transform(RID p_capture, const Transform &p_xform) = 0;
 	virtual Transform lightmap_capture_get_octree_cell_transform(RID p_capture) const = 0;
 	virtual void lightmap_capture_set_octree_cell_subdiv(RID p_capture, int p_subdiv) = 0;
 	virtual int lightmap_capture_get_octree_cell_subdiv(RID p_capture) const = 0;
-	virtual Vector<uint8_t> lightmap_capture_get_octree(RID p_capture) const = 0;
+	virtual std::vector<uint8_t> lightmap_capture_get_octree(RID p_capture) const = 0;
 	virtual void lightmap_capture_set_energy(RID p_capture, float p_energy) = 0;
 	virtual float lightmap_capture_get_energy(RID p_capture) const = 0;
 
@@ -874,9 +874,9 @@ public:
 	virtual void instance_set_extra_visibility_margin(RID p_instance, real_t p_margin) = 0;
 
 	// don't use these in a game!
-	virtual Vector<ObjectID> instances_cull_aabb(const AABB &p_aabb, RID p_scenario = RID()) const = 0;
-	virtual Vector<ObjectID> instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario = RID()) const = 0;
-	virtual Vector<ObjectID> instances_cull_convex(const Vector<Plane> &p_convex, RID p_scenario = RID()) const = 0;
+	virtual std::vector<ObjectID> instances_cull_aabb(const AABB &p_aabb, RID p_scenario = RID()) const = 0;
+	virtual std::vector<ObjectID> instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario = RID()) const = 0;
+	virtual std::vector<ObjectID> instances_cull_convex(const std::vector<Plane> &p_convex, RID p_scenario = RID()) const = 0;
 
 	Array _instances_cull_aabb_bind(const AABB &p_aabb, RID p_scenario = RID()) const;
 	Array _instances_cull_ray_bind(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario = RID()) const;
@@ -959,16 +959,16 @@ public:
 	virtual void canvas_item_set_default_texture_repeat(RID p_item, CanvasItemTextureRepeat p_repeat) = 0;
 
 	virtual void canvas_item_add_line(RID p_item, const Point2 &p_from, const Point2 &p_to, const Color &p_color, float p_width = 1.0) = 0;
-	virtual void canvas_item_add_polyline(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width = 1.0) = 0;
-	virtual void canvas_item_add_multiline(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width = 1.0) = 0;
+	virtual void canvas_item_add_polyline(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, float p_width = 1.0) = 0;
+	virtual void canvas_item_add_multiline(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, float p_width = 1.0) = 0;
 	virtual void canvas_item_add_rect(RID p_item, const Rect2 &p_rect, const Color &p_color) = 0;
 	virtual void canvas_item_add_circle(RID p_item, const Point2 &p_pos, float p_radius, const Color &p_color) = 0;
 	virtual void canvas_item_add_texture_rect(RID p_item, const Rect2 &p_rect, RID p_texture, bool p_tile = false, const Color &p_modulate = Color(1, 1, 1), bool p_transpose = false, RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
 	virtual void canvas_item_add_texture_rect_region(RID p_item, const Rect2 &p_rect, RID p_texture, const Rect2 &p_src_rect, const Color &p_modulate = Color(1, 1, 1), bool p_transpose = false, RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), bool p_clip_uv = false, CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
 	virtual void canvas_item_add_nine_patch(RID p_item, const Rect2 &p_rect, const Rect2 &p_source, RID p_texture, const Vector2 &p_topleft, const Vector2 &p_bottomright, NinePatchAxisMode p_x_axis_mode = NINE_PATCH_STRETCH, NinePatchAxisMode p_y_axis_mode = NINE_PATCH_STRETCH, bool p_draw_center = true, const Color &p_modulate = Color(1, 1, 1), RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
-	virtual void canvas_item_add_primitive(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, RID p_texture, float p_width = 1.0, RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
-	virtual void canvas_item_add_polygon(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), RID p_texture = RID(), RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
-	virtual void canvas_item_add_triangle_array(RID p_item, const Vector<int> &p_indices, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), const Vector<int> &p_bones = Vector<int>(), const Vector<float> &p_weights = Vector<float>(), RID p_texture = RID(), int p_count = -1, RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
+	virtual void canvas_item_add_primitive(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs, RID p_texture, float p_width = 1.0, RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
+	virtual void canvas_item_add_polygon(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs = std::vector<Point2>(), RID p_texture = RID(), RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
+	virtual void canvas_item_add_triangle_array(RID p_item, const std::vector<int> &p_indices, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs = std::vector<Point2>(), const std::vector<int> &p_bones = std::vector<int>(), const std::vector<float> &p_weights = std::vector<float>(), RID p_texture = RID(), int p_count = -1, RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
 	virtual void canvas_item_add_mesh(RID p_item, const RID &p_mesh, const Transform2D &p_transform = Transform2D(), const Color &p_modulate = Color(1, 1, 1), RID p_texture = RID(), RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
 	virtual void canvas_item_add_multimesh(RID p_item, RID p_mesh, RID p_texture = RID(), RID p_normal_map = RID(), RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
 	virtual void canvas_item_add_particles(RID p_item, RID p_particles, RID p_texture, RID p_normal_map, RID p_specular_map = RID(), const Color &p_specular_color_shininess = Color(), CanvasItemTextureFilter p_texture_filter = CANVAS_ITEM_TEXTURE_FILTER_DEFAULT, CanvasItemTextureRepeat = CANVAS_ITEM_TEXTURE_REPEAT_DEFAULT) = 0;
@@ -1033,8 +1033,8 @@ public:
 	virtual void canvas_light_occluder_set_light_mask(RID p_occluder, int p_mask) = 0;
 
 	virtual RID canvas_occluder_polygon_create() = 0;
-	virtual void canvas_occluder_polygon_set_shape(RID p_occluder_polygon, const Vector<Vector2> &p_shape, bool p_closed) = 0;
-	virtual void canvas_occluder_polygon_set_shape_as_lines(RID p_occluder_polygon, const Vector<Vector2> &p_shape) = 0;
+	virtual void canvas_occluder_polygon_set_shape(RID p_occluder_polygon, const std::vector<Vector2> &p_shape, bool p_closed) = 0;
+	virtual void canvas_occluder_polygon_set_shape_as_lines(RID p_occluder_polygon, const std::vector<Vector2> &p_shape) = 0;
 
 	enum CanvasOccluderPolygonCullMode {
 		CANVAS_OCCLUDER_POLYGON_CULL_DISABLED,
@@ -1089,7 +1089,7 @@ public:
 	};
 
 	virtual void set_frame_profiling_enabled(bool p_enable) = 0;
-	virtual Vector<FrameProfileArea> get_frame_profile() = 0;
+	virtual std::vector<FrameProfileArea> get_frame_profile() = 0;
 	virtual uint64_t get_frame_profile_frame() = 0;
 
 	/* Materials for 2D on 3D */
@@ -1104,7 +1104,7 @@ public:
 	virtual RID make_sphere_mesh(int p_lats, int p_lons, float p_radius);
 
 	virtual void mesh_add_surface_from_mesh_data(RID p_mesh, const Geometry::MeshData &p_mesh_data);
-	virtual void mesh_add_surface_from_planes(RID p_mesh, const Vector<Plane> &p_planes);
+	virtual void mesh_add_surface_from_planes(RID p_mesh, const std::vector<Plane> &p_planes);
 
 	virtual void set_boot_image(const Ref<Image> &p_image, const Color &p_color, bool p_scale, bool p_use_filter = true) = 0;
 	virtual void set_default_clear_color(const Color &p_color) = 0;
