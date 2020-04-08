@@ -136,12 +136,12 @@ public:
 
 		//RID sampled_light;
 
-		Vector<RID> materials;
-		Vector<RID> light_instances;
-		Vector<RID> reflection_probe_instances;
-		Vector<RID> gi_probe_instances;
+		std::vector<RID> materials;
+		std::vector<RID> light_instances;
+		std::vector<RID> reflection_probe_instances;
+		std::vector<RID> gi_probe_instances;
 
-		Vector<float> blend_values;
+		std::vector<float> blend_values;
 
 		RS::ShadowCastingSetting cast_shadows;
 
@@ -159,7 +159,7 @@ public:
 
 		InstanceBase *lightmap_capture;
 		RID lightmap;
-		Vector<Color> lightmap_capture_data; //in a array (12 values) to avoid wasting space if unused. Alpha is unused, but needed to send to shader
+		std::vector<Color> lightmap_capture_data; //in a array (12 values) to avoid wasting space if unused. Alpha is unused, but needed to send to shader
 
 		AABB aabb;
 		AABB transformed_aabb;
@@ -249,7 +249,7 @@ public:
 	virtual RID gi_probe_instance_create(RID p_gi_probe) = 0;
 	virtual void gi_probe_instance_set_transform_to_data(RID p_probe, const Transform &p_xform) = 0;
 	virtual bool gi_probe_needs_update(RID p_probe) const = 0;
-	virtual void gi_probe_update(RID p_probe, bool p_update_light_instances, const Vector<RID> &p_light_instances, int p_dynamic_object_count, InstanceBase **p_dynamic_objects) = 0;
+	virtual void gi_probe_update(RID p_probe, bool p_update_light_instances, const std::vector<RID> &p_light_instances, int p_dynamic_object_count, InstanceBase **p_dynamic_objects) = 0;
 
 	virtual void render_scene(RID p_render_buffers, const Transform &p_cam_transform, const CameraMatrix &p_cam_projection, bool p_cam_ortogonal, InstanceBase **p_cull_result, int p_cull_count, RID *p_light_cull_result, int p_light_cull_count, RID *p_reflection_probe_cull_result, int p_reflection_probe_cull_count, RID *p_gi_probe_cull_result, int p_gi_probe_cull_count, RID p_environment, RID p_camera_effects, RID p_shadow_atlas, RID p_reflection_atlas, RID p_reflection_probe, int p_reflection_probe_pass) = 0;
 
@@ -283,8 +283,8 @@ public:
 	/* TEXTURE API */
 
 	virtual RID texture_2d_create(const Ref<Image> &p_image) = 0;
-	virtual RID texture_2d_layered_create(const Vector<Ref<Image>> &p_layers, RS::TextureLayeredType p_layered_type) = 0;
-	virtual RID texture_3d_create(const Vector<Ref<Image>> &p_slices) = 0; //all slices, then all the mipmaps, must be coherent
+	virtual RID texture_2d_layered_create(const std::vector<Ref<Image>> &p_layers, RS::TextureLayeredType p_layered_type) = 0;
+	virtual RID texture_3d_create(const std::vector<Ref<Image>> &p_slices) = 0; //all slices, then all the mipmaps, must be coherent
 	virtual RID texture_proxy_create(RID p_base) = 0; //all slices, then all the mipmaps, must be coherent
 
 	virtual void texture_2d_update_immediate(RID p_texture, const Ref<Image> &p_image, int p_layer = 0) = 0; //mostly used for video and streaming
@@ -362,7 +362,7 @@ public:
 	virtual void mesh_set_blend_shape_mode(RID p_mesh, RS::BlendShapeMode p_mode) = 0;
 	virtual RS::BlendShapeMode mesh_get_blend_shape_mode(RID p_mesh) const = 0;
 
-	virtual void mesh_surface_update_region(RID p_mesh, int p_surface, int p_offset, const Vector<uint8_t> &p_data) = 0;
+	virtual void mesh_surface_update_region(RID p_mesh, int p_surface, int p_offset, const std::vector<uint8_t> &p_data) = 0;
 
 	virtual void mesh_surface_set_material(RID p_mesh, int p_surface, RID p_material) = 0;
 	virtual RID mesh_surface_get_material(RID p_mesh, int p_surface) const = 0;
@@ -399,8 +399,8 @@ public:
 	virtual Color multimesh_instance_get_color(RID p_multimesh, int p_index) const = 0;
 	virtual Color multimesh_instance_get_custom_data(RID p_multimesh, int p_index) const = 0;
 
-	virtual void multimesh_set_buffer(RID p_multimesh, const Vector<float> &p_buffer) = 0;
-	virtual Vector<float> multimesh_get_buffer(RID p_multimesh) const = 0;
+	virtual void multimesh_set_buffer(RID p_multimesh, const std::vector<float> &p_buffer) = 0;
+	virtual std::vector<float> multimesh_get_buffer(RID p_multimesh) const = 0;
 
 	virtual void multimesh_set_visible_instances(RID p_multimesh, int p_visible) = 0;
 	virtual int multimesh_get_visible_instances(RID p_multimesh) const = 0;
@@ -505,15 +505,15 @@ public:
 
 	virtual RID gi_probe_create() = 0;
 
-	virtual void gi_probe_allocate(RID p_gi_probe, const Transform &p_to_cell_xform, const AABB &p_aabb, const Vector3i &p_octree_size, const Vector<uint8_t> &p_octree_cells, const Vector<uint8_t> &p_data_cells, const Vector<uint8_t> &p_distance_field, const Vector<int> &p_level_counts) = 0;
+	virtual void gi_probe_allocate(RID p_gi_probe, const Transform &p_to_cell_xform, const AABB &p_aabb, const Vector3i &p_octree_size, const std::vector<uint8_t> &p_octree_cells, const std::vector<uint8_t> &p_data_cells, const std::vector<uint8_t> &p_distance_field, const std::vector<int> &p_level_counts) = 0;
 
 	virtual AABB gi_probe_get_bounds(RID p_gi_probe) const = 0;
 	virtual Vector3i gi_probe_get_octree_size(RID p_gi_probe) const = 0;
-	virtual Vector<uint8_t> gi_probe_get_octree_cells(RID p_gi_probe) const = 0;
-	virtual Vector<uint8_t> gi_probe_get_data_cells(RID p_gi_probe) const = 0;
-	virtual Vector<uint8_t> gi_probe_get_distance_field(RID p_gi_probe) const = 0;
+	virtual std::vector<uint8_t> gi_probe_get_octree_cells(RID p_gi_probe) const = 0;
+	virtual std::vector<uint8_t> gi_probe_get_data_cells(RID p_gi_probe) const = 0;
+	virtual std::vector<uint8_t> gi_probe_get_distance_field(RID p_gi_probe) const = 0;
 
-	virtual Vector<int> gi_probe_get_level_counts(RID p_gi_probe) const = 0;
+	virtual std::vector<int> gi_probe_get_level_counts(RID p_gi_probe) const = 0;
 	virtual Transform gi_probe_get_to_cell_xform(RID p_gi_probe) const = 0;
 
 	virtual void gi_probe_set_dynamic_range(RID p_gi_probe, float p_range) = 0;
@@ -564,15 +564,15 @@ public:
 	virtual RID lightmap_capture_create() = 0;
 	virtual void lightmap_capture_set_bounds(RID p_capture, const AABB &p_bounds) = 0;
 	virtual AABB lightmap_capture_get_bounds(RID p_capture) const = 0;
-	virtual void lightmap_capture_set_octree(RID p_capture, const Vector<uint8_t> &p_octree) = 0;
-	virtual Vector<uint8_t> lightmap_capture_get_octree(RID p_capture) const = 0;
+	virtual void lightmap_capture_set_octree(RID p_capture, const std::vector<uint8_t> &p_octree) = 0;
+	virtual std::vector<uint8_t> lightmap_capture_get_octree(RID p_capture) const = 0;
 	virtual void lightmap_capture_set_octree_cell_transform(RID p_capture, const Transform &p_xform) = 0;
 	virtual Transform lightmap_capture_get_octree_cell_transform(RID p_capture) const = 0;
 	virtual void lightmap_capture_set_octree_cell_subdiv(RID p_capture, int p_subdiv) = 0;
 	virtual int lightmap_capture_get_octree_cell_subdiv(RID p_capture) const = 0;
 	virtual void lightmap_capture_set_energy(RID p_capture, float p_energy) = 0;
 	virtual float lightmap_capture_get_energy(RID p_capture) const = 0;
-	virtual const Vector<LightmapCaptureOctree> *lightmap_capture_get_octree_ptr(RID p_capture) const = 0;
+	virtual const std::vector<LightmapCaptureOctree> *lightmap_capture_get_octree_ptr(RID p_capture) const = 0;
 
 	/* PARTICLES */
 
@@ -801,7 +801,7 @@ public:
 	};
 
 	typedef uint64_t PolygonID;
-	virtual PolygonID request_polygon(const Vector<int> &p_indices, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), const Vector<int> &p_bones = Vector<int>(), const Vector<float> &p_weights = Vector<float>()) = 0;
+	virtual PolygonID request_polygon(const std::vector<int> &p_indices, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs = std::vector<Point2>(), const std::vector<int> &p_bones = std::vector<int>(), const std::vector<float> &p_weights = std::vector<float>()) = 0;
 	virtual void free_polygon(PolygonID p_polygon) = 0;
 
 	//also easier to wrap to avoid mistakes
@@ -810,11 +810,11 @@ public:
 		PolygonID polygon_id;
 		Rect2 rect_cache;
 
-		_FORCE_INLINE_ void create(const Vector<int> &p_indices, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), const Vector<int> &p_bones = Vector<int>(), const Vector<float> &p_weights = Vector<float>()) {
+		_FORCE_INLINE_ void create(const std::vector<int> &p_indices, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs = std::vector<Point2>(), const std::vector<int> &p_bones = std::vector<int>(), const std::vector<float> &p_weights = std::vector<float>()) {
 			ERR_FAIL_COND(polygon_id != 0);
 			{
 				uint32_t pc = p_points.size();
-				const Vector2 *v2 = p_points.ptr();
+				const Vector2 *v2 = p_points.data();
 				rect_cache.position = *v2;
 				for (uint32_t i = 1; i < pc; i++) {
 					rect_cache.expand_to(v2[i]);
@@ -1114,7 +1114,7 @@ public:
 
 		Command *commands;
 		Command *last_command;
-		Vector<CommandBlock> blocks;
+		std::vector<CommandBlock> blocks;
 		uint32_t current_block;
 
 		template <class T>
@@ -1185,7 +1185,7 @@ public:
 			}
 			{
 				uint32_t cbc = MIN((current_block + 1), (uint32_t)blocks.size());
-				CommandBlock *blockptr = blocks.ptrw();
+				CommandBlock *blockptr = blocks.data();
 				for (uint32_t i = 0; i < cbc; i++) {
 					blockptr[i].usage = 0;
 				}
@@ -1265,7 +1265,7 @@ public:
 	virtual void light_update_shadow(RID p_rid, const Transform2D &p_light_xform, int p_light_mask, float p_near, float p_far, LightOccluderInstance *p_occluders) = 0;
 
 	virtual RID occluder_polygon_create() = 0;
-	virtual void occluder_polygon_set_shape_as_lines(RID p_occluder, const Vector<Vector2> &p_lines) = 0;
+	virtual void occluder_polygon_set_shape_as_lines(RID p_occluder, const std::vector<Vector2> &p_lines) = 0;
 	virtual void occluder_polygon_set_cull_mode(RID p_occluder, RS::CanvasOccluderPolygonCullMode p_mode) = 0;
 
 	virtual void draw_window_margins(int *p_margins, RID *p_margin_textures) = 0;
