@@ -137,7 +137,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 		uint32_t mipmaps;
 		uint32_t usage_flags;
 
-		Vector<DataFormat> allowed_shared_formats;
+		std::vector<DataFormat> allowed_shared_formats;
 
 		VkImageLayout layout;
 
@@ -150,7 +150,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	RID_Owner<Texture, true> texture_owner;
 	uint32_t texture_upload_region_size_px;
 
-	Vector<uint8_t> _texture_get_data_from_image(Texture *tex, VkImage p_image, VmaAllocation p_allocation, uint32_t p_layer, bool p_2d = false);
+	std::vector<uint8_t> _texture_get_data_from_image(Texture *tex, VkImage p_image, VmaAllocation p_allocation, uint32_t p_layer, bool p_2d = false);
 
 	/*****************/
 	/**** SAMPLER ****/
@@ -190,7 +190,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 		uint32_t fill_amount;
 	};
 
-	Vector<StagingBufferBlock> staging_buffer_blocks;
+	std::vector<StagingBufferBlock> staging_buffer_blocks;
 	int staging_buffer_current;
 	uint32_t staging_buffer_block_size;
 	uint64_t staging_buffer_max_size;
@@ -231,7 +231,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	// used for the render pipelines.
 
 	struct FramebufferFormatKey {
-		Vector<AttachmentFormat> attachments;
+		std::vector<AttachmentFormat> attachments;
 		bool operator<(const FramebufferFormatKey &p_key) const {
 
 			int as = attachments.size();
@@ -240,8 +240,8 @@ class RenderingDeviceVulkan : public RenderingDevice {
 				return as < bs;
 			}
 
-			const AttachmentFormat *af_a = attachments.ptr();
-			const AttachmentFormat *af_b = p_key.attachments.ptr();
+			const AttachmentFormat *af_a = attachments.data();
+			const AttachmentFormat *af_b = p_key.attachments.data();
 			for (int i = 0; i < as; i++) {
 				const AttachmentFormat &a = af_a[i];
 				const AttachmentFormat &b = af_b[i];
@@ -260,7 +260,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 		}
 	};
 
-	VkRenderPass _render_pass_create(const Vector<AttachmentFormat> &p_format, InitialAction p_initial_action, FinalAction p_final_action, InitialAction p_initial_depth_action, FinalAction p_final_depthcolor_action, int *r_color_attachment_count = nullptr);
+	VkRenderPass _render_pass_create(const std::vector<AttachmentFormat> &p_format, InitialAction p_initial_action, FinalAction p_final_action, InitialAction p_initial_depth_action, FinalAction p_final_depthcolor_action, int *r_color_attachment_count = nullptr);
 
 	// This is a cache and it's never freed, it ensures
 	// IDs for a given format are always unique.
@@ -299,7 +299,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 		};
 
 		uint32_t storage_mask;
-		Vector<RID> texture_ids;
+		std::vector<RID> texture_ids;
 
 		struct Version {
 			VkFramebuffer framebuffer;
@@ -328,7 +328,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	RID_Owner<Buffer, true> vertex_buffer_owner;
 
 	struct VertexDescriptionKey {
-		Vector<VertexDescription> vertex_formats;
+		std::vector<VertexDescription> vertex_formats;
 		bool operator==(const VertexDescriptionKey &p_key) const {
 			int vdc = vertex_formats.size();
 			int vdck = p_key.vertex_formats.size();
@@ -336,8 +336,8 @@ class RenderingDeviceVulkan : public RenderingDevice {
 			if (vdc != vdck) {
 				return false;
 			} else {
-				const VertexDescription *a_ptr = vertex_formats.ptr();
-				const VertexDescription *b_ptr = p_key.vertex_formats.ptr();
+				const VertexDescription *a_ptr = vertex_formats.data();
+				const VertexDescription *b_ptr = p_key.vertex_formats.data();
 				for (int i = 0; i < vdc; i++) {
 					const VertexDescription &a = a_ptr[i];
 					const VertexDescription &b = b_ptr[i];
@@ -365,7 +365,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 		uint32_t hash() const {
 			int vdc = vertex_formats.size();
 			uint32_t h = hash_djb2_one_32(vdc);
-			const VertexDescription *ptr = vertex_formats.ptr();
+			const VertexDescription *ptr = vertex_formats.data();
 			for (int i = 0; i < vdc; i++) {
 				const VertexDescription &vd = ptr[i];
 				h = hash_djb2_one_32(vd.location, h);
@@ -389,7 +389,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	HashMap<VertexDescriptionKey, VertexFormatID, VertexDescriptionHash> vertex_format_cache;
 
 	struct VertexDescriptionCache {
-		Vector<VertexDescription> vertex_formats;
+		std::vector<VertexDescription> vertex_formats;
 		VkVertexInputBindingDescription *bindings;
 		VkVertexInputAttributeDescription *attributes;
 		VkPipelineVertexInputStateCreateInfo create_info;
@@ -403,8 +403,8 @@ class RenderingDeviceVulkan : public RenderingDevice {
 		int vertex_count;
 		uint32_t max_instances_allowed;
 
-		Vector<VkBuffer> buffers; //not owned, just referenced
-		Vector<VkDeviceSize> offsets;
+		std::vector<VkBuffer> buffers; //not owned, just referenced
+		std::vector<VkDeviceSize> offsets;
 	};
 
 	RID_Owner<VertexArray, true> vertex_array_owner;
@@ -474,7 +474,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	};
 
 	struct UniformSetFormat {
-		Vector<UniformInfo> uniform_info;
+		std::vector<UniformInfo> uniform_info;
 		bool operator<(const UniformSetFormat &p_format) const {
 			uint32_t size = uniform_info.size();
 			uint32_t psize = p_format.uniform_info.size();
@@ -483,8 +483,8 @@ class RenderingDeviceVulkan : public RenderingDevice {
 				return size < psize;
 			}
 
-			const UniformInfo *infoptr = uniform_info.ptr();
-			const UniformInfo *pinfoptr = p_format.uniform_info.ptr();
+			const UniformInfo *infoptr = uniform_info.data();
+			const UniformInfo *pinfoptr = p_format.uniform_info.data();
 
 			for (uint32_t i = 0; i < size; i++) {
 				if (infoptr[i] != pinfoptr[i]) {
@@ -520,7 +520,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 
 		struct Set {
 
-			Vector<UniformInfo> uniform_info;
+			std::vector<UniformInfo> uniform_info;
 			VkDescriptorSetLayout descriptor_set_layout;
 		};
 
@@ -536,9 +536,9 @@ class RenderingDeviceVulkan : public RenderingDevice {
 
 		bool is_compute = false;
 		int max_output;
-		Vector<Set> sets;
-		Vector<uint32_t> set_formats;
-		Vector<VkPipelineShaderStageCreateInfo> pipeline_stages;
+		std::vector<Set> sets;
+		std::vector<uint32_t> set_formats;
+		std::vector<VkPipelineShaderStageCreateInfo> pipeline_stages;
 		VkPipelineLayout pipeline_layout;
 	};
 
@@ -635,9 +635,9 @@ class RenderingDeviceVulkan : public RenderingDevice {
 		DescriptorPoolKey pool_key;
 		VkDescriptorSet descriptor_set;
 		//VkPipelineLayout pipeline_layout; //not owned, inherited from shader
-		Vector<RID> attachable_textures; //used for validation
-		Vector<Texture *> mutable_sampled_textures; //used for layout change
-		Vector<Texture *> mutable_storage_textures; //used for layout change
+		std::vector<RID> attachable_textures; //used for validation
+		std::vector<Texture *> mutable_sampled_textures; //used for layout change
+		std::vector<Texture *> mutable_storage_textures; //used for layout change
 	};
 
 	RID_Owner<UniformSet, true> uniform_set_owner;
@@ -671,7 +671,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 #endif
 		//Actual pipeline
 		RID shader;
-		Vector<uint32_t> set_formats;
+		std::vector<uint32_t> set_formats;
 		VkPipelineLayout pipeline_layout; // not owned, needed for push constants
 		VkPipeline pipeline;
 		uint32_t push_constant_size;
@@ -683,7 +683,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	struct ComputePipeline {
 
 		RID shader;
-		Vector<uint32_t> set_formats;
+		std::vector<uint32_t> set_formats;
 		VkPipelineLayout pipeline_layout; // not owned, needed for push constants
 		VkPipeline pipeline;
 		uint32_t push_constant_size;
@@ -709,10 +709,10 @@ class RenderingDeviceVulkan : public RenderingDevice {
 
 	struct SplitDrawListAllocator {
 		VkCommandPool command_pool;
-		Vector<VkCommandBuffer> command_buffers; //one for each frame
+		std::vector<VkCommandBuffer> command_buffers; //one for each frame
 	};
 
-	Vector<SplitDrawListAllocator> split_draw_list_allocators;
+	std::vector<SplitDrawListAllocator> split_draw_list_allocators;
 
 	struct DrawList {
 
@@ -763,9 +763,9 @@ class RenderingDeviceVulkan : public RenderingDevice {
 			uint32_t index_array_size; //0 if index buffer not set
 			uint32_t index_array_max_index;
 			uint32_t index_array_offset;
-			Vector<uint32_t> set_formats;
-			Vector<bool> set_bound;
-			Vector<RID> set_rids;
+			std::vector<uint32_t> set_formats;
+			std::vector<bool> set_bound;
+			std::vector<RID> set_rids;
 			//last pipeline set values
 			bool pipeline_active;
 			uint32_t pipeline_dynamic_state;
@@ -775,7 +775,7 @@ class RenderingDeviceVulkan : public RenderingDevice {
 			bool pipeline_uses_restart_indices;
 			uint32_t pipeline_primitive_divisor;
 			uint32_t pipeline_primitive_minimum;
-			Vector<uint32_t> pipeline_set_formats;
+			std::vector<uint32_t> pipeline_set_formats;
 			uint32_t pipeline_push_constant_size;
 			bool pipeline_push_constant_suppplied;
 
@@ -818,13 +818,13 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	DrawList *draw_list; //one for regular draw lists, multiple for split.
 	uint32_t draw_list_count;
 	bool draw_list_split;
-	Vector<RID> draw_list_bound_textures;
+	std::vector<RID> draw_list_bound_textures;
 	bool draw_list_unbind_color_textures;
 	bool draw_list_unbind_depth_textures;
 
-	void _draw_list_insert_clear_region(DrawList *draw_list, Framebuffer *framebuffer, Point2i viewport_offset, Point2i viewport_size, bool p_clear_color, const Vector<Color> &p_clear_colors, bool p_clear_depth, float p_depth, uint32_t p_stencil);
+	void _draw_list_insert_clear_region(DrawList *draw_list, Framebuffer *framebuffer, Point2i viewport_offset, Point2i viewport_size, bool p_clear_color, const std::vector<Color> &p_clear_colors, bool p_clear_depth, float p_depth, uint32_t p_stencil);
 	Error _draw_list_setup_framebuffer(Framebuffer *p_framebuffer, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, VkFramebuffer *r_framebuffer, VkRenderPass *r_render_pass);
-	Error _draw_list_render_pass_begin(Framebuffer *framebuffer, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const Vector<Color> &p_clear_colors, float p_clear_depth, uint32_t p_clear_stencil, Point2i viewport_offset, Point2i viewport_size, VkFramebuffer vkframebuffer, VkRenderPass render_pass, VkCommandBuffer command_buffer, VkSubpassContents subpass_contents);
+	Error _draw_list_render_pass_begin(Framebuffer *framebuffer, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const std::vector<Color> &p_clear_colors, float p_clear_depth, uint32_t p_clear_stencil, Point2i viewport_offset, Point2i viewport_size, VkFramebuffer vkframebuffer, VkRenderPass render_pass, VkCommandBuffer command_buffer, VkSubpassContents subpass_contents);
 	_FORCE_INLINE_ DrawList *_get_draw_list_ptr(DrawListID p_id);
 
 	/**********************/
@@ -869,14 +869,14 @@ class RenderingDeviceVulkan : public RenderingDevice {
 
 		struct Validation {
 			bool active; //means command buffer was not closes, so you can keep adding things
-			Vector<uint32_t> set_formats;
-			Vector<bool> set_bound;
-			Vector<RID> set_rids;
+			std::vector<uint32_t> set_formats;
+			std::vector<bool> set_bound;
+			std::vector<RID> set_rids;
 			//last pipeline set values
 			bool pipeline_active;
 			RID pipeline_shader;
 			uint32_t invalid_set_from;
-			Vector<uint32_t> pipeline_set_formats;
+			std::vector<uint32_t> pipeline_set_formats;
 			uint32_t pipeline_push_constant_size;
 			bool pipeline_push_constant_suppplied;
 
@@ -968,12 +968,12 @@ class RenderingDeviceVulkan : public RenderingDevice {
 	void _free_rids(T &p_owner, const char *p_type);
 
 public:
-	virtual RID texture_create(const TextureFormat &p_format, const TextureView &p_view, const Vector<Vector<uint8_t>> &p_data = Vector<Vector<uint8_t>>());
+	virtual RID texture_create(const TextureFormat &p_format, const TextureView &p_view, const std::vector<std::vector<uint8_t>> &p_data = std::vector<std::vector<uint8_t>>());
 	virtual RID texture_create_shared(const TextureView &p_view, RID p_with_texture);
 
 	virtual RID texture_create_shared_from_slice(const TextureView &p_view, RID p_with_texture, uint32_t p_layer, uint32_t p_mipmap, TextureSliceType p_slice_type = TEXTURE_SLICE_2D);
-	virtual Error texture_update(RID p_texture, uint32_t p_layer, const Vector<uint8_t> &p_data, bool p_sync_with_draw = false);
-	virtual Vector<uint8_t> texture_get_data(RID p_texture, uint32_t p_layer);
+	virtual Error texture_update(RID p_texture, uint32_t p_layer, const std::vector<uint8_t> &p_data, bool p_sync_with_draw = false);
+	virtual std::vector<uint8_t> texture_get_data(RID p_texture, uint32_t p_layer);
 
 	virtual bool texture_is_format_supported_for_usage(DataFormat p_format, uint32_t p_usage) const;
 	virtual bool texture_is_shared(RID p_texture);
@@ -986,10 +986,10 @@ public:
 	/**** FRAMEBUFFER ****/
 	/*********************/
 
-	virtual FramebufferFormatID framebuffer_format_create(const Vector<AttachmentFormat> &p_format);
+	virtual FramebufferFormatID framebuffer_format_create(const std::vector<AttachmentFormat> &p_format);
 	virtual TextureSamples framebuffer_format_get_texture_samples(FramebufferFormatID p_format);
 
-	virtual RID framebuffer_create(const Vector<RID> &p_texture_attachments, FramebufferFormatID p_format_check = INVALID_ID);
+	virtual RID framebuffer_create(const std::vector<RID> &p_texture_attachments, FramebufferFormatID p_format_check = INVALID_ID);
 
 	virtual FramebufferFormatID framebuffer_get_format(RID p_framebuffer);
 
@@ -1003,13 +1003,13 @@ public:
 	/**** VERTEX ARRAY ****/
 	/**********************/
 
-	virtual RID vertex_buffer_create(uint32_t p_size_bytes, const Vector<uint8_t> &p_data = Vector<uint8_t>());
+	virtual RID vertex_buffer_create(uint32_t p_size_bytes, const std::vector<uint8_t> &p_data = std::vector<uint8_t>());
 
 	// Internally reference counted, this ID is warranted to be unique for the same description, but needs to be freed as many times as it was allocated
-	virtual VertexFormatID vertex_format_create(const Vector<VertexDescription> &p_vertex_formats);
-	virtual RID vertex_array_create(uint32_t p_vertex_count, VertexFormatID p_vertex_format, const Vector<RID> &p_src_buffers);
+	virtual VertexFormatID vertex_format_create(const std::vector<VertexDescription> &p_vertex_formats);
+	virtual RID vertex_array_create(uint32_t p_vertex_count, VertexFormatID p_vertex_format, const std::vector<RID> &p_src_buffers);
 
-	virtual RID index_buffer_create(uint32_t p_size_indices, IndexBufferFormat p_format, const Vector<uint8_t> &p_data = Vector<uint8_t>(), bool p_use_restart_indices = false);
+	virtual RID index_buffer_create(uint32_t p_size_indices, IndexBufferFormat p_format, const std::vector<uint8_t> &p_data = std::vector<uint8_t>(), bool p_use_restart_indices = false);
 
 	virtual RID index_array_create(RID p_index_buffer, uint32_t p_index_offset, uint32_t p_index_count);
 
@@ -1017,22 +1017,22 @@ public:
 	/**** SHADER ****/
 	/****************/
 
-	virtual RID shader_create(const Vector<ShaderStageData> &p_stages);
+	virtual RID shader_create(const std::vector<ShaderStageData> &p_stages);
 	virtual uint32_t shader_get_vertex_input_attribute_mask(RID p_shader);
 
 	/*****************/
 	/**** UNIFORM ****/
 	/*****************/
 
-	virtual RID uniform_buffer_create(uint32_t p_size_bytes, const Vector<uint8_t> &p_data = Vector<uint8_t>());
-	virtual RID storage_buffer_create(uint32_t p_size_bytes, const Vector<uint8_t> &p_data = Vector<uint8_t>());
-	virtual RID texture_buffer_create(uint32_t p_size_elements, DataFormat p_format, const Vector<uint8_t> &p_data = Vector<uint8_t>());
+	virtual RID uniform_buffer_create(uint32_t p_size_bytes, const std::vector<uint8_t> &p_data = std::vector<uint8_t>());
+	virtual RID storage_buffer_create(uint32_t p_size_bytes, const std::vector<uint8_t> &p_data = std::vector<uint8_t>());
+	virtual RID texture_buffer_create(uint32_t p_size_elements, DataFormat p_format, const std::vector<uint8_t> &p_data = std::vector<uint8_t>());
 
-	virtual RID uniform_set_create(const Vector<Uniform> &p_uniforms, RID p_shader, uint32_t p_shader_set);
+	virtual RID uniform_set_create(const std::vector<Uniform> &p_uniforms, RID p_shader, uint32_t p_shader_set);
 	virtual bool uniform_set_is_valid(RID p_uniform_set);
 
 	virtual Error buffer_update(RID p_buffer, uint32_t p_offset, uint32_t p_size, const void *p_data, bool p_sync_with_draw = false); //works for any buffer
-	virtual Vector<uint8_t> buffer_get_data(RID p_buffer);
+	virtual std::vector<uint8_t> buffer_get_data(RID p_buffer);
 
 	/*************************/
 	/**** RENDER PIPELINE ****/
@@ -1062,8 +1062,8 @@ public:
 
 	virtual DrawListID draw_list_begin_for_screen(DisplayServer::WindowID p_screen = 0, const Color &p_clear_color = Color());
 
-	virtual DrawListID draw_list_begin(RID p_framebuffer, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const Vector<Color> &p_clear_color_values = Vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2());
-	virtual Error draw_list_begin_split(RID p_framebuffer, uint32_t p_splits, DrawListID *r_split_ids, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const Vector<Color> &p_clear_color_values = Vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2());
+	virtual DrawListID draw_list_begin(RID p_framebuffer, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const std::vector<Color> &p_clear_color_values = std::vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2());
+	virtual Error draw_list_begin_split(RID p_framebuffer, uint32_t p_splits, DrawListID *r_split_ids, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const std::vector<Color> &p_clear_color_values = std::vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2());
 
 	virtual void draw_list_bind_render_pipeline(DrawListID p_list, RID p_render_pipeline);
 	virtual void draw_list_bind_uniform_set(DrawListID p_list, RID p_uniform_set, uint32_t p_index);
