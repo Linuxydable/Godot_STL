@@ -4709,6 +4709,9 @@
     <ClInclude Include="thirdparty\vulkan\include\vulkan\vulkan_xlib_xrandr.h">
       <Filter>Header Files\thirdparty\vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="servers\physics_server_2d.h">
+      <Filter>Header Files\servers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\bind\core_bind.cpp">
@@ -7061,9 +7064,6 @@
       <Filter>Source Files\servers</Filter>
     </ClCompile>
     <ClCompile Include="servers\camera_server.cpp">
-      <Filter>Source Files\servers</Filter>
-    </ClCompile>
-    <ClCompile Include="servers\physics_2d_server.cpp">
       <Filter>Source Files\servers</Filter>
     </ClCompile>
     <ClCompile Include="servers\physics_server.cpp">
@@ -9558,6 +9558,9 @@
     </ClCompile>
     <ClCompile Include="thirdparty\vulkan\vk_mem_alloc.cpp">
       <Filter>Header Files\thirdparty\vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="servers\physics_server_2d.cpp">
+      <Filter>Header Files\servers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
