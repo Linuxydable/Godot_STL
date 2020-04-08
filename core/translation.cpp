@@ -794,41 +794,41 @@ static const char *locale_renames[][2] = {
 
 ///////////////////////////////////////////////
 
-Vector<String> Translation::_get_messages() const {
+std::vector<String> Translation::_get_messages() const {
 
-	Vector<String> msgs;
+	std::vector<String> msgs;
 	msgs.resize(translation_map.size() * 2);
 	int idx = 0;
 	for (const Map<StringName, StringName>::Element *E = translation_map.front(); E; E = E->next()) {
 
-		msgs.set(idx + 0, E->key());
-		msgs.set(idx + 1, E->get());
+		msgs[idx + 0] = E->key();
+		msgs[idx + 1] = E->get();
 		idx += 2;
 	}
 
 	return msgs;
 }
 
-Vector<String> Translation::_get_message_list() const {
+std::vector<String> Translation::_get_message_list() const {
 
-	Vector<String> msgs;
+	std::vector<String> msgs;
 	msgs.resize(translation_map.size());
 	int idx = 0;
 	for (const Map<StringName, StringName>::Element *E = translation_map.front(); E; E = E->next()) {
 
-		msgs.set(idx, E->key());
+		msgs[idx] = E->key();
 		idx += 1;
 	}
 
 	return msgs;
 }
 
-void Translation::_set_messages(const Vector<String> &p_messages) {
+void Translation::_set_messages(const std::vector<String> &p_messages) {
 
 	int msg_count = p_messages.size();
 	ERR_FAIL_COND(msg_count % 2);
 
-	const String *r = p_messages.ptr();
+	const String *r = p_messages.data();
 
 	for (int i = 0; i < msg_count; i += 2) {
 
@@ -1146,12 +1146,12 @@ TranslationServer *TranslationServer::singleton = nullptr;
 bool TranslationServer::_load_translations(const String &p_from) {
 
 	if (ProjectSettings::get_singleton()->has_setting(p_from)) {
-		Vector<String> translations = ProjectSettings::get_singleton()->get(p_from);
+		std::vector<String> translations = ProjectSettings::get_singleton()->get(p_from);
 
 		int tcount = translations.size();
 
 		if (tcount) {
-			const String *r = translations.ptr();
+			const String *r = translations.data();
 
 			for (int i = 0; i < tcount; i++) {
 

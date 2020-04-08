@@ -44,10 +44,10 @@ class Translation : public Resource {
 	String locale;
 	Map<StringName, StringName> translation_map;
 
-	Vector<String> _get_message_list() const;
+	std::vector<String> _get_message_list() const;
 
-	Vector<String> _get_messages() const;
-	void _set_messages(const Vector<String> &p_messages);
+	std::vector<String> _get_messages() const;
+	void _set_messages(const std::vector<String> &p_messages);
 
 protected:
 	static void _bind_methods();
