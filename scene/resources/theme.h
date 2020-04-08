@@ -52,13 +52,13 @@ class Theme : public Resource {
 	HashMap<StringName, HashMap<StringName, Color>> color_map;
 	HashMap<StringName, HashMap<StringName, int>> constant_map;
 
-	Vector<String> _get_icon_list(const String &p_type) const;
-	Vector<String> _get_stylebox_list(const String &p_type) const;
-	Vector<String> _get_stylebox_types(void) const;
-	Vector<String> _get_font_list(const String &p_type) const;
-	Vector<String> _get_color_list(const String &p_type) const;
-	Vector<String> _get_constant_list(const String &p_type) const;
-	Vector<String> _get_type_list(const String &p_type) const;
+	std::vector<String> _get_icon_list(const String &p_type) const;
+	std::vector<String> _get_stylebox_list(const String &p_type) const;
+	std::vector<String> _get_stylebox_types(void) const;
+	std::vector<String> _get_font_list(const String &p_type) const;
+	std::vector<String> _get_color_list(const String &p_type) const;
+	std::vector<String> _get_constant_list(const String &p_type) const;
+	std::vector<String> _get_type_list(const String &p_type) const;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
