@@ -91,12 +91,11 @@ bool WSLServer::PendingPeer::_parse_request(const std::vector<String> p_protocol
 				break;
 			}
 			// Found a protocol
-			protocol = *it_find;
-			return true;
+			if (protocol != "")
+				break;
 		}
-
-		// Invalid protocol(s) requested
-		return false;
+		if (protocol == "") // Invalid protocol(s) requested
+			return false;
 	} else if (!p_protocols.empty()) // No protocol requested, but we need one
 		return false;
 	return true;
