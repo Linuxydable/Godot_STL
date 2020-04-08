@@ -68,7 +68,7 @@ RID RasterizerEffectsRD::_get_uniform_set_from_image(RID p_image) {
 			return uniform_set;
 		}
 	}
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	RD::Uniform u;
 	u.type = RD::UNIFORM_TYPE_IMAGE;
 	u.binding = 0;
@@ -91,7 +91,7 @@ RID RasterizerEffectsRD::_get_uniform_set_from_texture(RID p_texture, bool p_use
 		}
 	}
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	RD::Uniform u;
 	u.type = RD::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
 	u.binding = 0;
@@ -115,7 +115,7 @@ RID RasterizerEffectsRD::_get_compute_uniform_set_from_texture(RID p_texture, bo
 		}
 	}
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	RD::Uniform u;
 	u.type = RD::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
 	u.binding = 0;
@@ -143,7 +143,7 @@ RID RasterizerEffectsRD::_get_compute_uniform_set_from_texture_pair(RID p_textur
 		}
 	}
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	{
 		RD::Uniform u;
 		u.type = RD::UNIFORM_TYPE_SAMPLER_WITH_TEXTURE;
@@ -181,7 +181,7 @@ RID RasterizerEffectsRD::_get_compute_uniform_set_from_image_pair(RID p_texture1
 		}
 	}
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	{
 		RD::Uniform u;
 		u.type = RD::UNIFORM_TYPE_IMAGE;
@@ -214,7 +214,7 @@ void RasterizerEffectsRD::copy_to_rect(RID p_source_rd_texture, RID p_dest_frame
 		blur.push_constant.flags |= BLUR_COPY_FORCE_LUMINANCE;
 	}
 
-	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(p_dest_framebuffer, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_DISCARD, Vector<Color>(), 1.0, 0, p_rect);
+	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(p_dest_framebuffer, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_DISCARD, std::vector<Color>(), 1.0, 0, p_rect);
 	RD::get_singleton()->draw_list_bind_render_pipeline(draw_list, blur.pipelines[BLUR_MODE_SIMPLY_COPY].get_render_pipeline(RD::INVALID_ID, RD::get_singleton()->framebuffer_get_format(p_dest_framebuffer)));
 	RD::get_singleton()->draw_list_bind_uniform_set(draw_list, _get_uniform_set_from_texture(p_source_rd_texture), 0);
 	RD::get_singleton()->draw_list_bind_index_array(draw_list, index_array);
@@ -510,7 +510,7 @@ void RasterizerEffectsRD::sub_surface_scattering(RID p_diffuse, RID p_diffuse2, 
 
 void RasterizerEffectsRD::merge_specular(RID p_dest_framebuffer, RID p_specular, RID p_base, RID p_reflection) {
 
-	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(p_dest_framebuffer, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_DISCARD, Vector<Color>());
+	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(p_dest_framebuffer, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_DISCARD, std::vector<Color>());
 
 	if (p_reflection.is_valid()) {
 
@@ -565,7 +565,7 @@ void RasterizerEffectsRD::copy_cubemap_to_dp(RID p_source_rd_texture, RID p_dest
 	push_constant.z_near = p_z_near;
 	push_constant.z_flip = p_dp_flip;
 
-	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(p_dest_framebuffer, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_DISCARD, Vector<Color>(), 1.0, 0, p_rect);
+	RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(p_dest_framebuffer, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_KEEP, RD::FINAL_ACTION_DISCARD, std::vector<Color>(), 1.0, 0, p_rect);
 	RD::get_singleton()->draw_list_bind_render_pipeline(draw_list, copy.pipelines[COPY_MODE_CUBE_TO_DP].get_render_pipeline(RD::INVALID_ID, RD::get_singleton()->framebuffer_get_format(p_dest_framebuffer)));
 	RD::get_singleton()->draw_list_bind_uniform_set(draw_list, _get_uniform_set_from_texture(p_source_rd_texture), 0);
 	RD::get_singleton()->draw_list_bind_index_array(draw_list, index_array);
@@ -613,7 +613,7 @@ void RasterizerEffectsRD::tonemapper(RID p_source_color, RID p_dst_framebuffer, 
 	RD::get_singleton()->draw_list_end();
 }
 
-void RasterizerEffectsRD::luminance_reduction(RID p_source_texture, const Size2i p_source_size, const Vector<RID> p_reduce, RID p_prev_luminance, float p_min_luminance, float p_max_luminance, float p_adjust, bool p_set) {
+void RasterizerEffectsRD::luminance_reduction(RID p_source_texture, const Size2i p_source_size, const std::vector<RID> p_reduce, RID p_prev_luminance, float p_min_luminance, float p_max_luminance, float p_adjust, bool p_set) {
 
 	luminance_reduce.push_constant.source_size[0] = p_source_size.x;
 	luminance_reduce.push_constant.source_size[1] = p_source_size.y;
@@ -821,7 +821,7 @@ void RasterizerEffectsRD::bokeh_dof(RID p_base_texture, RID p_depth_texture, con
 	RD::get_singleton()->compute_list_end();
 }
 
-void RasterizerEffectsRD::generate_ssao(RID p_depth_buffer, RID p_normal_buffer, const Size2i &p_depth_buffer_size, RID p_depth_mipmaps_texture, const Vector<RID> &depth_mipmaps, RID p_ao1, bool p_half_size, RID p_ao2, RID p_upscale_buffer, float p_intensity, float p_radius, float p_bias, const CameraMatrix &p_projection, RS::EnvironmentSSAOQuality p_quality, RS::EnvironmentSSAOBlur p_blur, float p_edge_sharpness) {
+void RasterizerEffectsRD::generate_ssao(RID p_depth_buffer, RID p_normal_buffer, const Size2i &p_depth_buffer_size, RID p_depth_mipmaps_texture, const std::vector<RID> &depth_mipmaps, RID p_ao1, bool p_half_size, RID p_ao2, RID p_upscale_buffer, float p_intensity, float p_radius, float p_bias, const CameraMatrix &p_projection, RS::EnvironmentSSAOQuality p_quality, RS::EnvironmentSSAOBlur p_blur, float p_edge_sharpness) {
 
 	//minify first
 	ssao.minify_push_constant.orthogonal = p_projection.is_orthogonal();
@@ -1043,9 +1043,9 @@ void RasterizerEffectsRD::cubemap_downsample(RID p_source_cubemap, RID p_dest_cu
 	RD::get_singleton()->compute_list_end();
 }
 
-void RasterizerEffectsRD::cubemap_filter(RID p_source_cubemap, Vector<RID> p_dest_cubemap, bool p_use_array) {
+void RasterizerEffectsRD::cubemap_filter(RID p_source_cubemap, std::vector<RID> p_dest_cubemap, bool p_use_array) {
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	for (int i = 0; i < p_dest_cubemap.size(); i++) {
 		RD::Uniform u;
 		u.type = RD::UNIFORM_TYPE_IMAGE;
@@ -1111,7 +1111,7 @@ void RasterizerEffectsRD::render_sky(RD::DrawListID p_list, float p_time, RID p_
 RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{ // Initialize blur
-		Vector<String> blur_modes;
+		std::vector<String> blur_modes;
 		blur_modes.push_back("\n#define MODE_GAUSSIAN_BLUR\n");
 		blur_modes.push_back("\n#define MODE_GAUSSIAN_GLOW\n");
 		blur_modes.push_back("\n#define MODE_GAUSSIAN_GLOW\n#define GLOW_USE_AUTO_EXPOSURE\n");
@@ -1139,7 +1139,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{
 		// Initialize roughness
-		Vector<String> cubemap_roughness_modes;
+		std::vector<String> cubemap_roughness_modes;
 		cubemap_roughness_modes.push_back("");
 		roughness.shader.initialize(cubemap_roughness_modes);
 
@@ -1150,7 +1150,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{
 		// Initialize tonemapper
-		Vector<String> tonemap_modes;
+		std::vector<String> tonemap_modes;
 		tonemap_modes.push_back("\n");
 		tonemap_modes.push_back("\n#define USE_GLOW_FILTER_BICUBIC\n");
 
@@ -1165,7 +1165,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{
 		// Initialize luminance_reduce
-		Vector<String> luminance_reduce_modes;
+		std::vector<String> luminance_reduce_modes;
 		luminance_reduce_modes.push_back("\n#define READ_TEXTURE\n");
 		luminance_reduce_modes.push_back("\n");
 		luminance_reduce_modes.push_back("\n#define WRITE_LUMINANCE\n");
@@ -1181,7 +1181,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{
 		// Initialize copier
-		Vector<String> copy_modes;
+		std::vector<String> copy_modes;
 		copy_modes.push_back("\n#define MODE_CUBE_TO_DP\n");
 
 		copy.shader.initialize(copy_modes);
@@ -1195,7 +1195,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{
 		// Initialize bokeh
-		Vector<String> bokeh_modes;
+		std::vector<String> bokeh_modes;
 		bokeh_modes.push_back("\n#define MODE_GEN_BLUR_SIZE\n");
 		bokeh_modes.push_back("\n#define MODE_BOKEH_BOX\n");
 		bokeh_modes.push_back("\n#define MODE_BOKEH_HEXAGONAL\n");
@@ -1215,7 +1215,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 		// Initialize ssao
 		uint32_t pipeline = 0;
 		{
-			Vector<String> ssao_modes;
+			std::vector<String> ssao_modes;
 			ssao_modes.push_back("\n#define MINIFY_START\n");
 			ssao_modes.push_back("\n");
 
@@ -1229,7 +1229,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 			}
 		}
 		{
-			Vector<String> ssao_modes;
+			std::vector<String> ssao_modes;
 			ssao_modes.push_back("\n#define SSAO_QUALITY_LOW\n");
 			ssao_modes.push_back("\n");
 			ssao_modes.push_back("\n#define SSAO_QUALITY_HIGH\n");
@@ -1249,7 +1249,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 			}
 		}
 		{
-			Vector<String> ssao_modes;
+			std::vector<String> ssao_modes;
 			ssao_modes.push_back("\n#define MODE_FULL_SIZE\n");
 			ssao_modes.push_back("\n");
 			ssao_modes.push_back("\n#define MODE_UPSCALE\n");
@@ -1270,7 +1270,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{
 		// Initialize roughness limiter
-		Vector<String> shader_modes;
+		std::vector<String> shader_modes;
 		shader_modes.push_back("");
 
 		roughness_limiter.shader.initialize(shader_modes);
@@ -1282,7 +1282,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 
 	{
 		//Initialize cubemap downsampler
-		Vector<String> cubemap_downsampler_modes;
+		std::vector<String> cubemap_downsampler_modes;
 		cubemap_downsampler_modes.push_back("");
 		cubemap_downsampler.shader.initialize(cubemap_downsampler_modes);
 
@@ -1295,7 +1295,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 		// Initialize cubemap filter
 		filter.use_high_quality = GLOBAL_GET("rendering/quality/reflections/fast_filter_high_quality");
 
-		Vector<String> cubemap_filter_modes;
+		std::vector<String> cubemap_filter_modes;
 		cubemap_filter_modes.push_back("\n#define USE_HIGH_QUALITY\n");
 		cubemap_filter_modes.push_back("\n#define USE_LOW_QUALITY\n");
 		cubemap_filter_modes.push_back("\n#define USE_HIGH_QUALITY\n#define USE_TEXTURE_ARRAY\n");
@@ -1315,7 +1315,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 			RD::get_singleton()->buffer_update(filter.coefficient_buffer, 0, sizeof(low_quality_coeffs), &low_quality_coeffs[0], false);
 		}
 
-		Vector<RD::Uniform> uniforms;
+		std::vector<RD::Uniform> uniforms;
 		{
 			RD::Uniform u;
 			u.type = RD::UNIFORM_TYPE_STORAGE_BUFFER;
@@ -1327,7 +1327,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 	}
 
 	{
-		Vector<String> specular_modes;
+		std::vector<String> specular_modes;
 		specular_modes.push_back("\n#define MODE_MERGE\n");
 		specular_modes.push_back("\n#define MODE_MERGE\n#define MODE_SSR\n");
 		specular_modes.push_back("\n");
@@ -1364,7 +1364,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 	}
 
 	{
-		Vector<String> ssr_modes;
+		std::vector<String> ssr_modes;
 		ssr_modes.push_back("\n");
 		ssr_modes.push_back("\n#define MODE_ROUGH\n");
 
@@ -1378,7 +1378,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 	}
 
 	{
-		Vector<String> ssr_filter_modes;
+		std::vector<String> ssr_filter_modes;
 		ssr_filter_modes.push_back("\n");
 		ssr_filter_modes.push_back("\n#define VERTICAL_PASS\n");
 
@@ -1392,7 +1392,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 	}
 
 	{
-		Vector<String> ssr_scale_modes;
+		std::vector<String> ssr_scale_modes;
 		ssr_scale_modes.push_back("\n");
 
 		ssr_scale.shader.initialize(ssr_scale_modes);
@@ -1403,7 +1403,7 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 	}
 
 	{
-		Vector<String> sss_modes;
+		std::vector<String> sss_modes;
 		sss_modes.push_back("\n#define USE_11_SAMPLES\n");
 		sss_modes.push_back("\n#define USE_17_SAMPLES\n");
 		sss_modes.push_back("\n#define USE_25_SAMPLES\n");
@@ -1431,10 +1431,10 @@ RasterizerEffectsRD::RasterizerEffectsRD() {
 	default_mipmap_sampler = RD::get_singleton()->sampler_create(sampler);
 
 	{ //create index array for copy shaders
-		Vector<uint8_t> pv;
+		std::vector<uint8_t> pv;
 		pv.resize(6 * 4);
 		{
-			uint8_t *w = pv.ptrw();
+			uint8_t *w = pv.data();
 			int *p32 = (int *)w;
 			p32[0] = 0;
 			p32[1] = 1;
