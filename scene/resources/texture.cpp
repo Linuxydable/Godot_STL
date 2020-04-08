@@ -390,7 +390,7 @@ Ref<Image> StreamTexture::load_image_from_file(FileAccess *f, int p_size_limit) 
 			std::vector<uint8_t> pv;
 			pv.resize(size);
 			{
-				uint8_t *wr = pv.ptrw();
+				uint8_t *wr = pv.data();
 				f->get_buffer(wr, size);
 			}
 
@@ -440,14 +440,14 @@ Ref<Image> StreamTexture::load_image_from_file(FileAccess *f, int p_size_limit) 
 			img_data.resize(total_size);
 
 			{
-				uint8_t *wr = img_data.ptrw();
+				uint8_t *wr = img_data.data();
 
 				int ofs = 0;
 				for (int i = 0; i < mipmap_images.size(); i++) {
 
 					std::vector<uint8_t> id = mipmap_images[i]->get_data();
 					int len = id.size();
-					const uint8_t *r = id.ptr();
+					const uint8_t *r = id.data();
 					copymem(&wr[ofs], r, len);
 					ofs += len;
 				}
@@ -476,7 +476,7 @@ Ref<Image> StreamTexture::load_image_from_file(FileAccess *f, int p_size_limit) 
 			data.resize(size - ofs);
 
 			{
-				uint8_t *wr = data.ptrw();
+				uint8_t *wr = data.data();
 				f->get_buffer(wr, data.size());
 			}
 
@@ -1304,7 +1304,7 @@ void LargeTexture::draw(RID p_canvas_item, const Point2 &p_pos, const Color &p_m
 
 	for (auto &&piece : pieces) {
 		// TODO
-		pieces[i].texture->draw(p_canvas_item, pieces[i].offset + p_pos, p_modulate, p_transpose, p_normal_map, p_specular_map, p_specular_color_shininess, p_texture_filter, p_texture_repeat);
+		piece.texture->draw(p_canvas_item, piece.offset + p_pos, p_modulate, p_transpose, p_normal_map, p_specular_map, p_specular_color_shininess, p_texture_filter, p_texture_repeat);
 	}
 }
 
@@ -1318,7 +1318,7 @@ void LargeTexture::draw_rect(RID p_canvas_item, const Rect2 &p_rect, bool p_tile
 
 	for (auto &&piece : pieces) {
 		// TODO
-		pieces[i].texture->draw_rect(p_canvas_item, Rect2(pieces[i].offset * scale + p_rect.position, pieces[i].texture->get_size() * scale), false, p_modulate, p_transpose, p_normal_map, p_specular_map, p_specular_color_shininess, p_texture_filter, p_texture_repeat);
+		piece.texture->draw_rect(p_canvas_item, Rect2(piece.offset * scale + p_rect.position, piece.texture->get_size() * scale), false, p_modulate, p_transpose, p_normal_map, p_specular_map, p_specular_color_shininess, p_texture_filter, p_texture_repeat);
 	}
 }
 void LargeTexture::draw_rect_region(RID p_canvas_item, const Rect2 &p_rect, const Rect2 &p_src_rect, const Color &p_modulate, bool p_transpose, const Ref<Texture2D> &p_normal_map, const Ref<Texture2D> &p_specular_map, const Color &p_specular_color_shininess, RS::CanvasItemTextureFilter p_texture_filter, RS::CanvasItemTextureRepeat p_texture_repeat, bool p_clip_uv) const {
@@ -1339,7 +1339,7 @@ void LargeTexture::draw_rect_region(RID p_canvas_item, const Rect2 &p_rect, cons
 		target.size *= scale;
 		target.position = p_rect.position + (p_src_rect.position + rect.position) * scale;
 		local.position -= rect.position;
-		pieces[i].texture->draw_rect_region(p_canvas_item, target, local, p_modulate, p_transpose, p_normal_map, p_specular_map, p_specular_color_shininess, p_texture_filter, p_texture_repeat, false);
+		piece.texture->draw_rect_region(p_canvas_item, target, local, p_modulate, p_transpose, p_normal_map, p_specular_map, p_specular_color_shininess, p_texture_filter, p_texture_repeat, false);
 	}
 }
 
@@ -1421,7 +1421,7 @@ void CurveTexture::_update() {
 
 	// The array is locked in that scope
 	{
-		uint8_t *wd8 = data.ptrw();
+		uint8_t *wd8 = data.data();
 		float *wd = (float *)wd8;
 
 		if (_curve.is_valid()) {
@@ -1542,7 +1542,7 @@ void GradientTexture::_update() {
 	std::vector<uint8_t> data;
 	data.resize(width * 4);
 	{
-		uint8_t *wd8 = data.ptrw();
+		uint8_t *wd8 = data.data();
 		Gradient &g = **gradient;
 
 		for (int i = 0; i < width; i++) {
@@ -2091,7 +2091,7 @@ RES ResourceFormatLoaderTextureLayered::load(const String &p_path, const String 
 				std::vector<uint8_t> pv;
 				pv.resize(size);
 				{
-					uint8_t *w = pv.ptrw();
+					uint8_t *w = pv.data();
 					f->get_buffer(w, size);
 				}
 
@@ -2117,14 +2117,14 @@ RES ResourceFormatLoaderTextureLayered::load(const String &p_path, const String 
 				img_data.resize(total_size);
 
 				{
-					uint8_t *w = img_data.ptrw();
+					uint8_t *w = img_data.data();
 
 					int ofs = 0;
 					for (int i = 0; i < mipmap_images.size(); i++) {
 
 						std::vector<uint8_t> id = mipmap_images[i]->get_data();
 						int len = id.size();
-						const uint8_t *r = id.ptr();
+						const uint8_t *r = id.data();
 						copymem(&w[ofs], r, len);
 						ofs += len;
 					}
@@ -2151,7 +2151,7 @@ RES ResourceFormatLoaderTextureLayered::load(const String &p_path, const String 
 			img_data.resize(total_size);
 
 			{
-				uint8_t *w = img_data.ptrw();
+				uint8_t *w = img_data.data();
 				int bytes = f->get_buffer(w, total_size);
 				if (bytes != total_size) {
 					if (r_error) {
