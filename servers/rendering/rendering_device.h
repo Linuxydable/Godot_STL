@@ -56,8 +56,8 @@ public:
 		SHADER_LANGUAGE_HLSL
 	};
 
-	typedef Vector<uint8_t> (*ShaderCompileFunction)(ShaderStage p_stage, const String &p_source_code, ShaderLanguage p_language, String *r_error);
-	typedef Vector<uint8_t> (*ShaderCacheFunction)(ShaderStage p_stage, const String &p_source_code, ShaderLanguage p_language);
+	typedef std::vector<uint8_t> (*ShaderCompileFunction)(ShaderStage p_stage, const String &p_source_code, ShaderLanguage p_language, String *r_error);
+	typedef std::vector<uint8_t> (*ShaderCacheFunction)(ShaderStage p_stage, const String &p_source_code, ShaderLanguage p_language);
 
 private:
 	static ShaderCompileFunction compile_function;
@@ -377,7 +377,7 @@ public:
 		TextureType type;
 		TextureSamples samples;
 		uint32_t usage_bits;
-		Vector<DataFormat> shareable_formats;
+		std::vector<DataFormat> shareable_formats;
 
 		TextureFormat() {
 			format = DATA_FORMAT_R8_UNORM;
@@ -408,7 +408,7 @@ public:
 		}
 	};
 
-	virtual RID texture_create(const TextureFormat &p_format, const TextureView &p_view, const Vector<Vector<uint8_t>> &p_data = Vector<Vector<uint8_t>>()) = 0;
+	virtual RID texture_create(const TextureFormat &p_format, const TextureView &p_view, const std::vector<std::vector<uint8_t>> &p_data = std::vector<std::vector<uint8_t>>()) = 0;
 	virtual RID texture_create_shared(const TextureView &p_view, RID p_with_texture) = 0;
 
 	enum TextureSliceType {
@@ -419,8 +419,8 @@ public:
 
 	virtual RID texture_create_shared_from_slice(const TextureView &p_view, RID p_with_texture, uint32_t p_layer, uint32_t p_mipmap, TextureSliceType p_slice_type = TEXTURE_SLICE_2D) = 0;
 
-	virtual Error texture_update(RID p_texture, uint32_t p_layer, const Vector<uint8_t> &p_data, bool p_sync_with_draw = false) = 0; //this function can be used from any thread and it takes effect at the beginning of the frame, unless sync with draw is used, which is used to mix updates with draw calls
-	virtual Vector<uint8_t> texture_get_data(RID p_texture, uint32_t p_layer) = 0; // CPU textures will return immediately, while GPU textures will most likely force a flush
+	virtual Error texture_update(RID p_texture, uint32_t p_layer, const std::vector<uint8_t> &p_data, bool p_sync_with_draw = false) = 0; //this function can be used from any thread and it takes effect at the beginning of the frame, unless sync with draw is used, which is used to mix updates with draw calls
+	virtual std::vector<uint8_t> texture_get_data(RID p_texture, uint32_t p_layer) = 0; // CPU textures will return immediately, while GPU textures will most likely force a flush
 
 	virtual bool texture_is_format_supported_for_usage(DataFormat p_format, uint32_t p_usage) const = 0;
 	virtual bool texture_is_shared(RID p_texture) = 0;
@@ -447,10 +447,10 @@ public:
 	typedef int64_t FramebufferFormatID;
 
 	// This ID is warranted to be unique for the same formats, does not need to be freed
-	virtual FramebufferFormatID framebuffer_format_create(const Vector<AttachmentFormat> &p_format) = 0;
+	virtual FramebufferFormatID framebuffer_format_create(const std::vector<AttachmentFormat> &p_format) = 0;
 	virtual TextureSamples framebuffer_format_get_texture_samples(FramebufferFormatID p_format) = 0;
 
-	virtual RID framebuffer_create(const Vector<RID> &p_texture_attachments, FramebufferFormatID p_format_check = INVALID_ID) = 0;
+	virtual RID framebuffer_create(const std::vector<RID> &p_texture_attachments, FramebufferFormatID p_format_check = INVALID_ID) = 0;
 
 	virtual FramebufferFormatID framebuffer_get_format(RID p_framebuffer) = 0;
 
@@ -543,41 +543,41 @@ public:
 			frequency = VERTEX_FREQUENCY_VERTEX;
 		}
 	};
-	virtual RID vertex_buffer_create(uint32_t p_size_bytes, const Vector<uint8_t> &p_data = Vector<uint8_t>()) = 0;
+	virtual RID vertex_buffer_create(uint32_t p_size_bytes, const std::vector<uint8_t> &p_data = std::vector<uint8_t>()) = 0;
 
 	typedef int64_t VertexFormatID;
 
 	// This ID is warranted to be unique for the same formats, does not need to be freed
-	virtual VertexFormatID vertex_format_create(const Vector<VertexDescription> &p_vertex_formats) = 0;
-	virtual RID vertex_array_create(uint32_t p_vertex_count, VertexFormatID p_vertex_format, const Vector<RID> &p_src_buffers) = 0;
+	virtual VertexFormatID vertex_format_create(const std::vector<VertexDescription> &p_vertex_formats) = 0;
+	virtual RID vertex_array_create(uint32_t p_vertex_count, VertexFormatID p_vertex_format, const std::vector<RID> &p_src_buffers) = 0;
 
 	enum IndexBufferFormat {
 		INDEX_BUFFER_FORMAT_UINT16,
 		INDEX_BUFFER_FORMAT_UINT32,
 	};
 
-	virtual RID index_buffer_create(uint32_t p_size_indices, IndexBufferFormat p_format, const Vector<uint8_t> &p_data = Vector<uint8_t>(), bool p_use_restart_indices = false) = 0;
+	virtual RID index_buffer_create(uint32_t p_size_indices, IndexBufferFormat p_format, const std::vector<uint8_t> &p_data = std::vector<uint8_t>(), bool p_use_restart_indices = false) = 0;
 	virtual RID index_array_create(RID p_index_buffer, uint32_t p_index_offset, uint32_t p_index_count) = 0;
 
 	/****************/
 	/**** SHADER ****/
 	/****************/
 
-	virtual Vector<uint8_t> shader_compile_from_source(ShaderStage p_stage, const String &p_source_code, ShaderLanguage p_language = SHADER_LANGUAGE_GLSL, String *r_error = nullptr, bool p_allow_cache = true);
+	virtual std::vector<uint8_t> shader_compile_from_source(ShaderStage p_stage, const String &p_source_code, ShaderLanguage p_language = SHADER_LANGUAGE_GLSL, String *r_error = nullptr, bool p_allow_cache = true);
 
 	static void shader_set_compile_function(ShaderCompileFunction p_function);
 	static void shader_set_cache_function(ShaderCacheFunction p_function);
 
 	struct ShaderStageData {
 		ShaderStage shader_stage;
-		Vector<uint8_t> spir_v;
+		std::vector<uint8_t> spir_v;
 
 		ShaderStageData() {
 			shader_stage = SHADER_STAGE_VERTEX;
 		}
 	};
 
-	virtual RID shader_create(const Vector<ShaderStageData> &p_stages) = 0;
+	virtual RID shader_create(const std::vector<ShaderStageData> &p_stages) = 0;
 	virtual uint32_t shader_get_vertex_input_attribute_mask(RID p_shader) = 0;
 
 	/******************/
@@ -598,9 +598,9 @@ public:
 		UNIFORM_TYPE_MAX
 	};
 
-	virtual RID uniform_buffer_create(uint32_t p_size_bytes, const Vector<uint8_t> &p_data = Vector<uint8_t>()) = 0;
-	virtual RID storage_buffer_create(uint32_t p_size, const Vector<uint8_t> &p_data = Vector<uint8_t>()) = 0;
-	virtual RID texture_buffer_create(uint32_t p_size_elements, DataFormat p_format, const Vector<uint8_t> &p_data = Vector<uint8_t>()) = 0;
+	virtual RID uniform_buffer_create(uint32_t p_size_bytes, const std::vector<uint8_t> &p_data = std::vector<uint8_t>()) = 0;
+	virtual RID storage_buffer_create(uint32_t p_size, const std::vector<uint8_t> &p_data = std::vector<uint8_t>()) = 0;
+	virtual RID texture_buffer_create(uint32_t p_size_elements, DataFormat p_format, const std::vector<uint8_t> &p_data = std::vector<uint8_t>()) = 0;
 
 	struct Uniform {
 		UniformType type;
@@ -611,7 +611,7 @@ public:
 		//provide more
 		//for sampler with texture, supply two IDs for each.
 		//accepted IDs are: Sampler, Texture, Uniform Buffer and Texture Buffer
-		Vector<RID> ids;
+		std::vector<RID> ids;
 
 		Uniform() {
 			type = UNIFORM_TYPE_IMAGE;
@@ -619,11 +619,11 @@ public:
 		}
 	};
 
-	virtual RID uniform_set_create(const Vector<Uniform> &p_uniforms, RID p_shader, uint32_t p_shader_set) = 0;
+	virtual RID uniform_set_create(const std::vector<Uniform> &p_uniforms, RID p_shader, uint32_t p_shader_set) = 0;
 	virtual bool uniform_set_is_valid(RID p_uniform_set) = 0;
 
 	virtual Error buffer_update(RID p_buffer, uint32_t p_offset, uint32_t p_size, const void *p_data, bool p_sync_with_draw = false) = 0; //this function can be used from any thread and it takes effect at the beginning of the frame, unless sync with draw is used, which is used to mix updates with draw calls
-	virtual Vector<uint8_t> buffer_get_data(RID p_buffer) = 0; //this causes stall, only use to retrieve large buffers for saving
+	virtual std::vector<uint8_t> buffer_get_data(RID p_buffer) = 0; //this causes stall, only use to retrieve large buffers for saving
 
 	/*************************/
 	/**** RENDER PIPELINE ****/
@@ -752,7 +752,7 @@ public:
 		TextureSamples sample_count;
 		bool enable_sample_shading;
 		float min_sample_shading;
-		Vector<uint32_t> sample_mask;
+		std::vector<uint32_t> sample_mask;
 		bool enable_alpha_to_coverage;
 		bool enable_alpha_to_one;
 
@@ -864,7 +864,7 @@ public:
 			return bs;
 		}
 
-		Vector<Attachment> attachments; //one per render target texture
+		std::vector<Attachment> attachments; //one per render target texture
 		Color blend_constant;
 
 		PipelineColorBlendState() {
@@ -922,8 +922,8 @@ public:
 	typedef int64_t DrawListID;
 
 	virtual DrawListID draw_list_begin_for_screen(DisplayServer::WindowID p_screen = 0, const Color &p_clear_color = Color()) = 0;
-	virtual DrawListID draw_list_begin(RID p_framebuffer, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const Vector<Color> &p_clear_color_values = Vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2()) = 0;
-	virtual Error draw_list_begin_split(RID p_framebuffer, uint32_t p_splits, DrawListID *r_split_ids, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const Vector<Color> &p_clear_color_values = Vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2()) = 0;
+	virtual DrawListID draw_list_begin(RID p_framebuffer, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const std::vector<Color> &p_clear_color_values = std::vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2()) = 0;
+	virtual Error draw_list_begin_split(RID p_framebuffer, uint32_t p_splits, DrawListID *r_split_ids, InitialAction p_initial_color_action, FinalAction p_final_color_action, InitialAction p_initial_depth_action, FinalAction p_final_depth_action, const std::vector<Color> &p_clear_color_values = std::vector<Color>(), float p_clear_depth = 1.0, uint32_t p_clear_stencil = 0, const Rect2 &p_region = Rect2()) = 0;
 
 	virtual void draw_list_bind_render_pipeline(DrawListID p_list, RID p_render_pipeline) = 0;
 	virtual void draw_list_bind_uniform_set(DrawListID p_list, RID p_uniform_set, uint32_t p_index) = 0;
