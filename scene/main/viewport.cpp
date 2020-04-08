@@ -343,7 +343,7 @@ void Viewport::_sub_window_grab_focus(Window *p_window) {
 	if (p_window->get_flag(Window::FLAG_NO_FOCUS)) {
 		//can only move to foreground, but no focus granted
 		SubWindow sw = gui.sub_windows[index];
-		gui.sub_windows.remove(index);
+		gui.sub_windows.erase(gui.sub_windows.begin() + index);
 		gui.sub_windows.push_back(sw);
 		index = gui.sub_windows.size() - 1;
 		_sub_window_update_order();
@@ -371,7 +371,7 @@ void Viewport::_sub_window_grab_focus(Window *p_window) {
 
 	{ //move to foreground
 		SubWindow sw = gui.sub_windows[index];
-		gui.sub_windows.remove(index);
+		gui.sub_windows.erase(gui.sub_windows.begin() + index);
 		gui.sub_windows.push_back(sw);
 		index = gui.sub_windows.size() - 1;
 		_sub_window_update_order();
@@ -389,7 +389,7 @@ void Viewport::_sub_window_remove(Window *p_window) {
 	for (int i = 0; i < gui.sub_windows.size(); i++) {
 		if (gui.sub_windows[i].window == p_window) {
 			RS::get_singleton()->free(gui.sub_windows[i].canvas_item);
-			gui.sub_windows.remove(i);
+			gui.sub_windows.erase(gui.sub_windows.begin() + i);
 			break;
 		}
 	}
@@ -2882,7 +2882,7 @@ bool Viewport::_sub_windows_forward_input(const Ref<InputEvent> &p_event) {
 
 		bool click_on_window = false;
 		for (int i = gui.sub_windows.size() - 1; i >= 0; i--) {
-			SubWindow &sw = gui.sub_windows.write[i];
+			SubWindow &sw = gui.sub_windows[i];
 
 			//clicked inside window?
 

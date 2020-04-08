@@ -340,7 +340,7 @@ private:
 		SubWindowResize subwindow_resize_mode;
 		Rect2i subwindow_resize_from_rect;
 
-		Vector<SubWindow> sub_windows;
+		std::vector<SubWindow> sub_windows;
 
 		GUI();
 	} gui;
