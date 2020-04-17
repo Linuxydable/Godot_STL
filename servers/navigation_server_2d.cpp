@@ -98,11 +98,11 @@ static Vector3 v2_to_v3(const Vector2 d) {
 static Vector2 v3_to_v2(const Vector3 &d) {
 	return Vector2(d.x, d.z);
 }
-static Vector<Vector2> vector_v3_to_v2(const Vector<Vector3> &d) {
-	Vector<Vector2> nd;
+static std::vector<Vector2> vector_v3_to_v2(const std::vector<Vector3> &d) {
+	std::vector<Vector2> nd;
 	nd.resize(d.size());
 	for (int i(0); i < nd.size(); i++) {
-		nd.write[i] = v3_to_v2(d[i]);
+		nd[i] = v3_to_v2(d[i]);
 	}
 	return nd;
 }
@@ -182,7 +182,7 @@ real_t FORWARD_1_C(map_get_cell_size, RID, p_map, rid_to_rid);
 void FORWARD_2_C(map_set_edge_connection_margin, RID, p_map, real_t, p_connection_margin, rid_to_rid, real_to_real);
 real_t FORWARD_1_C(map_get_edge_connection_margin, RID, p_map, rid_to_rid);
 
-Vector<Vector2> FORWARD_4_R_C(vector_v3_to_v2, map_get_path, RID, p_map, Vector2, p_origin, Vector2, p_destination, bool, p_optimize, rid_to_rid, v2_to_v3, v2_to_v3, bool_to_bool);
+std::vector<Vector2> FORWARD_4_R_C(vector_v3_to_v2, map_get_path, RID, p_map, Vector2, p_origin, Vector2, p_destination, bool, p_optimize, rid_to_rid, v2_to_v3, v2_to_v3, bool_to_bool);
 
 Vector2 FORWARD_2_R_C(v3_to_v2, map_get_closest_point, RID, p_map, const Vector2 &, p_point, rid_to_rid, v2_to_v3);
 RID FORWARD_2_C(map_get_closest_point_owner, RID, p_map, const Vector2 &, p_point, rid_to_rid, v2_to_v3);
