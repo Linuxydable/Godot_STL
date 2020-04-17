@@ -822,9 +822,6 @@
     <Filter Include="Source Files\scene">
       <UniqueIdentifier>{1DA0F1F1-7D0B-E440-BEB3-04ABCD5F8147}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\scene\2d">
-      <UniqueIdentifier>{5EC26546-FC7C-C66D-2533-D07F636C332F}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\scene\3d">
       <UniqueIdentifier>{5C51B91D-2C2B-6180-94BD-3E4605E64CB0}</UniqueIdentifier>
     </Filter>
@@ -4829,6 +4826,24 @@
     <ClInclude Include="scene\resources\navigation_mesh.h">
       <Filter>Header Files\scene\resources</Filter>
     </ClInclude>
+    <ClInclude Include="scene\2d\animated_sprite_2d.h">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\2d\gpu_particles_2d.h">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\2d\navigation_agent_2d.h">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\2d\navigation_obstacle_2d.h">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\2d\navigation_region_2d.h">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\2d\sprite_2d.h">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\bind\core_bind.cpp">
@@ -6294,117 +6309,6 @@
     </ClCompile>
     <ClCompile Include="platform\x11\export\export.cpp">
       <Filter>Source Files\platform\x11\export</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\animated_sprite.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\area_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\audio_stream_player_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\back_buffer_copy.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\camera_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\canvas_item.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\canvas_modulate.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\collision_object_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\collision_polygon_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\collision_shape_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\cpu_particles_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\joints_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\light_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\light_occluder_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\line_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\line_builder.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\mesh_instance_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\multimesh_instance_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\navigation_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\navigation_polygon.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\node_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\parallax_background.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\parallax_layer.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\particles_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\path_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\path_texture.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\physics_body_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\polygon_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\position_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\ray_cast_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\remote_transform_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\skeleton_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\sprite.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\tile_map.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\touch_screen_button.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\visibility_notifier_2d.cpp">
-      <Filter>Source Files\scene\2d</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\2d\y_sort.cpp">
-      <Filter>Source Files\scene\2d</Filter>
     </ClCompile>
     <ClCompile Include="scene\3d\area.cpp">
       <Filter>Source Files\scene\3d</Filter>
@@ -9741,6 +9645,117 @@
     </ClCompile>
     <ClCompile Include="scene\resources\navigation_mesh.cpp">
       <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\animated_sprite_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\area_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\audio_stream_player_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\back_buffer_copy.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\camera_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\canvas_modulate.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\collision_object_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\collision_polygon_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\collision_shape_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\cpu_particles_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\gpu_particles_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\joints_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\light_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\light_occluder_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\line_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\line_builder.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\mesh_instance_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\multimesh_instance_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\navigation_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\navigation_agent_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\navigation_obstacle_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\navigation_region_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\node_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\parallax_background.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\parallax_layer.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\path_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\physics_body_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\polygon_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\position_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\ray_cast_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\remote_transform_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\skeleton_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\sprite_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\tile_map.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\touch_screen_button.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\visibility_notifier_2d.cpp">
+      <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\2d\y_sort.cpp">
+      <Filter>Header Files\scene\2d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
