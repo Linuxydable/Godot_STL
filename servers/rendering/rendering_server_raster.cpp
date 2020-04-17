@@ -134,7 +134,7 @@ void RenderingServerRaster::draw(bool p_swap_buffers, double frame_step) {
 	RS::get_singleton()->emit_signal("frame_post_draw");
 
 	if (RSG::storage->get_captured_timestamps_count()) {
-		Vector<FrameProfileArea> new_profile;
+		std::vector<FrameProfileArea> new_profile;
 		new_profile.resize(RSG::storage->get_captured_timestamps_count());
 
 		uint64_t base_cpu = RSG::storage->get_captured_timestamp_cpu_time(0);
@@ -142,9 +142,9 @@ void RenderingServerRaster::draw(bool p_swap_buffers, double frame_step) {
 		for (uint32_t i = 0; i < RSG::storage->get_captured_timestamps_count(); i++) {
 			uint64_t time_cpu = RSG::storage->get_captured_timestamp_cpu_time(i) - base_cpu;
 			uint64_t time_gpu = RSG::storage->get_captured_timestamp_gpu_time(i) - base_gpu;
-			new_profile.write[i].gpu_msec = float(time_gpu / 1000) / 1000.0;
-			new_profile.write[i].cpu_msec = float(time_cpu) / 1000.0;
-			new_profile.write[i].name = RSG::storage->get_captured_timestamp_name(i);
+			new_profile[i].gpu_msec = float(time_gpu / 1000) / 1000.0;
+			new_profile[i].cpu_msec = float(time_cpu) / 1000.0;
+			new_profile[i].name = RSG::storage->get_captured_timestamp_name(i);
 		}
 
 		frame_profile = new_profile;
@@ -196,7 +196,7 @@ uint64_t RenderingServerRaster::get_frame_profile_frame() {
 	return frame_profile_frame;
 }
 
-Vector<RenderingServer::FrameProfileArea> RenderingServerRaster::get_frame_profile() {
+std::vector<RenderingServer::FrameProfileArea> RenderingServerRaster::get_frame_profile() {
 	return frame_profile;
 }
 

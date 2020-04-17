@@ -73,7 +73,7 @@ class RenderingServerRaster : public RenderingServer {
 	static void _changes_changed() {}
 
 	uint64_t frame_profile_frame;
-	Vector<FrameProfileArea> frame_profile;
+	std::vector<FrameProfileArea> frame_profile;
 
 public:
 	//if editor is redrawing when it shouldn't, enable this and put a breakpoint in _changes_changed()
@@ -151,8 +151,8 @@ public:
 
 	//these go pass-through, as they can be called from any thread
 	BIND1R(RID, texture_2d_create, const Ref<Image> &)
-	BIND2R(RID, texture_2d_layered_create, const Vector<Ref<Image>> &, TextureLayeredType)
-	BIND1R(RID, texture_3d_create, const Vector<Ref<Image>> &)
+	BIND2R(RID, texture_2d_layered_create, const std::vector<Ref<Image>> &, TextureLayeredType)
+	BIND1R(RID, texture_3d_create, const std::vector<Ref<Image>> &)
 	BIND1R(RID, texture_proxy_create, RID)
 
 	//goes pass-through
@@ -216,7 +216,7 @@ public:
 
 	/* MESH API */
 
-	virtual RID mesh_create_from_surfaces(const Vector<SurfaceData> &p_surfaces) {
+	virtual RID mesh_create_from_surfaces(const std::vector<SurfaceData> &p_surfaces) {
 		RID mesh = mesh_create();
 		for (int i = 0; i < p_surfaces.size(); i++) {
 			mesh_add_surface(mesh, p_surfaces[i]);
@@ -233,7 +233,7 @@ public:
 	BIND2(mesh_set_blend_shape_mode, RID, BlendShapeMode)
 	BIND1RC(BlendShapeMode, mesh_get_blend_shape_mode, RID)
 
-	BIND4(mesh_surface_update_region, RID, int, int, const Vector<uint8_t> &)
+	BIND4(mesh_surface_update_region, RID, int, int, const std::vector<uint8_t> &)
 
 	BIND3(mesh_surface_set_material, RID, int, RID)
 	BIND2RC(RID, mesh_surface_get_material, RID, int)
@@ -268,8 +268,8 @@ public:
 	BIND2RC(Color, multimesh_instance_get_color, RID, int)
 	BIND2RC(Color, multimesh_instance_get_custom_data, RID, int)
 
-	BIND2(multimesh_set_buffer, RID, const Vector<float> &)
-	BIND1RC(Vector<float>, multimesh_get_buffer, RID)
+	BIND2(multimesh_set_buffer, RID, const std::vector<float> &)
+	BIND1RC(std::vector<float>, multimesh_get_buffer, RID)
 
 	BIND2(multimesh_set_visible_instances, RID, int)
 	BIND1RC(int, multimesh_get_visible_instances, RID)
@@ -344,14 +344,14 @@ public:
 
 	BIND0R(RID, gi_probe_create)
 
-	BIND8(gi_probe_allocate, RID, const Transform &, const AABB &, const Vector3i &, const Vector<uint8_t> &, const Vector<uint8_t> &, const Vector<uint8_t> &, const Vector<int> &)
+	BIND8(gi_probe_allocate, RID, const Transform &, const AABB &, const Vector3i &, const std::vector<uint8_t> &, const std::vector<uint8_t> &, const std::vector<uint8_t> &, const std::vector<int> &)
 
 	BIND1RC(AABB, gi_probe_get_bounds, RID)
 	BIND1RC(Vector3i, gi_probe_get_octree_size, RID)
-	BIND1RC(Vector<uint8_t>, gi_probe_get_octree_cells, RID)
-	BIND1RC(Vector<uint8_t>, gi_probe_get_data_cells, RID)
-	BIND1RC(Vector<uint8_t>, gi_probe_get_distance_field, RID)
-	BIND1RC(Vector<int>, gi_probe_get_level_counts, RID)
+	BIND1RC(std::vector<uint8_t>, gi_probe_get_octree_cells, RID)
+	BIND1RC(std::vector<uint8_t>, gi_probe_get_data_cells, RID)
+	BIND1RC(std::vector<uint8_t>, gi_probe_get_distance_field, RID)
+	BIND1RC(std::vector<int>, gi_probe_get_level_counts, RID)
 	BIND1RC(Transform, gi_probe_get_to_cell_xform, RID)
 
 	BIND2(gi_probe_set_dynamic_range, RID, float)
@@ -391,8 +391,8 @@ public:
 	BIND2(lightmap_capture_set_bounds, RID, const AABB &)
 	BIND1RC(AABB, lightmap_capture_get_bounds, RID)
 
-	BIND2(lightmap_capture_set_octree, RID, const Vector<uint8_t> &)
-	BIND1RC(Vector<uint8_t>, lightmap_capture_get_octree, RID)
+	BIND2(lightmap_capture_set_octree, RID, const std::vector<uint8_t> &)
+	BIND1RC(std::vector<uint8_t>, lightmap_capture_get_octree, RID)
 
 	BIND2(lightmap_capture_set_octree_cell_transform, RID, const Transform &)
 	BIND1RC(Transform, lightmap_capture_get_octree_cell_transform, RID)
@@ -587,9 +587,9 @@ public:
 	BIND2(instance_set_extra_visibility_margin, RID, real_t)
 
 	// don't use these in a game!
-	BIND2RC(Vector<ObjectID>, instances_cull_aabb, const AABB &, RID)
-	BIND3RC(Vector<ObjectID>, instances_cull_ray, const Vector3 &, const Vector3 &, RID)
-	BIND2RC(Vector<ObjectID>, instances_cull_convex, const Vector<Plane> &, RID)
+	BIND2RC(std::vector<ObjectID>, instances_cull_aabb, const AABB &, RID)
+	BIND3RC(std::vector<ObjectID>, instances_cull_ray, const Vector3 &, const Vector3 &, RID)
+	BIND2RC(std::vector<ObjectID>, instances_cull_convex, const std::vector<Plane> &, RID)
 
 	BIND3(instance_geometry_set_flag, RID, InstanceFlags, bool)
 	BIND2(instance_geometry_set_cast_shadows_setting, RID, ShadowCastingSetting)
@@ -631,16 +631,16 @@ public:
 	BIND2(canvas_item_set_default_texture_repeat, RID, CanvasItemTextureRepeat)
 
 	BIND5(canvas_item_add_line, RID, const Point2 &, const Point2 &, const Color &, float)
-	BIND4(canvas_item_add_polyline, RID, const Vector<Point2> &, const Vector<Color> &, float)
-	BIND4(canvas_item_add_multiline, RID, const Vector<Point2> &, const Vector<Color> &, float)
+	BIND4(canvas_item_add_polyline, RID, const std::vector<Point2> &, const std::vector<Color> &, float)
+	BIND4(canvas_item_add_multiline, RID, const std::vector<Point2> &, const std::vector<Color> &, float)
 	BIND3(canvas_item_add_rect, RID, const Rect2 &, const Color &)
 	BIND4(canvas_item_add_circle, RID, const Point2 &, float, const Color &)
 	BIND11(canvas_item_add_texture_rect, RID, const Rect2 &, RID, bool, const Color &, bool, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
 	BIND12(canvas_item_add_texture_rect_region, RID, const Rect2 &, RID, const Rect2 &, const Color &, bool, RID, RID, const Color &, bool, CanvasItemTextureFilter, CanvasItemTextureRepeat)
 	BIND15(canvas_item_add_nine_patch, RID, const Rect2 &, const Rect2 &, RID, const Vector2 &, const Vector2 &, NinePatchAxisMode, NinePatchAxisMode, bool, const Color &, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
-	BIND11(canvas_item_add_primitive, RID, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, RID, float, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
-	BIND10(canvas_item_add_polygon, RID, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, RID, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
-	BIND14(canvas_item_add_triangle_array, RID, const Vector<int> &, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, const Vector<int> &, const Vector<float> &, RID, int, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
+	BIND11(canvas_item_add_primitive, RID, const std::vector<Point2> &, const std::vector<Color> &, const std::vector<Point2> &, RID, float, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
+	BIND10(canvas_item_add_polygon, RID, const std::vector<Point2> &, const std::vector<Color> &, const std::vector<Point2> &, RID, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
+	BIND14(canvas_item_add_triangle_array, RID, const std::vector<int> &, const std::vector<Point2> &, const std::vector<Color> &, const std::vector<Point2> &, const std::vector<int> &, const std::vector<float> &, RID, int, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
 	BIND10(canvas_item_add_mesh, RID, const RID &, const Transform2D &, const Color &, RID, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
 	BIND8(canvas_item_add_multimesh, RID, RID, RID, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
 	BIND8(canvas_item_add_particles, RID, RID, RID, RID, RID, const Color &, CanvasItemTextureFilter, CanvasItemTextureRepeat)
@@ -690,8 +690,8 @@ public:
 	BIND2(canvas_light_occluder_set_light_mask, RID, int)
 
 	BIND0R(RID, canvas_occluder_polygon_create)
-	BIND3(canvas_occluder_polygon_set_shape, RID, const Vector<Vector2> &, bool)
-	BIND2(canvas_occluder_polygon_set_shape_as_lines, RID, const Vector<Vector2> &)
+	BIND3(canvas_occluder_polygon_set_shape, RID, const std::vector<Vector2> &, bool)
+	BIND2(canvas_occluder_polygon_set_shape_as_lines, RID, const std::vector<Vector2> &)
 
 	BIND2(canvas_occluder_polygon_set_cull_mode, RID, CanvasOccluderPolygonCullMode)
 
@@ -721,7 +721,7 @@ public:
 	virtual String get_video_adapter_vendor() const;
 
 	virtual void set_frame_profiling_enabled(bool p_enable);
-	virtual Vector<FrameProfileArea> get_frame_profile();
+	virtual std::vector<FrameProfileArea> get_frame_profile();
 	virtual uint64_t get_frame_profile_frame();
 
 	virtual RID get_test_cube();
