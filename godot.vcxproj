@@ -1574,8 +1574,8 @@
     <ClCompile Include="drivers\windows\thread_windows.cpp" />
     <ClCompile Include="drivers\winmidi\midi_driver_winmidi.cpp" />
     <ClCompile Include="editor\collada\collada.cpp" />
-    <ClCompile Include="editor\doc\doc_data.cpp" />
     <ClCompile Include="editor\doc\doc_dump.cpp" />
+    <ClCompile Include="editor\doc_data.cpp" />
     <ClCompile Include="editor\fileserver\editor_file_server.cpp" />
     <ClCompile Include="editor\import\editor_import_collada.cpp" />
     <ClCompile Include="editor\import\editor_import_plugin.cpp" />

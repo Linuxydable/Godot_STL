@@ -1586,9 +1586,6 @@
     <ClInclude Include="editor\collada\collada.h">
       <Filter>Header Files\editor\collada</Filter>
     </ClInclude>
-    <ClInclude Include="editor\doc\doc_data.h">
-      <Filter>Header Files\editor\doc</Filter>
-    </ClInclude>
     <ClInclude Include="editor\doc\doc_dump.h">
       <Filter>Header Files\editor\doc</Filter>
     </ClInclude>
@@ -4867,6 +4864,9 @@
     </ClInclude>
     <ClInclude Include="platform\windows\windows_terminal_logger.h">
       <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="editor\doc\doc_data.h">
+      <Filter>Header Files\editor</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -9739,9 +9739,6 @@
     <ClCompile Include="core\crypto\hashing_context.cpp">
       <Filter>Header Files\core\crypto</Filter>
     </ClCompile>
-    <ClCompile Include="editor\doc\doc_data.cpp">
-      <Filter>Source Files\editor</Filter>
-    </ClCompile>
     <ClCompile Include="editor\doc\doc_dump.cpp">
       <Filter>Source Files\editor</Filter>
     </ClCompile>
@@ -9774,6 +9771,9 @@
     </ClCompile>
     <ClCompile Include="platform\windows\export\export.cpp">
       <Filter>Header Files\platform\windows\export</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\doc_data.cpp">
+      <Filter>Header Files\editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
