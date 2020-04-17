@@ -648,7 +648,7 @@ void RenderingServerScene::instance_set_blend_shape_weight(RID p_instance, int p
 	}
 
 	ERR_FAIL_INDEX(p_shape, instance->blend_values.size());
-	instance->blend_values.write[p_shape] = p_weight;
+	instance->blend_values[p_shape] = p_weight;
 }
 
 void RenderingServerScene::instance_set_surface_material(RID p_instance, int p_surface, RID p_material) {
@@ -663,7 +663,7 @@ void RenderingServerScene::instance_set_surface_material(RID p_instance, int p_s
 
 	ERR_FAIL_INDEX(p_surface, instance->materials.size());
 
-	instance->materials.write[p_surface] = p_material;
+	instance->materials[p_surface] = p_material;
 
 	_instance_queue_update(instance, false, true);
 }
@@ -789,9 +789,9 @@ void RenderingServerScene::instance_set_extra_visibility_margin(RID p_instance, 
 	_instance_queue_update(instance, true, false);
 }
 
-Vector<ObjectID> RenderingServerScene::instances_cull_aabb(const AABB &p_aabb, RID p_scenario) const {
+std::vector<ObjectID> RenderingServerScene::instances_cull_aabb(const AABB &p_aabb, RID p_scenario) const {
 
-	Vector<ObjectID> instances;
+	std::vector<ObjectID> instances;
 	Scenario *scenario = scenario_owner.getornull(p_scenario);
 	ERR_FAIL_COND_V(!scenario, instances);
 
@@ -813,9 +813,9 @@ Vector<ObjectID> RenderingServerScene::instances_cull_aabb(const AABB &p_aabb, R
 
 	return instances;
 }
-Vector<ObjectID> RenderingServerScene::instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario) const {
+std::vector<ObjectID> RenderingServerScene::instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario) const {
 
-	Vector<ObjectID> instances;
+	std::vector<ObjectID> instances;
 	Scenario *scenario = scenario_owner.getornull(p_scenario);
 	ERR_FAIL_COND_V(!scenario, instances);
 	const_cast<RenderingServerScene *>(this)->update_dirty_instances(); // check dirty instances before culling
@@ -835,9 +835,9 @@ Vector<ObjectID> RenderingServerScene::instances_cull_ray(const Vector3 &p_from,
 
 	return instances;
 }
-Vector<ObjectID> RenderingServerScene::instances_cull_convex(const Vector<Plane> &p_convex, RID p_scenario) const {
+std::vector<ObjectID> RenderingServerScene::instances_cull_convex(const std::vector<Plane> &p_convex, RID p_scenario) const {
 
-	Vector<ObjectID> instances;
+	std::vector<ObjectID> instances;
 	Scenario *scenario = scenario_owner.getornull(p_scenario);
 	ERR_FAIL_COND_V(!scenario, instances);
 	const_cast<RenderingServerScene *>(this)->update_dirty_instances(); // check dirty instances before culling
@@ -1309,11 +1309,11 @@ void RenderingServerScene::_update_instance_lightmap_captures(Instance *p_instan
 	//print_line("update captures for pos: " + p_instance->transform.origin);
 
 	for (int i = 0; i < 12; i++)
-		new (&p_instance->lightmap_capture_data.ptrw()[i]) Color;
+		new (&p_instance->lightmap_capture_data[i]) Color;
 
 	//this could use some sort of blending..
 	for (List<Instance *>::Element *E = geom->lightmap_captures.front(); E; E = E->next()) {
-		const Vector<RasterizerStorage::LightmapCaptureOctree> *octree = RSG::storage->lightmap_capture_get_octree_ptr(E->get()->base);
+		const std::vector<RasterizerStorage::LightmapCaptureOctree> *octree = RSG::storage->lightmap_capture_get_octree_ptr(E->get()->base);
 		//print_line("octree size: " + itos(octree->size()));
 		if (octree->size() == 0)
 			continue;
@@ -1321,7 +1321,7 @@ void RenderingServerScene::_update_instance_lightmap_captures(Instance *p_instan
 		int cell_subdiv = RSG::storage->lightmap_capture_get_octree_cell_subdiv(E->get()->base);
 		to_cell_xform = to_cell_xform * E->get()->transform.affine_inverse();
 
-		const RasterizerStorage::LightmapCaptureOctree *octree_r = octree->ptr();
+		const RasterizerStorage::LightmapCaptureOctree *octree_r = octree->data();
 
 		Vector3 pos = to_cell_xform.xform(p_instance->transform.origin);
 
@@ -1329,7 +1329,7 @@ void RenderingServerScene::_update_instance_lightmap_captures(Instance *p_instan
 
 			Vector3 dir = to_cell_xform.basis.xform(cone_traces[i]).normalized();
 			Color capture = _light_capture_voxel_cone_trace(octree_r, pos, dir, cone_aperture, cell_subdiv);
-			p_instance->lightmap_capture_data.write[i] += capture;
+			p_instance->lightmap_capture_data[i] += capture;
 		}
 	}
 }
@@ -1359,7 +1359,7 @@ bool RenderingServerScene::_light_instance_update_shadow(Instance *p_instance, c
 
 			if (depth_range_mode == RS::LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED) {
 				//optimize min/max
-				Vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
+				std::vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
 				int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, RS::INSTANCE_GEOMETRY_MASK);
 				Plane base(p_cam_transform.origin, -p_cam_transform.basis.get_axis(2));
 				//check distance max and min
@@ -1547,18 +1547,18 @@ bool RenderingServerScene::_light_instance_update_shadow(Instance *p_instance, c
 
 				//now that we now all ranges, we can proceed to make the light frustum planes, for culling octree
 
-				Vector<Plane> light_frustum_planes;
+				std::vector<Plane> light_frustum_planes;
 				light_frustum_planes.resize(6);
 
 				//right/left
-				light_frustum_planes.write[0] = Plane(x_vec, x_max);
-				light_frustum_planes.write[1] = Plane(-x_vec, -x_min);
+				light_frustum_planes[0] = Plane(x_vec, x_max);
+				light_frustum_planes[1] = Plane(-x_vec, -x_min);
 				//top/bottom
-				light_frustum_planes.write[2] = Plane(y_vec, y_max);
-				light_frustum_planes.write[3] = Plane(-y_vec, -y_min);
+				light_frustum_planes[2] = Plane(y_vec, y_max);
+				light_frustum_planes[3] = Plane(-y_vec, -y_min);
 				//near/far
-				light_frustum_planes.write[4] = Plane(z_vec, z_max + 1e6);
-				light_frustum_planes.write[5] = Plane(-z_vec, -z_min); // z_min is ok, since casters further than far-light plane are not needed
+				light_frustum_planes[4] = Plane(z_vec, z_max + 1e6);
+				light_frustum_planes[5] = Plane(-z_vec, -z_min); // z_min is ok, since casters further than far-light plane are not needed
 
 				int cull_count = p_scenario->octree.cull_convex(light_frustum_planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, RS::INSTANCE_GEOMETRY_MASK);
 
@@ -1617,13 +1617,13 @@ bool RenderingServerScene::_light_instance_update_shadow(Instance *p_instance, c
 					float radius = RSG::storage->light_get_param(p_instance->base, RS::LIGHT_PARAM_RANGE);
 
 					float z = i == 0 ? -1 : 1;
-					Vector<Plane> planes;
+					std::vector<Plane> planes;
 					planes.resize(5);
-					planes.write[0] = light_transform.xform(Plane(Vector3(0, 0, z), radius));
-					planes.write[1] = light_transform.xform(Plane(Vector3(1, 0, z).normalized(), radius));
-					planes.write[2] = light_transform.xform(Plane(Vector3(-1, 0, z).normalized(), radius));
-					planes.write[3] = light_transform.xform(Plane(Vector3(0, 1, z).normalized(), radius));
-					planes.write[4] = light_transform.xform(Plane(Vector3(0, -1, z).normalized(), radius));
+					planes[0] = light_transform.xform(Plane(Vector3(0, 0, z), radius));
+					planes[1] = light_transform.xform(Plane(Vector3(1, 0, z).normalized(), radius));
+					planes[2] = light_transform.xform(Plane(Vector3(-1, 0, z).normalized(), radius));
+					planes[3] = light_transform.xform(Plane(Vector3(0, 1, z).normalized(), radius));
+					planes[4] = light_transform.xform(Plane(Vector3(0, -1, z).normalized(), radius));
 
 					int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, RS::INSTANCE_GEOMETRY_MASK);
 					Plane near_plane(light_transform.origin, light_transform.basis.get_axis(2) * z);
@@ -1678,7 +1678,7 @@ bool RenderingServerScene::_light_instance_update_shadow(Instance *p_instance, c
 
 					Transform xform = light_transform * Transform().looking_at(view_normals[i], view_up[i]);
 
-					Vector<Plane> planes = cm.get_projection_planes(xform);
+					std::vector<Plane> planes = cm.get_projection_planes(xform);
 
 					int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, RS::INSTANCE_GEOMETRY_MASK);
 
@@ -1718,7 +1718,7 @@ bool RenderingServerScene::_light_instance_update_shadow(Instance *p_instance, c
 			CameraMatrix cm;
 			cm.set_perspective(angle * 2.0, 1.0, 0.01, radius);
 
-			Vector<Plane> planes = cm.get_projection_planes(light_transform);
+			std::vector<Plane> planes = cm.get_projection_planes(light_transform);
 			int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, RS::INSTANCE_GEOMETRY_MASK);
 
 			Plane near_plane(light_transform.origin, -light_transform.basis.get_axis(2));
@@ -1898,7 +1898,7 @@ void RenderingServerScene::_prepare_scene(const Transform p_cam_transform, const
 
 	//rasterizer->set_camera(camera->transform, camera_matrix,ortho);
 
-	Vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
+	std::vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
 
 	Plane near_plane(p_cam_transform.origin, -p_cam_transform.basis.get_axis(2).normalized());
 	float z_far = p_cam_projection.get_z_far();
@@ -2021,7 +2021,7 @@ void RenderingServerScene::_prepare_scene(const Transform p_cam_transform, const
 
 					InstanceLightData *light = static_cast<InstanceLightData *>(E->get()->base_data);
 
-					ins->light_instances.write[l++] = light->instance;
+					ins->light_instances[l++] = light->instance;
 				}
 
 				geom->lighting_dirty = false;
@@ -2036,7 +2036,7 @@ void RenderingServerScene::_prepare_scene(const Transform p_cam_transform, const
 
 					InstanceReflectionProbeData *reflection_probe = static_cast<InstanceReflectionProbeData *>(E->get()->base_data);
 
-					ins->reflection_probe_instances.write[l++] = reflection_probe->instance;
+					ins->reflection_probe_instances[l++] = reflection_probe->instance;
 				}
 
 				geom->reflection_dirty = false;
@@ -2051,7 +2051,7 @@ void RenderingServerScene::_prepare_scene(const Transform p_cam_transform, const
 
 					InstanceGIProbeData *gi_probe = static_cast<InstanceGIProbeData *>(E->get()->base_data);
 
-					ins->gi_probe_instances.write[l++] = gi_probe->probe_instance;
+					ins->gi_probe_instances[l++] = gi_probe->probe_instance;
 				}
 
 				geom->gi_probes_dirty = false;
@@ -2402,8 +2402,8 @@ void RenderingServerScene::render_probes() {
 		{
 
 			int light_cache_size = probe->light_cache.size();
-			const InstanceGIProbeData::LightCache *caches = probe->light_cache.ptr();
-			const RID *instance_caches = probe->light_instances.ptr();
+			const InstanceGIProbeData::LightCache *caches = probe->light_cache.data();
+			const RID *instance_caches = probe->light_instances.data();
 
 			int idx = 0; //must count visible lights
 			for (Set<Instance *>::Element *E = probe->lights.front(); E; E = E->next()) {
@@ -2487,8 +2487,8 @@ void RenderingServerScene::render_probes() {
 			probe->light_instances.resize(cache_count);
 
 			if (cache_count) {
-				InstanceGIProbeData::LightCache *caches = probe->light_cache.ptrw();
-				RID *instance_caches = probe->light_instances.ptrw();
+				InstanceGIProbeData::LightCache *caches = probe->light_cache.data();
+				RID *instance_caches = probe->light_instances.data();
 
 				int idx = 0; //must count visible lights
 				for (Set<Instance *>::Element *E = probe->lights.front(); E; E = E->next()) {
@@ -2561,7 +2561,7 @@ void RenderingServerScene::render_probes() {
 
 						InstanceGIProbeData *gi_probe2 = static_cast<InstanceGIProbeData *>(F->get()->base_data);
 
-						ins->gi_probe_instances.write[l++] = gi_probe2->probe_instance;
+						ins->gi_probe_instances[l++] = gi_probe2->probe_instance;
 					}
 
 					geom->gi_probes_dirty = false;
@@ -2607,7 +2607,7 @@ void RenderingServerScene::_update_dirty_instance(Instance *p_instance) {
 			if (new_blend_shape_count != p_instance->blend_values.size()) {
 				p_instance->blend_values.resize(new_blend_shape_count);
 				for (int i = 0; i < new_blend_shape_count; i++) {
-					p_instance->blend_values.write[i] = 0;
+					p_instance->blend_values[i] = 0;
 				}
 			}
 		}
