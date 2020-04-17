@@ -4808,9 +4808,6 @@
     <ClInclude Include="scene\resources\height_map_shape_3d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="scene\resources\navigation_mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="scene\resources\ray_shape_3d.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -4828,6 +4825,9 @@
     </ClInclude>
     <ClInclude Include="scene\resources\world_margin_shape_3d.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\navigation_mesh.h">
+      <Filter>Header Files\scene\resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -9601,9 +9601,6 @@
     <ClCompile Include="scene\resources\height_map_shape_3d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="scene\resources\navigation_mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="scene\resources\ray_shape_3d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -9741,6 +9738,9 @@
     </ClCompile>
     <ClCompile Include="scene\resources\default_theme\default_theme.cpp">
       <Filter>Header Files\scene\resources\default_theme</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\navigation_mesh.cpp">
+      <Filter>Header Files\scene\resources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

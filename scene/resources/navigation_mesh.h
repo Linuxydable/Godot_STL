@@ -39,11 +39,11 @@ class NavigationMesh : public Resource {
 
 	GDCLASS(NavigationMesh, Resource);
 
-	Vector<Vector3> vertices;
+	std::vector<Vector3> vertices;
 	struct Polygon {
-		Vector<int> indices;
+		std::vector<int> indices;
 	};
-	Vector<Polygon> polygons;
+	std::vector<Polygon> polygons;
 	Ref<ArrayMesh> debug_mesh;
 
 	struct _EdgeKey {
@@ -179,12 +179,12 @@ public:
 
 	void create_from_mesh(const Ref<Mesh> &p_mesh);
 
-	void set_vertices(const Vector<Vector3> &p_vertices);
-	Vector<Vector3> get_vertices() const;
+	void set_vertices(const std::vector<Vector3> &p_vertices);
+	std::vector<Vector3> get_vertices() const;
 
-	void add_polygon(const Vector<int> &p_polygon);
+	void add_polygon(const std::vector<int> &p_polygon);
 	int get_polygon_count() const;
-	Vector<int> get_polygon(int p_idx);
+	std::vector<int> get_polygon(int p_idx);
 	void clear_polygons();
 
 	Ref<Mesh> get_debug_mesh();
