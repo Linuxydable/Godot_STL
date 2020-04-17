@@ -315,7 +315,7 @@ void VideoStreamPlaybackWebm::update(float p_delta) {
 
 					if (err == VPXDecoder::NO_ERROR && image.w == webm->getWidth() && image.h == webm->getHeight()) {
 
-						uint8_t *w = frame_data.ptrw();
+						uint8_t *w = frame_data.data();
 						bool converted = false;
 
 						if (image.chromaShiftW == 0 && image.chromaShiftH == 0 && image.cs == VPX_CS_SRGB) {
