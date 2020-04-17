@@ -1275,7 +1275,10 @@ void VisualScript::_set_data(const Dictionary &p_data) {
 					ScriptNetData nd;
 					nd.name = E->key();
 					nd.mode = vsf->get_rpc_mode();
-					if (rpc_functions.find(nd) == -1) {
+
+					auto it_find = std::find(rpc_functions.begin(), rpc_functions.end(), nd);
+
+					if (it_find == rpc_functions.end()) {
 						rpc_functions.push_back(nd);
 					}
 				}
@@ -1286,7 +1289,8 @@ void VisualScript::_set_data(const Dictionary &p_data) {
 	// Visual script doesn't have rset :(
 
 	// Sort so we are 100% that they are always the same.
-	rpc_functions.sort_custom<SortNetData>();
+
+	std::sort(rpc_functions.begin(), rpc_functions.end(), SortNetData);
 }
 
 Dictionary VisualScript::_get_data() const {
@@ -1569,10 +1573,8 @@ void VisualScriptInstance::_dependency_step(VisualScriptNodeInstance *node, int 
 	pass_stack[node->pass_idx] = p_pass;
 
 	if (!node->dependencies.empty()) {
-		for (auto &&dep : node->dependencies) {
-
 		int dc = node->dependencies.size();
-		VisualScriptNodeInstance **deps = node->dependencies.ptrw();
+		VisualScriptNodeInstance **deps = node->dependencies.data();
 
 		for (int i = 0; i < dc; i++) {
 
@@ -1662,9 +1664,12 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 			//run dependencies first
 
 			if (!node->dependencies.empty()) {
-				for (auto &&dep : node->dependencies) {
+				int dc = node->dependencies.size();
+				VisualScriptNodeInstance **deps = node->dependencies.data();
 
+				for (int i = 0; i < dc; i++) {
 					_dependency_step(deps[i], p_pass, pass_stack, input_args, output_args, variant_stack, r_error, error_str, &node);
+
 					if (r_error.error != Callable::CallError::CALL_OK) {
 						error = true;
 						current_node_id = node->id;
