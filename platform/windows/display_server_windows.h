@@ -275,7 +275,7 @@ class DisplayServerWindows : public DisplayServer {
 
 	HCURSOR cursors[CURSOR_MAX] = { nullptr };
 	CursorShape cursor_shape;
-	Map<CursorShape, Vector<Variant>> cursors_cache;
+	Map<CursorShape, std::vector<Variant>> cursors_cache;
 
 	void _drag_event(WindowID p_window, float p_x, float p_y, int idx);
 	void _touch_event(WindowID p_window, bool p_pressed, float p_x, float p_y, int idx);
@@ -322,7 +322,7 @@ public:
 	virtual void screen_set_keep_on(bool p_enable); //disable screensaver
 	virtual bool screen_is_kept_on() const;
 
-	virtual Vector<DisplayServer::WindowID> get_window_list() const;
+	virtual std::vector<DisplayServer::WindowID> get_window_list() const;
 
 	virtual WindowID create_sub_window(WindowMode p_mode, uint32_t p_flags, const Rect2i &p_rect = Rect2i());
 	virtual void delete_sub_window(WindowID p_window);
@@ -408,7 +408,7 @@ public:
 	virtual void set_context(Context p_context);
 
 	static DisplayServer *create_func(const String &p_rendering_driver, WindowMode p_mode, uint32_t p_flags, const Vector2i &p_resolution, Error &r_error);
-	static Vector<String> get_rendering_drivers_func();
+	static std::vector<String> get_rendering_drivers_func();
 	static void register_windows_driver();
 
 	DisplayServerWindows(const String &p_rendering_driver, WindowMode p_mode, uint32_t p_flags, const Vector2i &p_resolution, Error &r_error);
