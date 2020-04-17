@@ -147,9 +147,9 @@ public:
 			}
 			return (right_to_screen ? 0 : 1) < (left_to_screen ? 0 : 1);
 		}
-	};
+	} ViewportSort ;
 
-	Vector<Viewport *> active_viewports;
+	std::vector<Viewport *> active_viewports;
 
 private:
 	void _draw_3d(Viewport *p_viewport, ARVRInterface::Eyes p_eye);

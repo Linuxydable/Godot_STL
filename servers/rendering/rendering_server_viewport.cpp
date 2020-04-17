@@ -30,6 +30,8 @@
 
 #include "rendering_server_viewport.h"
 
+#include <algorithm>
+
 #include "core/project_settings.h"
 #include "rendering_server_canvas.h"
 #include "rendering_server_globals.h"
@@ -310,9 +312,9 @@ void RenderingServerViewport::draw_viewports() {
 	}
 
 	//sort viewports
-	active_viewports.sort_custom<ViewportSort>();
+	std::sort(active_viewports.begin(), active_viewports.end(), ViewportSort);
 
-	Map<DisplayServer::WindowID, Vector<Rasterizer::BlitToScreen>> blit_to_screen_list;
+	Map<DisplayServer::WindowID, std::vector<Rasterizer::BlitToScreen>> blit_to_screen_list;
 	//draw viewports
 	RENDER_TIMESTAMP(">Render Viewports");
 
@@ -430,7 +432,7 @@ void RenderingServerViewport::draw_viewports() {
 				}
 
 				if (!blit_to_screen_list.has(vp->viewport_to_screen)) {
-					blit_to_screen_list[vp->viewport_to_screen] = Vector<Rasterizer::BlitToScreen>();
+					blit_to_screen_list[vp->viewport_to_screen] = std::vector<Rasterizer::BlitToScreen>();
 				}
 
 				blit_to_screen_list[vp->viewport_to_screen].push_back(blit);
@@ -449,8 +451,8 @@ void RenderingServerViewport::draw_viewports() {
 	//this needs to be called to make screen swapping more efficient
 	RSG::rasterizer->prepare_for_blitting_render_targets();
 
-	for (Map<int, Vector<Rasterizer::BlitToScreen>>::Element *E = blit_to_screen_list.front(); E; E = E->next()) {
-		RSG::rasterizer->blit_render_targets_to_screen(E->key(), E->get().ptr(), E->get().size());
+	for (Map<int, std::vector<Rasterizer::BlitToScreen>>::Element *E = blit_to_screen_list.front(); E; E = E->next()) {
+		RSG::rasterizer->blit_render_targets_to_screen(E->key(), E->get().data(), E->get().size());
 	}
 }
 
@@ -501,11 +503,16 @@ void RenderingServerViewport::viewport_set_active(RID p_viewport, bool p_active)
 	Viewport *viewport = viewport_owner.getornull(p_viewport);
 	ERR_FAIL_COND(!viewport);
 
+	auto it_find = std::find(active_viewports.begin(), active_viewports.end(), viewport);
+
 	if (p_active) {
-		ERR_FAIL_COND(active_viewports.find(viewport) != -1); //already active
+		ERR_FAIL_COND(it_find != active_viewports.end()); //already active
+
 		active_viewports.push_back(viewport);
 	} else {
-		active_viewports.erase(viewport);
+		if (it_find != active_viewports.end()) {
+			active_viewports.erase(it_find);
+		}
 	}
 }
 
@@ -761,7 +768,12 @@ bool RenderingServerViewport::free(RID p_rid) {
 		}
 
 		viewport_set_scenario(p_rid, RID());
-		active_viewports.erase(viewport);
+
+		auto it_find = std::find(active_viewports.begin(), active_viewports.end(), viewport);
+
+		if (it_find != active_viewports.end()) {
+			active_viewports.erase(it_find);
+		}
 
 		viewport_owner.free(p_rid);
 		memdelete(viewport);
