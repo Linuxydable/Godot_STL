@@ -549,12 +549,6 @@
     <Filter Include="Source Files\core">
       <UniqueIdentifier>{FE7245F9-71E6-7229-9CD4-DBE8F7F3D3FF}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\core\bind">
-      <UniqueIdentifier>{E8FEA1FA-A6FF-8A5B-F28E-7BA9466978E5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\core\crypto">
-      <UniqueIdentifier>{92EA2473-5DD3-7E66-1159-1F3C9B3D016F}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\core\io">
       <UniqueIdentifier>{93295F8D-9CDE-943B-F192-E3B9F49436E5}</UniqueIdentifier>
     </Filter>
@@ -4846,18 +4840,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="core\bind\core_bind.cpp">
-      <Filter>Source Files\core\bind</Filter>
-    </ClCompile>
-    <ClCompile Include="core\crypto\crypto.cpp">
-      <Filter>Source Files\core\crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="core\crypto\crypto_core.cpp">
-      <Filter>Source Files\core\crypto</Filter>
-    </ClCompile>
-    <ClCompile Include="core\crypto\hashing_context.cpp">
-      <Filter>Source Files\core\crypto</Filter>
-    </ClCompile>
     <ClCompile Include="core\io\compression.cpp">
       <Filter>Source Files\core\io</Filter>
     </ClCompile>
@@ -9756,6 +9738,18 @@
     </ClCompile>
     <ClCompile Include="scene\2d\y_sort.cpp">
       <Filter>Header Files\scene\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="core\bind\core_bind.cpp">
+      <Filter>Header Files\core\bind</Filter>
+    </ClCompile>
+    <ClCompile Include="core\crypto\crypto.cpp">
+      <Filter>Header Files\core\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="core\crypto\crypto_core.cpp">
+      <Filter>Header Files\core\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="core\crypto\hashing_context.cpp">
+      <Filter>Header Files\core\crypto</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
