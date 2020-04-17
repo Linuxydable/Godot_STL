@@ -47,7 +47,7 @@ void LightClusterBuilder::bake_cluster() {
 
 	float slice_depth = (z_near - z_far) / depth;
 
-	uint8_t *cluster_dataw = cluster_data.ptrw();
+	uint8_t *cluster_dataw = cluster_data.data();
 	Cell *cluster_data_ptr = (Cell *)cluster_dataw;
 	//clear the cluster
 	zeromem(cluster_data_ptr, (width * height * depth * sizeof(Cell)));
@@ -160,7 +160,7 @@ void LightClusterBuilder::bake_cluster() {
 	//print_line("offset: " + itos(offset));
 	/* Step 3, Place item lists */
 
-	uint32_t *ids_ptr = ids.ptrw();
+	uint32_t *ids_ptr = ids.data();
 
 	for (uint32_t i = 0; i < sort_id_count; i++) {
 		const SortID &id = sort_ids[i];
