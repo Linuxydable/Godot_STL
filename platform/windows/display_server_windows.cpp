@@ -465,11 +465,11 @@ bool DisplayServerWindows::screen_is_kept_on() const {
 	return false;
 }
 
-Vector<DisplayServer::WindowID> DisplayServerWindows::get_window_list() const {
+std::vector<DisplayServer::WindowID> DisplayServerWindows::get_window_list() const {
 
 	_THREAD_SAFE_METHOD_
 
-	Vector<DisplayServer::WindowID> ret;
+	std::vector<DisplayServer::WindowID> ret;
 	for (Map<WindowID, WindowData>::Element *E = windows.front(); E; E = E->next()) {
 		ret.push_back(E->key());
 	}
@@ -1292,7 +1292,7 @@ void DisplayServerWindows::cursor_set_custom_image(const RES &p_cursor, CursorSh
 
 	if (p_cursor.is_valid()) {
 
-		Map<CursorShape, Vector<Variant>>::Element *cursor_c = cursors_cache.find(p_shape);
+		Map<CursorShape, std::vector<Variant>>::Element *cursor_c = cursors_cache.find(p_shape);
 
 		if (cursor_c) {
 			if (cursor_c->get()[0] == p_cursor && cursor_c->get()[1] == p_hotspot) {
@@ -1383,7 +1383,7 @@ void DisplayServerWindows::cursor_set_custom_image(const RES &p_cursor, CursorSh
 
 		cursors[p_shape] = CreateIconIndirect(&iconinfo);
 
-		Vector<Variant> params;
+		std::vector<Variant> params;
 		params.push_back(p_cursor);
 		params.push_back(p_hotspot);
 		cursors_cache.insert(p_shape, params);
@@ -1592,22 +1592,22 @@ void DisplayServerWindows::set_native_icon(const String &p_filename) {
 
 	// Read the big icon
 	DWORD bytecount_big = icon_dir->idEntries[big_icon_index].dwBytesInRes;
-	Vector<uint8_t> data_big;
+	std::vector<uint8_t> data_big;
 	data_big.resize(bytecount_big);
 	pos = icon_dir->idEntries[big_icon_index].dwImageOffset;
 	f->seek(pos);
-	f->get_buffer((uint8_t *)&data_big.write[0], bytecount_big);
-	HICON icon_big = CreateIconFromResource((PBYTE)&data_big.write[0], bytecount_big, TRUE, 0x00030000);
+	f->get_buffer((uint8_t *)&data_big[0], bytecount_big);
+	HICON icon_big = CreateIconFromResource((PBYTE)&data_big[0], bytecount_big, TRUE, 0x00030000);
 	ERR_FAIL_COND_MSG(!icon_big, "Could not create " + itos(big_icon_width) + "x" + itos(big_icon_width) + " @" + itos(big_icon_cc) + " icon, error: " + format_error_message(GetLastError()) + ".");
 
 	// Read the small icon
 	DWORD bytecount_small = icon_dir->idEntries[small_icon_index].dwBytesInRes;
-	Vector<uint8_t> data_small;
+	std::vector<uint8_t> data_small;
 	data_small.resize(bytecount_small);
 	pos = icon_dir->idEntries[small_icon_index].dwImageOffset;
 	f->seek(pos);
-	f->get_buffer((uint8_t *)&data_small.write[0], bytecount_small);
-	HICON icon_small = CreateIconFromResource((PBYTE)&data_small.write[0], bytecount_small, TRUE, 0x00030000);
+	f->get_buffer((uint8_t *)&data_small[0], bytecount_small);
+	HICON icon_small = CreateIconFromResource((PBYTE)&data_small[0], bytecount_small, TRUE, 0x00030000);
 	ERR_FAIL_COND_MSG(!icon_small, "Could not create 16x16 @" + itos(small_icon_cc) + " icon, error: " + format_error_message(GetLastError()) + ".");
 
 	// Online tradition says to be sure last error is cleared and set the small icon first
@@ -1638,9 +1638,9 @@ void DisplayServerWindows::set_icon(const Ref<Image> &p_icon) {
 
 	/* Create temporary bitmap buffer */
 	int icon_len = 40 + h * w * 4;
-	Vector<BYTE> v;
+	std::vector<BYTE> v;
 	v.resize(icon_len);
-	BYTE *icon_bmp = v.ptrw();
+	BYTE *icon_bmp = v.data();
 
 	encode_uint32(40, &icon_bmp[0]);
 	encode_uint32(w, &icon_bmp[4]);
@@ -1655,7 +1655,7 @@ void DisplayServerWindows::set_icon(const Ref<Image> &p_icon) {
 	encode_uint32(0, &icon_bmp[36]);
 
 	uint8_t *wr = &icon_bmp[40];
-	const uint8_t *r = icon->get_data().ptr();
+	const uint8_t *r = icon->get_data().data();
 
 	for (int i = 0; i < h; i++) {
 
@@ -2583,7 +2583,7 @@ LRESULT DisplayServerWindows::WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 
 			int fcount = DragQueryFileW(hDropInfo, 0xFFFFFFFF, nullptr, 0);
 
-			Vector<String> files;
+			std::vector<String> files;
 
 			for (int i = 0; i < fcount; i++) {
 
@@ -2948,8 +2948,8 @@ DisplayServerWindows::DisplayServerWindows(const String &p_rendering_driver, Win
 	InputFilter::get_singleton()->set_event_dispatch_function(_dispatch_input_events);
 }
 
-Vector<String> DisplayServerWindows::get_rendering_drivers_func() {
-	Vector<String> drivers;
+std::vector<String> DisplayServerWindows::get_rendering_drivers_func() {
+	std::vector<String> drivers;
 
 #ifdef VULKAN_ENABLED
 	drivers.push_back("vulkan");

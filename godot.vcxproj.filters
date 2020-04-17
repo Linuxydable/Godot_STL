@@ -801,12 +801,6 @@
     <Filter Include="Source Files\platform\uwp\export">
       <UniqueIdentifier>{5404572C-15FD-E652-BDDA-4C632985A9F9}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\platform\windows">
-      <UniqueIdentifier>{03574B3B-CCE3-8660-5DBF-010B92BE4AB4}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\platform\windows\export">
-      <UniqueIdentifier>{9CB30B24-EDCB-8D50-40EE-7CD908C3352E}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\platform\x11">
       <UniqueIdentifier>{63359B4B-0DFB-540A-4DB4-40F202547D8B}</UniqueIdentifier>
     </Filter>
@@ -4841,6 +4835,39 @@
     <ClInclude Include="editor\doc\doc_data_class_path.gen.h">
       <Filter>Source Files\editor\doc</Filter>
     </ClInclude>
+    <ClInclude Include="platform\windows\context_gl_windows.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\crash_handler_windows.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\display_server_windows.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\joypad_windows.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\key_mapping_windows.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\lang_table.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\logo.gen.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\os_windows.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\platform_config.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\vulkan_context_win.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
+    <ClInclude Include="platform\windows\windows_terminal_logger.h">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\io\compression.cpp">
@@ -6249,42 +6276,6 @@
     </ClCompile>
     <ClCompile Include="platform\uwp\export\export.cpp">
       <Filter>Source Files\platform\uwp\export</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\export\export.cpp">
-      <Filter>Source Files\platform\windows\export</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\camera_win.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\context_gl_windows.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\crash_handler_windows.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\godot.natvis">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\godot_res.rc">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\godot_windows.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\joypad_windows.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\key_mapping_windows.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\os_windows.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\power_windows.cpp">
-      <Filter>Source Files\platform\windows</Filter>
-    </ClCompile>
-    <ClCompile Include="platform\windows\windows_terminal_logger.cpp">
-      <Filter>Source Files\platform\windows</Filter>
     </ClCompile>
     <ClCompile Include="platform\x11\export\export.cpp">
       <Filter>Source Files\platform\x11\export</Filter>
@@ -9753,6 +9744,36 @@
     </ClCompile>
     <ClCompile Include="editor\doc\doc_dump.cpp">
       <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\context_gl_windows.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\crash_handler_windows.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\display_server_windows.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\godot_windows.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\joypad_windows.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\key_mapping_windows.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\os_windows.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\vulkan_context_win.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\windows_terminal_logger.cpp">
+      <Filter>Header Files\platform\windows</Filter>
+    </ClCompile>
+    <ClCompile Include="platform\windows\export\export.cpp">
+      <Filter>Header Files\platform\windows\export</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
