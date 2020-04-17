@@ -38,9 +38,9 @@
 #include <webp/decode.h>
 #include <webp/encode.h>
 
-static Vector<uint8_t> _webp_lossy_pack(const Ref<Image> &p_image, float p_quality) {
+static std::vector<uint8_t> _webp_lossy_pack(const Ref<Image> &p_image, float p_quality) {
 
-	ERR_FAIL_COND_V(p_image.is_null() || p_image->empty(), Vector<uint8_t>());
+	ERR_FAIL_COND_V(p_image.is_null() || p_image->empty(), std::vector<uint8_t>());
 
 	Ref<Image> img = p_image->duplicate();
 	if (img->detect_alpha())
@@ -49,8 +49,8 @@ static Vector<uint8_t> _webp_lossy_pack(const Ref<Image> &p_image, float p_quali
 		img->convert(Image::FORMAT_RGB8);
 
 	Size2 s(img->get_width(), img->get_height());
-	Vector<uint8_t> data = img->get_data();
-	const uint8_t *r = data.ptr();
+	std::vector<uint8_t> data = img->get_data();
+	const uint8_t *r = data.data();
 
 	uint8_t *dst_buff = nullptr;
 	size_t dst_size = 0;
@@ -61,10 +61,10 @@ static Vector<uint8_t> _webp_lossy_pack(const Ref<Image> &p_image, float p_quali
 		dst_size = WebPEncodeRGBA(r, s.width, s.height, 4 * s.width, CLAMP(p_quality * 100.0, 0, 100.0), &dst_buff);
 	}
 
-	ERR_FAIL_COND_V(dst_size == 0, Vector<uint8_t>());
-	Vector<uint8_t> dst;
+	ERR_FAIL_COND_V(dst_size == 0, std::vector<uint8_t>());
+	std::vector<uint8_t> dst;
 	dst.resize(4 + dst_size);
-	uint8_t *w = dst.ptrw();
+	uint8_t *w = dst.data();
 	w[0] = 'W';
 	w[1] = 'E';
 	w[2] = 'B';
@@ -75,11 +75,11 @@ static Vector<uint8_t> _webp_lossy_pack(const Ref<Image> &p_image, float p_quali
 	return dst;
 }
 
-static Ref<Image> _webp_lossy_unpack(const Vector<uint8_t> &p_buffer) {
+static Ref<Image> _webp_lossy_unpack(const std::vector<uint8_t> &p_buffer) {
 
 	int size = p_buffer.size() - 4;
 	ERR_FAIL_COND_V(size <= 0, Ref<Image>());
-	const uint8_t *r = p_buffer.ptr();
+	const uint8_t *r = p_buffer.data();
 
 	ERR_FAIL_COND_V(r[0] != 'W' || r[1] != 'E' || r[2] != 'B' || r[3] != 'P', Ref<Image>());
 	WebPBitstreamFeatures features;
@@ -93,11 +93,11 @@ static Ref<Image> _webp_lossy_unpack(const Vector<uint8_t> &p_buffer) {
 	print_line("alpha: "+itos(features.has_alpha));
 	*/
 
-	Vector<uint8_t> dst_image;
+	std::vector<uint8_t> dst_image;
 	int datasize = features.width * features.height * (features.has_alpha ? 4 : 3);
 	dst_image.resize(datasize);
 
-	uint8_t *dst_w = dst_image.ptrw();
+	uint8_t *dst_w = dst_image.data();
 
 	bool errdec = false;
 	if (features.has_alpha) {
@@ -121,10 +121,10 @@ Error webp_load_image_from_buffer(Image *p_image, const uint8_t *p_buffer, int p
 		ERR_FAIL_V(ERR_FILE_CORRUPT);
 	}
 
-	Vector<uint8_t> dst_image;
+	std::vector<uint8_t> dst_image;
 	int datasize = features.width * features.height * (features.has_alpha ? 4 : 3);
 	dst_image.resize(datasize);
-	uint8_t *dst_w = dst_image.ptrw();
+	uint8_t *dst_w = dst_image.data();
 
 	bool errdec = false;
 	if (features.has_alpha) {
@@ -151,12 +151,12 @@ static Ref<Image> _webp_mem_loader_func(const uint8_t *p_png, int p_size) {
 
 Error ImageLoaderWEBP::load_image(Ref<Image> p_image, FileAccess *f, bool p_force_linear, float p_scale) {
 
-	Vector<uint8_t> src_image;
+	std::vector<uint8_t> src_image;
 	int src_image_len = f->get_len();
 	ERR_FAIL_COND_V(src_image_len == 0, ERR_FILE_CORRUPT);
 	src_image.resize(src_image_len);
 
-	uint8_t *w = src_image.ptrw();
+	uint8_t *w = src_image.data();
 
 	f->get_buffer(&w[0], src_image_len);
 
