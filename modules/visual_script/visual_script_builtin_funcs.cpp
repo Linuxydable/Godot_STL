@@ -1242,7 +1242,7 @@ void VisualScriptBuiltinFunc::exec_func(BuiltinFunc p_func, const Variant **p_in
 
 			barr.resize(len);
 			{
-				uint8_t *w = barr.ptrw();
+				uint8_t *w = barr.data();
 				encode_variant(*p_inputs[0], w, len, full_objects);
 			}
 			*r_return = barr;
@@ -1266,7 +1266,7 @@ void VisualScriptBuiltinFunc::exec_func(BuiltinFunc p_func, const Variant **p_in
 			bool allow_objects = *p_inputs[1];
 			Variant ret;
 			{
-				const uint8_t *r = varr.ptr();
+				const uint8_t *r = varr.data();
 				Error err = decode_variant(ret, r, varr.size(), nullptr, allow_objects);
 				if (err != OK) {
 					r_error_str = RTR("Not enough bytes for decoding bytes, or invalid format.");
