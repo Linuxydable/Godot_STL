@@ -171,9 +171,9 @@ class RasterizerCanvasRD : public RasterizerCanvas {
 		String path;
 
 		Map<StringName, ShaderLanguage::ShaderNode::Uniform> uniforms;
-		Vector<ShaderCompilerRD::GeneratedCode::Texture> texture_uniforms;
+		std::vector<ShaderCompilerRD::GeneratedCode::Texture> texture_uniforms;
 
-		Vector<uint32_t> ubo_offsets;
+		std::vector<uint32_t> ubo_offsets;
 		uint32_t ubo_size;
 
 		String code;
@@ -203,8 +203,8 @@ class RasterizerCanvasRD : public RasterizerCanvas {
 		ShaderData *shader_data;
 		RID uniform_buffer;
 		RID uniform_set;
-		Vector<RID> texture_cache;
-		Vector<uint8_t> ubo_data;
+		std::vector<RID> texture_cache;
+		std::vector<uint8_t> ubo_data;
 
 		virtual void set_render_priority(int p_priority) {}
 		virtual void set_next_pass(RID p_pass) {}
@@ -473,7 +473,7 @@ public:
 	TextureBindingID request_texture_binding(RID p_texture, RID p_normalmap, RID p_specular, RS::CanvasItemTextureFilter p_filter, RS::CanvasItemTextureRepeat p_repeat, RID p_multimesh);
 	void free_texture_binding(TextureBindingID p_binding);
 
-	PolygonID request_polygon(const Vector<int> &p_indices, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), const Vector<int> &p_bones = Vector<int>(), const Vector<float> &p_weights = Vector<float>());
+	PolygonID request_polygon(const std::vector<int> &p_indices, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs = std::vector<Point2>(), const std::vector<int> &p_bones = std::vector<int>(), const std::vector<float> &p_weights = std::vector<float>());
 	void free_polygon(PolygonID p_polygon);
 
 	RID light_create();
@@ -482,7 +482,7 @@ public:
 	void light_update_shadow(RID p_rid, const Transform2D &p_light_xform, int p_light_mask, float p_near, float p_far, LightOccluderInstance *p_occluders);
 
 	RID occluder_polygon_create();
-	void occluder_polygon_set_shape_as_lines(RID p_occluder, const Vector<Vector2> &p_lines);
+	void occluder_polygon_set_shape_as_lines(RID p_occluder, const std::vector<Vector2> &p_lines);
 	void occluder_polygon_set_cull_mode(RID p_occluder, RS::CanvasOccluderPolygonCullMode p_mode);
 
 	void canvas_render_items(RID p_to_render_target, Item *p_item_list, const Color &p_modulate, Light *p_light_list, const Transform2D &p_canvas_transform);
