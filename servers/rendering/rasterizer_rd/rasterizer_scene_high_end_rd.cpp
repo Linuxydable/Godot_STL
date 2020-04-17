@@ -387,7 +387,7 @@ bool RasterizerSceneHighEndRD::ShaderData::casts_shadows() const {
 Variant RasterizerSceneHighEndRD::ShaderData::get_default_parameter(const StringName &p_parameter) const {
 	if (uniforms.has(p_parameter)) {
 		ShaderLanguage::ShaderNode::Uniform uniform = uniforms[p_parameter];
-		Vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
+		std::vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
 		return ShaderLanguage::constant_value_to_variant(default_value, uniform.type, uniform.hint);
 	}
 	return Variant();
@@ -434,7 +434,7 @@ void RasterizerSceneHighEndRD::MaterialData::update_parameters(const Map<StringN
 		ubo_data.resize(shader_data->ubo_size);
 		if (ubo_data.size()) {
 			uniform_buffer = RD::get_singleton()->uniform_buffer_create(ubo_data.size());
-			memset(ubo_data.ptrw(), 0, ubo_data.size()); //clear
+			memset(ubo_data.data(), 0, ubo_data.size()); //clear
 		}
 
 		//clear previous uniform set
@@ -447,8 +447,8 @@ void RasterizerSceneHighEndRD::MaterialData::update_parameters(const Map<StringN
 	//check whether buffer changed
 	if (p_uniform_dirty && ubo_data.size()) {
 
-		update_uniform_buffer(shader_data->uniforms, shader_data->ubo_offsets.ptr(), p_parameters, ubo_data.ptrw(), ubo_data.size(), false);
-		RD::get_singleton()->buffer_update(uniform_buffer, 0, ubo_data.size(), ubo_data.ptrw());
+		update_uniform_buffer(shader_data->uniforms, shader_data->ubo_offsets.data(), p_parameters, ubo_data.data(), ubo_data.size(), false);
+		RD::get_singleton()->buffer_update(uniform_buffer, 0, ubo_data.size(), ubo_data.data());
 	}
 
 	uint32_t tex_uniform_count = shader_data->texture_uniforms.size();
@@ -466,7 +466,7 @@ void RasterizerSceneHighEndRD::MaterialData::update_parameters(const Map<StringN
 
 	if (p_textures_dirty && tex_uniform_count) {
 
-		update_textures(p_parameters, shader_data->default_texture_params, shader_data->texture_uniforms, texture_cache.ptrw(), true);
+		update_textures(p_parameters, shader_data->default_texture_params, shader_data->texture_uniforms, texture_cache.data(), true);
 	}
 
 	if (shader_data->ubo_size == 0 && shader_data->texture_uniforms.size() == 0) {
@@ -479,7 +479,7 @@ void RasterizerSceneHighEndRD::MaterialData::update_parameters(const Map<StringN
 		return;
 	}
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 
 	{
 
@@ -491,7 +491,7 @@ void RasterizerSceneHighEndRD::MaterialData::update_parameters(const Map<StringN
 			uniforms.push_back(u);
 		}
 
-		const RID *textures = texture_cache.ptrw();
+		const RID *textures = texture_cache.data();
 		for (uint32_t i = 0; i < tex_uniform_count; i++) {
 			RD::Uniform u;
 			u.type = RD::UNIFORM_TYPE_TEXTURE;
@@ -538,7 +538,7 @@ void RasterizerSceneHighEndRD::RenderBufferDataHighEnd::ensure_specular() {
 		specular = RD::get_singleton()->texture_create(tf, RD::TextureView());
 
 		{
-			Vector<RID> fb;
+			std::vector<RID> fb;
 			fb.push_back(color);
 			fb.push_back(specular);
 			fb.push_back(depth);
@@ -546,7 +546,7 @@ void RasterizerSceneHighEndRD::RenderBufferDataHighEnd::ensure_specular() {
 			color_specular_fb = RD::get_singleton()->framebuffer_create(fb);
 		}
 		{
-			Vector<RID> fb;
+			std::vector<RID> fb;
 			fb.push_back(specular);
 
 			specular_only_fb = RD::get_singleton()->framebuffer_create(fb);
@@ -588,14 +588,14 @@ void RasterizerSceneHighEndRD::RenderBufferDataHighEnd::configure(RID p_color_bu
 	depth = p_depth_buffer;
 
 	{
-		Vector<RID> fb;
+		std::vector<RID> fb;
 		fb.push_back(p_color_buffer);
 		fb.push_back(depth);
 
 		color_fb = RD::get_singleton()->framebuffer_create(fb);
 	}
 	{
-		Vector<RID> fb;
+		std::vector<RID> fb;
 		fb.push_back(depth);
 
 		depth_fb = RD::get_singleton()->framebuffer_create(fb);
@@ -614,7 +614,7 @@ void RasterizerSceneHighEndRD::_allocate_normal_texture(RenderBufferDataHighEnd 
 	tf.usage_bits = RD::TEXTURE_USAGE_SAMPLING_BIT | RD::TEXTURE_USAGE_COLOR_ATTACHMENT_BIT;
 
 	rb->normal_buffer = RD::get_singleton()->texture_create(tf, RD::TextureView());
-	Vector<RID> fb;
+	std::vector<RID> fb;
 	fb.push_back(rb->depth);
 	fb.push_back(rb->normal_buffer);
 	rb->depth_normal_fb = RD::get_singleton()->framebuffer_create(fb);
@@ -637,7 +637,7 @@ void RasterizerSceneHighEndRD::_allocate_roughness_texture(RenderBufferDataHighE
 	tf.usage_bits = RD::TEXTURE_USAGE_SAMPLING_BIT | RD::TEXTURE_USAGE_STORAGE_BIT | RD::TEXTURE_USAGE_COLOR_ATTACHMENT_BIT;
 
 	rb->roughness_buffer = RD::get_singleton()->texture_create(tf, RD::TextureView());
-	Vector<RID> fb;
+	std::vector<RID> fb;
 	fb.push_back(rb->depth);
 	fb.push_back(rb->normal_buffer);
 	fb.push_back(rb->roughness_buffer);
@@ -1220,7 +1220,7 @@ void RasterizerSceneHighEndRD::_fill_render_list(InstanceBase **p_cull_result, i
 					continue; //nothing to do
 				}
 
-				const RID *inst_materials = inst->materials.ptr();
+				const RID *inst_materials = inst->materials.data();
 
 				for (uint32_t j = 0; j < surface_count; j++) {
 
@@ -1713,7 +1713,7 @@ void RasterizerSceneHighEndRD::_render_scene(RID p_render_buffer, const Transfor
 	RID alpha_framebuffer;
 
 	PassMode depth_pass_mode = PASS_MODE_DEPTH;
-	Vector<Color> depth_pass_clear;
+	std::vector<Color> depth_pass_clear;
 	bool using_separate_specular = false;
 	bool using_ssr = false;
 
@@ -1911,7 +1911,7 @@ void RasterizerSceneHighEndRD::_render_scene(RID p_render_buffer, const Transfor
 		bool will_continue_depth = (can_continue_depth || draw_sky || debug_giprobes);
 
 		//regular forward for now
-		Vector<Color> c;
+		std::vector<Color> c;
 		if (using_separate_specular) {
 			Color cc = clear_color.to_linear();
 			cc.a = 0; //subsurf scatter must be 0
@@ -2127,7 +2127,7 @@ void RasterizerSceneHighEndRD::_render_material(const Transform &p_cam_transform
 
 	{
 		//regular forward for now
-		Vector<Color> clear;
+		std::vector<Color> clear;
 		clear.push_back(Color(0, 0, 0, 0));
 		clear.push_back(Color(0, 0, 0, 0));
 		clear.push_back(Color(0, 0, 0, 0));
@@ -2155,14 +2155,14 @@ void RasterizerSceneHighEndRD::_update_render_base_uniform_set() {
 			RD::get_singleton()->free(render_base_uniform_set);
 		}
 
-		Vector<RD::Uniform> uniforms;
+		std::vector<RD::Uniform> uniforms;
 
 		{
 			RD::Uniform u;
 			u.type = RD::UNIFORM_TYPE_SAMPLER;
 			u.binding = 1;
 			u.ids.resize(12);
-			RID *ids_ptr = u.ids.ptrw();
+			RID *ids_ptr = u.ids.data();
 			ids_ptr[0] = storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_NEAREST, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);
 			ids_ptr[1] = storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_LINEAR, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);
 			ids_ptr[2] = storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_NEAREST_WITH_MIPMAPS, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);
@@ -2248,19 +2248,19 @@ void RasterizerSceneHighEndRD::_update_render_base_uniform_set() {
 				if (gi_probe_is_anisotropic()) {
 					if (probe.is_null()) {
 						RID empty_tex = storage->texture_rd_get_default(RasterizerStorageRD::DEFAULT_RD_TEXTURE_3D_WHITE);
-						u.ids.write[i * 3 + 0] = empty_tex;
-						u.ids.write[i * 3 + 1] = empty_tex;
-						u.ids.write[i * 3 + 2] = empty_tex;
+						u.ids[i * 3 + 0] = empty_tex;
+						u.ids[i * 3 + 1] = empty_tex;
+						u.ids[i * 3 + 2] = empty_tex;
 					} else {
-						u.ids.write[i * 3 + 0] = gi_probe_instance_get_texture(probe);
-						u.ids.write[i * 3 + 1] = gi_probe_instance_get_aniso_texture(probe, 0);
-						u.ids.write[i * 3 + 2] = gi_probe_instance_get_aniso_texture(probe, 1);
+						u.ids[i * 3 + 0] = gi_probe_instance_get_texture(probe);
+						u.ids[i * 3 + 1] = gi_probe_instance_get_aniso_texture(probe, 0);
+						u.ids[i * 3 + 2] = gi_probe_instance_get_aniso_texture(probe, 1);
 					}
 				} else {
 					if (probe.is_null()) {
-						u.ids.write[i] = storage->texture_rd_get_default(RasterizerStorageRD::DEFAULT_RD_TEXTURE_3D_WHITE);
+						u.ids[i] = storage->texture_rd_get_default(RasterizerStorageRD::DEFAULT_RD_TEXTURE_3D_WHITE);
 					} else {
-						u.ids.write[i] = gi_probe_instance_get_texture(probe);
+						u.ids[i] = gi_probe_instance_get_texture(probe);
 					}
 				}
 			}
@@ -2307,7 +2307,7 @@ void RasterizerSceneHighEndRD::_setup_view_dependant_uniform_set(RID p_shadow_at
 
 	//default render buffer and scene state uniform set
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 
 	{
 
@@ -2374,7 +2374,7 @@ void RasterizerSceneHighEndRD::_update_render_buffers_uniform_set(RID p_render_b
 
 	if (rb->uniform_set.is_null() || !RD::get_singleton()->uniform_set_is_valid(rb->uniform_set)) {
 
-		Vector<RD::Uniform> uniforms;
+		std::vector<RD::Uniform> uniforms;
 		{
 			RD::Uniform u;
 			u.binding = 0;
@@ -2506,7 +2506,7 @@ RasterizerSceneHighEndRD::RasterizerSceneHighEndRD(RasterizerStorageRD *p_storag
 			defines += "\n#define MAX_GI_PROBES " + itos(scene_state.max_gi_probes) + "\n";
 		}
 
-		Vector<String> shader_versions;
+		std::vector<String> shader_versions;
 		shader_versions.push_back("\n#define MODE_RENDER_DEPTH\n");
 		shader_versions.push_back("\n#define MODE_RENDER_DEPTH\n#define MODE_DUAL_PARABOLOID\n");
 		shader_versions.push_back("\n#define MODE_RENDER_DEPTH\n#define MODE_RENDER_NORMAL\n");
@@ -2703,7 +2703,7 @@ RasterizerSceneHighEndRD::RasterizerSceneHighEndRD(RasterizerStorageRD *p_storag
 
 	{
 		default_vec4_xform_buffer = RD::get_singleton()->storage_buffer_create(256);
-		Vector<RD::Uniform> uniforms;
+		std::vector<RD::Uniform> uniforms;
 		RD::Uniform u;
 		u.type = RD::UNIFORM_TYPE_STORAGE_BUFFER;
 		u.ids.push_back(default_vec4_xform_buffer);
@@ -2723,7 +2723,7 @@ RasterizerSceneHighEndRD::RasterizerSceneHighEndRD(RasterizerStorageRD *p_storag
 	}
 
 	{
-		Vector<RD::Uniform> uniforms;
+		std::vector<RD::Uniform> uniforms;
 
 		RD::Uniform u;
 		u.binding = 0;
@@ -2736,7 +2736,7 @@ RasterizerSceneHighEndRD::RasterizerSceneHighEndRD(RasterizerStorageRD *p_storag
 	}
 
 	{ //render buffers
-		Vector<RD::Uniform> uniforms;
+		std::vector<RD::Uniform> uniforms;
 		for (int i = 0; i < 5; i++) {
 			RD::Uniform u;
 			u.binding = i;

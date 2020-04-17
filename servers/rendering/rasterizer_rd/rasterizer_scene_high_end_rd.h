@@ -116,9 +116,9 @@ class RasterizerSceneHighEndRD : public RasterizerSceneRD {
 		String path;
 
 		Map<StringName, ShaderLanguage::ShaderNode::Uniform> uniforms;
-		Vector<ShaderCompilerRD::GeneratedCode::Texture> texture_uniforms;
+		std::vector<ShaderCompilerRD::GeneratedCode::Texture> texture_uniforms;
 
-		Vector<uint32_t> ubo_offsets;
+		std::vector<uint32_t> ubo_offsets;
 		uint32_t ubo_size;
 
 		String code;
@@ -169,8 +169,8 @@ class RasterizerSceneHighEndRD : public RasterizerSceneRD {
 		ShaderData *shader_data;
 		RID uniform_buffer;
 		RID uniform_set;
-		Vector<RID> texture_cache;
-		Vector<uint8_t> ubo_data;
+		std::vector<RID> texture_cache;
+		std::vector<uint8_t> ubo_data;
 		uint64_t last_pass = 0;
 		uint32_t index = 0;
 		RID next_pass;
