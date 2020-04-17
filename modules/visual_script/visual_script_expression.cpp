@@ -1151,7 +1151,7 @@ VisualScriptExpression::ENode *VisualScriptExpression::_parse_expression() {
 				op->nodes[1] = nullptr;
 				expression[i].is_op = false;
 				expression[i].node = op;
-				expression.remove(i + 1);
+				expression.erase(expression.begin() + i + 1);
 			}
 
 		} else {
