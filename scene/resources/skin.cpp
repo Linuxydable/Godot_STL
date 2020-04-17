@@ -73,7 +73,7 @@ void Skin::set_bind_bone(int p_index, int p_bone) {
 	emit_changed();
 }
 
-void Skin::set_bind_pose(unsigned p_index, const Transform &p_pose) {
+void Skin::set_bind_pose(int p_index, const Transform &p_pose) {
 	ERR_FAIL_INDEX(p_index, binds.size());
 
 	binds[p_index].pose = p_pose;
