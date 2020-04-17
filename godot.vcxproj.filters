@@ -840,12 +840,6 @@
     <Filter Include="Source Files\scene\main">
       <UniqueIdentifier>{B124D51B-AE2F-2302-F48E-A579C0C6AA44}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\scene\resources">
-      <UniqueIdentifier>{2BADA331-E35A-94D2-776D-C0A81C7C4DF8}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\scene\resources\default_theme">
-      <UniqueIdentifier>{C66AF9A5-8E67-76E9-4FEC-2445E1F03DCC}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\servers">
       <UniqueIdentifier>{BB9451A6-BD26-3468-D418-62FFDCCE1BFE}</UniqueIdentifier>
     </Filter>
@@ -4793,6 +4787,48 @@
     <ClInclude Include="core\os\threaded_array_processor.h">
       <Filter>Header Files\core\os</Filter>
     </ClInclude>
+    <ClInclude Include="scene\resources\box_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\capsule_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\concave_polygon_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\convex_polygon_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\cylinder_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\default_theme\theme_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\height_map_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\navigation_mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\ray_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\sky_material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\sphere_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\world_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="scene\resources\world_margin_shape_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\bind\core_bind.cpp">
@@ -6702,171 +6738,6 @@
     </ClCompile>
     <ClCompile Include="scene\main\viewport.cpp">
       <Filter>Source Files\scene\main</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\default_theme\default_theme.cpp">
-      <Filter>Source Files\scene\resources\default_theme</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\animation.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\audio_stream_sample.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\bit_map.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\box_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\canvas.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\capsule_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\capsule_shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\circle_shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\concave_polygon_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\concave_polygon_shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\convex_polygon_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\convex_polygon_shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\curve.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\cylinder_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\dynamic_font.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\environment.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\font.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\gradient.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\height_map_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\line_shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\material.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\mesh.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\mesh_data_tool.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\mesh_library.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\multimesh.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\packed_scene.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\particles_material.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\physics_material.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\plane_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\polygon_path_finder.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\primitive_meshes.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\ray_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\rectangle_shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\resource_format_text.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\room.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\segment_shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\shader.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\shape_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\skin.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\sky.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\space_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\sphere_shape.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\style_box.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\surface_tool.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\text_file.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\texture.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\theme.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\tile_set.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\video_stream.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\visual_shader.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\visual_shader_nodes.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\world.cpp">
-      <Filter>Source Files\scene\resources</Filter>
-    </ClCompile>
-    <ClCompile Include="scene\resources\world_2d.cpp">
-      <Filter>Source Files\scene\resources</Filter>
     </ClCompile>
     <ClCompile Include="scene\register_scene_types.cpp">
       <Filter>Source Files\scene</Filter>
@@ -9711,6 +9582,165 @@
     </ClCompile>
     <ClCompile Include="core\os\thread_dummy.cpp">
       <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\box_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\capsule_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\concave_polygon_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\convex_polygon_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\cylinder_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\height_map_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\navigation_mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\ray_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\sky_material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\sphere_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\world_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\world_margin_shape_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\animation.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\audio_stream_sample.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\bit_map.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\capsule_shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\circle_shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\concave_polygon_shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\convex_polygon_shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\curve.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\dynamic_font.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\environment.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\font.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\gradient.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\line_shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\material.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\mesh.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\mesh_data_tool.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\mesh_library.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\multimesh.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\packed_scene.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\particles_material.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\physics_material.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\polygon_path_finder.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\primitive_meshes.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\rectangle_shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\resource_format_text.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\segment_shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\shader.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\shape_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\skin.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\sky.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\style_box.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\surface_tool.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\text_file.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\texture.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\theme.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\tile_set.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\visual_shader.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\visual_shader_nodes.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\world_2d.cpp">
+      <Filter>Header Files\scene\resources</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\resources\default_theme\default_theme.cpp">
+      <Filter>Header Files\scene\resources\default_theme</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
