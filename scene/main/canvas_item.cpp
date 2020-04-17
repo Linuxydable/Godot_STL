@@ -749,16 +749,16 @@ void CanvasItem::draw_line(const Point2 &p_from, const Point2 &p_to, const Color
 	RenderingServer::get_singleton()->canvas_item_add_line(canvas_item, p_from, p_to, p_color, p_width);
 }
 
-void CanvasItem::draw_polyline(const Vector<Point2> &p_points, const Color &p_color, float p_width) {
+void CanvasItem::draw_polyline(const std::vector<Point2> &p_points, const Color &p_color, float p_width) {
 
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
-	Vector<Color> colors;
+	std::vector<Color> colors;
 	colors.push_back(p_color);
 	RenderingServer::get_singleton()->canvas_item_add_polyline(canvas_item, p_points, colors, p_width);
 }
 
-void CanvasItem::draw_polyline_colors(const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width) {
+void CanvasItem::draw_polyline_colors(const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, float p_width) {
 
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
@@ -767,27 +767,27 @@ void CanvasItem::draw_polyline_colors(const Vector<Point2> &p_points, const Vect
 
 void CanvasItem::draw_arc(const Vector2 &p_center, float p_radius, float p_start_angle, float p_end_angle, int p_point_count, const Color &p_color, float p_width) {
 
-	Vector<Point2> points;
+	std::vector<Point2> points;
 	points.resize(p_point_count);
 	const float delta_angle = p_end_angle - p_start_angle;
 	for (int i = 0; i < p_point_count; i++) {
 		float theta = (i / (p_point_count - 1.0f)) * delta_angle + p_start_angle;
-		points.set(i, p_center + Vector2(Math::cos(theta), Math::sin(theta)) * p_radius);
+		points[i] = p_center + Vector2(Math::cos(theta), Math::sin(theta)) * p_radius;
 	}
 
 	draw_polyline(points, p_color, p_width);
 }
 
-void CanvasItem::draw_multiline(const Vector<Point2> &p_points, const Color &p_color, float p_width) {
+void CanvasItem::draw_multiline(const std::vector<Point2> &p_points, const Color &p_color, float p_width) {
 
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
-	Vector<Color> colors;
+	std::vector<Color> colors;
 	colors.push_back(p_color);
 	RenderingServer::get_singleton()->canvas_item_add_multiline(canvas_item, p_points, colors, p_width);
 }
 
-void CanvasItem::draw_multiline_colors(const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width) {
+void CanvasItem::draw_multiline_colors(const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, float p_width) {
 
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
@@ -878,7 +878,7 @@ void CanvasItem::draw_style_box(const Ref<StyleBox> &p_style_box, const Rect2 &p
 
 	p_style_box->draw(canvas_item, p_rect);
 }
-void CanvasItem::draw_primitive(const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, Ref<Texture2D> p_texture, float p_width, const Ref<Texture2D> &p_normal_map, const Ref<Texture2D> &p_specular_map, const Color &p_specular_color_shininess, TextureFilter p_texture_filter, TextureRepeat p_texture_repeat) {
+void CanvasItem::draw_primitive(const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs, Ref<Texture2D> p_texture, float p_width, const Ref<Texture2D> &p_normal_map, const Ref<Texture2D> &p_specular_map, const Color &p_specular_color_shininess, TextureFilter p_texture_filter, TextureRepeat p_texture_repeat) {
 
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
@@ -904,7 +904,7 @@ void CanvasItem::draw_set_transform_matrix(const Transform2D &p_matrix) {
 	RenderingServer::get_singleton()->canvas_item_add_set_transform(canvas_item, p_matrix);
 }
 
-void CanvasItem::draw_polygon(const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, Ref<Texture2D> p_texture, const Ref<Texture2D> &p_normal_map, const Ref<Texture2D> &p_specular_map, const Color &p_specular_color_shininess, TextureFilter p_texture_filter, TextureRepeat p_texture_repeat) {
+void CanvasItem::draw_polygon(const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs, Ref<Texture2D> p_texture, const Ref<Texture2D> &p_normal_map, const Ref<Texture2D> &p_specular_map, const Color &p_specular_color_shininess, TextureFilter p_texture_filter, TextureRepeat p_texture_repeat) {
 
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
@@ -915,11 +915,11 @@ void CanvasItem::draw_polygon(const Vector<Point2> &p_points, const Vector<Color
 	RenderingServer::get_singleton()->canvas_item_add_polygon(canvas_item, p_points, p_colors, p_uvs, rid, rid_normal, rid_specular, p_specular_color_shininess, RS::CanvasItemTextureFilter(p_texture_filter), RS::CanvasItemTextureRepeat(p_texture_repeat));
 }
 
-void CanvasItem::draw_colored_polygon(const Vector<Point2> &p_points, const Color &p_color, const Vector<Point2> &p_uvs, Ref<Texture2D> p_texture, const Ref<Texture2D> &p_normal_map, const Ref<Texture2D> &p_specular_map, const Color &p_specular_color_shininess, TextureFilter p_texture_filter, TextureRepeat p_texture_repeat) {
+void CanvasItem::draw_colored_polygon(const std::vector<Point2> &p_points, const Color &p_color, const std::vector<Point2> &p_uvs, Ref<Texture2D> p_texture, const Ref<Texture2D> &p_normal_map, const Ref<Texture2D> &p_specular_map, const Color &p_specular_color_shininess, TextureFilter p_texture_filter, TextureRepeat p_texture_repeat) {
 
 	ERR_FAIL_COND_MSG(!drawing, "Drawing is only allowed inside NOTIFICATION_DRAW, _draw() function or 'draw' signal.");
 
-	Vector<Color> colors;
+	std::vector<Color> colors;
 	colors.push_back(p_color);
 	RID rid = p_texture.is_valid() ? p_texture->get_rid() : RID();
 	RID rid_normal = p_normal_map.is_valid() ? p_normal_map->get_rid() : RID();

@@ -561,9 +561,6 @@
     <Filter Include="Source Files\core\math">
       <UniqueIdentifier>{446241C5-A6B1-DD42-ACFD-96BC43E81BB1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\core\os">
-      <UniqueIdentifier>{01638832-0D4D-84E2-672B-454C2E08DE22}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\drivers">
       <UniqueIdentifier>{A22AD125-2B17-4DC7-3F15-9E1DB2DA2990}</UniqueIdentifier>
     </Filter>
@@ -4787,6 +4784,15 @@
     <ClInclude Include="servers\rendering\rasterizer_rd\shader_rd.h">
       <Filter>Header Files\servers\rendering\rasterize_rd</Filter>
     </ClInclude>
+    <ClInclude Include="scene\main\canvas_item.h">
+      <Filter>Header Files\scene\main</Filter>
+    </ClInclude>
+    <ClInclude Include="core\os\copymem.h">
+      <Filter>Header Files\core\os</Filter>
+    </ClInclude>
+    <ClInclude Include="core\os\threaded_array_processor.h">
+      <Filter>Header Files\core\os</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\bind\core_bind.cpp">
@@ -4971,51 +4977,6 @@
     </ClCompile>
     <ClCompile Include="core\math\vector3.cpp">
       <Filter>Source Files\core\math</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\dir_access.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\file_access.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\input.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\input_event.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\keyboard.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\main_loop.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\memory.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\midi_driver.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\mutex.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\os.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\rw_lock.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\semaphore.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\thread.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\thread_dummy.cpp">
-      <Filter>Source Files\core\os</Filter>
-    </ClCompile>
-    <ClCompile Include="core\os\thread_safe.cpp">
-      <Filter>Source Files\core\os</Filter>
     </ClCompile>
     <ClCompile Include="core\array.cpp">
       <Filter>Source Files\core</Filter>
@@ -9711,6 +9672,45 @@
     </ClCompile>
     <ClCompile Include="servers\rendering\rasterizer_rd\shader_rd.cpp">
       <Filter>Header Files\servers\rendering\rasterize_rd</Filter>
+    </ClCompile>
+    <ClCompile Include="scene\main\canvas_item.cpp">
+      <Filter>Header Files\scene\main</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\dir_access.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\file_access.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\keyboard.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\main_loop.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\memory.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\midi_driver.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\mutex.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\os.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\rw_lock.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\semaphore.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\thread.cpp">
+      <Filter>Header Files\core\os</Filter>
+    </ClCompile>
+    <ClCompile Include="core\os\thread_dummy.cpp">
+      <Filter>Header Files\core\os</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
