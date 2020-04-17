@@ -64,17 +64,17 @@ void RasterizerSceneRD::_update_reflection_data(ReflectionData &rd, int p_size, 
 			layer.mipmaps.resize(mipmaps);
 			layer.views.resize(mipmaps);
 			for (int j = 0; j < mipmaps; j++) {
-				ReflectionData::Layer::Mipmap &mm = layer.mipmaps.write[j];
+				ReflectionData::Layer::Mipmap &mm = layer.mipmaps[j];
 				mm.size.width = mmw;
 				mm.size.height = mmh;
 				for (int k = 0; k < 6; k++) {
 					mm.views[k] = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), p_base_cube, p_base_layer + i * 6 + k, j);
-					Vector<RID> fbtex;
+					std::vector<RID> fbtex;
 					fbtex.push_back(mm.views[k]);
 					mm.framebuffers[k] = RD::get_singleton()->framebuffer_create(fbtex);
 				}
 
-				layer.views.write[j] = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), p_base_cube, p_base_layer + i * 6, j, RD::TEXTURE_SLICE_CUBEMAP);
+				layer.views[j] = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), p_base_cube, p_base_layer + i * 6, j, RD::TEXTURE_SLICE_CUBEMAP);
 
 				mmw = MAX(1, mmw >> 1);
 				mmh = MAX(1, mmh >> 1);
@@ -92,17 +92,17 @@ void RasterizerSceneRD::_update_reflection_data(ReflectionData &rd, int p_size, 
 		layer.mipmaps.resize(mipmaps);
 		layer.views.resize(mipmaps);
 		for (int j = 0; j < mipmaps; j++) {
-			ReflectionData::Layer::Mipmap &mm = layer.mipmaps.write[j];
+			ReflectionData::Layer::Mipmap &mm = layer.mipmaps[j];
 			mm.size.width = mmw;
 			mm.size.height = mmh;
 			for (int k = 0; k < 6; k++) {
 				mm.views[k] = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), p_base_cube, p_base_layer + k, j);
-				Vector<RID> fbtex;
+				std::vector<RID> fbtex;
 				fbtex.push_back(mm.views[k]);
 				mm.framebuffers[k] = RD::get_singleton()->framebuffer_create(fbtex);
 			}
 
-			layer.views.write[j] = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), p_base_cube, p_base_layer, j, RD::TEXTURE_SLICE_CUBEMAP);
+			layer.views[j] = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), p_base_cube, p_base_layer, j, RD::TEXTURE_SLICE_CUBEMAP);
 
 			mmw = MAX(1, mmw >> 1);
 			mmh = MAX(1, mmh >> 1);
@@ -128,7 +128,7 @@ void RasterizerSceneRD::_update_reflection_data(ReflectionData &rd, int p_size, 
 		uint32_t mmh = 64;
 		rd.downsampled_layer.mipmaps.resize(7);
 		for (int j = 0; j < rd.downsampled_layer.mipmaps.size(); j++) {
-			ReflectionData::DownsampleLayer::Mipmap &mm = rd.downsampled_layer.mipmaps.write[j];
+			ReflectionData::DownsampleLayer::Mipmap &mm = rd.downsampled_layer.mipmaps[j];
 			mm.size.width = mmw;
 			mm.size.height = mmh;
 			mm.view = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), rd.downsampled_radiance_cubemap, 0, j, RD::TEXTURE_SLICE_CUBEMAP);
@@ -147,7 +147,7 @@ void RasterizerSceneRD::_create_reflection_fast_filter(ReflectionData &rd, bool 
 		storage->get_effects()->cubemap_downsample(rd.downsampled_layer.mipmaps[i - 1].view, rd.downsampled_layer.mipmaps[i].view, rd.downsampled_layer.mipmaps[i].size);
 	}
 
-	Vector<RID> views;
+	std::vector<RID> views;
 	if (p_use_arrays) {
 		for (int i = 1; i < rd.layers.size(); i++) {
 			views.push_back(rd.layers[i].views[0]);
@@ -317,7 +317,7 @@ void RasterizerSceneRD::_update_dirty_skys() {
 			tformat.type = RD::TEXTURE_TYPE_2D;
 
 			sky->half_res_pass = RD::get_singleton()->texture_create(tformat, RD::TextureView());
-			Vector<RID> texs;
+			std::vector<RID> texs;
 			texs.push_back(sky->half_res_pass);
 			sky->half_res_framebuffer = RD::get_singleton()->framebuffer_create(texs);
 			texture_set_dirty = true;
@@ -332,7 +332,7 @@ void RasterizerSceneRD::_update_dirty_skys() {
 			tformat.type = RD::TEXTURE_TYPE_2D;
 
 			sky->quarter_res_pass = RD::get_singleton()->texture_create(tformat, RD::TextureView());
-			Vector<RID> texs;
+			std::vector<RID> texs;
 			texs.push_back(sky->quarter_res_pass);
 			sky->quarter_res_framebuffer = RD::get_singleton()->framebuffer_create(texs);
 			texture_set_dirty = true;
@@ -373,7 +373,7 @@ RID RasterizerSceneRD::sky_get_radiance_uniform_set_rd(RID p_sky, RID p_shader, 
 
 		sky->uniform_set = RID();
 		if (sky->radiance.is_valid()) {
-			Vector<RD::Uniform> uniforms;
+			std::vector<RD::Uniform> uniforms;
 			{
 				RD::Uniform u;
 				u.type = RD::UNIFORM_TYPE_TEXTURE;
@@ -394,7 +394,7 @@ RID RasterizerSceneRD::_get_sky_textures(Sky *p_sky, SkyTextureSetVersion p_vers
 	if (p_sky->texture_uniform_sets[p_version].is_valid() && RD::get_singleton()->uniform_set_is_valid(p_sky->texture_uniform_sets[p_version])) {
 		return p_sky->texture_uniform_sets[p_version];
 	}
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	{
 		RD::Uniform u;
 		u.type = RD::UNIFORM_TYPE_TEXTURE;
@@ -512,7 +512,7 @@ void RasterizerSceneRD::_draw_sky(bool p_can_continue_color, bool p_can_continue
 
 		RID texture_uniform_set = _get_sky_textures(sky, SKY_TEXTURE_SET_QUARTER_RES);
 
-		Vector<Color> clear_colors;
+		std::vector<Color> clear_colors;
 		clear_colors.push_back(Color(0.0, 0.0, 0.0));
 
 		RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(sky->quarter_res_framebuffer, RD::INITIAL_ACTION_CLEAR, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_CLEAR, RD::FINAL_ACTION_DISCARD, clear_colors);
@@ -525,7 +525,7 @@ void RasterizerSceneRD::_draw_sky(bool p_can_continue_color, bool p_can_continue
 
 		RID texture_uniform_set = _get_sky_textures(sky, SKY_TEXTURE_SET_HALF_RES);
 
-		Vector<Color> clear_colors;
+		std::vector<Color> clear_colors;
 		clear_colors.push_back(Color(0.0, 0.0, 0.0));
 
 		RD::DrawListID draw_list = RD::get_singleton()->draw_list_begin(sky->half_res_framebuffer, RD::INITIAL_ACTION_CLEAR, RD::FINAL_ACTION_READ, RD::INITIAL_ACTION_CLEAR, RD::FINAL_ACTION_DISCARD, clear_colors);
@@ -659,7 +659,7 @@ void RasterizerSceneRD::_setup_sky(RID p_environment, const Vector3 &p_position,
 				RD::get_singleton()->free(sky_scene_state.light_uniform_set);
 			}
 
-			Vector<RD::Uniform> uniforms;
+			std::vector<RD::Uniform> uniforms;
 			{
 				RD::Uniform u;
 				u.binding = 0;
@@ -739,7 +739,7 @@ void RasterizerSceneRD::_update_sky(RID p_environment, const CameraMatrix &p_pro
 		if (shader_data->uses_quarter_res) {
 			RenderPipelineVertexFormatCacheRD *pipeline = &shader_data->pipelines[SKY_VERSION_CUBEMAP_QUARTER_RES];
 
-			Vector<Color> clear_colors;
+			std::vector<Color> clear_colors;
 			clear_colors.push_back(Color(0.0, 0.0, 0.0));
 			RD::DrawListID cubemap_draw_list;
 
@@ -757,7 +757,7 @@ void RasterizerSceneRD::_update_sky(RID p_environment, const CameraMatrix &p_pro
 		if (shader_data->uses_half_res) {
 			RenderPipelineVertexFormatCacheRD *pipeline = &shader_data->pipelines[SKY_VERSION_CUBEMAP_HALF_RES];
 
-			Vector<Color> clear_colors;
+			std::vector<Color> clear_colors;
 			clear_colors.push_back(Color(0.0, 0.0, 0.0));
 			RD::DrawListID cubemap_draw_list;
 
@@ -949,7 +949,7 @@ bool RasterizerSceneRD::SkyShaderData::casts_shadows() const {
 Variant RasterizerSceneRD::SkyShaderData::get_default_parameter(const StringName &p_parameter) const {
 	if (uniforms.has(p_parameter)) {
 		ShaderLanguage::ShaderNode::Uniform uniform = uniforms[p_parameter];
-		Vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
+		std::vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
 		return ShaderLanguage::constant_value_to_variant(default_value, uniform.type, uniform.hint);
 	}
 	return Variant();
@@ -989,7 +989,7 @@ void RasterizerSceneRD::SkyMaterialData::update_parameters(const Map<StringName,
 		ubo_data.resize(shader_data->ubo_size);
 		if (ubo_data.size()) {
 			uniform_buffer = RD::get_singleton()->uniform_buffer_create(ubo_data.size());
-			memset(ubo_data.ptrw(), 0, ubo_data.size()); //clear
+			memset(ubo_data.data(), 0, ubo_data.size()); //clear
 		}
 
 		//clear previous uniform set
@@ -1002,8 +1002,8 @@ void RasterizerSceneRD::SkyMaterialData::update_parameters(const Map<StringName,
 	//check whether buffer changed
 	if (p_uniform_dirty && ubo_data.size()) {
 
-		update_uniform_buffer(shader_data->uniforms, shader_data->ubo_offsets.ptr(), p_parameters, ubo_data.ptrw(), ubo_data.size(), false);
-		RD::get_singleton()->buffer_update(uniform_buffer, 0, ubo_data.size(), ubo_data.ptrw());
+		update_uniform_buffer(shader_data->uniforms, shader_data->ubo_offsets.data(), p_parameters, ubo_data.data(), ubo_data.size(), false);
+		RD::get_singleton()->buffer_update(uniform_buffer, 0, ubo_data.size(), ubo_data.data());
 	}
 
 	uint32_t tex_uniform_count = shader_data->texture_uniforms.size();
@@ -1021,7 +1021,7 @@ void RasterizerSceneRD::SkyMaterialData::update_parameters(const Map<StringName,
 
 	if (p_textures_dirty && tex_uniform_count) {
 
-		update_textures(p_parameters, shader_data->default_texture_params, shader_data->texture_uniforms, texture_cache.ptrw(), true);
+		update_textures(p_parameters, shader_data->default_texture_params, shader_data->texture_uniforms, texture_cache.data(), true);
 	}
 
 	if (shader_data->ubo_size == 0 && shader_data->texture_uniforms.size() == 0) {
@@ -1034,7 +1034,7 @@ void RasterizerSceneRD::SkyMaterialData::update_parameters(const Map<StringName,
 		return;
 	}
 
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 
 	{
 
@@ -1046,7 +1046,7 @@ void RasterizerSceneRD::SkyMaterialData::update_parameters(const Map<StringName,
 			uniforms.push_back(u);
 		}
 
-		const RID *textures = texture_cache.ptrw();
+		const RID *textures = texture_cache.data();
 		for (uint32_t i = 0; i < tex_uniform_count; i++) {
 			RD::Uniform u;
 			u.type = RD::UNIFORM_TYPE_TEXTURE;
@@ -1330,7 +1330,7 @@ void RasterizerSceneRD::reflection_atlas_set_size(RID p_ref_atlas, int p_reflect
 		ra->depth_buffer = RID();
 
 		for (int i = 0; i < ra->reflections.size(); i++) {
-			_clear_reflection_data(ra->reflections.write[i].data);
+			_clear_reflection_data(ra->reflections[i].data);
 			if (ra->reflections[i].owner.is_null()) {
 				continue;
 			}
@@ -1368,7 +1368,7 @@ void RasterizerSceneRD::reflection_probe_release_atlas_index(RID p_instance) {
 	ReflectionAtlas *atlas = reflection_atlas_owner.getornull(rpi->atlas);
 	ERR_FAIL_COND(!atlas);
 	ERR_FAIL_INDEX(rpi->atlas_index, atlas->reflections.size());
-	atlas->reflections.write[rpi->atlas_index].owner = RID();
+	atlas->reflections[rpi->atlas_index].owner = RID();
 	rpi->atlas_index = -1;
 	rpi->atlas = RID();
 }
@@ -1457,16 +1457,16 @@ bool RasterizerSceneRD::reflection_probe_instance_begin_render(RID p_instance, R
 		}
 		atlas->reflections.resize(atlas->count);
 		for (int i = 0; i < atlas->count; i++) {
-			_update_reflection_data(atlas->reflections.write[i].data, atlas->size, mipmaps, false, atlas->reflection, i * 6, storage->reflection_probe_get_update_mode(rpi->probe) == RS::REFLECTION_PROBE_UPDATE_ALWAYS);
+			_update_reflection_data(atlas->reflections[i].data, atlas->size, mipmaps, false, atlas->reflection, i * 6, storage->reflection_probe_get_update_mode(rpi->probe) == RS::REFLECTION_PROBE_UPDATE_ALWAYS);
 			for (int j = 0; j < 6; j++) {
-				Vector<RID> fb;
-				fb.push_back(atlas->reflections.write[i].data.layers[0].mipmaps[0].views[j]);
+				std::vector<RID> fb;
+				fb.push_back(atlas->reflections[i].data.layers[0].mipmaps[0].views[j]);
 				fb.push_back(atlas->depth_buffer);
-				atlas->reflections.write[i].fbs[j] = RD::get_singleton()->framebuffer_create(fb);
+				atlas->reflections[i].fbs[j] = RD::get_singleton()->framebuffer_create(fb);
 			}
 		}
 
-		Vector<RID> fb;
+		std::vector<RID> fb;
 		fb.push_back(atlas->depth_buffer);
 		atlas->depth_fb = RD::get_singleton()->framebuffer_create(fb);
 	}
@@ -1518,7 +1518,7 @@ bool RasterizerSceneRD::reflection_probe_instance_postprocess_step(RID p_instanc
 
 	if (storage->reflection_probe_get_update_mode(rpi->probe) == RS::REFLECTION_PROBE_UPDATE_ALWAYS) {
 		// Using real time reflections, all roughness is done in one step
-		_create_reflection_fast_filter(atlas->reflections.write[rpi->atlas_index].data, false);
+		_create_reflection_fast_filter(atlas->reflections[rpi->atlas_index].data, false);
 		rpi->rendering = false;
 		rpi->processing_side = 0;
 		rpi->processing_layer = 1;
@@ -1526,7 +1526,7 @@ bool RasterizerSceneRD::reflection_probe_instance_postprocess_step(RID p_instanc
 	}
 
 	if (rpi->processing_layer > 1) {
-		_create_reflection_importance_sample(atlas->reflections.write[rpi->atlas_index].data, false, 10, rpi->processing_layer);
+		_create_reflection_importance_sample(atlas->reflections[rpi->atlas_index].data, false, 10, rpi->processing_layer);
 		rpi->processing_layer++;
 		if (rpi->processing_layer == atlas->reflections[rpi->atlas_index].data.layers[0].mipmaps.size()) {
 			rpi->rendering = false;
@@ -1537,7 +1537,7 @@ bool RasterizerSceneRD::reflection_probe_instance_postprocess_step(RID p_instanc
 		return false;
 
 	} else {
-		_create_reflection_importance_sample(atlas->reflections.write[rpi->atlas_index].data, false, rpi->processing_side, rpi->processing_layer);
+		_create_reflection_importance_sample(atlas->reflections[rpi->atlas_index].data, false, rpi->processing_side, rpi->processing_layer);
 	}
 
 	rpi->processing_side++;
@@ -1629,7 +1629,7 @@ void RasterizerSceneRD::shadow_atlas_set_size(RID p_atlas, int p_size) {
 
 		shadow_atlas->depth = RD::get_singleton()->texture_create(tf, RD::TextureView());
 
-		Vector<RID> fb;
+		std::vector<RID> fb;
 		fb.push_back(shadow_atlas->depth);
 		shadow_atlas->fb = RD::get_singleton()->framebuffer_create(fb);
 	}
@@ -1710,7 +1710,7 @@ bool RasterizerSceneRD::_shadow_atlas_find_shadow(ShadowAtlas *shadow_atlas, int
 
 		//look for an empty space
 		int sc = shadow_atlas->quadrants[qidx].shadows.size();
-		ShadowAtlas::Quadrant::Shadow *sarr = shadow_atlas->quadrants[qidx].shadows.ptrw();
+		ShadowAtlas::Quadrant::Shadow *sarr = shadow_atlas->quadrants[qidx].shadows.data();
 
 		int found_free_idx = -1; //found a free one
 		int found_used_idx = -1; //found existing one, must steal it
@@ -1810,7 +1810,7 @@ bool RasterizerSceneRD::shadow_atlas_update_light(RID p_atlas, RID p_light_intan
 		bool should_redraw = shadow_atlas->quadrants[q].shadows[s].version != p_light_version;
 
 		if (!should_realloc) {
-			shadow_atlas->quadrants[q].shadows.write[s].version = p_light_version;
+			shadow_atlas->quadrants[q].shadows[s].version = p_light_version;
 			//already existing, see if it should redraw or it's just OK
 			return should_redraw;
 		}
@@ -1820,7 +1820,7 @@ bool RasterizerSceneRD::shadow_atlas_update_light(RID p_atlas, RID p_light_intan
 		//find a better place
 		if (_shadow_atlas_find_shadow(shadow_atlas, valid_quadrants, valid_quadrant_count, shadow_atlas->quadrants[q].subdivision, tick, new_quadrant, new_shadow)) {
 			//found a better place!
-			ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows.write[new_shadow];
+			ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows[new_shadow];
 			if (sh->owner.is_valid()) {
 				//is taken, but is invalid, erasing it
 				shadow_atlas->shadow_owners.erase(sh->owner);
@@ -1829,8 +1829,8 @@ bool RasterizerSceneRD::shadow_atlas_update_light(RID p_atlas, RID p_light_intan
 			}
 
 			//erase previous
-			shadow_atlas->quadrants[q].shadows.write[s].version = 0;
-			shadow_atlas->quadrants[q].shadows.write[s].owner = RID();
+			shadow_atlas->quadrants[q].shadows[s].version = 0;
+			shadow_atlas->quadrants[q].shadows[s].owner = RID();
 
 			sh->owner = p_light_intance;
 			sh->alloc_tick = tick;
@@ -1850,7 +1850,7 @@ bool RasterizerSceneRD::shadow_atlas_update_light(RID p_atlas, RID p_light_intan
 
 		//already existing, see if it should redraw or it's just OK
 
-		shadow_atlas->quadrants[q].shadows.write[s].version = p_light_version;
+		shadow_atlas->quadrants[q].shadows[s].version = p_light_version;
 
 		return should_redraw;
 	}
@@ -1860,7 +1860,7 @@ bool RasterizerSceneRD::shadow_atlas_update_light(RID p_atlas, RID p_light_intan
 	//find a better place
 	if (_shadow_atlas_find_shadow(shadow_atlas, valid_quadrants, valid_quadrant_count, -1, tick, new_quadrant, new_shadow)) {
 		//found a better place!
-		ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows.write[new_shadow];
+		ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows[new_shadow];
 		if (sh->owner.is_valid()) {
 			//is taken, but is invalid, erasing it
 			shadow_atlas->shadow_owners.erase(sh->owner);
@@ -1913,7 +1913,7 @@ void RasterizerSceneRD::directional_shadow_atlas_set_size(int p_size) {
 		tf.usage_bits = RD::TEXTURE_USAGE_SAMPLING_BIT | RD::TEXTURE_USAGE_COLOR_ATTACHMENT_BIT;
 
 		directional_shadow.depth = RD::get_singleton()->texture_create(tf, RD::TextureView());
-		Vector<RID> fb;
+		std::vector<RID> fb;
 		fb.push_back(directional_shadow.depth);
 		directional_shadow.fb = RD::get_singleton()->framebuffer_create(fb);
 	}
@@ -2076,7 +2076,7 @@ RasterizerSceneRD::ShadowCubemap *RasterizerSceneRD::_get_shadow_cubemap(int p_s
 
 		for (int i = 0; i < 6; i++) {
 			RID side_texture = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), sc.cubemap, i, 0);
-			Vector<RID> fbtex;
+			std::vector<RID> fbtex;
 			fbtex.push_back(side_texture);
 			sc.side_fb[i] = RD::get_singleton()->framebuffer_create(fbtex);
 		}
@@ -2102,7 +2102,7 @@ RasterizerSceneRD::ShadowMap *RasterizerSceneRD::_get_shadow_map(const Size2i &p
 			sm.depth = RD::get_singleton()->texture_create(tf, RD::TextureView());
 		}
 
-		Vector<RID> fbtex;
+		std::vector<RID> fbtex;
 		fbtex.push_back(sm.depth);
 		sm.fb = RD::get_singleton()->framebuffer_create(fbtex);
 
@@ -2129,7 +2129,7 @@ RID RasterizerSceneRD::gi_probe_instance_create(RID p_base) {
 	gi_probe.slot = index;
 	gi_probe.probe = p_base;
 	RID rid = gi_probe_instance_owner.make_rid(gi_probe);
-	gi_probe_slots.write[index] = rid;
+	gi_probe_slots[index] = rid;
 
 	return rid;
 }
@@ -2150,7 +2150,7 @@ bool RasterizerSceneRD::gi_probe_needs_update(RID p_probe) const {
 	return gi_probe->last_probe_version != storage->gi_probe_get_version(gi_probe->probe);
 }
 
-void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instances, const Vector<RID> &p_light_instances, int p_dynamic_object_count, InstanceBase **p_dynamic_objects) {
+void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instances, const std::vector<RID> &p_light_instances, int p_dynamic_object_count, InstanceBase **p_dynamic_objects) {
 
 	GIProbeInstance *gi_probe = gi_probe_instance_owner.getornull(p_probe);
 	ERR_FAIL_COND(!gi_probe);
@@ -2182,7 +2182,7 @@ void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instanc
 
 		if (octree_size != Vector3i()) {
 			//can create a 3D texture
-			Vector<int> levels = storage->gi_probe_get_level_counts(gi_probe->probe);
+			std::vector<int> levels = storage->gi_probe_get_level_counts(gi_probe->probe);
 
 			RD::TextureFormat tf;
 			tf.format = RD::DATA_FORMAT_R8G8B8A8_UNORM;
@@ -2246,7 +2246,7 @@ void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instanc
 				}
 				mipmap.cell_count = levels[mipmap.level];
 
-				Vector<RD::Uniform> uniforms;
+				std::vector<RD::Uniform> uniforms;
 				{
 					RD::Uniform u;
 					u.type = RD::UNIFORM_TYPE_STORAGE_BUFFER;
@@ -2285,7 +2285,7 @@ void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instanc
 				}
 
 				{
-					Vector<RD::Uniform> copy_uniforms = uniforms;
+					std::vector<RD::Uniform> copy_uniforms = uniforms;
 					if (i == 0) {
 						{
 							RD::Uniform u;
@@ -2410,7 +2410,7 @@ void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instanc
 						dmap.normal = RD::get_singleton()->texture_create(dtf, RD::TextureView());
 						dmap.orm = RD::get_singleton()->texture_create(dtf, RD::TextureView());
 
-						Vector<RID> fb;
+						std::vector<RID> fb;
 						fb.push_back(dmap.albedo);
 						fb.push_back(dmap.normal);
 						fb.push_back(dmap.orm);
@@ -2421,7 +2421,7 @@ void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instanc
 						dmap.fb = RD::get_singleton()->framebuffer_create(fb);
 
 						{
-							Vector<RD::Uniform> uniforms;
+							std::vector<RD::Uniform> uniforms;
 							{
 								RD::Uniform u;
 								u.type = RD::UNIFORM_TYPE_UNIFORM_BUFFER;
@@ -2493,7 +2493,7 @@ void RasterizerSceneRD::gi_probe_update(RID p_probe, bool p_update_light_instanc
 						bool plot = dmap.mipmap >= 0;
 						bool write = dmap.mipmap < (gi_probe->mipmaps.size() - 1);
 
-						Vector<RD::Uniform> uniforms;
+						std::vector<RD::Uniform> uniforms;
 
 						{
 							RD::Uniform u;
@@ -2979,7 +2979,7 @@ void RasterizerSceneRD::_debug_giprobe(RID p_gi_probe, RD::DrawListID p_draw_lis
 	if (giprobe_debug_uniform_set.is_valid()) {
 		RD::get_singleton()->free(giprobe_debug_uniform_set);
 	}
-	Vector<RD::Uniform> uniforms;
+	std::vector<RD::Uniform> uniforms;
 	{
 		RD::Uniform u;
 		u.type = RD::UNIFORM_TYPE_STORAGE_BUFFER;
@@ -3033,7 +3033,7 @@ void RasterizerSceneRD::_debug_giprobe(RID p_gi_probe, RD::DrawListID p_draw_lis
 	RD::get_singleton()->draw_list_draw(p_draw_list, false, cell_count, 36);
 }
 
-const Vector<RID> &RasterizerSceneRD::gi_probe_get_slots() const {
+const std::vector<RID> &RasterizerSceneRD::gi_probe_get_slots() const {
 
 	return gi_probe_slots;
 }
@@ -3077,7 +3077,7 @@ void RasterizerSceneRD::_allocate_blur_textures(RenderBuffers *rb) {
 		RenderBuffers::Blur::Mipmap mm;
 		mm.texture = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), rb->blur[0].texture, 0, i);
 		{
-			Vector<RID> fbs;
+			std::vector<RID> fbs;
 			fbs.push_back(mm.texture);
 			mm.framebuffer = RD::get_singleton()->framebuffer_create(fbs);
 		}
@@ -3091,7 +3091,7 @@ void RasterizerSceneRD::_allocate_blur_textures(RenderBuffers *rb) {
 
 			mm.texture = RD::get_singleton()->texture_create_shared_from_slice(RD::TextureView(), rb->blur[1].texture, 0, i - 1);
 			{
-				Vector<RID> fbs;
+				std::vector<RID> fbs;
 				fbs.push_back(mm.texture);
 				mm.framebuffer = RD::get_singleton()->framebuffer_create(fbs);
 			}
@@ -3381,7 +3381,7 @@ void RasterizerSceneRD::_render_buffers_post_process_and_tonemap(RID p_render_bu
 		storage->get_effects()->luminance_reduction(rb->texture, Size2i(rb->width, rb->height), rb->luminance.reduce, rb->luminance.current, env->min_luminance, env->max_luminance, step, set_immediate);
 
 		//swap final reduce with prev luminance
-		SWAP(rb->luminance.current, rb->luminance.reduce.write[rb->luminance.reduce.size() - 1]);
+		SWAP(rb->luminance.current, rb->luminance.reduce[rb->luminance.reduce.size() - 1]);
 		RenderingServerRaster::redraw_request(); //redraw all the time if auto exposure rendering is on
 	}
 
@@ -3830,7 +3830,7 @@ bool RasterizerSceneRD::free(RID p_rid) {
 			RD::get_singleton()->free(gi_probe->dynamic_maps[i].depth);
 		}
 
-		gi_probe_slots.write[gi_probe->slot] = RID();
+		gi_probe_slots[gi_probe->slot] = RID();
 
 		gi_probe_instance_owner.free(p_rid);
 	} else if (sky_owner.owns(p_rid)) {
@@ -3875,7 +3875,7 @@ bool RasterizerSceneRD::free(RID p_rid) {
 			uint32_t q = (key >> ShadowAtlas::QUADRANT_SHIFT) & 0x3;
 			uint32_t s = key & ShadowAtlas::SHADOW_INDEX_MASK;
 
-			shadow_atlas->quadrants[q].shadows.write[s].owner = RID();
+			shadow_atlas->quadrants[q].shadows[s].owner = RID();
 			shadow_atlas->shadow_owners.erase(p_rid);
 		}
 
@@ -3969,7 +3969,7 @@ RasterizerSceneRD::RasterizerSceneRD(RasterizerStorageRD *p_storage) {
 			defines += "\n#define MODE_ANISOTROPIC\n";
 		}
 
-		Vector<String> versions;
+		std::vector<String> versions;
 		versions.push_back("\n#define MODE_COMPUTE_LIGHT\n");
 		versions.push_back("\n#define MODE_SECOND_BOUNCE\n");
 		versions.push_back("\n#define MODE_UPDATE_MIPMAPS\n");
@@ -3993,7 +3993,7 @@ RasterizerSceneRD::RasterizerSceneRD(RasterizerStorageRD *p_storage) {
 		if (gi_probe_use_anisotropy) {
 			defines += "\n#define USE_ANISOTROPY\n";
 		}
-		Vector<String> versions;
+		std::vector<String> versions;
 		versions.push_back("\n#define MODE_DEBUG_COLOR\n");
 		versions.push_back("\n#define MODE_DEBUG_LIGHT\n");
 		versions.push_back("\n#define MODE_DEBUG_EMISSION\n");
@@ -4029,7 +4029,7 @@ RasterizerSceneRD::RasterizerSceneRD(RasterizerStorageRD *p_storage) {
 		String defines = "\n#define MAX_DIRECTIONAL_LIGHT_DATA_STRUCTS " + itos(sky_scene_state.max_directional_lights) + "\n";
 
 		// Initialize sky
-		Vector<String> sky_modes;
+		std::vector<String> sky_modes;
 		sky_modes.push_back(""); // Full size
 		sky_modes.push_back("\n#define USE_HALF_RES_PASS\n"); // Half Res
 		sky_modes.push_back("\n#define USE_QUARTER_RES_PASS\n"); // Quarter res
@@ -4101,14 +4101,14 @@ RasterizerSceneRD::RasterizerSceneRD(RasterizerStorageRD *p_storage) {
 		SkyMaterialData *md = (SkyMaterialData *)storage->material_get_data(sky_shader.default_material, RasterizerStorageRD::SHADER_TYPE_SKY);
 		sky_shader.default_shader_rd = sky_shader.shader.version_get_shader(md->shader_data->version, SKY_VERSION_BACKGROUND);
 
-		Vector<RD::Uniform> uniforms;
+		std::vector<RD::Uniform> uniforms;
 
 		{
 			RD::Uniform u;
 			u.type = RD::UNIFORM_TYPE_SAMPLER;
 			u.binding = 0;
 			u.ids.resize(12);
-			RID *ids_ptr = u.ids.ptrw();
+			RID *ids_ptr = u.ids.data();
 			ids_ptr[0] = storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_NEAREST, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);
 			ids_ptr[1] = storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_LINEAR, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);
 			ids_ptr[2] = storage->sampler_rd_get_default(RS::CANVAS_ITEM_TEXTURE_FILTER_NEAREST_WITH_MIPMAPS, RS::CANVAS_ITEM_TEXTURE_REPEAT_DISABLED);

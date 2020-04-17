@@ -116,8 +116,8 @@ private:
 				RID views[6];
 				Size2i size;
 			};
-			Vector<Mipmap> mipmaps; //per-face view
-			Vector<RID> views; // per-cubemap view
+			std::vector<Mipmap> mipmaps; //per-face view
+			std::vector<RID> views; // per-cubemap view
 		};
 
 		struct DownsampleLayer {
@@ -125,7 +125,7 @@ private:
 				RID view;
 				Size2i size;
 			};
-			Vector<Mipmap> mipmaps;
+			std::vector<Mipmap> mipmaps;
 		};
 
 		RID radiance_base_cubemap; //cubemap for first layer, first cubemap
@@ -135,7 +135,7 @@ private:
 
 		bool dirty = true;
 
-		Vector<Layer> layers;
+		std::vector<Layer> layers;
 	};
 
 	void _clear_reflection_data(ReflectionData &rd);
@@ -171,9 +171,9 @@ private:
 
 		RenderPipelineVertexFormatCacheRD pipelines[SKY_VERSION_MAX];
 		Map<StringName, ShaderLanguage::ShaderNode::Uniform> uniforms;
-		Vector<ShaderCompilerRD::GeneratedCode::Texture> texture_uniforms;
+		std::vector<ShaderCompilerRD::GeneratedCode::Texture> texture_uniforms;
 
-		Vector<uint32_t> ubo_offsets;
+		std::vector<uint32_t> ubo_offsets;
 		uint32_t ubo_size;
 
 		String path;
@@ -207,8 +207,8 @@ private:
 		SkyShaderData *shader_data;
 		RID uniform_buffer;
 		RID uniform_set;
-		Vector<RID> texture_cache;
-		Vector<uint8_t> ubo_data;
+		std::vector<RID> texture_cache;
+		std::vector<uint8_t> ubo_data;
 		bool uniform_set_updated;
 
 		virtual void set_render_priority(int p_priority) {}
@@ -297,7 +297,7 @@ private:
 			RID fbs[6];
 		};
 
-		Vector<Reflection> reflections;
+		std::vector<Reflection> reflections;
 	};
 
 	RID_Owner<ReflectionAtlas> reflection_atlas_owner;
@@ -399,7 +399,7 @@ private:
 			uint32_t cell_offset;
 			uint32_t cell_count;
 		};
-		Vector<Mipmap> mipmaps;
+		std::vector<Mipmap> mipmaps;
 
 		struct DynamicMap {
 			RID texture; //color normally, or emission on first pass
@@ -414,7 +414,7 @@ private:
 			int mipmap; // mipmap to write to, -1 if no mipmap assigned
 		};
 
-		Vector<DynamicMap> dynamic_maps;
+		std::vector<DynamicMap> dynamic_maps;
 
 		int slot = -1;
 		uint32_t last_probe_version = 0;
@@ -435,7 +435,7 @@ private:
 	bool gi_probe_use_anisotropy = false;
 	GIProbeQuality gi_probe_quality = GIPROBE_QUALITY_MEDIUM;
 
-	Vector<RID> gi_probe_slots;
+	std::vector<RID> gi_probe_slots;
 
 	enum {
 		GI_PROBE_SHADER_VERSION_COMPUTE_LIGHT,
@@ -504,7 +504,7 @@ private:
 				}
 			};
 
-			Vector<Shadow> shadows;
+			std::vector<Shadow> shadows;
 
 			Quadrant() {
 				subdivision = 0; //not in use
@@ -730,20 +730,20 @@ private:
 				int height;
 			};
 
-			Vector<Mipmap> mipmaps;
+			std::vector<Mipmap> mipmaps;
 		};
 
 		Blur blur[2]; //the second one starts from the first mipmap
 
 		struct Luminance {
 
-			Vector<RID> reduce;
+			std::vector<RID> reduce;
 			RID current;
 		} luminance;
 
 		struct SSAO {
 			RID depth;
-			Vector<RID> depth_slices;
+			std::vector<RID> depth_slices;
 			RID ao[2];
 			RID ao_full; //when using half-size
 		} ssao;
@@ -1039,7 +1039,7 @@ public:
 	RID gi_probe_instance_create(RID p_base);
 	void gi_probe_instance_set_transform_to_data(RID p_probe, const Transform &p_xform);
 	bool gi_probe_needs_update(RID p_probe) const;
-	void gi_probe_update(RID p_probe, bool p_update_light_instances, const Vector<RID> &p_light_instances, int p_dynamic_object_count, InstanceBase **p_dynamic_objects);
+	void gi_probe_update(RID p_probe, bool p_update_light_instances, const std::vector<RID> &p_light_instances, int p_dynamic_object_count, InstanceBase **p_dynamic_objects);
 
 	_FORCE_INLINE_ uint32_t gi_probe_instance_get_slot(RID p_probe) {
 		GIProbeInstance *gi_probe = gi_probe_instance_owner.getornull(p_probe);
@@ -1089,7 +1089,7 @@ public:
 		return g_probe->last_pass;
 	}
 
-	const Vector<RID> &gi_probe_get_slots() const;
+	const std::vector<RID> &gi_probe_get_slots() const;
 	_FORCE_INLINE_ bool gi_probe_is_anisotropic() const {
 		return gi_probe_use_anisotropy;
 	}
