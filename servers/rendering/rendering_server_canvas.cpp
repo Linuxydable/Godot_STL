@@ -71,7 +71,7 @@ void RenderingServerCanvas::_render_canvas_item_tree(RID p_to_render_target, Can
 
 void _collect_ysort_children(RenderingServerCanvas::Item *p_canvas_item, Transform2D p_transform, RenderingServerCanvas::Item *p_material_owner, RenderingServerCanvas::Item **r_items, int &r_index) {
 	int child_item_count = p_canvas_item->child_items.size();
-	RenderingServerCanvas::Item **child_items = p_canvas_item->child_items.ptrw();
+	RenderingServerCanvas::Item **child_items = p_canvas_item->child_items.data();
 	for (int i = 0; i < child_item_count; i++) {
 		if (child_items[i]->visible) {
 			if (r_items) {
@@ -104,8 +104,8 @@ void RenderingServerCanvas::_cull_canvas_item(Item *p_canvas_item, const Transfo
 		return;
 
 	if (ci->children_order_dirty) {
+		std::sort(ci->child_items.begin(), ci->child_items.end(), ItemIndexSort);
 
-		ci->child_items.sort_custom<ItemIndexSort>();
 		ci->children_order_dirty = false;
 	}
 
@@ -127,7 +127,7 @@ void RenderingServerCanvas::_cull_canvas_item(Item *p_canvas_item, const Transfo
 		return;
 
 	int child_item_count = ci->child_items.size();
-	Item **child_items = ci->child_items.ptrw();
+	Item **child_items = ci->child_items.data();
 
 	if (ci->clip) {
 		if (p_canvas_clip != nullptr) {
@@ -247,13 +247,13 @@ void RenderingServerCanvas::render_canvas(RID p_render_target, Canvas *p_canvas,
 	RENDER_TIMESTAMP(">Render Canvas");
 
 	if (p_canvas->children_order_dirty) {
+		std::sort(p_canvas->child_items.begin(), p_canvas->child_items.end());
 
-		p_canvas->child_items.sort();
 		p_canvas->children_order_dirty = false;
 	}
 
 	int l = p_canvas->child_items.size();
-	Canvas::ChildItem *ci = p_canvas->child_items.ptrw();
+	Canvas::ChildItem *ci = p_canvas->child_items.data();
 
 	bool has_mirror = false;
 	for (int i = 0; i < l; i++) {
@@ -314,7 +314,7 @@ void RenderingServerCanvas::canvas_set_item_mirroring(RID p_canvas, RID p_item, 
 
 	int idx = canvas->find_item(canvas_item);
 	ERR_FAIL_COND(idx == -1);
-	canvas->child_items.write[idx].mirror = p_mirroring;
+	canvas->child_items[idx].mirror = p_mirroring;
 }
 void RenderingServerCanvas::canvas_set_modulate(RID p_canvas, const Color &p_color) {
 
@@ -358,7 +358,12 @@ void RenderingServerCanvas::canvas_item_set_parent(RID p_item, RID p_parent) {
 		} else if (canvas_item_owner.owns(canvas_item->parent)) {
 
 			Item *item_owner = canvas_item_owner.getornull(canvas_item->parent);
-			item_owner->child_items.erase(canvas_item);
+
+			auto it_find = std::find(item_owner->child_items.begin(), item_owner->child_items.end(), canvas_item);
+
+			if (it_find != item_owner->child_items.end()) {
+				item_owner->child_items.erase(it_find);
+			}
 
 			if (item_owner->sort_y) {
 				_mark_ysort_dirty(item_owner, canvas_item_owner);
@@ -511,7 +516,7 @@ void RenderingServerCanvas::canvas_item_add_line(RID p_item, const Point2 &p_fro
 	line->specular_shininess = Color(1, 1, 1, 1);
 }
 
-void RenderingServerCanvas::canvas_item_add_polyline(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width) {
+void RenderingServerCanvas::canvas_item_add_polyline(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, float p_width) {
 
 	ERR_FAIL_COND(p_points.size() < 2);
 	Item *canvas_item = canvas_item_owner.getornull(p_item);
@@ -524,11 +529,11 @@ void RenderingServerCanvas::canvas_item_add_polyline(RID p_item, const Vector<Po
 
 	if (true || p_width <= 1) {
 #define TODO make thick lines possible
-		Vector<int> indices;
+		std::vector<int> indices;
 		int pc = p_points.size();
 		indices.resize((pc - 1) * 2);
 		{
-			int *iptr = indices.ptrw();
+			int *iptr = indices.data();
 			for (int i = 0; i < (pc - 1); i++) {
 				iptr[i * 2 + 0] = i;
 				iptr[i * 2 + 1] = i + 1;
@@ -603,7 +608,7 @@ void RenderingServerCanvas::canvas_item_add_polyline(RID p_item, const Vector<Po
 	}
 }
 
-void RenderingServerCanvas::canvas_item_add_multiline(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, float p_width) {
+void RenderingServerCanvas::canvas_item_add_multiline(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, float p_width) {
 
 	ERR_FAIL_COND(p_points.size() < 2);
 	Item *canvas_item = canvas_item_owner.getornull(p_item);
@@ -619,7 +624,7 @@ void RenderingServerCanvas::canvas_item_add_multiline(RID p_item, const Vector<P
 
 		pline->primitive = RS::PRIMITIVE_LINES;
 		pline->specular_shininess = Color(1, 1, 1, 1);
-		pline->polygon.create(Vector<int>(), p_points, p_colors);
+		pline->polygon.create(std::vector<int>(), p_points, p_colors);
 	} else {
 	}
 }
@@ -648,27 +653,27 @@ void RenderingServerCanvas::canvas_item_add_circle(RID p_item, const Point2 &p_p
 	circle->primitive = RS::PRIMITIVE_TRIANGLES;
 	circle->specular_shininess = Color(1, 1, 1, 1);
 
-	Vector<int> indices;
-	Vector<Vector2> points;
+	std::vector<int> indices;
+	std::vector<Vector2> points;
 
 	static const int circle_points = 64;
 
 	points.resize(circle_points);
 	for (int i = 0; i < circle_points; i++) {
 		float angle = (i / float(circle_points)) * 2 * Math_PI;
-		points.write[i].x = Math::cos(angle) * p_radius;
-		points.write[i].y = Math::sin(angle) * p_radius;
-		points.write[i] += p_pos;
+		points[i].x = Math::cos(angle) * p_radius;
+		points[i].y = Math::sin(angle) * p_radius;
+		points[i] += p_pos;
 	}
 	indices.resize((circle_points - 2) * 3);
 
 	for (int i = 0; i < circle_points - 2; i++) {
-		indices.write[i * 3 + 0] = 0;
-		indices.write[i * 3 + 1] = i + 1;
-		indices.write[i * 3 + 2] = i + 2;
+		indices[i * 3 + 0] = 0;
+		indices[i * 3 + 1] = i + 1;
+		indices[i * 3 + 2] = i + 2;
 	}
 
-	Vector<Color> color;
+	std::vector<Color> color;
 	color.push_back(p_color);
 	circle->polygon.create(indices, points, color);
 }
@@ -772,7 +777,7 @@ void RenderingServerCanvas::canvas_item_add_nine_patch(RID p_item, const Rect2 &
 	style->axis_x = p_x_axis_mode;
 	style->axis_y = p_y_axis_mode;
 }
-void RenderingServerCanvas::canvas_item_add_primitive(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, RID p_texture, float p_width, RID p_normal_map, RID p_specular_map, const Color &p_specular_color_shininess, RenderingServer::CanvasItemTextureFilter p_filter, RenderingServer::CanvasItemTextureRepeat p_repeat) {
+void RenderingServerCanvas::canvas_item_add_primitive(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs, RID p_texture, float p_width, RID p_normal_map, RID p_specular_map, const Color &p_specular_color_shininess, RenderingServer::CanvasItemTextureFilter p_filter, RenderingServer::CanvasItemTextureRepeat p_repeat) {
 
 	uint32_t pc = p_points.size();
 	ERR_FAIL_COND(pc == 0 || pc > 4);
@@ -803,7 +808,7 @@ void RenderingServerCanvas::canvas_item_add_primitive(RID p_item, const Vector<P
 	prim->specular_shininess = p_specular_color_shininess;
 }
 
-void RenderingServerCanvas::canvas_item_add_polygon(RID p_item, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, RID p_texture, RID p_normal_map, RID p_specular_map, const Color &p_specular_color_shininess, RenderingServer::CanvasItemTextureFilter p_filter, RenderingServer::CanvasItemTextureRepeat p_repeat) {
+void RenderingServerCanvas::canvas_item_add_polygon(RID p_item, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs, RID p_texture, RID p_normal_map, RID p_specular_map, const Color &p_specular_color_shininess, RenderingServer::CanvasItemTextureFilter p_filter, RenderingServer::CanvasItemTextureRepeat p_repeat) {
 
 	Item *canvas_item = canvas_item_owner.getornull(p_item);
 	ERR_FAIL_COND(!canvas_item);
@@ -815,7 +820,7 @@ void RenderingServerCanvas::canvas_item_add_polygon(RID p_item, const Vector<Poi
 	ERR_FAIL_COND(color_size != 0 && color_size != 1 && color_size != pointcount);
 	ERR_FAIL_COND(uv_size != 0 && (uv_size != pointcount));
 #endif
-	Vector<int> indices = Geometry::triangulate_polygon(p_points);
+	std::vector<int> indices = Geometry::triangulate_polygon(p_points);
 	ERR_FAIL_COND_MSG(indices.empty(), "Invalid polygon data, triangulation failed.");
 
 	Item::CommandPolygon *polygon = canvas_item->alloc_command<Item::CommandPolygon>();
@@ -826,7 +831,7 @@ void RenderingServerCanvas::canvas_item_add_polygon(RID p_item, const Vector<Poi
 	polygon->polygon.create(indices, p_points, p_colors, p_uvs);
 }
 
-void RenderingServerCanvas::canvas_item_add_triangle_array(RID p_item, const Vector<int> &p_indices, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs, const Vector<int> &p_bones, const Vector<float> &p_weights, RID p_texture, int p_count, RID p_normal_map, RID p_specular_map, const Color &p_specular_color_shininess, RenderingServer::CanvasItemTextureFilter p_filter, RenderingServer::CanvasItemTextureRepeat p_repeat) {
+void RenderingServerCanvas::canvas_item_add_triangle_array(RID p_item, const std::vector<int> &p_indices, const std::vector<Point2> &p_points, const std::vector<Color> &p_colors, const std::vector<Point2> &p_uvs, const std::vector<int> &p_bones, const std::vector<float> &p_weights, RID p_texture, int p_count, RID p_normal_map, RID p_specular_map, const Color &p_specular_color_shininess, RenderingServer::CanvasItemTextureFilter p_filter, RenderingServer::CanvasItemTextureRepeat p_repeat) {
 
 	Item *canvas_item = canvas_item_owner.getornull(p_item);
 	ERR_FAIL_COND(!canvas_item);
@@ -838,7 +843,7 @@ void RenderingServerCanvas::canvas_item_add_triangle_array(RID p_item, const Vec
 	ERR_FAIL_COND(!p_bones.empty() && p_bones.size() != vertex_count * 4);
 	ERR_FAIL_COND(!p_weights.empty() && p_weights.size() != vertex_count * 4);
 
-	Vector<int> indices = p_indices;
+	std::vector<int> indices = p_indices;
 
 	Item::CommandPolygon *polygon = canvas_item->alloc_command<Item::CommandPolygon>();
 	ERR_FAIL_COND(!polygon);
@@ -1265,20 +1270,20 @@ RID RenderingServerCanvas::canvas_occluder_polygon_create() {
 	occluder_poly->occluder = RSG::canvas_render->occluder_polygon_create();
 	return canvas_light_occluder_polygon_owner.make_rid(occluder_poly);
 }
-void RenderingServerCanvas::canvas_occluder_polygon_set_shape(RID p_occluder_polygon, const Vector<Vector2> &p_shape, bool p_closed) {
+void RenderingServerCanvas::canvas_occluder_polygon_set_shape(RID p_occluder_polygon, const std::vector<Vector2> &p_shape, bool p_closed) {
 
 	if (p_shape.size() < 3) {
 		canvas_occluder_polygon_set_shape_as_lines(p_occluder_polygon, p_shape);
 		return;
 	}
 
-	Vector<Vector2> lines;
+	std::vector<Vector2> lines;
 	int lc = p_shape.size() * 2;
 
 	lines.resize(lc - (p_closed ? 0 : 2));
 	{
-		Vector2 *w = lines.ptrw();
-		const Vector2 *r = p_shape.ptr();
+		Vector2 *w = lines.data();
+		const Vector2 *r = p_shape.data();
 
 		int max = lc / 2;
 		if (!p_closed) {
@@ -1295,7 +1300,7 @@ void RenderingServerCanvas::canvas_occluder_polygon_set_shape(RID p_occluder_pol
 
 	canvas_occluder_polygon_set_shape_as_lines(p_occluder_polygon, lines);
 }
-void RenderingServerCanvas::canvas_occluder_polygon_set_shape_as_lines(RID p_occluder_polygon, const Vector<Vector2> &p_shape) {
+void RenderingServerCanvas::canvas_occluder_polygon_set_shape_as_lines(RID p_occluder_polygon, const std::vector<Vector2> &p_shape) {
 
 	LightOccluderPolygon *occluder_poly = canvas_light_occluder_polygon_owner.getornull(p_occluder_polygon);
 	ERR_FAIL_COND(!occluder_poly);
@@ -1304,7 +1309,7 @@ void RenderingServerCanvas::canvas_occluder_polygon_set_shape_as_lines(RID p_occ
 	int lc = p_shape.size();
 	occluder_poly->aabb = Rect2();
 	{
-		const Vector2 *r = p_shape.ptr();
+		const Vector2 *r = p_shape.data();
 		for (int i = 0; i < lc; i++) {
 			if (i == 0)
 				occluder_poly->aabb.position = r[i];
@@ -1382,7 +1387,12 @@ bool RenderingServerCanvas::free(RID p_rid) {
 			} else if (canvas_item_owner.owns(canvas_item->parent)) {
 
 				Item *item_owner = canvas_item_owner.getornull(canvas_item->parent);
-				item_owner->child_items.erase(canvas_item);
+
+				auto it_find = std::find(item_owner->child_items.begin(), item_owner->child_items.end(), canvas_item);
+
+				if (it_find != item_owner->child_items.end()) {
+					item_owner->child_items.erase(it_find);
+				}
 
 				if (item_owner->sort_y) {
 					_mark_ysort_dirty(item_owner, canvas_item_owner);
