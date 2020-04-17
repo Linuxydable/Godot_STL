@@ -328,6 +328,7 @@
     <ClInclude Include="drivers\winmidi\midi_driver_winmidi.h" />
     <ClInclude Include="editor\collada\collada.h" />
     <ClInclude Include="editor\doc\doc_data.h" />
+    <ClInclude Include="editor\doc\doc_data_class_path.gen.h" />
     <ClInclude Include="editor\doc\doc_dump.h" />
     <ClInclude Include="editor\fileserver\editor_file_server.h" />
     <ClInclude Include="editor\import\editor_import_collada.h" />

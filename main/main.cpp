@@ -79,7 +79,7 @@
 
 #ifdef TOOLS_ENABLED
 #include "editor/doc_data.h"
-#include "editor/doc_data_class_path.gen.h"
+#include "editor/doc/doc_data_class_path.gen.h"
 #include "editor/editor_node.h"
 #include "editor/editor_settings.h"
 #include "editor/progress_dialog.h"
@@ -291,7 +291,7 @@ void Main::print_help(const char *p_binary) {
 			OS::get_singleton()->print(", ");
 		}
 		OS::get_singleton()->print("'%s' (", DisplayServer::get_create_function_name(i));
-		Vector<String> rd = DisplayServer::get_create_function_rendering_drivers(i);
+		std::vector<String> rd = DisplayServer::get_create_function_rendering_drivers(i);
 		for (int j = 0; j < rd.size(); j++) {
 			if (j > 0) {
 				OS::get_singleton()->print(", ");

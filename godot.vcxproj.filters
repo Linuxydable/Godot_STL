@@ -4838,6 +4838,9 @@
     <ClInclude Include="scene\2d\sprite_2d.h">
       <Filter>Header Files\scene\2d</Filter>
     </ClInclude>
+    <ClInclude Include="editor\doc\doc_data_class_path.gen.h">
+      <Filter>Source Files\editor\doc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\io\compression.cpp">
@@ -5253,12 +5256,6 @@
     </ClCompile>
     <ClCompile Include="editor\collada\collada.cpp">
       <Filter>Source Files\editor\collada</Filter>
-    </ClCompile>
-    <ClCompile Include="editor\doc\doc_data.cpp">
-      <Filter>Source Files\editor\doc</Filter>
-    </ClCompile>
-    <ClCompile Include="editor\doc\doc_dump.cpp">
-      <Filter>Source Files\editor\doc</Filter>
     </ClCompile>
     <ClCompile Include="editor\fileserver\editor_file_server.cpp">
       <Filter>Source Files\editor\fileserver</Filter>
@@ -9750,6 +9747,12 @@
     </ClCompile>
     <ClCompile Include="core\crypto\hashing_context.cpp">
       <Filter>Header Files\core\crypto</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\doc\doc_data.cpp">
+      <Filter>Source Files\editor</Filter>
+    </ClCompile>
+    <ClCompile Include="editor\doc\doc_dump.cpp">
+      <Filter>Source Files\editor</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
