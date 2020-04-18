@@ -93,7 +93,7 @@ public:
 	static int upnp_result(int in);
 
 	int get_device_count() const;
-	Ref<UPNPDevice> get_device(size_t index) const;
+	Ref<UPNPDevice> get_device(int index) const;
 	void add_device(Ref<UPNPDevice> device);
 	void set_device(size_t index, Ref<UPNPDevice> device);
 	void remove_device(size_t index);
