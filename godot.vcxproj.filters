@@ -729,9 +729,6 @@
     <Filter Include="Source Files\modules\svg">
       <UniqueIdentifier>{23DA2F45-ADA9-879E-58D9-41E40B087B64}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\modules\tga">
-      <UniqueIdentifier>{2C1B6A12-A400-E654-6987-EB5A5230385A}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\modules\theora">
       <UniqueIdentifier>{EF743D51-B3FE-2E8E-0188-2912E09F4F4A}</UniqueIdentifier>
     </Filter>
@@ -6220,12 +6217,6 @@
     <ClCompile Include="modules\svg\register_types.cpp">
       <Filter>Source Files\modules\svg</Filter>
     </ClCompile>
-    <ClCompile Include="modules\tga\image_loader_tga.cpp">
-      <Filter>Source Files\modules\tga</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\tga\register_types.cpp">
-      <Filter>Source Files\modules\tga</Filter>
-    </ClCompile>
     <ClCompile Include="modules\theora\register_types.cpp">
       <Filter>Source Files\modules\theora</Filter>
     </ClCompile>
@@ -9870,6 +9861,12 @@
     </ClCompile>
     <ClCompile Include="scene\3d\world_environment.cpp">
       <Filter>Header Files\scene\3d</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\tga\image_loader_tga.cpp">
+      <Filter>Header Files\modules\tga</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\tga\register_types.cpp">
+      <Filter>Header Files\modules\tga</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
