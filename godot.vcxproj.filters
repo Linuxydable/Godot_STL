@@ -699,9 +699,6 @@
     <Filter Include="Source Files\modules\mobile_vr">
       <UniqueIdentifier>{54DEE18D-CAB8-C382-2DAC-0F7DC4E89196}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\modules\ogg">
-      <UniqueIdentifier>{E831AE89-8902-9B0B-1E05-0FFA3AF7E960}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\modules\opensimplex">
       <UniqueIdentifier>{99966A73-B11B-6707-F309-0F8212406CC4}</UniqueIdentifier>
     </Filter>
@@ -933,9 +930,6 @@
     <Filter Include="Source Files\thirdparty\jpeg-compressor">
       <UniqueIdentifier>{2E0FEA63-ACE5-7ED5-EED4-C0EA5A5F5A5F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\thirdparty\libogg">
-      <UniqueIdentifier>{0D90C0F8-62A3-F2BD-EF17-C952A70486C3}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\thirdparty\libpng">
       <UniqueIdentifier>{F60ED271-97FF-AA2B-1112-C65ADBDDC795}</UniqueIdentifier>
     </Filter>
@@ -1112,6 +1106,12 @@
     </Filter>
     <Filter Include="Header Files\thirdparty\libvorbis\books">
       <UniqueIdentifier>{91a5f727-cd23-434f-a412-7be5f2b618ca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libogg">
+      <UniqueIdentifier>{244eff81-eb2c-4bd6-b366-1645154f0c4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libogg\ogg">
+      <UniqueIdentifier>{55f9637d-d671-43b8-8952-bfe56330303e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -5132,6 +5132,18 @@
     <ClInclude Include="thirdparty\libvorbis\books\uncoupled\res_books_uncoupled.h">
       <Filter>Header Files\thirdparty\libvorbis\books</Filter>
     </ClInclude>
+    <ClInclude Include="thirdparty\libogg\crctable.h">
+      <Filter>Header Files\thirdparty\libogg</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libogg\ogg\config_types.h">
+      <Filter>Header Files\thirdparty\libogg\ogg</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libogg\ogg\ogg.h">
+      <Filter>Header Files\thirdparty\libogg\ogg</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libogg\ogg\os_types.h">
+      <Filter>Header Files\thirdparty\libogg\ogg</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\io\compression.cpp">
@@ -6330,9 +6342,6 @@
     </ClCompile>
     <ClCompile Include="modules\mobile_vr\register_types.cpp">
       <Filter>Source Files\modules\mobile_vr</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\ogg\register_types.cpp">
-      <Filter>Source Files\modules\ogg</Filter>
     </ClCompile>
     <ClCompile Include="modules\opensimplex\noise_texture.cpp">
       <Filter>Source Files\modules\opensimplex</Filter>
@@ -7761,12 +7770,6 @@
     </ClCompile>
     <ClCompile Include="thirdparty\jpeg-compressor\jpgd.cpp">
       <Filter>Source Files\thirdparty\jpeg-compressor</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libogg\bitwise.c">
-      <Filter>Source Files\thirdparty\libogg</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libogg\framing.c">
-      <Filter>Source Files\thirdparty\libogg</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\libpng\png.c">
       <Filter>Source Files\thirdparty\libpng</Filter>
@@ -10143,6 +10146,15 @@
     </ClCompile>
     <ClCompile Include="thirdparty\libtheora\x86_vc\x86state.c">
       <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\ogg\register_types.cpp">
+      <Filter>Header Files\modules\ogg</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libogg\bitwise.c">
+      <Filter>Header Files\thirdparty\libogg</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libogg\framing.c">
+      <Filter>Header Files\thirdparty\libogg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
