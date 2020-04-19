@@ -34,14 +34,11 @@
 #include "core/print_string.h"
 
 Error ImageLoaderTGA::decode_tga_rle(const uint8_t *p_compressed_buffer, size_t p_pixel_size, uint8_t *p_uncompressed_buffer, size_t p_output_size) {
-	Error error;
+	std::vector<uint8_t> pixels;
 
-	Vector<uint8_t> pixels;
-	error = pixels.resize(p_pixel_size);
-	if (error != OK)
-		return error;
+	pixels.resize(p_pixel_size);
 
-	uint8_t *pixels_w = pixels.ptrw();
+	uint8_t *pixels_w = pixels.data();
 
 	size_t compressed_pos = 0;
 	size_t output_pos = 0;
@@ -116,9 +113,9 @@ Error ImageLoaderTGA::convert_to_image(Ref<Image> p_image, const uint8_t *p_buff
 		x_end = -1;
 	}
 
-	Vector<uint8_t> image_data;
+	std::vector<uint8_t> image_data;
 	image_data.resize(width * height * sizeof(uint32_t));
-	uint8_t *image_data_w = image_data.ptrw();
+	uint8_t *image_data_w = image_data.data();
 
 	size_t i = 0;
 	uint32_t x = x_start;
@@ -206,7 +203,7 @@ Error ImageLoaderTGA::convert_to_image(Ref<Image> p_image, const uint8_t *p_buff
 
 Error ImageLoaderTGA::load_image(Ref<Image> p_image, FileAccess *f, bool p_force_linear, float p_scale) {
 
-	Vector<uint8_t> src_image;
+	std::vector<uint8_t> src_image;
 	int src_image_len = f->get_len();
 	ERR_FAIL_COND_V(src_image_len == 0, ERR_FILE_CORRUPT);
 	ERR_FAIL_COND_V(src_image_len < (int)sizeof(tga_header_s), ERR_FILE_CORRUPT);
@@ -257,30 +254,28 @@ Error ImageLoaderTGA::load_image(Ref<Image> p_image, FileAccess *f, bool p_force
 	if (err == OK) {
 		f->seek(f->get_position() + tga_header.id_length);
 
-		Vector<uint8_t> palette;
+		std::vector<uint8_t> palette;
 
 		if (has_color_map) {
 			size_t color_map_size = tga_header.color_map_length * (tga_header.color_map_depth >> 3);
-			err = palette.resize(color_map_size);
-			if (err == OK) {
-				uint8_t *palette_w = palette.ptrw();
-				f->get_buffer(&palette_w[0], color_map_size);
-			} else {
-				return OK;
-			}
+
+			palette.resize(color_map_size);
+
+			uint8_t *palette_w = palette.data();
+			f->get_buffer(&palette_w[0], color_map_size);
 		}
 
-		uint8_t *src_image_w = src_image.ptrw();
+		uint8_t *src_image_w = src_image.data();
 		f->get_buffer(&src_image_w[0], src_image_len - f->get_position());
 
-		const uint8_t *src_image_r = src_image.ptr();
+		const uint8_t *src_image_r = src_image.data();
 
 		const size_t pixel_size = tga_header.pixel_depth >> 3;
 		const size_t buffer_size = (tga_header.image_width * tga_header.image_height) * pixel_size;
 
-		Vector<uint8_t> uncompressed_buffer;
+		std::vector<uint8_t> uncompressed_buffer;
 		uncompressed_buffer.resize(buffer_size);
-		uint8_t *uncompressed_buffer_w = uncompressed_buffer.ptrw();
+		uint8_t *uncompressed_buffer_w = uncompressed_buffer.data();
 		const uint8_t *uncompressed_buffer_r;
 
 		const uint8_t *buffer = nullptr;
@@ -290,7 +285,7 @@ Error ImageLoaderTGA::load_image(Ref<Image> p_image, FileAccess *f, bool p_force
 			err = decode_tga_rle(src_image_r, pixel_size, uncompressed_buffer_w, buffer_size);
 
 			if (err == OK) {
-				uncompressed_buffer_r = uncompressed_buffer.ptr();
+				uncompressed_buffer_r = uncompressed_buffer.data();
 				buffer = uncompressed_buffer_r;
 			}
 		} else {
@@ -298,7 +293,7 @@ Error ImageLoaderTGA::load_image(Ref<Image> p_image, FileAccess *f, bool p_force
 		};
 
 		if (err == OK) {
-			const uint8_t *palette_r = palette.ptr();
+			const uint8_t *palette_r = palette.data();
 			err = convert_to_image(p_image, buffer, tga_header, palette_r, is_monochrome);
 		}
 	}
