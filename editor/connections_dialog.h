@@ -62,7 +62,7 @@ public:
 		StringName signal;
 		StringName method;
 		uint32_t flags = 0;
-		Vector<Variant> binds;
+		std::vector<Variant> binds;
 
 		ConnectionData() {
 		}
