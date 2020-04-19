@@ -726,9 +726,6 @@
     <Filter Include="Source Files\modules\stb_vorbis">
       <UniqueIdentifier>{FA261259-BDAC-A594-F86C-E75F0146575B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\modules\theora">
-      <UniqueIdentifier>{EF743D51-B3FE-2E8E-0188-2912E09F4F4A}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\modules\tinyexr">
       <UniqueIdentifier>{840F0F29-0186-3D71-43C5-116E829403B3}</UniqueIdentifier>
     </Filter>
@@ -740,12 +737,6 @@
     </Filter>
     <Filter Include="Source Files\modules\visual_script">
       <UniqueIdentifier>{3D7BFB57-76D7-CF90-5B3D-E7E6CD3F6A81}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\modules\vorbis">
-      <UniqueIdentifier>{5743FB8A-06BB-1772-16F5-E685B815D4E5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\modules\vorbis\stub">
-      <UniqueIdentifier>{679FE707-FA8B-A74D-9573-3D6ACD609CCC}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\modules\webm">
       <UniqueIdentifier>{EC4A72C3-394A-9823-25FF-68B4DA40939F}</UniqueIdentifier>
@@ -951,12 +942,6 @@
     <Filter Include="Source Files\thirdparty\libsimplewebm">
       <UniqueIdentifier>{B49E3483-90F4-7D06-552B-9928D0411578}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\thirdparty\libtheora">
-      <UniqueIdentifier>{6B66D691-CCCA-7143-A473-E3DBB99BB5A2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\thirdparty\libvorbis">
-      <UniqueIdentifier>{CC4FE604-20C3-8937-B752-ADC5FAFBDF5E}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\thirdparty\libvpx">
       <UniqueIdentifier>{DBE2206F-EADE-AEAE-EB5C-99D9A0A3AB26}</UniqueIdentifier>
     </Filter>
@@ -1109,6 +1094,24 @@
     </Filter>
     <Filter Include="Header Files\servers\rendering\rasterize_rd">
       <UniqueIdentifier>{d4dd0e17-000f-4a6c-a4dc-b83460d8a3af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libtheora\theora">
+      <UniqueIdentifier>{03412c74-32de-409f-a9a3-b0b7337b6085}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libtheora\x86">
+      <UniqueIdentifier>{a9319a91-5773-463b-b6e8-9bf9e42eaa24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libtheora\x86_vc">
+      <UniqueIdentifier>{6e2f474d-e4f8-41cf-97e7-cd79a6b74c46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libvorbis\vorbis">
+      <UniqueIdentifier>{ee837604-d89d-4045-a6a8-a529fdaaf332}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libvorbis\modes">
+      <UniqueIdentifier>{3511b62e-796f-4582-a8f5-f26205b91190}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\thirdparty\libvorbis\books">
+      <UniqueIdentifier>{91a5f727-cd23-434f-a412-7be5f2b618ca}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -4958,6 +4961,177 @@
     <ClInclude Include="scene\3d\voxelizer.h">
       <Filter>Header Files\scene\3d</Filter>
     </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\backends.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\codec_internal.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\highlevel.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\lookup_data.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\masking.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\misc.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\os.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\scales.h">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="modules\vorbis\register_types.h">
+      <Filter>Header Files\modules\vorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\apiwrapper.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\dct.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\decint.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\encint.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\enquant.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\huffenc.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\huffman.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\mathops.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\modedec.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\ocintrin.h">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\theora\codec.h">
+      <Filter>Header Files\thirdparty\libtheora\theora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\theora\theora.h">
+      <Filter>Header Files\thirdparty\libtheora\theora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\theora\theoradec.h">
+      <Filter>Header Files\thirdparty\libtheora\theora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\theora\theoraenc.h">
+      <Filter>Header Files\thirdparty\libtheora\theora</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86\mmxfrag.h">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86\mmxloop.h">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86\x86enc.h">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86\x86int.h">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86_vc\mmxfrag.h">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86_vc\mmxloop.h">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86_vc\x86enc.h">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libtheora\x86_vc\x86int.h">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\floor_all.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\psych_8.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\psych_11.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\psych_16.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\psych_44.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\residue_8.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\residue_16.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\residue_44.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\residue_44p51.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\residue_44u.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_8.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_11.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_16.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_22.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_32.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_44.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_44p51.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_44u.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\modes\setup_X.h">
+      <Filter>Header Files\thirdparty\libvorbis\modes</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\vorbis\codec.h">
+      <Filter>Header Files\thirdparty\libvorbis\vorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\vorbis\vorbisenc.h">
+      <Filter>Header Files\thirdparty\libvorbis\vorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\vorbis\vorbisfile.h">
+      <Filter>Header Files\thirdparty\libvorbis\vorbis</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\books\coupled\res_books_51.h">
+      <Filter>Header Files\thirdparty\libvorbis\books</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\books\coupled\res_books_stereo.h">
+      <Filter>Header Files\thirdparty\libvorbis\books</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\books\floor\floor_books.h">
+      <Filter>Header Files\thirdparty\libvorbis\books</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\libvorbis\books\uncoupled\res_books_uncoupled.h">
+      <Filter>Header Files\thirdparty\libvorbis\books</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\io\compression.cpp">
@@ -6208,12 +6382,6 @@
     <ClCompile Include="modules\stb_vorbis\resource_importer_ogg_vorbis.cpp">
       <Filter>Source Files\modules\stb_vorbis</Filter>
     </ClCompile>
-    <ClCompile Include="modules\theora\register_types.cpp">
-      <Filter>Source Files\modules\theora</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\theora\video_stream_theora.cpp">
-      <Filter>Source Files\modules\theora</Filter>
-    </ClCompile>
     <ClCompile Include="modules\tinyexr\image_loader_tinyexr.cpp">
       <Filter>Source Files\modules\tinyexr</Filter>
     </ClCompile>
@@ -6264,9 +6432,6 @@
     </ClCompile>
     <ClCompile Include="modules\visual_script\visual_script_yield_nodes.cpp">
       <Filter>Source Files\modules\visual_script</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\vorbis\stub\register_types.cpp">
-      <Filter>Source Files\modules\vorbis\stub</Filter>
     </ClCompile>
     <ClCompile Include="modules\webm\register_types.cpp">
       <Filter>Source Files\modules\webm</Filter>
@@ -7656,102 +7821,6 @@
     </ClCompile>
     <ClCompile Include="thirdparty\libsimplewebm\WebMDemuxer.cpp">
       <Filter>Source Files\thirdparty\libsimplewebm</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\bitpack.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\cpu.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\decinfo.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\decode.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\dequant.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\fragment.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\huffdec.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\idct.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\info.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\internal.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\quant.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libtheora\state.c">
-      <Filter>Source Files\thirdparty\libtheora</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\bitrate.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\block.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\codebook.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\envelope.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\floor0.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\floor1.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\info.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\lookup.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\lpc.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\lsp.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\mapping0.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\mdct.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\psy.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\registry.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\res0.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\sharedbook.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\smallft.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\synthesis.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\vorbisfile.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\libvorbis\window.c">
-      <Filter>Source Files\thirdparty\libvorbis</Filter>
     </ClCompile>
     <ClCompile Include="thirdparty\libvpx\vp8\common\generic\systemdependent.c">
       <Filter>Source Files\thirdparty\libvpx\vp8\common\generic</Filter>
@@ -9864,6 +9933,216 @@
     </ClCompile>
     <ClCompile Include="modules\svg\register_types.cpp">
       <Filter>Header Files\modules\svg</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\theora\register_types.cpp">
+      <Filter>Header Files\modules\theora</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\theora\video_stream_theora.cpp">
+      <Filter>Header Files\modules\theora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\analysis.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\barkmel.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\psytune.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\tone.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\vorbisenc.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\vorbis\register_types.cpp">
+      <Filter>Header Files\modules\vorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\analyze.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\apiwrapper.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\bitpack.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\cpu.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\decapiwrapper.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\decinfo.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\decode.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\dequant.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\encapiwrapper.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\encfrag.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\encinfo.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\encode.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\encoder_disabled.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\enquant.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\fdct.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\fragment.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\huffdec.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\huffenc.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\idct.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\info.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\internal.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\mathops.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\mcenc.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\quant.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\rate.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\state.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\tokenize.c">
+      <Filter>Header Files\thirdparty\libtheora</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\bitrate.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\block.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\codebook.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\envelope.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\floor0.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\floor1.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\info.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\lookup.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\lpc.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\lsp.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\mapping0.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\mdct.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\psy.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\registry.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\res0.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\sharedbook.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\smallft.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\synthesis.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\vorbisfile.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libvorbis\window.c">
+      <Filter>Header Files\thirdparty\libvorbis</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\mmxencfrag.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\mmxfdct.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\mmxfrag.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\mmxidct.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\mmxstate.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\sse2fdct.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\x86enc.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86\x86state.c">
+      <Filter>Header Files\thirdparty\libtheora\x86</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86_vc\mmxencfrag.c">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86_vc\mmxfdct.c">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86_vc\mmxfrag.c">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86_vc\mmxidct.c">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86_vc\mmxstate.c">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86_vc\x86enc.c">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\libtheora\x86_vc\x86state.c">
+      <Filter>Header Files\thirdparty\libtheora\x86_vc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
