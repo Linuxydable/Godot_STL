@@ -44,12 +44,12 @@
 #include "scene/2d/skeleton_2d.h"
 
 void AnimatedValuesBackup::update_skeletons() {
-	for (const Entry& c_entry : entries) {
-		if (c_entry.bone_idx != -1) {
+	for (int i = 0; i < entries.size(); i++) {
+		if (entries[i].bone_idx != -1) {
 			// 3D bone
 			Object::cast_to<Skeleton3D>(entries[i].object)->notification(Skeleton3D::NOTIFICATION_UPDATE_SKELETON);
 		} else {
-			Bone2D *bone = Object::cast_to<Bone2D>(c_entry.object);
+			Bone2D *bone = Object::cast_to<Bone2D>(entries[i].object);
 			if (bone && bone->skeleton) {
 				// 2D bone
 				bone->skeleton->_update_transform();
@@ -1595,9 +1595,10 @@ AnimatedValuesBackup AnimationPlayer::backup_animated_values() {
 }
 
 void AnimationPlayer::restore_animated_values(const AnimatedValuesBackup &p_backup){
-	for (auto &&c_entry : p_backup.entries) {
-		if (c_entry.bone_idx == -1) {
-			c_entry.object->set_indexed(c_entry.subpath, c_entry.value);
+	for (int i = 0; i < p_backup.entries.size(); i++) {
+		const AnimatedValuesBackup::Entry *entry = &p_backup.entries[i];
+		if (entry->bone_idx == -1) {
+			entry->object->set_indexed(entry->subpath, entry->value);
 		} else {
 			Object::cast_to<Skeleton3D>(entry->object)->set_bone_pose(entry->bone_idx, entry->value);
 		}
