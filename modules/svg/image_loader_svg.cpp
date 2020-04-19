@@ -94,9 +94,9 @@ void ImageLoaderSVG::set_convert_colors(Dictionary *p_replace_color) {
 	}
 }
 
-Error ImageLoaderSVG::_create_image(Ref<Image> p_image, const Vector<uint8_t> *p_data, float p_scale, bool upsample, bool convert_colors) {
+Error ImageLoaderSVG::_create_image(Ref<Image> p_image, const std::vector<uint8_t> *p_data, float p_scale, bool upsample, bool convert_colors) {
 	NSVGimage *svg_image;
-	const uint8_t *src_r = p_data->ptr();
+	const uint8_t *src_r = p_data->data();
 	svg_image = nsvgParse((char *)src_r, "px", 96);
 	if (svg_image == nullptr) {
 		ERR_PRINT("SVG Corrupted");
@@ -115,10 +115,10 @@ Error ImageLoaderSVG::_create_image(Ref<Image> p_image, const Vector<uint8_t> *p
 	const int h = (int)(svg_image->height * p_scale * upscale);
 	ERR_FAIL_COND_V_MSG(h > Image::MAX_HEIGHT, ERR_PARAMETER_RANGE_ERROR, vformat("Can't create image from SVG with scale %s, the resulting image size exceeds max height.", rtos(p_scale)));
 
-	Vector<uint8_t> dst_image;
+	std::vector<uint8_t> dst_image;
 	dst_image.resize(w * h * 4);
 
-	uint8_t *dw = dst_image.ptrw();
+	uint8_t *dw = dst_image.data();
 
 	rasterizer.rasterize(svg_image, 0, 0, p_scale * upscale, (unsigned char *)dw, w, h, w * 4);
 
@@ -135,9 +135,9 @@ Error ImageLoaderSVG::_create_image(Ref<Image> p_image, const Vector<uint8_t> *p
 Error ImageLoaderSVG::create_image_from_string(Ref<Image> p_image, const char *p_svg_str, float p_scale, bool upsample, bool convert_colors) {
 
 	size_t str_len = strlen(p_svg_str);
-	Vector<uint8_t> src_data;
+	std::vector<uint8_t> src_data;
 	src_data.resize(str_len + 1);
-	uint8_t *src_w = src_data.ptrw();
+	uint8_t *src_w = src_data.data();
 	memcpy(src_w, p_svg_str, str_len + 1);
 
 	return _create_image(p_image, &src_data, p_scale, upsample, convert_colors);
@@ -146,9 +146,9 @@ Error ImageLoaderSVG::create_image_from_string(Ref<Image> p_image, const char *p
 Error ImageLoaderSVG::load_image(Ref<Image> p_image, FileAccess *f, bool p_force_linear, float p_scale) {
 
 	uint32_t size = f->get_len();
-	Vector<uint8_t> src_image;
+	std::vector<uint8_t> src_image;
 	src_image.resize(size + 1);
-	uint8_t *src_w = src_image.ptrw();
+	uint8_t *src_w = src_image.data();
 	f->get_buffer(src_w, size);
 	src_w[size] = '\0';
 

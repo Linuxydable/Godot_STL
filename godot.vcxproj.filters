@@ -726,9 +726,6 @@
     <Filter Include="Source Files\modules\stb_vorbis">
       <UniqueIdentifier>{FA261259-BDAC-A594-F86C-E75F0146575B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\modules\svg">
-      <UniqueIdentifier>{23DA2F45-ADA9-879E-58D9-41E40B087B64}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\modules\theora">
       <UniqueIdentifier>{EF743D51-B3FE-2E8E-0188-2912E09F4F4A}</UniqueIdentifier>
     </Filter>
@@ -6211,12 +6208,6 @@
     <ClCompile Include="modules\stb_vorbis\resource_importer_ogg_vorbis.cpp">
       <Filter>Source Files\modules\stb_vorbis</Filter>
     </ClCompile>
-    <ClCompile Include="modules\svg\image_loader_svg.cpp">
-      <Filter>Source Files\modules\svg</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\svg\register_types.cpp">
-      <Filter>Source Files\modules\svg</Filter>
-    </ClCompile>
     <ClCompile Include="modules\theora\register_types.cpp">
       <Filter>Source Files\modules\theora</Filter>
     </ClCompile>
@@ -9867,6 +9858,12 @@
     </ClCompile>
     <ClCompile Include="modules\tga\register_types.cpp">
       <Filter>Header Files\modules\tga</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\svg\image_loader_svg.cpp">
+      <Filter>Header Files\modules\svg</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\svg\register_types.cpp">
+      <Filter>Header Files\modules\svg</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
