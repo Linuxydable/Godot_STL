@@ -76,7 +76,7 @@ private:
 	Thread *joy_thread;
 	InputFilter *input;
 	Joypad joypads[JOYPADS_MAX];
-	Vector<String> attached_devices;
+	std::vector<String> attached_devices;
 
 	static void joy_thread_func(void *p_user);
 
