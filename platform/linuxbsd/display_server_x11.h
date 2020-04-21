@@ -168,7 +168,7 @@ class DisplayServerX11 : public DisplayServer {
 
 	struct {
 		int opcode;
-		Vector<int> touch_devices;
+		std::vector<int> touch_devices;
 		Map<int, Vector2> absolute_devices;
 		Map<int, Vector3> pen_devices;
 		XIEventMask all_event_mask;
@@ -203,7 +203,7 @@ class DisplayServerX11 : public DisplayServer {
 	Cursor cursors[CURSOR_MAX];
 	Cursor null_cursor;
 	CursorShape current_cursor;
-	Map<CursorShape, Vector<Variant>> cursors_cache;
+	Map<CursorShape, std::vector<Variant>> cursors_cache;
 
 	bool layered_window;
 
@@ -266,7 +266,7 @@ public:
 	virtual int screen_get_dpi(int p_screen = SCREEN_OF_MAIN_WINDOW) const;
 	virtual bool screen_is_touchscreen(int p_screen = SCREEN_OF_MAIN_WINDOW) const;
 
-	virtual Vector<DisplayServer::WindowID> get_window_list() const;
+	virtual std::vector<DisplayServer::WindowID> get_window_list() const;
 
 	virtual WindowID create_sub_window(WindowMode p_mode, uint32_t p_flags, const Rect2i &p_rect = Rect2i());
 	virtual void delete_sub_window(WindowID p_id);
@@ -338,7 +338,7 @@ public:
 	virtual void set_icon(const Ref<Image> &p_icon);
 
 	static DisplayServer *create_func(const String &p_rendering_driver, WindowMode p_mode, uint32_t p_flags, const Vector2i &p_resolution, Error &r_error);
-	static Vector<String> get_rendering_drivers_func();
+	static std::vector<String> get_rendering_drivers_func();
 
 	static void register_x11_driver();
 

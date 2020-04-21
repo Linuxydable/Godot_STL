@@ -135,10 +135,10 @@ void DisplayServerX11::alert(const String &p_alert, const String &p_title) {
 	const char *message_programs[] = { "zenity", "kdialog", "Xdialog", "xmessage" };
 
 	String path = OS::get_singleton()->get_environment("PATH");
-	Vector<String> path_elems = path.split(":", false);
+	std::vector<String> path_elems = path.split(":", false);
 	String program;
 
-	for (int i = 0; i < path_elems.size(); i++) {
+	for (decltype(path_elems.size()) i = 0; i < path_elems.size(); i++) {
 		for (uint64_t k = 0; k < sizeof(message_programs) / sizeof(char *); k++) {
 			String tested_path = path_elems[i].plus_file(message_programs[k]);
 
@@ -662,10 +662,10 @@ bool DisplayServerX11::screen_is_touchscreen(int p_screen) const {
 	return DisplayServer::screen_is_touchscreen(p_screen);
 }
 
-Vector<DisplayServer::WindowID> DisplayServerX11::get_window_list() const {
+std::vector<DisplayServer::WindowID> DisplayServerX11::get_window_list() const {
 	_THREAD_SAFE_METHOD_
 
-	Vector<int> ret;
+	std::vector<int> ret;
 	for (Map<WindowID, WindowData>::Element *E = windows.front(); E; E = E->next()) {
 		ret.push_back(E->key());
 	}
@@ -1757,7 +1757,7 @@ void DisplayServerX11::cursor_set_custom_image(const RES &p_cursor, CursorShape 
 
 	if (p_cursor.is_valid()) {
 
-		Map<CursorShape, Vector<Variant>>::Element *cursor_c = cursors_cache.find(p_shape);
+		Map<CursorShape, std::vector<Variant>>::Element *cursor_c = cursors_cache.find(p_shape);
 
 		if (cursor_c) {
 			if (cursor_c->get()[0] == p_cursor && cursor_c->get()[1] == p_hotspot) {
@@ -1832,7 +1832,7 @@ void DisplayServerX11::cursor_set_custom_image(const RES &p_cursor, CursorShape 
 		// Save it for a further usage
 		cursors[p_shape] = XcursorImageLoadCursor(x11_display, cursor_image);
 
-		Vector<Variant> params;
+		std::vector<Variant> params;
 		params.push_back(p_cursor);
 		params.push_back(p_hotspot);
 		cursors_cache.insert(p_shape, params);
@@ -1874,7 +1874,7 @@ DisplayServerX11::LatinKeyboardVariant DisplayServerX11::get_latin_keyboard_vari
 	char *layout = XGetAtomName(x11_display, xkbdesc->names->symbols);
 	ERR_FAIL_COND_V(!layout, LATIN_KEYBOARD_QWERTY);
 
-	Vector<String> info = String(layout).split("+");
+	std::vector<String> info = String(layout).split("+");
 	ERR_FAIL_INDEX_V(1, info.size(), LATIN_KEYBOARD_QWERTY);
 
 	if (info[1].find("colemak") != -1) {
@@ -2862,9 +2862,9 @@ void DisplayServerX11::process_events() {
 
 					Property p = _read_property(x11_display, windows[window_id].x11_window, XInternAtom(x11_display, "PRIMARY", 0));
 
-					Vector<String> files = String((char *)p.data).split("\n", false);
-					for (int i = 0; i < files.size(); i++) {
-						files.write[i] = files[i].replace("file://", "").http_unescape().strip_edges();
+					std::vector<String> files = String((char *)p.data).split("\n", false);
+					for (decltype(files.size()) i = 0; i < files.size(); i++) {
+						files[i] = files[i].replace("file://", "").http_unescape().strip_edges();
 					}
 
 					if (!windows[window_id].drop_files_callback.is_null()) {
@@ -3087,16 +3087,16 @@ void DisplayServerX11::set_icon(const Ref<Image> &p_icon) {
 			}
 
 			// We're using long to have wordsize (32Bit build -> 32 Bits, 64 Bit build -> 64 Bits
-			Vector<long> pd;
+			std::vector<long> pd;
 
 			pd.resize(2 + w * h);
 
-			pd.write[0] = w;
-			pd.write[1] = h;
+			pd[0] = w;
+			pd[1] = h;
 
-			const uint8_t *r = img->get_data().ptr();
+			const uint8_t *r = img->get_data().data();
 
-			long *wr = &pd.write[2];
+			long *wr = &pd[2];
 			uint8_t const *pr = r;
 
 			for (int i = 0; i < w * h; i++) {
@@ -3107,7 +3107,7 @@ void DisplayServerX11::set_icon(const Ref<Image> &p_icon) {
 				pr += 4;
 			}
 
-			XChangeProperty(x11_display, wd.x11_window, net_wm_icon, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pd.ptr(), pd.size());
+			XChangeProperty(x11_display, wd.x11_window, net_wm_icon, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pd.data(), pd.size());
 
 			if (!g_set_icon_error)
 				break;
@@ -3120,8 +3120,8 @@ void DisplayServerX11::set_icon(const Ref<Image> &p_icon) {
 	XSetErrorHandler(oldHandler);
 }
 
-Vector<String> DisplayServerX11::get_rendering_drivers_func() {
-	Vector<String> drivers;
+std::vector<String> DisplayServerX11::get_rendering_drivers_func() {
+	std::vector<String> drivers;
 
 #ifdef VULKAN_ENABLED
 	drivers.push_back("vulkan");
@@ -3557,7 +3557,7 @@ DisplayServerX11::DisplayServerX11(const String &p_rendering_driver, WindowMode 
 
 			if (getenv("LD_LIBRARY_PATH")) {
 				String ld_library_path(getenv("LD_LIBRARY_PATH"));
-				Vector<String> libraries = ld_library_path.split(":");
+				std::vector<String> libraries = ld_library_path.split(":");
 
 				for (int i = 0; i < libraries.size(); ++i) {
 					if (FileAccess::exists(libraries[i] + "/libGL.so.1") ||
