@@ -60,15 +60,15 @@ Error CryptoKeyMbedTLS::load(String p_path) {
 	int flen = f->get_len();
 	out.resize(flen + 1);
 	{
-		uint8_t *w = out.ptrw();
+		uint8_t *w = out.data();
 		f->get_buffer(w, flen);
 		w[flen] = 0; //end f string
 	}
 	memdelete(f);
 
-	int ret = mbedtls_pk_parse_key(&pkey, out.ptr(), out.size(), nullptr, 0);
+	int ret = mbedtls_pk_parse_key(&pkey, out.data(), out.size(), nullptr, 0);
 	// We MUST zeroize the memory for safety!
-	mbedtls_platform_zeroize(out.ptrw(), out.size());
+	mbedtls_platform_zeroize(out.data(), out.size());
 	ERR_FAIL_COND_V_MSG(ret, FAILED, "Error parsing private key '" + itos(ret) + "'.");
 
 	return OK;
@@ -109,13 +109,13 @@ Error X509CertificateMbedTLS::load(String p_path) {
 	int flen = f->get_len();
 	out.resize(flen + 1);
 	{
-		uint8_t *w = out.ptrw();
+		uint8_t *w = out.data();
 		f->get_buffer(w, flen);
 		w[flen] = 0; //end f string
 	}
 	memdelete(f);
 
-	int ret = mbedtls_x509_crt_parse(&cert, out.ptr(), out.size());
+	int ret = mbedtls_x509_crt_parse(&cert, out.data(), out.size());
 	ERR_FAIL_COND_V_MSG(ret, FAILED, "Error parsing some certificates: " + itos(ret));
 
 	return OK;
@@ -212,13 +212,13 @@ void CryptoMbedTLS::load_default_certificates(String p_path) {
 		// Use builtin certs only if user did not override it in project settings.
 		PackedByteArray out;
 		out.resize(_certs_uncompressed_size + 1);
-		uint8_t *w = out.ptrw();
+		uint8_t *w = out.data();
 		Compression::decompress(w, _certs_uncompressed_size, _certs_compressed, _certs_compressed_size, Compression::MODE_DEFLATE);
 		w[_certs_uncompressed_size] = 0; // Make sure it ends with string terminator
 #ifdef DEBUG_ENABLED
 		print_verbose("Loaded builtin certs");
 #endif
-		default_certs->load_from_memory(out.ptr(), out.size());
+		default_certs->load_from_memory(out.data(), out.size());
 	}
 #endif
 }
@@ -279,6 +279,6 @@ Ref<X509Certificate> CryptoMbedTLS::generate_self_signed_certificate(Ref<CryptoK
 PackedByteArray CryptoMbedTLS::generate_random_bytes(int p_bytes) {
 	PackedByteArray out;
 	out.resize(p_bytes);
-	mbedtls_ctr_drbg_random(&ctr_drbg, out.ptrw(), p_bytes);
+	mbedtls_ctr_drbg_random(&ctr_drbg, out.data(), p_bytes);
 	return out;
 }
