@@ -164,13 +164,13 @@ void AudioStreamOGGVorbis::clear_data() {
 	}
 }
 
-void AudioStreamOGGVorbis::set_data(const Vector<uint8_t> &p_data) {
+void AudioStreamOGGVorbis::set_data(const std::vector<uint8_t> &p_data) {
 
 	int src_data_len = p_data.size();
 #define MAX_TEST_MEM (1 << 20)
 
 	uint32_t alloc_try = 1024;
-	Vector<char> alloc_mem;
+	std::vector<char> alloc_mem;
 	char *w;
 	stb_vorbis *ogg_stream = nullptr;
 	stb_vorbis_alloc ogg_alloc;
@@ -178,12 +178,12 @@ void AudioStreamOGGVorbis::set_data(const Vector<uint8_t> &p_data) {
 	while (alloc_try < MAX_TEST_MEM) {
 
 		alloc_mem.resize(alloc_try);
-		w = alloc_mem.ptrw();
+		w = alloc_mem.data();
 
 		ogg_alloc.alloc_buffer = w;
 		ogg_alloc.alloc_buffer_length_in_bytes = alloc_try;
 
-		const uint8_t *src_datar = p_data.ptr();
+		const uint8_t *src_datar = p_data.data();
 
 		int error;
 		ogg_stream = stb_vorbis_open_memory((const unsigned char *)src_datar, src_data_len, &error, &ogg_alloc);
@@ -219,14 +219,14 @@ void AudioStreamOGGVorbis::set_data(const Vector<uint8_t> &p_data) {
 	}
 }
 
-Vector<uint8_t> AudioStreamOGGVorbis::get_data() const {
+std::vector<uint8_t> AudioStreamOGGVorbis::get_data() const {
 
-	Vector<uint8_t> vdata;
+	std::vector<uint8_t> vdata;
 
 	if (data_len && data) {
 		vdata.resize(data_len);
 		{
-			uint8_t *w = vdata.ptrw();
+			uint8_t *w = vdata.data();
 			copymem(w, data, data_len);
 		}
 	}
