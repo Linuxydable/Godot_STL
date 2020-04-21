@@ -1047,9 +1047,6 @@
     <Filter Include="Source Files\thirdparty\recastnavigation\Recast\Source">
       <UniqueIdentifier>{E75BF57F-4209-8080-C62F-488200C2F230}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\thirdparty\squish">
-      <UniqueIdentifier>{21DB5E4E-BB4D-60B2-FA2A-9DA44FF146C9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\thirdparty\vhacd">
       <UniqueIdentifier>{C529C7BD-7E77-D0C4-B5E9-AAC4088F01CF}</UniqueIdentifier>
     </Filter>
@@ -5144,6 +5141,21 @@
     <ClInclude Include="thirdparty\libogg\ogg\os_types.h">
       <Filter>Header Files\thirdparty\libogg\ogg</Filter>
     </ClInclude>
+    <ClInclude Include="thirdparty\squish\config.h">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\squish\simd.h">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\squish\simd_float.h">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\squish\simd_sse.h">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\squish\simd_ve.h">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\io\compression.cpp">
@@ -9181,33 +9193,6 @@
     <ClCompile Include="thirdparty\recastnavigation\Recast\Source\RecastRegion.cpp">
       <Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\squish\alpha.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\clusterfit.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\colourblock.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\colourfit.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\colourset.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\maths.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\rangefit.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\singlecolourfit.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\squish\squish.cpp">
-      <Filter>Source Files\thirdparty\squish</Filter>
-    </ClCompile>
     <ClCompile Include="thirdparty\vhacd\src\btAlignedAllocator.cpp">
       <Filter>Source Files\thirdparty\vhacd\src</Filter>
     </ClCompile>
@@ -10156,8 +10141,38 @@
     <ClCompile Include="thirdparty\libogg\framing.c">
       <Filter>Header Files\thirdparty\libogg</Filter>
     </ClCompile>
+    <ClCompile Include="thirdparty\squish\alpha.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\clusterfit.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\colourblock.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\colourfit.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\colourset.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\maths.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\rangefit.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\singlecolourfit.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\squish\squish.cpp">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="SConstruct" />
+    <None Include="thirdparty\squish\singlecolourlookup.inl">
+      <Filter>Header Files\thirdparty\squish</Filter>
+    </None>
   </ItemGroup>
 </Project>
