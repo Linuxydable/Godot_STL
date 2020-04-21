@@ -708,9 +708,6 @@
     <Filter Include="Source Files\modules\opus\stub">
       <UniqueIdentifier>{0988C165-F32C-858E-ECC3-6552CCC17DEA}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\modules\pvr">
-      <UniqueIdentifier>{3C4444E1-14BF-033A-4D92-26F12873BAB7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\modules\recast">
       <UniqueIdentifier>{B61C0A32-1819-5371-3AB6-42509D3D6D9E}</UniqueIdentifier>
     </Filter>
@@ -1034,9 +1031,6 @@
     </Filter>
     <Filter Include="Source Files\thirdparty\opus\silk\float">
       <UniqueIdentifier>{DEECDEEC-CF34-1CEC-D41B-D8F5EA3AE7C0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\thirdparty\pvrtccompressor">
-      <UniqueIdentifier>{898FCAF7-6492-F624-B251-219C1275952C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\thirdparty\recastnavigation">
       <UniqueIdentifier>{E12F7E76-AC19-1266-3AEB-AC8C724BE362}</UniqueIdentifier>
@@ -5156,6 +5150,30 @@
     <ClInclude Include="thirdparty\squish\simd_ve.h">
       <Filter>Header Files\thirdparty\squish</Filter>
     </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\AlphaBitmap.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\Bitmap.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\BitUtility.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\ColorRgba.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\Interval.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\Point2.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\RgbaBitmap.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
+    <ClInclude Include="thirdparty\pvrtccompressor\RgbBitmap.h">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\io\compression.cpp">
@@ -6366,12 +6384,6 @@
     </ClCompile>
     <ClCompile Include="modules\opus\stub\register_types.cpp">
       <Filter>Source Files\modules\opus\stub</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\pvr\register_types.cpp">
-      <Filter>Source Files\modules\pvr</Filter>
-    </ClCompile>
-    <ClCompile Include="modules\pvr\texture_loader_pvr.cpp">
-      <Filter>Source Files\modules\pvr</Filter>
     </ClCompile>
     <ClCompile Include="modules\recast\navigation_mesh_editor_plugin.cpp">
       <Filter>Source Files\modules\recast</Filter>
@@ -9145,21 +9157,6 @@
     <ClCompile Include="thirdparty\opus\stream.c">
       <Filter>Source Files\thirdparty\opus</Filter>
     </ClCompile>
-    <ClCompile Include="thirdparty\pvrtccompressor\BitScale.cpp">
-      <Filter>Source Files\thirdparty\pvrtccompressor</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\pvrtccompressor\MortonTable.cpp">
-      <Filter>Source Files\thirdparty\pvrtccompressor</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\pvrtccompressor\PvrTcDecoder.cpp">
-      <Filter>Source Files\thirdparty\pvrtccompressor</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\pvrtccompressor\PvrTcEncoder.cpp">
-      <Filter>Source Files\thirdparty\pvrtccompressor</Filter>
-    </ClCompile>
-    <ClCompile Include="thirdparty\pvrtccompressor\PvrTcPacket.cpp">
-      <Filter>Source Files\thirdparty\pvrtccompressor</Filter>
-    </ClCompile>
     <ClCompile Include="thirdparty\recastnavigation\Recast\Source\Recast.cpp">
       <Filter>Source Files\thirdparty\recastnavigation\Recast\Source</Filter>
     </ClCompile>
@@ -10167,6 +10164,27 @@
     </ClCompile>
     <ClCompile Include="thirdparty\squish\squish.cpp">
       <Filter>Header Files\thirdparty\squish</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\pvrtccompressor\BitScale.cpp">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\pvrtccompressor\MortonTable.cpp">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\pvrtccompressor\PvrTcDecoder.cpp">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\pvrtccompressor\PvrTcEncoder.cpp">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="thirdparty\pvrtccompressor\PvrTcPacket.cpp">
+      <Filter>Header Files\thirdparty\pvrtccompressor</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\pvr\register_types.cpp">
+      <Filter>Header Files\modules\pvr</Filter>
+    </ClCompile>
+    <ClCompile Include="modules\pvr\texture_loader_pvr.cpp">
+      <Filter>Header Files\modules\pvr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
