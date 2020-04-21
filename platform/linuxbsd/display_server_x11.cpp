@@ -138,7 +138,7 @@ void DisplayServerX11::alert(const String &p_alert, const String &p_title) {
 	std::vector<String> path_elems = path.split(":", false);
 	String program;
 
-	for (decltype(path_elems.size()) i = 0; i < path_elems.size(); i++) {
+	for (int i = 0; i < path_elems.size(); i++) {
 		for (uint64_t k = 0; k < sizeof(message_programs) / sizeof(char *); k++) {
 			String tested_path = path_elems[i].plus_file(message_programs[k]);
 
@@ -2863,8 +2863,8 @@ void DisplayServerX11::process_events() {
 					Property p = _read_property(x11_display, windows[window_id].x11_window, XInternAtom(x11_display, "PRIMARY", 0));
 
 					std::vector<String> files = String((char *)p.data).split("\n", false);
-					for (decltype(files.size()) i = 0; i < files.size(); i++) {
-						files[i] = files[i].replace("file://", "").http_unescape().strip_edges();
+					for (int i = 0; i < files.size(); i++) {
+						files.write[i] = files[i].replace("file://", "").http_unescape().strip_edges();
 					}
 
 					if (!windows[window_id].drop_files_callback.is_null()) {
