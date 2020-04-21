@@ -2864,7 +2864,7 @@ void DisplayServerX11::process_events() {
 
 					std::vector<String> files = String((char *)p.data).split("\n", false);
 					for (int i = 0; i < files.size(); i++) {
-						files.write[i] = files[i].replace("file://", "").http_unescape().strip_edges();
+						files[i] = files[i].replace("file://", "").http_unescape().strip_edges();
 					}
 
 					if (!windows[window_id].drop_files_callback.is_null()) {
