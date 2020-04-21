@@ -144,7 +144,7 @@ protected:
 
 		/* BOX SHAPE */
 
-		Vector<Plane> box_planes = Geometry::build_box_planes(Vector3(0.5, 0.5, 0.5));
+		std::vector<Plane> box_planes = Geometry::build_box_planes(Vector3(0.5, 0.5, 0.5));
 		RID box_mesh = vs->mesh_create();
 		Geometry::MeshData box_data = Geometry::build_convex_mesh(box_planes);
 		vs->mesh_add_surface_from_mesh_data(box_mesh, box_data);
@@ -156,7 +156,7 @@ protected:
 
 		/* CAPSULE SHAPE */
 
-		Vector<Plane> capsule_planes = Geometry::build_capsule_planes(0.5, 0.7, 12, Vector3::AXIS_Z);
+		std::vector<Plane> capsule_planes = Geometry::build_capsule_planes(0.5, 0.7, 12, Vector3::AXIS_Z);
 
 		RID capsule_mesh = vs->mesh_create();
 		Geometry::MeshData capsule_data = Geometry::build_convex_mesh(capsule_planes);
@@ -173,7 +173,7 @@ protected:
 
 		/* CONVEX SHAPE */
 
-		Vector<Plane> convex_planes = Geometry::build_cylinder_planes(0.5, 0.7, 5, Vector3::AXIS_Z);
+		std::vector<Plane> convex_planes = Geometry::build_cylinder_planes(0.5, 0.7, 5, Vector3::AXIS_Z);
 
 		RID convex_mesh = vs->mesh_create();
 		Geometry::MeshData convex_data = Geometry::build_convex_mesh(convex_planes);
@@ -187,14 +187,14 @@ protected:
 		type_shape_map[PhysicsServer3D::SHAPE_CONVEX_POLYGON] = convex_shape;
 	}
 
-	void make_trimesh(Vector<Vector3> p_faces, const Transform &p_xform = Transform()) {
+	void make_trimesh(std::vector<Vector3> p_faces, const Transform &p_xform = Transform()) {
 
 		RenderingServer *vs = RenderingServer::get_singleton();
 		PhysicsServer3D *ps = PhysicsServer3D::get_singleton();
 		RID trimesh_shape = ps->shape_create(PhysicsServer3D::SHAPE_CONCAVE_POLYGON);
 		ps->shape_set_data(trimesh_shape, p_faces);
 		p_faces = ps->shape_get_data(trimesh_shape); // optimized one
-		Vector<Vector3> normals; // for drawing
+		std::vector<Vector3> normals; // for drawing
 		for (int i = 0; i < p_faces.size() / 3; i++) {
 
 			Plane p(p_faces[i * 3 + 0], p_faces[i * 3 + 1], p_faces[i * 3 + 2]);
@@ -223,21 +223,21 @@ protected:
 
 	void make_grid(int p_width, int p_height, float p_cellsize, float p_cellheight, const Transform &p_xform = Transform()) {
 
-		Vector<Vector<float>> grid;
+		std::vector<std::vector<float>> grid;
 
 		grid.resize(p_width);
 
 		for (int i = 0; i < p_width; i++) {
 
-			grid.write[i].resize(p_height);
+			grid[i].resize(p_height);
 
 			for (int j = 0; j < p_height; j++) {
 
-				grid.write[i].write[j] = 1.0 + Math::random(-p_cellheight, p_cellheight);
+				grid[i][j] = 1.0 + Math::random(-p_cellheight, p_cellheight);
 			}
 		}
 
-		Vector<Vector3> faces;
+		std::vector<Vector3> faces;
 
 		for (int i = 1; i < p_width; i++) {
 
@@ -364,7 +364,7 @@ public:
 		RenderingServer *vs = RenderingServer::get_singleton();
 		PhysicsServer3D *ps = PhysicsServer3D::get_singleton();
 
-		Vector<Plane> capsule_planes = Geometry::build_capsule_planes(0.5, 1, 12, 5, Vector3::AXIS_Y);
+		std::vector<Plane> capsule_planes = Geometry::build_capsule_planes(0.5, 1, 12, 5, Vector3::AXIS_Y);
 
 		RID capsule_mesh = vs->mesh_create();
 		Geometry::MeshData capsule_data = Geometry::build_convex_mesh(capsule_planes);
