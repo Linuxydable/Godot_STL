@@ -453,21 +453,21 @@ MainLoop *test() {
 		print_line("RGBE: " + Color(rd, gd, bd));
 	}
 
-	Vector<int> ints;
+	std::vector<int> ints;
 	ints.resize(20);
 
 	{
 		int *w;
-		w = ints.ptrw();
+		w = ints.data();
 		for (int i = 0; i < ints.size(); i++) {
 			w[i] = i;
 		}
 	}
 
-	Vector<int> posho = ints;
+	std::vector<int> posho = ints;
 
 	{
-		const int *r = posho.ptr();
+		const int *r = posho.data();
 		for (int i = 0; i < posho.size(); i++) {
 			print_line(itos(i) + " : " + itos(r[i]));
 		}
