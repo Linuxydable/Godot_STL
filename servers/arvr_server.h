@@ -76,8 +76,8 @@ public:
 	};
 
 private:
-	Vector<Ref<ARVRInterface> > interfaces;
-	Vector<ARVRPositionalTracker *> trackers;
+	std::vector<Ref<ARVRInterface> > interfaces;
+	std::vector<ARVRPositionalTracker *> trackers;
 
 	Ref<ARVRInterface> primary_interface; /* we'll identify one interface as primary, this will be used by our viewports */
 
