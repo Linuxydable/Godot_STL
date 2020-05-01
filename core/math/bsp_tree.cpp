@@ -60,11 +60,11 @@ void BSP_Tree::from_aabb(const AABB &p_aabb) {
 	error_radius = 0;
 }
 
-Vector<BSP_Tree::Node> BSP_Tree::get_nodes() const {
+std::vector<BSP_Tree::Node> BSP_Tree::get_nodes() const {
 
 	return nodes;
 }
-Vector<Plane> BSP_Tree::get_planes() const {
+std::vector<Plane> BSP_Tree::get_planes() const {
 
 	return planes;
 }
@@ -271,10 +271,10 @@ bool BSP_Tree::point_is_inside(const Vector3 &p_point) const {
 	}
 }
 
-static int _bsp_find_best_half_plane(const Face3 *p_faces, const Vector<int> &p_indices, real_t p_tolerance) {
+static int _bsp_find_best_half_plane(const Face3 *p_faces, const std::vector<int> &p_indices, real_t p_tolerance) {
 
 	int ic = p_indices.size();
-	const int *indices = p_indices.ptr();
+	const int *indices = p_indices.data();
 
 	int best_plane = -1;
 	real_t best_plane_cost = 1e20;
@@ -336,7 +336,7 @@ static int _bsp_find_best_half_plane(const Face3 *p_faces, const Vector<int> &p_
 	return best_plane;
 }
 
-static int _bsp_create_node(const Face3 *p_faces, const Vector<int> &p_indices, Vector<Plane> &p_planes, Vector<BSP_Tree::Node> &p_nodes, real_t p_tolerance) {
+static int _bsp_create_node(const Face3 *p_faces, const std::vector<int> &p_indices, std::vector<Plane> &p_planes, std::vector<BSP_Tree::Node> &p_nodes, real_t p_tolerance) {
 
 	ERR_FAIL_COND_V(p_nodes.size() == BSP_Tree::MAX_NODES, -1);
 
@@ -344,15 +344,15 @@ static int _bsp_create_node(const Face3 *p_faces, const Vector<int> &p_indices, 
 	ERR_FAIL_COND_V(p_indices.size() == 0, -1)
 
 	int ic = p_indices.size();
-	const int *indices = p_indices.ptr();
+	const int *indices = p_indices.data();
 
 	int divisor_idx = _bsp_find_best_half_plane(p_faces, p_indices, p_tolerance);
 
 	// returned error
 	ERR_FAIL_COND_V(divisor_idx < 0, -1);
 
-	Vector<int> faces_over;
-	Vector<int> faces_under;
+	std::vector<int> faces_over;
+	std::vector<int> faces_under;
 
 	Plane divisor_plane = p_faces[indices[divisor_idx]].get_plane();
 
@@ -440,15 +440,15 @@ BSP_Tree::operator Variant() const {
 	Dictionary d;
 	d["error_radius"] = error_radius;
 
-	Vector<real_t> plane_values;
+	std::vector<real_t> plane_values;
 	plane_values.resize(planes.size() * 4);
 
 	for (int i = 0; i < planes.size(); i++) {
 
-		plane_values.write[i * 4 + 0] = planes[i].normal.x;
-		plane_values.write[i * 4 + 1] = planes[i].normal.y;
-		plane_values.write[i * 4 + 2] = planes[i].normal.z;
-		plane_values.write[i * 4 + 3] = planes[i].d;
+		plane_values[i * 4 + 0] = planes[i].normal.x;
+		plane_values[i * 4 + 1] = planes[i].normal.y;
+		plane_values[i * 4 + 2] = planes[i].normal.z;
+		plane_values[i * 4 + 3] = planes[i].d;
 	}
 
 	d["planes"] = plane_values;
@@ -494,10 +494,10 @@ BSP_Tree::BSP_Tree(const Variant &p_variant) {
 			PoolVector<real_t>::Read r = src_planes.read();
 			for (int i = 0; i < plane_count / 4; i++) {
 
-				planes.write[i].normal.x = r[i * 4 + 0];
-				planes.write[i].normal.y = r[i * 4 + 1];
-				planes.write[i].normal.z = r[i * 4 + 2];
-				planes.write[i].d = r[i * 4 + 3];
+				planes[i].normal.x = r[i * 4 + 0];
+				planes[i].normal.y = r[i * 4 + 1];
+				planes[i].normal.z = r[i * 4 + 2];
+				planes[i].d = r[i * 4 + 3];
 			}
 		}
 
@@ -516,9 +516,9 @@ BSP_Tree::BSP_Tree(const Variant &p_variant) {
 
 	for (int i = 0; i < nodes.size(); i++) {
 
-		nodes.write[i].over = r[i * 3 + 0];
-		nodes.write[i].under = r[i * 3 + 1];
-		nodes.write[i].plane = r[i * 3 + 2];
+		nodes[i].over = r[i * 3 + 0];
+		nodes[i].under = r[i * 3 + 1];
+		nodes[i].plane = r[i * 3 + 2];
 	}
 }
 
@@ -532,7 +532,7 @@ BSP_Tree::BSP_Tree(const PoolVector<Face3> &p_faces, real_t p_error_radius) {
 
 	bool first = true;
 
-	Vector<int> indices;
+	std::vector<int> indices;
 
 	for (int i = 0; i < face_count; i++) {
 
@@ -570,7 +570,7 @@ BSP_Tree::BSP_Tree(const PoolVector<Face3> &p_faces, real_t p_error_radius) {
 	error_radius = p_error_radius;
 }
 
-BSP_Tree::BSP_Tree(const Vector<Node> &p_nodes, const Vector<Plane> &p_planes, const AABB &p_aabb, real_t p_error_radius) :
+BSP_Tree::BSP_Tree(const std::vector<Node> &p_nodes, const std::vector<Plane> &p_planes, const AABB &p_aabb, real_t p_error_radius) :
 		nodes(p_nodes),
 		planes(p_planes),
 		aabb(p_aabb),
