@@ -72,7 +72,7 @@ void PackedData::add_path(const String &pkg_path, const String &path, uint64_t o
 
 		if (p.find("/") != -1) { //in a subdir
 
-			Vector<String> ds = p.get_base_dir().split("/");
+			std::vector<String> ds = p.get_base_dir().split("/");
 
 			for (int j = 0; j < ds.size(); j++) {
 
@@ -421,7 +421,7 @@ Error DirAccessPack::change_dir(String p_dir) {
 		absolute = true;
 	}
 
-	Vector<String> paths = nd.split("/");
+	std::vector<String> paths = nd.split("/");
 
 	PackedData::PackedDir *pd;
 

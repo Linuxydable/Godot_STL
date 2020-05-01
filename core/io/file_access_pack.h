@@ -31,6 +31,8 @@
 #ifndef FILE_ACCESS_PACK_H
 #define FILE_ACCESS_PACK_H
 
+#include <vector>
+
 #include "core/list.h"
 #include "core/map.h"
 #include "core/os/dir_access.h"
@@ -87,7 +89,7 @@ private:
 			a = b = 0;
 		};
 
-		PathMD5(const Vector<uint8_t> p_buf) {
+		PathMD5(const std::vector<uint8_t> p_buf) {
 			a = *((uint64_t *)&p_buf[0]);
 			b = *((uint64_t *)&p_buf[8]);
 		};
@@ -95,7 +97,7 @@ private:
 
 	Map<PathMD5, PackedFile> files;
 
-	Vector<PackSource *> sources;
+	std::vector<PackSource *> sources;
 
 	PackedDir *root;
 	//Map<String,PackedDir*> dirs;
