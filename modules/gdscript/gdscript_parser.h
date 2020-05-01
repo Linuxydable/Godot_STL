@@ -151,7 +151,7 @@ public:
 		bool extends_used;
 		bool classname_used;
 		StringName extends_file;
-		Vector<StringName> extends_class;
+		std::vector<StringName> extends_class;
 		DataType base_type;
 		String icon_path;
 
@@ -178,21 +178,21 @@ public:
 
 		struct Signal {
 			StringName name;
-			Vector<StringName> arguments;
+			std::vector<StringName> arguments;
 			int emissions;
 			int line;
 		};
 
-		Vector<ClassNode *> subclasses;
-		Vector<Member> variables;
+		std::vector<ClassNode *> subclasses;
+		std::vector<Member> variables;
 		Map<StringName, Constant> constant_expressions;
-		Vector<FunctionNode *> functions;
-		Vector<FunctionNode *> static_functions;
-		Vector<Signal> _signals;
+		std::vector<FunctionNode *> functions;
+		std::vector<FunctionNode *> static_functions;
+		std::vector<Signal> _signals;
 		BlockNode *initializer;
 		BlockNode *ready;
 		ClassNode *owner;
-		//Vector<Node*> initializers;
+		//std::vector<Node*> initializers;
 		int end_line;
 
 		ClassNode() {
@@ -213,12 +213,12 @@ public:
 		bool has_unreachable_code;
 		StringName name;
 		DataType return_type;
-		Vector<StringName> arguments;
-		Vector<DataType> argument_types;
-		Vector<Node *> default_values;
+		std::vector<StringName> arguments;
+		std::vector<DataType> argument_types;
+		std::vector<Node *> default_values;
 		BlockNode *body;
 #ifdef DEBUG_ENABLED
-		Vector<int> arguments_usage;
+		std::vector<int> arguments_usage;
 #endif // DEBUG_ENABLED
 
 		virtual DataType get_datatype() const { return return_type; }
@@ -309,7 +309,7 @@ public:
 
 	struct ArrayNode : public Node {
 
-		Vector<Node *> elements;
+		std::vector<Node *> elements;
 		DataType datatype;
 		virtual DataType get_datatype() const { return datatype; }
 		virtual void set_datatype(const DataType &p_datatype) { datatype = p_datatype; }
@@ -329,7 +329,7 @@ public:
 			Node *value;
 		};
 
-		Vector<Pair> elements;
+		std::vector<Pair> elements;
 		DataType datatype;
 		virtual DataType get_datatype() const { return datatype; }
 		virtual void set_datatype(const DataType &p_datatype) { datatype = p_datatype; }
@@ -400,7 +400,7 @@ public:
 
 		Operator op;
 
-		Vector<Node *> arguments;
+		std::vector<Node *> arguments;
 		DataType datatype;
 		virtual DataType get_datatype() const { return datatype; }
 		virtual void set_datatype(const DataType &p_datatype) { datatype = p_datatype; }
@@ -423,24 +423,24 @@ public:
 		Node *constant;
 		StringName bind;
 		Map<ConstantNode *, PatternNode *> dictionary;
-		Vector<PatternNode *> array;
+		std::vector<PatternNode *> array;
 	};
 
 	struct PatternBranchNode : public Node {
-		Vector<PatternNode *> patterns;
+		std::vector<PatternNode *> patterns;
 		BlockNode *body;
 	};
 
 	struct MatchNode : public Node {
 		Node *val_to_match;
-		Vector<PatternBranchNode *> branches;
+		std::vector<PatternBranchNode *> branches;
 
 		struct CompiledPatternBranch {
 			Node *compiled_pattern;
 			BlockNode *body;
 		};
 
-		Vector<CompiledPatternBranch> compiled_pattern_branches;
+		std::vector<CompiledPatternBranch> compiled_pattern_branches;
 	};
 
 	struct ControlFlowNode : public Node {
@@ -455,7 +455,7 @@ public:
 		};
 
 		CFType cf_type;
-		Vector<Node *> arguments;
+		std::vector<Node *> arguments;
 		BlockNode *body;
 		BlockNode *body_else;
 
@@ -603,11 +603,11 @@ private:
 	void _set_error(const String &p_error, int p_line = -1, int p_column = -1);
 #ifdef DEBUG_ENABLED
 	void _add_warning(int p_code, int p_line = -1, const String &p_symbol1 = String(), const String &p_symbol2 = String(), const String &p_symbol3 = String(), const String &p_symbol4 = String());
-	void _add_warning(int p_code, int p_line, const Vector<String> &p_symbols);
+	void _add_warning(int p_code, int p_line, const std::vector<String> &p_symbols);
 #endif // DEBUG_ENABLED
 	bool _recover_from_completion();
 
-	bool _parse_arguments(Node *p_parent, Vector<Node *> &p_args, bool p_static, bool p_can_codecomplete = false, bool p_parsing_constant = false);
+	bool _parse_arguments(Node *p_parent, std::vector<Node *> &p_args, bool p_static, bool p_can_codecomplete = false, bool p_parsing_constant = false);
 	bool _enter_indent_block(BlockNode *p_block = NULL);
 	bool _parse_newline();
 	Node *_parse_expression(Node *p_parent, bool p_static, bool p_allow_assign = false, bool p_parsing_constant = false);
@@ -616,7 +616,7 @@ private:
 	bool _reduce_export_var_type(Variant &p_value, int p_line = 0);
 
 	PatternNode *_parse_pattern(bool p_static);
-	void _parse_pattern_block(BlockNode *p_block, Vector<PatternBranchNode *> &p_branches, bool p_static);
+	void _parse_pattern_block(BlockNode *p_block, std::vector<PatternBranchNode *> &p_branches, bool p_static);
 	void _transform_match_statment(MatchNode *p_match_statement);
 	void _generate_pattern(PatternNode *p_pattern, Node *p_node_to_match, Node *&p_resulting_node, Map<StringName, Node *> &p_bindings);
 
@@ -667,7 +667,7 @@ public:
 	const List<GDScriptWarning> &get_warnings() const { return warnings; }
 #endif // DEBUG_ENABLED
 	Error parse(const String &p_code, const String &p_base_path = "", bool p_just_validate = false, const String &p_self_path = "", bool p_for_completion = false, Set<int> *r_safe_lines = NULL, bool p_dependencies_only = false);
-	Error parse_bytecode(const Vector<uint8_t> &p_bytecode, const String &p_base_path = "", const String &p_self_path = "");
+	Error parse_bytecode(const std::vector<uint8_t> &p_bytecode, const String &p_base_path = "", const String &p_self_path = "");
 
 	bool is_tool_script() const;
 	const Node *get_parse_tree() const;
