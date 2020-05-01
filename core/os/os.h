@@ -37,7 +37,6 @@
 #include "core/list.h"
 #include "core/os/main_loop.h"
 #include "core/ustring.h"
-#include "core/vector.h"
 
 #include <stdarg.h>
 
@@ -477,7 +476,7 @@ public:
 
 	virtual bool can_use_threads() const;
 
-	virtual Error dialog_show(String p_title, String p_description, Vector<String> p_buttons, Object *p_obj, String p_callback);
+	virtual Error dialog_show(String p_title, String p_description, std::vector<String> p_buttons, Object *p_obj, String p_callback);
 	virtual Error dialog_input_text(String p_title, String p_description, String p_partial, Object *p_obj, String p_callback);
 
 	enum LatinKeyboardVariant {
@@ -535,7 +534,7 @@ public:
 
 	virtual bool request_permission(const String &p_name) { return true; }
 	virtual bool request_permissions() { return true; }
-	virtual Vector<String> get_granted_permissions() const { return Vector<String>(); }
+	virtual std::vector<String> get_granted_permissions() const { return std::vector<String>(); }
 
 	virtual void process_and_drop_events() {}
 	OS();
