@@ -2089,7 +2089,7 @@ bool ShaderLanguage::_validate_function_call(BlockNode *p_block, OperatorNode *p
 
 	ERR_FAIL_COND_V(p_func->op != OP_CALL && p_func->op != OP_CONSTRUCT, false);
 
-	Vector<DataType> args;
+	std::vector<DataType> args;
 
 	ERR_FAIL_COND_V(p_func->arguments[0]->type != Node::TYPE_VARIABLE, false);
 
@@ -2202,8 +2202,8 @@ bool ShaderLanguage::_validate_function_call(BlockNode *p_block, OperatorNode *p
 						conversion->datatype = builtin_func_defs[idx].args[i];
 						conversion->values.resize(1);
 
-						convert_constant(constant, builtin_func_defs[idx].args[i], conversion->values.ptrw());
-						p_func->arguments.write[i + 1] = conversion;
+						convert_constant(constant, builtin_func_defs[idx].args[i], conversion->values.data());
+						p_func->arguments[i + 1] = conversion;
 					}
 
 					if (r_ret_type)
@@ -2310,8 +2310,8 @@ bool ShaderLanguage::_validate_function_call(BlockNode *p_block, OperatorNode *p
 				conversion->datatype = pfunc->arguments[k].type;
 				conversion->values.resize(1);
 
-				convert_constant(constant, pfunc->arguments[k].type, conversion->values.ptrw());
-				p_func->arguments.write[k + 1] = conversion;
+				convert_constant(constant, pfunc->arguments[k].type, conversion->values.data());
+				p_func->arguments[k + 1] = conversion;
 			}
 
 			if (r_ret_type)
@@ -2474,7 +2474,7 @@ bool ShaderLanguage::is_sampler_type(DataType p_type) {
 		   p_type == TYPE_SAMPLEREXT;
 }
 
-Variant ShaderLanguage::constant_value_to_variant(const Vector<ShaderLanguage::ConstantNode::Value> &p_value, DataType p_type, ShaderLanguage::ShaderNode::Uniform::Hint p_hint) {
+Variant ShaderLanguage::constant_value_to_variant(const std::vector<ShaderLanguage::ConstantNode::Value> &p_value, DataType p_type, ShaderLanguage::ShaderNode::Uniform::Hint p_hint) {
 	if (p_value.size() > 0) {
 		Variant value;
 		switch (p_type) {
@@ -2817,9 +2817,9 @@ bool ShaderLanguage::_validate_assign(Node *p_node, const Map<StringName, BuiltI
 
 ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, const Map<StringName, BuiltInInfo> &p_builtin_types) {
 
-	Vector<Expression> expression;
+	std::vector<Expression> expression;
 
-	//Vector<TokenType> operators;
+	//std::vector<TokenType> operators;
 
 	while (true) {
 
@@ -2969,7 +2969,7 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 						//add to current function as dependency
 						for (int j = 0; j < shader->functions.size(); j++) {
 							if (shader->functions[j].name == current_function) {
-								shader->functions.write[j].uses_function.insert(name);
+								shader->functions[j].uses_function.insert(name);
 								break;
 							}
 						}
@@ -3610,8 +3610,8 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 				}
 				op->arguments.push_back(expression[i + 1].node);
 
-				expression.write[i].is_op = false;
-				expression.write[i].node = op;
+				expression[i].is_op = false;
+				expression[i].node = op;
 
 				if (!_validate_operator(op, &op->return_cache)) {
 
@@ -3624,7 +3624,7 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 					_set_error("Invalid arguments to unary operator '" + get_operator_text(op->op) + "' :" + at);
 					return NULL;
 				}
-				expression.remove(i + 1);
+				expression.erase(expression.begin() + i + 1);
 			}
 
 		} else if (is_ternary) {
@@ -3645,8 +3645,8 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 			op->arguments.push_back(expression[next_op + 1].node);
 			op->arguments.push_back(expression[next_op + 3].node);
 
-			expression.write[next_op - 1].is_op = false;
-			expression.write[next_op - 1].node = op;
+			expression[next_op - 1].is_op = false;
+			expression[next_op - 1].node = op;
 			if (!_validate_operator(op, &op->return_cache)) {
 
 				String at;
@@ -3660,7 +3660,7 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 			}
 
 			for (int i = 0; i < 4; i++) {
-				expression.remove(next_op);
+				expression.erase(expression.begin() + next_op);
 			}
 
 		} else {
@@ -3700,7 +3700,7 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 
 			op->arguments.push_back(expression[next_op - 1].node); //expression goes as left
 			op->arguments.push_back(expression[next_op + 1].node); //next expression goes as right
-			expression.write[next_op - 1].node = op;
+			expression[next_op - 1].node = op;
 
 			//replace all 3 nodes by this operator and make it an expression
 
@@ -3716,8 +3716,8 @@ ShaderLanguage::Node *ShaderLanguage::_parse_expression(BlockNode *p_block, cons
 				return NULL;
 			}
 
-			expression.remove(next_op);
-			expression.remove(next_op);
+			expression.erase(expression.begin() + next_op);
+			expression.erase(expression.begin() + next_op);
 		}
 	}
 
@@ -3740,11 +3740,11 @@ ShaderLanguage::Node *ShaderLanguage::_reduce_expression(BlockNode *p_block, Sha
 		DataType base = get_scalar_type(type);
 		int cardinality = get_cardinality(type);
 
-		Vector<ConstantNode::Value> values;
+		std::vector<ConstantNode::Value> values;
 
 		for (int i = 1; i < op->arguments.size(); i++) {
 
-			op->arguments.write[i] = _reduce_expression(p_block, op->arguments[i]);
+			op->arguments[i] = _reduce_expression(p_block, op->arguments[i]);
 			if (op->arguments[i]->type == Node::TYPE_CONSTANT) {
 				ConstantNode *cn = static_cast<ConstantNode *>(op->arguments[i]);
 
@@ -3798,14 +3798,14 @@ ShaderLanguage::Node *ShaderLanguage::_reduce_expression(BlockNode *p_block, Sha
 		return cn;
 	} else if (op->op == OP_NEGATE) {
 
-		op->arguments.write[0] = _reduce_expression(p_block, op->arguments[0]);
+		op->arguments[0] = _reduce_expression(p_block, op->arguments[0]);
 		if (op->arguments[0]->type == Node::TYPE_CONSTANT) {
 
 			ConstantNode *cn = static_cast<ConstantNode *>(op->arguments[0]);
 
 			DataType base = get_scalar_type(cn->datatype);
 
-			Vector<ConstantNode::Value> values;
+			std::vector<ConstantNode::Value> values;
 
 			for (int i = 0; i < cn->values.size(); i++) {
 
@@ -4760,7 +4760,7 @@ Error ShaderLanguage::_validate_datatype(DataType p_type) {
 	return OK;
 }
 
-Error ShaderLanguage::_parse_shader(const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types) {
+Error ShaderLanguage::_parse_shader(const Map<StringName, FunctionInfo> &p_functions, const std::vector<StringName> &p_render_modes, const Set<String> &p_shader_types) {
 
 	Token tk = _get_token();
 
@@ -4811,12 +4811,12 @@ Error ShaderLanguage::_parse_shader(const Map<StringName, FunctionInfo> &p_funct
 						return ERR_PARSE_ERROR;
 					}
 
-					if (p_render_modes.find(mode) == -1) {
+					if (std::find(p_render_modes.begin(), p_render_modes.end(), mode) == p_render_modes.end()) {
 						_set_error("Invalid render mode: '" + String(mode) + "'");
 						return ERR_PARSE_ERROR;
 					}
 
-					if (shader->render_modes.find(mode) != -1) {
+					if (std::find(shader->render_modes.begin(), shader->render_modes.end(), mode) != shader->render_modes.end()) {
 						_set_error("Duplicate render mode: '" + String(mode) + "'");
 						return ERR_PARSE_ERROR;
 					}
@@ -5038,7 +5038,7 @@ Error ShaderLanguage::_parse_shader(const Map<StringName, FunctionInfo> &p_funct
 
 						uniform2.default_value.resize(cn->values.size());
 
-						if (!convert_constant(cn, uniform2.type, uniform2.default_value.ptrw())) {
+						if (!convert_constant(cn, uniform2.type, uniform2.default_value.data())) {
 							_set_error("Can't convert constant to " + get_datatype_name(uniform2.type));
 							return ERR_PARSE_ERROR;
 						}
@@ -5539,7 +5539,7 @@ String ShaderLanguage::get_shader_type(const String &p_code) {
 	return String();
 }
 
-Error ShaderLanguage::compile(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types) {
+Error ShaderLanguage::compile(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const std::vector<StringName> &p_render_modes, const Set<String> &p_shader_types) {
 
 	clear();
 
@@ -5556,7 +5556,7 @@ Error ShaderLanguage::compile(const String &p_code, const Map<StringName, Functi
 	return OK;
 }
 
-Error ShaderLanguage::complete(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const Vector<StringName> &p_render_modes, const Set<String> &p_shader_types, List<ScriptCodeCompletionOption> *r_options, String &r_call_hint) {
+Error ShaderLanguage::complete(const String &p_code, const Map<StringName, FunctionInfo> &p_functions, const std::vector<StringName> &p_render_modes, const Set<String> &p_shader_types, List<ScriptCodeCompletionOption> *r_options, String &r_call_hint) {
 
 	clear();
 
