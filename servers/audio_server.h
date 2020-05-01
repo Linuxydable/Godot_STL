@@ -53,7 +53,7 @@ class AudioDriver {
 #endif
 
 protected:
-	Vector<int32_t> input_buffer;
+	std::vector<int32_t> input_buffer;
 	unsigned int input_position;
 	unsigned int input_size;
 
@@ -111,7 +111,7 @@ public:
 	SpeakerMode get_speaker_mode_by_total_channels(int p_channels) const;
 	int get_total_channels_by_speaker_mode(SpeakerMode) const;
 
-	Vector<int32_t> get_input_buffer() { return input_buffer; }
+	std::vector<int32_t> get_input_buffer() { return input_buffer; }
 	unsigned int get_input_position() { return input_position; }
 	unsigned int get_input_size() { return input_size; }
 
@@ -197,8 +197,8 @@ private:
 			bool used;
 			bool active;
 			AudioFrame peak_volume;
-			Vector<AudioFrame> buffer;
-			Vector<Ref<AudioEffectInstance> > effect_instances;
+			std::vector<AudioFrame> buffer;
+			std::vector<Ref<AudioEffectInstance> > effect_instances;
 			uint64_t last_mix_with_audio;
 			Channel() {
 				last_mix_with_audio = 0;
@@ -208,7 +208,7 @@ private:
 			}
 		};
 
-		Vector<Channel> channels;
+		std::vector<Channel> channels;
 
 		struct Effect {
 			Ref<AudioEffect> effect;
@@ -218,14 +218,14 @@ private:
 #endif
 		};
 
-		Vector<Effect> effects;
+		std::vector<Effect> effects;
 		float volume_db;
 		StringName send;
 		int index_cache;
 	};
 
-	Vector<Vector<AudioFrame> > temp_buffer; //temp_buffer for each level
-	Vector<Bus *> buses;
+	std::vector<std::vector<AudioFrame> > temp_buffer; //temp_buffer for each level
+	std::vector<Bus *> buses;
 	Map<StringName, Bus *> bus_map;
 
 	void _update_bus_effects(int p_bus);
@@ -397,7 +397,7 @@ class AudioBusLayout : public Resource {
 			bool enabled;
 		};
 
-		Vector<Effect> effects;
+		std::vector<Effect> effects;
 
 		float volume_db;
 		StringName send;
@@ -410,7 +410,7 @@ class AudioBusLayout : public Resource {
 		}
 	};
 
-	Vector<Bus> buses;
+	std::vector<Bus> buses;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
