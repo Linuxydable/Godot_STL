@@ -258,7 +258,7 @@ void ScriptDebuggerLocal::debug(ScriptLanguage *p_script, bool p_can_continue, b
 void ScriptDebuggerLocal::print_variables(const List<String> &names, const List<Variant> &values, const String &variable_prefix) {
 
 	String value;
-	Vector<String> value_lines;
+	std::vector<String> value_lines;
 	const List<Variant>::Element *V = values.front();
 	for (const List<String>::Element *E = names.front(); E; E = E->next()) {
 
@@ -325,11 +325,11 @@ void ScriptDebuggerLocal::idle_poll() {
 
 	int ofs = 0;
 	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
-		ofs += ScriptServer::get_language(i)->profiling_get_frame_data(&pinfo.write[ofs], pinfo.size() - ofs);
+		ofs += ScriptServer::get_language(i)->profiling_get_frame_data(&pinfo[ofs], pinfo.size() - ofs);
 	}
 
 	SortArray<ScriptLanguage::ProfilingInfo, _ScriptDebuggerLocalProfileInfoSort> sort;
-	sort.sort(pinfo.ptrw(), ofs);
+	sort.sort(pinfo.data(), ofs);
 
 	//falta el frame time
 
@@ -377,11 +377,11 @@ void ScriptDebuggerLocal::profiling_end() {
 	int ofs = 0;
 
 	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
-		ofs += ScriptServer::get_language(i)->profiling_get_accumulated_data(&pinfo.write[ofs], pinfo.size() - ofs);
+		ofs += ScriptServer::get_language(i)->profiling_get_accumulated_data(&pinfo[ofs], pinfo.size() - ofs);
 	}
 
 	SortArray<ScriptLanguage::ProfilingInfo, _ScriptDebuggerLocalProfileInfoSort> sort;
-	sort.sort(pinfo.ptrw(), ofs);
+	sort.sort(pinfo.data(), ofs);
 
 	uint64_t total_us = 0;
 	for (int i = 0; i < ofs; i++) {
@@ -411,7 +411,7 @@ void ScriptDebuggerLocal::send_message(const String &p_message, const Array &p_a
 	// print_line("MESSAGE: '" + p_message + "' - " + String(Variant(p_args)));
 }
 
-void ScriptDebuggerLocal::send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const Vector<ScriptLanguage::StackInfo> &p_stack_info) {
+void ScriptDebuggerLocal::send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const std::vector<ScriptLanguage::StackInfo> &p_stack_info) {
 
 	print_line("ERROR: '" + (p_descr.empty() ? p_err : p_descr) + "'");
 }

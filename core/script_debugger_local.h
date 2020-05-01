@@ -42,7 +42,7 @@ class ScriptDebuggerLocal : public ScriptDebugger {
 	String target_function;
 	Map<String, String> options;
 
-	Vector<ScriptLanguage::ProfilingInfo> pinfo;
+	std::vector<ScriptLanguage::ProfilingInfo> pinfo;
 
 	Pair<String, int> to_breakpoint(const String &p_line);
 	void print_variables(const List<String> &names, const List<Variant> &values, const String &variable_prefix);
@@ -50,7 +50,7 @@ class ScriptDebuggerLocal : public ScriptDebugger {
 public:
 	void debug(ScriptLanguage *p_script, bool p_can_continue, bool p_is_error_breakpoint);
 	virtual void send_message(const String &p_message, const Array &p_args);
-	virtual void send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const Vector<ScriptLanguage::StackInfo> &p_stack_info);
+	virtual void send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const std::vector<ScriptLanguage::StackInfo> &p_stack_info);
 
 	virtual bool is_profiling() const { return profiling; }
 	virtual void add_profiling_frame_data(const StringName &p_name, const Array &p_data) {}
