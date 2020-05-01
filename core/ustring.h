@@ -31,6 +31,8 @@
 #ifndef USTRING_H
 #define USTRING_H
 
+#include <vector>
+
 #include "core/array.h"
 #include "core/cowdata.h"
 #include "core/typedefs.h"
