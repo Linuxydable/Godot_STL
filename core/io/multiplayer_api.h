@@ -72,14 +72,14 @@ private:
 	};
 
 	int bandwidth_incoming_pointer;
-	Vector<BandwidthFrame> bandwidth_incoming_data;
+	std::vector<BandwidthFrame> bandwidth_incoming_data;
 	int bandwidth_outgoing_pointer;
-	Vector<BandwidthFrame> bandwidth_outgoing_data;
+	std::vector<BandwidthFrame> bandwidth_outgoing_data;
 	Map<ObjectID, ProfilingInfo> profiler_frame_data;
 	bool profiling;
 
 	void _init_node_profile(ObjectID p_node);
-	int _get_bandwidth_usage(const Vector<BandwidthFrame> &p_buffer, int p_pointer);
+	int _get_bandwidth_usage(const std::vector<BandwidthFrame> &p_buffer, int p_pointer);
 #endif
 
 	Ref<NetworkedMultiplayerPeer> network_peer;
@@ -88,7 +88,7 @@ private:
 	HashMap<NodePath, PathSentCache> path_send_cache;
 	Map<int, PathGetCache> path_get_cache;
 	int last_send_cache_id;
-	Vector<uint8_t> packet_cache;
+	std::vector<uint8_t> packet_cache;
 	Node *root_node;
 	bool allow_object_decoding;
 
@@ -147,7 +147,7 @@ public:
 	void _server_disconnected();
 
 	bool has_network_peer() const { return network_peer.is_valid(); }
-	Vector<int> get_network_connected_peers() const;
+	std::vector<int> get_network_connected_peers() const;
 	int get_rpc_sender_id() const { return rpc_sender_id; }
 	int get_network_unique_id() const;
 	bool is_network_server() const;
