@@ -30,6 +30,8 @@
 
 #include "gdscript.h"
 
+#include <algorithm>
+
 #include "core/core_string_names.h"
 #include "core/engine.h"
 #include "core/global_constants.h"
@@ -246,7 +248,7 @@ void GDScript::get_script_property_list(List<PropertyInfo> *p_list) const {
 
 	while (sptr) {
 
-		Vector<_GDScriptMemberSort> msort;
+		std::vector<_GDScriptMemberSort> msort;
 		for (Map<StringName, PropertyInfo>::Element *E = sptr->member_info.front(); E; E = E->next()) {
 
 			_GDScriptMemberSort ms;
@@ -256,8 +258,8 @@ void GDScript::get_script_property_list(List<PropertyInfo> *p_list) const {
 			msort.push_back(ms);
 		}
 
-		msort.sort();
-		msort.invert();
+		std::sort(msort.rbegin(), msort.rend());
+
 		for (int i = 0; i < msort.size(); i++) {
 
 			props.push_front(sptr->member_info[msort[i].name]);
@@ -597,7 +599,7 @@ Error GDScript::reload(bool p_keep_state) {
 	for (const List<GDScriptWarning>::Element *E = parser.get_warnings().front(); E; E = E->next()) {
 		const GDScriptWarning &warning = E->get();
 		if (ScriptDebugger::get_singleton()) {
-			Vector<ScriptLanguage::StackInfo> si;
+			std::vector<ScriptLanguage::StackInfo> si;
 			ScriptDebugger::get_singleton()->send_error("", get_path(), warning.line, warning.get_name(), warning.get_message(), ERR_HANDLER_WARNING, si);
 		}
 	}
@@ -715,7 +717,7 @@ void GDScript::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("get_as_byte_code"), &GDScript::get_as_byte_code);
 }
 
-Vector<uint8_t> GDScript::get_as_byte_code() const {
+std::vector<uint8_t> GDScript::get_as_byte_code() const {
 
 	GDScriptTokenizerBuffer tokenizer;
 	return tokenizer.parse_code_string(source);
@@ -723,7 +725,7 @@ Vector<uint8_t> GDScript::get_as_byte_code() const {
 
 Error GDScript::load_byte_code(const String &p_path) {
 
-	Vector<uint8_t> bytecode;
+	std::vector<uint8_t> bytecode;
 
 	if (p_path.ends_with("gde")) {
 
@@ -733,10 +735,10 @@ Error GDScript::load_byte_code(const String &p_path) {
 		FileAccessEncrypted *fae = memnew(FileAccessEncrypted);
 		ERR_FAIL_COND_V(!fae, ERR_CANT_OPEN);
 
-		Vector<uint8_t> key;
+		std::vector<uint8_t> key;
 		key.resize(32);
 		for (int i = 0; i < key.size(); i++) {
-			key.write[i] = script_encryption_key[i];
+			key[i] = script_encryption_key[i];
 		}
 
 		Error err = fae->open_and_parse(fa, key, FileAccessEncrypted::MODE_READ);
@@ -750,7 +752,7 @@ Error GDScript::load_byte_code(const String &p_path) {
 		}
 
 		bytecode.resize(fae->get_len());
-		fae->get_buffer(bytecode.ptrw(), bytecode.size());
+		fae->get_buffer(bytecode.data(), bytecode.size());
 		fae->close();
 		memdelete(fae);
 
@@ -865,7 +867,7 @@ bool GDScript::has_script_signal(const StringName &p_signal) const {
 }
 void GDScript::get_script_signal_list(List<MethodInfo> *r_signals) const {
 
-	for (const Map<StringName, Vector<StringName> >::Element *E = _signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<StringName> >::Element *E = _signals.front(); E; E = E->next()) {
 
 		MethodInfo mi;
 		mi.name = E->key();
@@ -920,7 +922,7 @@ void GDScript::_save_orphaned_subclasses() {
 		ObjectID id;
 		String fully_qualified_name;
 	};
-	Vector<ClassRefWithName> weak_subclasses;
+	std::vector<ClassRefWithName> weak_subclasses;
 	// collect subclasses ObjectID and name
 	for (Map<StringName, Ref<GDScript> >::Element *E = subclasses.front(); E; E = E->next()) {
 		E->get()->_owner = NULL; //bye, you are no longer owned cause I died
@@ -990,13 +992,13 @@ bool GDScriptInstance::set(const StringName &p_name, const Variant &p_value) {
 					const Variant *value = &p_value;
 					Variant converted = Variant::construct(member->data_type.builtin_type, &value, 1, ce);
 					if (ce.error == Variant::CallError::CALL_OK) {
-						members.write[member->index] = converted;
+						members[member->index] = converted;
 						return true;
 					} else {
 						return false;
 					}
 				} else {
-					members.write[member->index] = p_value;
+					members[member->index] = p_value;
 				}
 			}
 			return true;
@@ -1137,7 +1139,7 @@ void GDScriptInstance::get_property_list(List<PropertyInfo> *p_properties) const
 
 		//instance a fake script for editing the values
 
-		Vector<_GDScriptMemberSort> msort;
+		std::vector<_GDScriptMemberSort> msort;
 		for (Map<StringName, PropertyInfo>::Element *F = sptr->member_info.front(); F; F = F->next()) {
 
 			_GDScriptMemberSort ms;
@@ -1147,8 +1149,8 @@ void GDScriptInstance::get_property_list(List<PropertyInfo> *p_properties) const
 			msort.push_back(ms);
 		}
 
-		msort.sort();
-		msort.invert();
+		std::sort(msort.rbegin(), msort.rend());
+
 		for (int i = 0; i < msort.size(); i++) {
 
 			props.push_front(sptr->member_info[msort[i].name]);
@@ -1333,7 +1335,7 @@ void GDScriptInstance::reload_members() {
 
 	members.resize(script->member_indices.size()); //resize
 
-	Vector<Variant> new_members;
+	std::vector<Variant> new_members;
 	new_members.resize(script->member_indices.size());
 
 	//pass the values to the new indices
@@ -1341,7 +1343,7 @@ void GDScriptInstance::reload_members() {
 
 		if (member_indices_cache.has(E->key())) {
 			Variant value = members[member_indices_cache[E->key()]];
-			new_members.write[E->get().index] = value;
+			new_members[E->get().index] = value;
 		}
 	}
 
@@ -1391,12 +1393,12 @@ void GDScriptLanguage::_add_global(const StringName &p_name, const Variant &p_va
 
 	if (globals.has(p_name)) {
 		//overwrite existing
-		global_array.write[globals[p_name]] = p_value;
+		global_array[globals[p_name]] = p_value;
 		return;
 	}
 	globals[p_name] = global_array.size();
 	global_array.push_back(p_value);
-	_global_array = global_array.ptrw();
+	_global_array = global_array.data();
 }
 
 void GDScriptLanguage::add_global_constant(const StringName &p_variable, const Variant &p_value) {
@@ -1914,7 +1916,7 @@ String GDScriptLanguage::get_global_class_name(const String &p_path, String *r_b
 							subclass = NULL;
 							break;
 						} else {
-							Vector<StringName> extend_classes = subclass->extends_class;
+							std::vector<StringName> extend_classes = subclass->extends_class;
 
 							FileAccessRef subfile = FileAccess::open(subclass->extends_file, FileAccess::READ);
 							if (!subfile) {
@@ -1944,7 +1946,7 @@ String GDScriptLanguage::get_global_class_name(const String &p_path, String *r_b
 								for (int i = 0; i < subclass->subclasses.size(); i++) {
 									const GDScriptParser::ClassNode *inner_class = subclass->subclasses[i];
 									if (inner_class->name == extend_classes[0]) {
-										extend_classes.remove(0);
+										extend_classes.erase(extend_classes.begin());
 										found = true;
 										subclass = inner_class;
 										break;

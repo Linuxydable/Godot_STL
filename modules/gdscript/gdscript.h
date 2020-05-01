@@ -84,7 +84,7 @@ class GDScript : public Script {
 	Map<StringName, GDScriptFunction *> member_functions;
 	Map<StringName, MemberInfo> member_indices; //members are just indices to the instanced script.
 	Map<StringName, Ref<GDScript> > subclasses;
-	Map<StringName, Vector<StringName> > _signals;
+	Map<StringName, std::vector<StringName> > _signals;
 
 #ifdef TOOLS_ENABLED
 
@@ -189,7 +189,7 @@ public:
 	Error load_source_code(const String &p_path);
 	Error load_byte_code(const String &p_path);
 
-	Vector<uint8_t> get_as_byte_code() const;
+	std::vector<uint8_t> get_as_byte_code() const;
 
 	bool get_property_default_value(const StringName &p_property, Variant &r_value) const;
 
@@ -232,7 +232,7 @@ class GDScriptInstance : public ScriptInstance {
 #ifdef DEBUG_ENABLED
 	Map<StringName, int> member_indices_cache; //used only for hot script reloading
 #endif
-	Vector<Variant> members;
+	std::vector<Variant> members;
 	bool base_ref;
 
 	void _ml_call_reversed(GDScript *sptr, const StringName &p_method, const Variant **p_args, int p_argcount);
@@ -303,7 +303,7 @@ struct GDScriptWarning {
 		STANDALONE_TERNARY, // Return value of ternary expression is discarded
 		WARNING_MAX,
 	} code;
-	Vector<String> symbols;
+	std::vector<String> symbols;
 	int line;
 
 	String get_name() const;
@@ -322,7 +322,7 @@ class GDScriptLanguage : public ScriptLanguage {
 	static GDScriptLanguage *singleton;
 
 	Variant *_global_array;
-	Vector<Variant> global_array;
+	std::vector<Variant> global_array;
 	Map<StringName, int> globals;
 	Map<StringName, Variant> named_globals;
 
@@ -406,17 +406,17 @@ public:
 		_debug_call_stack_pos--;
 	}
 
-	virtual Vector<StackInfo> debug_get_current_stack_info() {
+	virtual std::vector<StackInfo> debug_get_current_stack_info() {
 		if (Thread::get_main_id() != Thread::get_caller_id())
-			return Vector<StackInfo>();
+			return std::vector<StackInfo>();
 
-		Vector<StackInfo> csi;
+		std::vector<StackInfo> csi;
 		csi.resize(_debug_call_stack_pos);
 		for (int i = 0; i < _debug_call_stack_pos; i++) {
-			csi.write[_debug_call_stack_pos - i - 1].line = _call_stack[i].line ? *_call_stack[i].line : 0;
+			csi[_debug_call_stack_pos - i - 1].line = _call_stack[i].line ? *_call_stack[i].line : 0;
 			if (_call_stack[i].function) {
-				csi.write[_debug_call_stack_pos - i - 1].func = _call_stack[i].function->get_name();
-				csi.write[_debug_call_stack_pos - i - 1].file = _call_stack[i].function->get_script()->get_path();
+				csi[_debug_call_stack_pos - i - 1].func = _call_stack[i].function->get_name();
+				csi[_debug_call_stack_pos - i - 1].file = _call_stack[i].function->get_script()->get_path();
 			}
 		}
 		return csi;
