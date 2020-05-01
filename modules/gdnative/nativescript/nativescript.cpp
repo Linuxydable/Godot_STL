@@ -1312,8 +1312,8 @@ int NativeScriptLanguage::register_binding_functions(godot_instance_binding_func
 void NativeScriptLanguage::unregister_binding_functions(int p_idx) {
 	ERR_FAIL_INDEX(p_idx, binding_functions.size());
 
-	for (Set<Vector<void *> *>::Element *E = binding_instances.front(); E; E = E->next()) {
-		Vector<void *> &binding_data = *E->get();
+	for (Set<std::vector<void *> *>::Element *E = binding_instances.front(); E; E = E->next()) {
+		std::vector<void *> &binding_data = *E->get();
 
 		if (p_idx < binding_data.size() && binding_data[p_idx] && binding_functions[p_idx].second.free_instance_binding_data)
 			binding_functions[p_idx].second.free_instance_binding_data(binding_functions[p_idx].second.data, binding_data[p_idx]);
@@ -1330,7 +1330,7 @@ void *NativeScriptLanguage::get_instance_binding_data(int p_idx, Object *p_objec
 
 	ERR_FAIL_COND_V_MSG(!binding_functions[p_idx].first, NULL, "Tried to get binding data for a nativescript binding that does not exist.");
 
-	Vector<void *> *binding_data = (Vector<void *> *)p_object->get_script_instance_binding(lang_idx);
+	std::vector<void *> *binding_data = (std::vector<void *> *)p_object->get_script_instance_binding(lang_idx);
 
 	if (!binding_data)
 		return NULL; // should never happen.
@@ -1342,7 +1342,7 @@ void *NativeScriptLanguage::get_instance_binding_data(int p_idx, Object *p_objec
 		binding_data->resize(p_idx + 1);
 
 		for (int i = old_size; i <= p_idx; i++) {
-			(*binding_data).write[i] = NULL;
+			(*binding_data)[i] = NULL;
 		}
 	}
 
@@ -1351,7 +1351,7 @@ void *NativeScriptLanguage::get_instance_binding_data(int p_idx, Object *p_objec
 		const void *global_type_tag = get_global_type_tag(p_idx, p_object->get_class_name());
 
 		// no binding data yet, soooooo alloc new one \o/
-		(*binding_data).write[p_idx] = binding_functions[p_idx].second.alloc_instance_binding_data(binding_functions[p_idx].second.data, global_type_tag, (godot_object *)p_object);
+		(*binding_data)[p_idx] = binding_functions[p_idx].second.alloc_instance_binding_data(binding_functions[p_idx].second.data, global_type_tag, (godot_object *)p_object);
 	}
 
 	return (*binding_data)[p_idx];
@@ -1359,12 +1359,12 @@ void *NativeScriptLanguage::get_instance_binding_data(int p_idx, Object *p_objec
 
 void *NativeScriptLanguage::alloc_instance_binding_data(Object *p_object) {
 
-	Vector<void *> *binding_data = new Vector<void *>;
+	std::vector<void *> *binding_data = new std::vector<void *>;
 
 	binding_data->resize(binding_functions.size());
 
 	for (int i = 0; i < binding_functions.size(); i++) {
-		(*binding_data).write[i] = NULL;
+		(*binding_data)[i] = NULL;
 	}
 
 	binding_instances.insert(binding_data);
@@ -1377,7 +1377,7 @@ void NativeScriptLanguage::free_instance_binding_data(void *p_data) {
 	if (!p_data)
 		return;
 
-	Vector<void *> &binding_data = *(Vector<void *> *)p_data;
+	std::vector<void *> &binding_data = *(std::vector<void *> *)p_data;
 
 	for (int i = 0; i < binding_data.size(); i++) {
 		if (!binding_data[i])
@@ -1400,7 +1400,7 @@ void NativeScriptLanguage::refcount_incremented_instance_binding(Object *p_objec
 	if (!data)
 		return;
 
-	Vector<void *> &binding_data = *(Vector<void *> *)data;
+	std::vector<void *> &binding_data = *(std::vector<void *> *)data;
 
 	for (int i = 0; i < binding_data.size(); i++) {
 		if (!binding_data[i])
@@ -1422,7 +1422,7 @@ bool NativeScriptLanguage::refcount_decremented_instance_binding(Object *p_objec
 	if (!data)
 		return true;
 
-	Vector<void *> &binding_data = *(Vector<void *> *)data;
+	std::vector<void *> &binding_data = *(std::vector<void *> *)data;
 
 	bool can_die = true;
 
