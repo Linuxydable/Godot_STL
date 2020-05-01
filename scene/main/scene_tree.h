@@ -94,7 +94,7 @@ public:
 private:
 	struct Group {
 
-		Vector<Node *> nodes;
+		std::vector<Node *> nodes;
 		//uint64_t last_tree_version;
 		bool changed;
 		Group() { changed = false; };
@@ -156,7 +156,7 @@ private:
 
 	List<ObjectID> delete_queue;
 
-	Map<UGCall, Vector<Variant> > unique_group_calls;
+	Map<UGCall, std::vector<Variant> > unique_group_calls;
 	bool ugc_locked;
 	void _flush_ugc();
 
@@ -389,7 +389,7 @@ public:
 
 	static SceneTree *get_singleton() { return singleton; }
 
-	void drop_files(const Vector<String> &p_files, int p_from_screen = 0);
+	void drop_files(const std::vector<String> &p_files, int p_from_screen = 0);
 	void global_menu_action(const Variant &p_id, const Variant &p_meta);
 	void get_argument_options(const StringName &p_function, int p_idx, List<String> *r_options) const;
 
@@ -404,7 +404,7 @@ public:
 	bool is_network_server() const;
 	bool has_network_peer() const;
 	int get_network_unique_id() const;
-	Vector<int> get_network_connected_peers() const;
+	std::vector<int> get_network_connected_peers() const;
 	int get_rpc_sender_id() const;
 
 	void set_refuse_new_network_connections(bool p_refuse);
