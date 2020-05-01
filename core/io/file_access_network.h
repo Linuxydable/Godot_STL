@@ -58,7 +58,7 @@ class FileAccessNetworkClient {
 	Ref<StreamPeerTCP> client;
 	int last_id;
 
-	Vector<uint8_t> block;
+	std::vector<uint8_t> block;
 
 	void _thread_func();
 	static void _thread_func(void *s);
@@ -104,14 +104,14 @@ class FileAccessNetwork : public FileAccess {
 	struct Page {
 		int activity;
 		bool queued;
-		Vector<uint8_t> buffer;
+		std::vector<uint8_t> buffer;
 		Page() {
 			activity = 0;
 			queued = false;
 		}
 	};
 
-	mutable Vector<Page> pages;
+	mutable std::vector<Page> pages;
 
 	mutable Error response;
 
@@ -119,7 +119,7 @@ class FileAccessNetwork : public FileAccess {
 	friend class FileAccessNetworkClient;
 	void _queue_page(int p_page) const;
 	void _respond(size_t p_len, Error p_status);
-	void _set_block(int p_offset, const Vector<uint8_t> &p_block);
+	void _set_block(int p_offset, const std::vector<uint8_t> &p_block);
 
 public:
 	enum Command {
