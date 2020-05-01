@@ -34,7 +34,6 @@
 #include "core/list.h"
 #include "core/os/main_loop.h"
 #include "core/ustring.h"
-#include "core/vector.h"
 
 class Engine {
 
