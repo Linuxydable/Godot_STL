@@ -1720,7 +1720,7 @@ void RasterizerStorageGLES2::shader_add_custom_define(RID p_shader, const String
 	_shader_make_dirty(shader);
 }
 
-void RasterizerStorageGLES2::shader_get_custom_defines(RID p_shader, Vector<String> *p_defines) const {
+void RasterizerStorageGLES2::shader_get_custom_defines(RID p_shader, std::vector<String> *p_defines) const {
 
 	Shader *shader = shader_owner.get(p_shader);
 	ERR_FAIL_COND(!shader);
@@ -1821,7 +1821,7 @@ Variant RasterizerStorageGLES2::material_get_param_default(RID p_material, const
 	if (material->shader) {
 		if (material->shader->uniforms.has(p_param)) {
 			ShaderLanguage::ShaderNode::Uniform uniform = material->shader->uniforms[p_param];
-			Vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
+			std::vector<ShaderLanguage::ConstantNode::Value> default_value = uniform.default_value;
 			return ShaderLanguage::constant_value_to_variant(default_value, uniform.type, uniform.hint);
 		}
 	}
@@ -2224,7 +2224,7 @@ static PoolVector<uint8_t> _unpack_half_floats(const PoolVector<uint8_t> &array,
 	return ret;
 }
 
-void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const Vector<PoolVector<uint8_t> > &p_blend_shapes, const Vector<AABB> &p_bone_aabbs) {
+void RasterizerStorageGLES2::mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const std::vector<PoolVector<uint8_t> > &p_blend_shapes, const std::vector<AABB> &p_bone_aabbs) {
 
 	Mesh *mesh = mesh_owner.getornull(p_mesh);
 	ERR_FAIL_COND(!mesh);
@@ -2691,20 +2691,20 @@ AABB RasterizerStorageGLES2::mesh_surface_get_aabb(RID p_mesh, int p_surface) co
 	return mesh->surfaces[p_surface]->aabb;
 }
 
-Vector<PoolVector<uint8_t> > RasterizerStorageGLES2::mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const {
+std::vector<PoolVector<uint8_t> > RasterizerStorageGLES2::mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const {
 	const Mesh *mesh = mesh_owner.getornull(p_mesh);
-	ERR_FAIL_COND_V(!mesh, Vector<PoolVector<uint8_t> >());
-	ERR_FAIL_INDEX_V(p_surface, mesh->surfaces.size(), Vector<PoolVector<uint8_t> >());
+	ERR_FAIL_COND_V(!mesh, std::vector<PoolVector<uint8_t> >());
+	ERR_FAIL_INDEX_V(p_surface, mesh->surfaces.size(), std::vector<PoolVector<uint8_t> >());
 #ifndef TOOLS_ENABLED
 	ERR_PRINT("OpenGL ES 2.0 does not allow retrieving mesh array data");
 #endif
 
 	return mesh->surfaces[p_surface]->blend_shape_data;
 }
-Vector<AABB> RasterizerStorageGLES2::mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const {
+std::vector<AABB> RasterizerStorageGLES2::mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const {
 	const Mesh *mesh = mesh_owner.getornull(p_mesh);
-	ERR_FAIL_COND_V(!mesh, Vector<AABB>());
-	ERR_FAIL_INDEX_V(p_surface, mesh->surfaces.size(), Vector<AABB>());
+	ERR_FAIL_COND_V(!mesh, std::vector<AABB>());
+	ERR_FAIL_INDEX_V(p_surface, mesh->surfaces.size(), std::vector<AABB>());
 
 	return mesh->surfaces[p_surface]->skeleton_bone_aabb;
 }
@@ -5596,7 +5596,7 @@ bool RasterizerStorageGLES2::free(RID p_rid) {
 
 			for (int i = 0; i < ins->materials.size(); i++) {
 				if (ins->materials[i] == p_rid) {
-					ins->materials.write[i] = RID();
+					ins->materials[i] = RID();
 				}
 			}
 		}
@@ -5852,7 +5852,7 @@ void RasterizerStorageGLES2::initialize() {
 
 		const GLubyte *extension_string = glGetString(GL_EXTENSIONS);
 
-		Vector<String> extensions = String((const char *)extension_string).split(" ");
+		std::vector<String> extensions = String((const char *)extension_string).split(" ");
 
 		for (int i = 0; i < extensions.size(); i++) {
 			config.extensions.insert(extensions[i]);
