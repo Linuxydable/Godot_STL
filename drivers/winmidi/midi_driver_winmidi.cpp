@@ -49,7 +49,7 @@ Error MIDIDriverWinMidi::open() {
 		MMRESULT res = midiInOpen(&midi_in, i, (DWORD_PTR)read, (DWORD_PTR)this, CALLBACK_FUNCTION);
 		if (res == MMSYSERR_NOERROR) {
 			midiInStart(midi_in);
-			connected_sources.insert(i, midi_in);
+			connected_sources.insert(connected_sources.begin() + i, midi_in);
 		} else {
 			char err[256];
 			midiInGetErrorText(res, err, 256);
