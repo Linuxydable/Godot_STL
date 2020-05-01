@@ -36,12 +36,12 @@ void NodePath::_update_hash_cache() const {
 
 	uint32_t h = data->absolute ? 1 : 0;
 	int pc = data->path.size();
-	const StringName *sn = data->path.ptr();
+	const StringName *sn = data->path.data();
 	for (int i = 0; i < pc; i++) {
 		h = h ^ sn[i].hash();
 	}
 	int spc = data->subpath.size();
-	const StringName *ssn = data->subpath.ptr();
+	const StringName *ssn = data->subpath.data();
 	for (int i = 0; i < spc; i++) {
 		h = h ^ ssn[i].hash();
 	}
@@ -53,7 +53,7 @@ void NodePath::_update_hash_cache() const {
 void NodePath::prepend_period() {
 
 	if (data->path.size() && data->path[0].operator String() != ".") {
-		data->path.insert(0, ".");
+		data->path.insert(data->path.begin(), ".");
 		data->hash_cache_valid = false;
 	}
 }
@@ -125,8 +125,8 @@ bool NodePath::operator==(const NodePath &p_path) const {
 		return false;
 	}
 
-	const StringName *l_path_ptr = data->path.ptr();
-	const StringName *r_path_ptr = p_path.data->path.ptr();
+	const StringName *l_path_ptr = data->path.data();
+	const StringName *r_path_ptr = p_path.data->path.data();
 
 	for (int i = 0; i < path_size; i++) {
 
@@ -134,8 +134,8 @@ bool NodePath::operator==(const NodePath &p_path) const {
 			return false;
 	}
 
-	const StringName *l_subpath_ptr = data->subpath.ptr();
-	const StringName *r_subpath_ptr = p_path.data->subpath.ptr();
+	const StringName *l_subpath_ptr = data->subpath.data();
+	const StringName *r_subpath_ptr = p_path.data->subpath.data();
 
 	for (int i = 0; i < subpath_size; i++) {
 
@@ -197,18 +197,18 @@ NodePath::NodePath(const NodePath &p_path) {
 	}
 }
 
-Vector<StringName> NodePath::get_names() const {
+std::vector<StringName> NodePath::get_names() const {
 
 	if (data)
 		return data->path;
-	return Vector<StringName>();
+	return std::vector<StringName>();
 }
 
-Vector<StringName> NodePath::get_subnames() const {
+std::vector<StringName> NodePath::get_subnames() const {
 
 	if (data)
 		return data->subpath;
-	return Vector<StringName>();
+	return std::vector<StringName>();
 }
 
 StringName NodePath::get_concatenated_subnames() const {
@@ -217,7 +217,7 @@ StringName NodePath::get_concatenated_subnames() const {
 	if (!data->concatenated_subpath) {
 		int spc = data->subpath.size();
 		String concatenated;
-		const StringName *ssn = data->subpath.ptr();
+		const StringName *ssn = data->subpath.data();
 		for (int i = 0; i < spc; i++) {
 			concatenated += i == 0 ? ssn[i].operator String() : ":" + ssn[i];
 		}
@@ -231,8 +231,8 @@ NodePath NodePath::rel_path_to(const NodePath &p_np) const {
 	ERR_FAIL_COND_V(!is_absolute(), NodePath());
 	ERR_FAIL_COND_V(!p_np.is_absolute(), NodePath());
 
-	Vector<StringName> src_dirs = get_names();
-	Vector<StringName> dst_dirs = p_np.get_names();
+	std::vector<StringName> src_dirs = get_names();
+	std::vector<StringName> dst_dirs = p_np.get_names();
 
 	//find common parent
 	int common_parent = 0;
@@ -249,7 +249,7 @@ NodePath NodePath::rel_path_to(const NodePath &p_np) const {
 
 	common_parent--;
 
-	Vector<StringName> relpath;
+	std::vector<StringName> relpath;
 
 	for (int i = src_dirs.size() - 1; i > common_parent; i--) {
 
@@ -272,20 +272,20 @@ NodePath NodePath::get_as_property_path() const {
 	if (!data || !data->path.size()) {
 		return *this;
 	} else {
-		Vector<StringName> new_path = data->subpath;
+		std::vector<StringName> new_path = data->subpath;
 
 		String initial_subname = data->path[0];
 
 		for (int i = 1; i < data->path.size(); i++) {
 			initial_subname += "/" + data->path[i];
 		}
-		new_path.insert(0, initial_subname);
+		new_path.insert(new_path.begin(), initial_subname);
 
-		return NodePath(Vector<StringName>(), new_path, false);
+		return NodePath(std::vector<StringName>(), new_path, false);
 	}
 }
 
-NodePath::NodePath(const Vector<StringName> &p_path, bool p_absolute) {
+NodePath::NodePath(const std::vector<StringName> &p_path, bool p_absolute) {
 
 	data = NULL;
 
@@ -300,7 +300,7 @@ NodePath::NodePath(const Vector<StringName> &p_path, bool p_absolute) {
 	data->hash_cache_valid = false;
 }
 
-NodePath::NodePath(const Vector<StringName> &p_path, const Vector<StringName> &p_subpath, bool p_absolute) {
+NodePath::NodePath(const std::vector<StringName> &p_path, const std::vector<StringName> &p_subpath, bool p_absolute) {
 
 	data = NULL;
 
@@ -324,12 +324,12 @@ void NodePath::simplify() {
 		if (data->path.size() == 1)
 			break;
 		if (data->path[i].operator String() == ".") {
-			data->path.remove(i);
+			data->path.erase(data->path.begin() + i);
 			i--;
 		} else if (data->path[i].operator String() == ".." && i > 0 && data->path[i - 1].operator String() != "." && data->path[i - 1].operator String() != "..") {
 			//remove both
-			data->path.remove(i - 1);
-			data->path.remove(i - 1);
+			data->path.erase(data->path.begin() + i - 1);
+			data->path.erase(data->path.begin() + i - 1);
 			i -= 2;
 			if (data->path.size() == 0) {
 				data->path.push_back(".");
@@ -355,7 +355,7 @@ NodePath::NodePath(const String &p_path) {
 		return;
 
 	String path = p_path;
-	Vector<StringName> subpath;
+	std::vector<StringName> subpath;
 
 	bool absolute = (path[0] == '/');
 	bool last_is_slash = true;
@@ -426,7 +426,7 @@ NodePath::NodePath(const String &p_path) {
 
 				String name = path.substr(from, i - from);
 				ERR_FAIL_INDEX(slice, data->path.size());
-				data->path.write[slice++] = name;
+				data->path[slice++] = name;
 			}
 			from = i + 1;
 			last_is_slash = true;
