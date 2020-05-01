@@ -249,18 +249,18 @@ private:
 	GDScript *_script;
 
 	StringName name;
-	Vector<Variant> constants;
-	Vector<StringName> global_names;
+	std::vector<Variant> constants;
+	std::vector<StringName> global_names;
 #ifdef TOOLS_ENABLED
-	Vector<StringName> named_globals;
+	std::vector<StringName> named_globals;
 #endif
-	Vector<int> default_arguments;
-	Vector<int> code;
-	Vector<GDScriptDataType> argument_types;
+	std::vector<int> default_arguments;
+	std::vector<int> code;
+	std::vector<GDScriptDataType> argument_types;
 	GDScriptDataType return_type;
 
 #ifdef TOOLS_ENABLED
-	Vector<StringName> arg_names;
+	std::vector<StringName> arg_names;
 #endif
 
 	List<StackDebug> stack_debug;
@@ -300,7 +300,7 @@ public:
 #endif
 		GDScriptInstance *instance;
 		ObjectID instance_id;
-		Vector<uint8_t> stack;
+		std::vector<uint8_t> stack;
 		int stack_size;
 		Variant self;
 		uint32_t alloca_size;
