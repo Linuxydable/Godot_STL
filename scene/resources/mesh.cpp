@@ -107,7 +107,7 @@ Ref<TriangleMesh> Mesh::generate_triangle_mesh() const {
 	return triangle_mesh;
 }
 
-void Mesh::generate_debug_mesh_lines(Vector<Vector3> &r_lines) {
+void Mesh::generate_debug_mesh_lines(std::vector<Vector3> &r_lines) {
 
 	if (debug_lines.size() > 0) {
 		r_lines = debug_lines;
@@ -129,21 +129,21 @@ void Mesh::generate_debug_mesh_lines(Vector<Vector3> &r_lines) {
 	PoolVector<Vector3>::Read ver_r = vertices.read();
 	for (int j = 0, x = 0, i = 0; i < triangles_num; j += 6, x += 3, ++i) {
 		// Triangle line 1
-		debug_lines.write[j + 0] = ver_r[ind_r[x + 0]];
-		debug_lines.write[j + 1] = ver_r[ind_r[x + 1]];
+		debug_lines[j + 0] = ver_r[ind_r[x + 0]];
+		debug_lines[j + 1] = ver_r[ind_r[x + 1]];
 
 		// Triangle line 2
-		debug_lines.write[j + 2] = ver_r[ind_r[x + 1]];
-		debug_lines.write[j + 3] = ver_r[ind_r[x + 2]];
+		debug_lines[j + 2] = ver_r[ind_r[x + 1]];
+		debug_lines[j + 3] = ver_r[ind_r[x + 2]];
 
 		// Triangle line 3
-		debug_lines.write[j + 4] = ver_r[ind_r[x + 2]];
-		debug_lines.write[j + 5] = ver_r[ind_r[x + 0]];
+		debug_lines[j + 4] = ver_r[ind_r[x + 2]];
+		debug_lines[j + 5] = ver_r[ind_r[x + 0]];
 	}
 
 	r_lines = debug_lines;
 }
-void Mesh::generate_debug_mesh_indices(Vector<Vector3> &r_points) {
+void Mesh::generate_debug_mesh_indices(std::vector<Vector3> &r_points) {
 	Ref<TriangleMesh> tm = generate_triangle_mesh();
 	if (tm.is_null())
 		return;
@@ -153,7 +153,7 @@ void Mesh::generate_debug_mesh_indices(Vector<Vector3> &r_points) {
 	int vertices_size = vertices.size();
 	r_points.resize(vertices_size);
 	for (int i = 0; i < vertices_size; ++i) {
-		r_points.write[i] = vertices[i];
+		r_points[i] = vertices[i];
 	}
 }
 
@@ -553,21 +553,21 @@ void Mesh::clear_cache() const {
 	debug_lines.clear();
 }
 
-Vector<Ref<Shape> > Mesh::convex_decompose() const {
+std::vector<Ref<Shape> > Mesh::convex_decompose() const {
 
-	ERR_FAIL_COND_V(!convex_composition_function, Vector<Ref<Shape> >());
+	ERR_FAIL_COND_V(!convex_composition_function, std::vector<Ref<Shape> >());
 
 	PoolVector<Face3> faces = get_faces();
-	Vector<Face3> f3;
+	std::vector<Face3> f3;
 	f3.resize(faces.size());
 	PoolVector<Face3>::Read f = faces.read();
 	for (int i = 0; i < f3.size(); i++) {
-		f3.write[i] = f[i];
+		f3[i] = f[i];
 	}
 
-	Vector<Vector<Face3> > decomposed = convex_composition_function(f3);
+	std::vector<std::vector<Face3> > decomposed = convex_composition_function(f3);
 
-	Vector<Ref<Shape> > ret;
+	std::vector<Ref<Shape> > ret;
 
 	for (int i = 0; i < decomposed.size(); i++) {
 		Set<Vector3> points;
@@ -669,7 +669,7 @@ bool ArrayMesh::_set(const StringName &p_name, const Variant &p_value) {
 			if (d.has("index_count"))
 				index_count = d["index_count"];
 
-			Vector<PoolVector<uint8_t> > blend_shapes;
+			std::vector<PoolVector<uint8_t> > blend_shapes;
 
 			if (d.has("blend_shape_data")) {
 				Array blend_shape_data = d["blend_shape_data"];
@@ -682,13 +682,13 @@ bool ArrayMesh::_set(const StringName &p_name, const Variant &p_value) {
 			ERR_FAIL_COND_V(!d.has("aabb"), false);
 			AABB aabb = d["aabb"];
 
-			Vector<AABB> bone_aabb;
+			std::vector<AABB> bone_aabb;
 			if (d.has("skeleton_aabb")) {
 				Array baabb = d["skeleton_aabb"];
 				bone_aabb.resize(baabb.size());
 
 				for (int i = 0; i < baabb.size(); i++) {
-					bone_aabb.write[i] = baabb[i];
+					bone_aabb[i] = baabb[i];
 				}
 			}
 
@@ -757,7 +757,7 @@ bool ArrayMesh::_get(const StringName &p_name, Variant &r_ret) const {
 	d["format"] = VS::get_singleton()->mesh_surface_get_format(mesh, idx);
 	d["aabb"] = VS::get_singleton()->mesh_surface_get_aabb(mesh, idx);
 
-	Vector<AABB> skel_aabb = VS::get_singleton()->mesh_surface_get_skeleton_aabb(mesh, idx);
+	std::vector<AABB> skel_aabb = VS::get_singleton()->mesh_surface_get_skeleton_aabb(mesh, idx);
 	Array arr;
 	arr.resize(skel_aabb.size());
 	for (int i = 0; i < skel_aabb.size(); i++) {
@@ -765,7 +765,7 @@ bool ArrayMesh::_get(const StringName &p_name, Variant &r_ret) const {
 	}
 	d["skeleton_aabb"] = arr;
 
-	Vector<PoolVector<uint8_t> > blend_shape_data = VS::get_singleton()->mesh_surface_get_blend_shapes(mesh, idx);
+	std::vector<PoolVector<uint8_t> > blend_shape_data = VS::get_singleton()->mesh_surface_get_blend_shapes(mesh, idx);
 
 	Array md;
 	for (int i = 0; i < blend_shape_data.size(); i++) {
@@ -822,7 +822,7 @@ void ArrayMesh::_recompute_aabb() {
 	}
 }
 
-void ArrayMesh::add_surface(uint32_t p_format, PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const Vector<PoolVector<uint8_t> > &p_blend_shapes, const Vector<AABB> &p_bone_aabbs) {
+void ArrayMesh::add_surface(uint32_t p_format, PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const std::vector<PoolVector<uint8_t> > &p_blend_shapes, const std::vector<AABB> &p_bone_aabbs) {
 
 	Surface s;
 	s.aabb = p_aabb;
@@ -894,14 +894,14 @@ void ArrayMesh::add_blend_shape(const StringName &p_name) {
 
 	StringName name = p_name;
 
-	if (blend_shapes.find(name) != -1) {
+	if (std::find(blend_shapes.begin(), blend_shapes.end(), name) != blend_shapes.end()) {
 
 		int count = 2;
 		do {
 
 			name = String(p_name) + " " + itos(count);
 			count++;
-		} while (blend_shapes.find(name) != -1);
+		} while (std::find(blend_shapes.begin(), blend_shapes.end(), name) != blend_shapes.end());
 	}
 
 	blend_shapes.push_back(name);
@@ -938,7 +938,7 @@ void ArrayMesh::surface_remove(int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, surfaces.size());
 	VisualServer::get_singleton()->mesh_remove_surface(mesh, p_idx);
-	surfaces.remove(p_idx);
+	surfaces.erase(surfaces.begin() + p_idx);
 
 	clear_cache();
 	_recompute_aabb();
@@ -975,7 +975,7 @@ void ArrayMesh::surface_set_material(int p_idx, const Ref<Material> &p_material)
 	ERR_FAIL_INDEX(p_idx, surfaces.size());
 	if (surfaces[p_idx].material == p_material)
 		return;
-	surfaces.write[p_idx].material = p_material;
+	surfaces[p_idx].material = p_material;
 	VisualServer::get_singleton()->mesh_surface_set_material(mesh, p_idx, p_material.is_null() ? RID() : p_material->get_rid());
 
 	_change_notify("material");
@@ -996,7 +996,7 @@ void ArrayMesh::surface_set_name(int p_idx, const String &p_name) {
 
 	ERR_FAIL_INDEX(p_idx, surfaces.size());
 
-	surfaces.write[p_idx].name = p_name;
+	surfaces[p_idx].name = p_name;
 	emit_changed();
 }
 
@@ -1016,7 +1016,7 @@ void ArrayMesh::surface_update_region(int p_surface, int p_offset, const PoolVec
 void ArrayMesh::surface_set_custom_aabb(int p_idx, const AABB &p_aabb) {
 
 	ERR_FAIL_INDEX(p_idx, surfaces.size());
-	surfaces.write[p_idx].aabb = p_aabb;
+	surfaces[p_idx].aabb = p_aabb;
 	// set custom aabb too?
 	emit_changed();
 }
@@ -1077,7 +1077,7 @@ AABB ArrayMesh::get_custom_aabb() const {
 
 void ArrayMesh::regen_normalmaps() {
 
-	Vector<Ref<SurfaceTool> > surfs;
+	std::vector<Ref<SurfaceTool> > surfs;
 	for (int i = 0; i < get_surface_count(); i++) {
 
 		Ref<SurfaceTool> st = memnew(SurfaceTool);
@@ -1091,8 +1091,8 @@ void ArrayMesh::regen_normalmaps() {
 
 	for (int i = 0; i < surfs.size(); i++) {
 
-		surfs.write[i]->generate_tangents();
-		surfs.write[i]->commit(Ref<ArrayMesh>(this));
+		surfs[i]->generate_tangents();
+		surfs[i]->commit(Ref<ArrayMesh>(this));
 	}
 }
 
@@ -1102,7 +1102,7 @@ bool (*array_mesh_lightmap_unwrap_callback)(float p_texel_size, const float *p_v
 struct ArrayMeshLightmapSurface {
 
 	Ref<Material> material;
-	Vector<SurfaceTool::Vertex> vertices;
+	std::vector<SurfaceTool::Vertex> vertices;
 	Mesh::PrimitiveType primitive;
 	uint32_t format;
 };
@@ -1112,14 +1112,14 @@ Error ArrayMesh::lightmap_unwrap(const Transform &p_base_transform, float p_texe
 	ERR_FAIL_COND_V(!array_mesh_lightmap_unwrap_callback, ERR_UNCONFIGURED);
 	ERR_FAIL_COND_V_MSG(blend_shapes.size() != 0, ERR_UNAVAILABLE, "Can't unwrap mesh with blend shapes.");
 
-	Vector<float> vertices;
-	Vector<float> normals;
-	Vector<int> indices;
-	Vector<int> face_materials;
-	Vector<float> uv;
-	Vector<Pair<int, int> > uv_index;
+	std::vector<float> vertices;
+	std::vector<float> normals;
+	std::vector<int> indices;
+	std::vector<int> face_materials;
+	std::vector<float> uv;
+	std::vector<Pair<int, int> > uv_index;
 
-	Vector<ArrayMeshLightmapSurface> surfaces;
+	std::vector<ArrayMeshLightmapSurface> surfaces;
 	for (int i = 0; i < get_surface_count(); i++) {
 		ArrayMeshLightmapSurface s;
 		s.primitive = surface_get_primitive_type(i);
@@ -1150,13 +1150,13 @@ Error ArrayMesh::lightmap_unwrap(const Transform &p_base_transform, float p_texe
 			Vector3 v = p_base_transform.xform(r[j]);
 			Vector3 n = p_base_transform.basis.xform(rn[j]).normalized();
 
-			vertices.write[(j + vertex_ofs) * 3 + 0] = v.x;
-			vertices.write[(j + vertex_ofs) * 3 + 1] = v.y;
-			vertices.write[(j + vertex_ofs) * 3 + 2] = v.z;
-			normals.write[(j + vertex_ofs) * 3 + 0] = n.x;
-			normals.write[(j + vertex_ofs) * 3 + 1] = n.y;
-			normals.write[(j + vertex_ofs) * 3 + 2] = n.z;
-			uv_index.write[j + vertex_ofs] = Pair<int, int>(i, j);
+			vertices[(j + vertex_ofs) * 3 + 0] = v.x;
+			vertices[(j + vertex_ofs) * 3 + 1] = v.y;
+			vertices[(j + vertex_ofs) * 3 + 2] = v.z;
+			normals[(j + vertex_ofs) * 3 + 0] = n.x;
+			normals[(j + vertex_ofs) * 3 + 1] = n.y;
+			normals[(j + vertex_ofs) * 3 + 2] = n.z;
+			uv_index[j + vertex_ofs] = Pair<int, int>(i, j);
 		}
 
 		PoolVector<int> rindices = arrays[Mesh::ARRAY_INDEX];
@@ -1200,7 +1200,7 @@ Error ArrayMesh::lightmap_unwrap(const Transform &p_base_transform, float p_texe
 	int size_x;
 	int size_y;
 
-	bool ok = array_mesh_lightmap_unwrap_callback(p_texel_size, vertices.ptr(), normals.ptr(), vertices.size() / 3, indices.ptr(), face_materials.ptr(), indices.size(), &gen_uvs, &gen_vertices, &gen_vertex_count, &gen_indices, &gen_index_count, &size_x, &size_y);
+	bool ok = array_mesh_lightmap_unwrap_callback(p_texel_size, vertices.data(), normals.data(), vertices.size() / 3, indices.data(), face_materials.data(), indices.size(), &gen_uvs, &gen_vertices, &gen_vertex_count, &gen_indices, &gen_index_count, &size_x, &size_y);
 
 	if (!ok) {
 		return ERR_CANT_CREATE;
@@ -1212,7 +1212,7 @@ Error ArrayMesh::lightmap_unwrap(const Transform &p_base_transform, float p_texe
 	}
 
 	//create surfacetools for each surface..
-	Vector<Ref<SurfaceTool> > surfaces_tools;
+	std::vector<Ref<SurfaceTool> > surfaces_tools;
 
 	for (int i = 0; i < surfaces.size(); i++) {
 		Ref<SurfaceTool> st;
@@ -1239,31 +1239,31 @@ Error ArrayMesh::lightmap_unwrap(const Transform &p_base_transform, float p_texe
 			SurfaceTool::Vertex v = surfaces[surface].vertices[uv_index[gen_vertices[gen_indices[i + j]]].second];
 
 			if (surfaces[surface].format & ARRAY_FORMAT_COLOR) {
-				surfaces_tools.write[surface]->add_color(v.color);
+				surfaces_tools[surface]->add_color(v.color);
 			}
 			if (surfaces[surface].format & ARRAY_FORMAT_TEX_UV) {
-				surfaces_tools.write[surface]->add_uv(v.uv);
+				surfaces_tools[surface]->add_uv(v.uv);
 			}
 			if (surfaces[surface].format & ARRAY_FORMAT_NORMAL) {
-				surfaces_tools.write[surface]->add_normal(v.normal);
+				surfaces_tools[surface]->add_normal(v.normal);
 			}
 			if (surfaces[surface].format & ARRAY_FORMAT_TANGENT) {
 				Plane t;
 				t.normal = v.tangent;
 				t.d = v.binormal.dot(v.normal.cross(v.tangent)) < 0 ? -1 : 1;
-				surfaces_tools.write[surface]->add_tangent(t);
+				surfaces_tools[surface]->add_tangent(t);
 			}
 			if (surfaces[surface].format & ARRAY_FORMAT_BONES) {
-				surfaces_tools.write[surface]->add_bones(v.bones);
+				surfaces_tools[surface]->add_bones(v.bones);
 			}
 			if (surfaces[surface].format & ARRAY_FORMAT_WEIGHTS) {
-				surfaces_tools.write[surface]->add_weights(v.weights);
+				surfaces_tools[surface]->add_weights(v.weights);
 			}
 
 			Vector2 uv2(gen_uvs[gen_indices[i + j] * 2 + 0], gen_uvs[gen_indices[i + j] * 2 + 1]);
-			surfaces_tools.write[surface]->add_uv2(uv2);
+			surfaces_tools[surface]->add_uv2(uv2);
 
-			surfaces_tools.write[surface]->add_vertex(v.vertex);
+			surfaces_tools[surface]->add_vertex(v.vertex);
 		}
 	}
 
@@ -1275,8 +1275,8 @@ Error ArrayMesh::lightmap_unwrap(const Transform &p_base_transform, float p_texe
 	//generate surfaces
 
 	for (int i = 0; i < surfaces_tools.size(); i++) {
-		surfaces_tools.write[i]->index();
-		surfaces_tools.write[i]->commit(Ref<ArrayMesh>((ArrayMesh *)this), surfaces[i].format);
+		surfaces_tools[i]->index();
+		surfaces_tools[i]->commit(Ref<ArrayMesh>((ArrayMesh *)this), surfaces[i].format);
 	}
 
 	set_lightmap_size_hint(Size2(size_x, size_y));
