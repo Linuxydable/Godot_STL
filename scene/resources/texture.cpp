@@ -575,7 +575,7 @@ Error StreamTexture::_load_data(const String &p_path, int &tw, int &th, int &tw_
 		}
 
 		//mipmaps need to be read independently, they will be later combined
-		Vector<Ref<Image> > mipmap_images;
+		std::vector<Ref<Image> > mipmap_images;
 		int total_size = 0;
 
 		for (uint32_t i = 0; i < mipmaps; i++) {
@@ -1301,7 +1301,7 @@ bool LargeTexture::has_alpha() const {
 void LargeTexture::set_flags(uint32_t p_flags) {
 
 	for (int i = 0; i < pieces.size(); i++) {
-		pieces.write[i].texture->set_flags(p_flags);
+		pieces[i].texture->set_flags(p_flags);
 	}
 }
 
@@ -1327,7 +1327,7 @@ int LargeTexture::add_piece(const Point2 &p_offset, const Ref<Texture> &p_textur
 void LargeTexture::set_piece_offset(int p_idx, const Point2 &p_offset) {
 
 	ERR_FAIL_INDEX(p_idx, pieces.size());
-	pieces.write[p_idx].offset = p_offset;
+	pieces[p_idx].offset = p_offset;
 };
 
 void LargeTexture::set_piece_texture(int p_idx, const Ref<Texture> &p_texture) {
@@ -1335,7 +1335,7 @@ void LargeTexture::set_piece_texture(int p_idx, const Ref<Texture> &p_texture) {
 	ERR_FAIL_COND(p_texture == this);
 	ERR_FAIL_COND(p_texture.is_null());
 	ERR_FAIL_INDEX(p_idx, pieces.size());
-	pieces.write[p_idx].texture = p_texture;
+	pieces[p_idx].texture = p_texture;
 };
 
 void LargeTexture::set_size(const Size2 &p_size) {
@@ -2453,7 +2453,7 @@ RES ResourceFormatLoaderTextureLayered::load(const String &p_path, const String 
 			//look for a PNG file inside
 
 			int mipmaps = f->get_32();
-			Vector<Ref<Image> > mipmap_images;
+			std::vector<Ref<Image> > mipmap_images;
 
 			for (int i = 0; i < mipmaps; i++) {
 				uint32_t size = f->get_32();

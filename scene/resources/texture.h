@@ -345,7 +345,7 @@ protected:
 		Ref<Texture> texture;
 	};
 
-	Vector<Piece> pieces;
+	std::vector<Piece> pieces;
 	Size2i size;
 
 	Array _get_data() const;
