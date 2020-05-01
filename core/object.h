@@ -209,7 +209,7 @@ struct MethodInfo {
 	uint32_t flags;
 	int id;
 	List<PropertyInfo> arguments;
-	Vector<Variant> default_arguments;
+	std::vector<Variant> default_arguments;
 
 	inline bool operator==(const MethodInfo &p_method) const { return id == p_method.id; }
 	inline bool operator<(const MethodInfo &p_method) const { return id == p_method.id ? (name < p_method.name) : (id < p_method.id); }
@@ -421,7 +421,7 @@ public:
 		Object *target;
 		StringName method;
 		uint32_t flags;
-		Vector<Variant> binds;
+		std::vector<Variant> binds;
 		bool operator<(const Connection &p_conn) const;
 
 		operator Variant() const;
@@ -668,8 +668,8 @@ public:
 
 	void set(const StringName &p_name, const Variant &p_value, bool *r_valid = NULL);
 	Variant get(const StringName &p_name, bool *r_valid = NULL) const;
-	void set_indexed(const Vector<StringName> &p_names, const Variant &p_value, bool *r_valid = NULL);
-	Variant get_indexed(const Vector<StringName> &p_names, bool *r_valid = NULL) const;
+	void set_indexed(const std::vector<StringName> &p_names, const Variant &p_value, bool *r_valid = NULL);
+	Variant get_indexed(const std::vector<StringName> &p_names, bool *r_valid = NULL) const;
 
 	void get_property_list(List<PropertyInfo> *p_list, bool p_reversed = false) const;
 
@@ -723,7 +723,7 @@ public:
 	int get_persistent_signal_connection_count() const;
 	void get_signals_connected_to_this(List<Connection> *p_connections) const;
 
-	Error connect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method, const Vector<Variant> &p_binds = Vector<Variant>(), uint32_t p_flags = 0);
+	Error connect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method, const std::vector<Variant> &p_binds = std::vector<Variant>(), uint32_t p_flags = 0);
 	void disconnect(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method);
 	bool is_connected(const StringName &p_signal, Object *p_to_object, const StringName &p_to_method) const;
 
@@ -734,7 +734,7 @@ public:
 	bool is_blocking_signals() const;
 
 	Variant::Type get_static_property_type(const StringName &p_property, bool *r_valid = NULL) const;
-	Variant::Type get_static_property_type_indexed(const Vector<StringName> &p_path, bool *r_valid = NULL) const;
+	Variant::Type get_static_property_type_indexed(const std::vector<StringName> &p_path, bool *r_valid = NULL) const;
 
 	virtual void get_translatable_strings(List<String> *p_strings) const;
 
