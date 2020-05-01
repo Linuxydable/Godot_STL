@@ -205,7 +205,7 @@ public:
 	int findn(const String &p_str, int p_from = 0) const; ///< return <0 if failed, case insensitive
 	int rfind(const String &p_str, int p_from = -1) const; ///< return <0 if failed
 	int rfindn(const String &p_str, int p_from = -1) const; ///< return <0 if failed, case insensitive
-	int findmk(const Vector<String> &p_keys, int p_from = 0, int *r_key = NULL) const; ///< return <0 if failed
+	int findmk(const std::vector<String> &p_keys, int p_from = 0, int *r_key = NULL) const; ///< return <0 if failed
 	bool match(const String &p_wildcard) const;
 	bool matchn(const String &p_wildcard) const;
 	bool begins_with(const String &p_string) const;
@@ -215,7 +215,7 @@ public:
 	bool is_subsequence_of(const String &p_string) const;
 	bool is_subsequence_ofi(const String &p_string) const;
 	bool is_quoted() const;
-	Vector<String> bigrams() const;
+	std::vector<String> bigrams() const;
 	float similarity(const String &p_string) const;
 	String format(const Variant &values, String placeholder = "{_}") const;
 	String replace_first(const String &p_key, const String &p_with) const;
@@ -261,15 +261,15 @@ public:
 	String get_slice(String p_splitter, int p_slice) const;
 	String get_slicec(CharType p_splitter, int p_slice) const;
 
-	Vector<String> split(const String &p_splitter, bool p_allow_empty = true, int p_maxsplit = 0) const;
-	Vector<String> rsplit(const String &p_splitter, bool p_allow_empty = true, int p_maxsplit = 0) const;
-	Vector<String> split_spaces() const;
-	Vector<float> split_floats(const String &p_splitter, bool p_allow_empty = true) const;
-	Vector<float> split_floats_mk(const Vector<String> &p_splitters, bool p_allow_empty = true) const;
-	Vector<int> split_ints(const String &p_splitter, bool p_allow_empty = true) const;
-	Vector<int> split_ints_mk(const Vector<String> &p_splitters, bool p_allow_empty = true) const;
+	std::vector<String> split(const String &p_splitter, bool p_allow_empty = true, int p_maxsplit = 0) const;
+	std::vector<String> rsplit(const String &p_splitter, bool p_allow_empty = true, int p_maxsplit = 0) const;
+	std::vector<String> split_spaces() const;
+	std::vector<float> split_floats(const String &p_splitter, bool p_allow_empty = true) const;
+	std::vector<float> split_floats_mk(const std::vector<String> &p_splitters, bool p_allow_empty = true) const;
+	std::vector<int> split_ints(const String &p_splitter, bool p_allow_empty = true) const;
+	std::vector<int> split_ints_mk(const std::vector<String> &p_splitters, bool p_allow_empty = true) const;
 
-	String join(Vector<String> parts);
+	String join(std::vector<String> parts);
 
 	static CharType char_uppercase(CharType p_char);
 	static CharType char_lowercase(CharType p_char);
@@ -307,9 +307,9 @@ public:
 	String md5_text() const;
 	String sha1_text() const;
 	String sha256_text() const;
-	Vector<uint8_t> md5_buffer() const;
-	Vector<uint8_t> sha1_buffer() const;
-	Vector<uint8_t> sha256_buffer() const;
+	std::vector<uint8_t> md5_buffer() const;
+	std::vector<uint8_t> sha1_buffer() const;
+	std::vector<uint8_t> sha256_buffer() const;
 
 	_FORCE_INLINE_ bool empty() const { return length() == 0; }
 

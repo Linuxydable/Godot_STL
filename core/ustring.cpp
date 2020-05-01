@@ -732,9 +732,9 @@ String String::get_slicec(CharType p_splitter, int p_slice) const {
 	}
 }
 
-Vector<String> String::split_spaces() const {
+std::vector<String> String::split_spaces() const {
 
-	Vector<String> ret;
+	std::vector<String> ret;
 	int from = 0;
 	int i = 0;
 	int len = length();
@@ -769,9 +769,9 @@ Vector<String> String::split_spaces() const {
 	return ret;
 }
 
-Vector<String> String::split(const String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
+std::vector<String> String::split(const String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
 
-	Vector<String> ret;
+	std::vector<String> ret;
 	int from = 0;
 	int len = length();
 
@@ -805,9 +805,9 @@ Vector<String> String::split(const String &p_splitter, bool p_allow_empty, int p
 	return ret;
 }
 
-Vector<String> String::rsplit(const String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
+std::vector<String> String::rsplit(const String &p_splitter, bool p_allow_empty, int p_maxsplit) const {
 
-	Vector<String> ret;
+	std::vector<String> ret;
 	const int len = length();
 	int remaining_len = len;
 
@@ -841,9 +841,9 @@ Vector<String> String::rsplit(const String &p_splitter, bool p_allow_empty, int 
 	return ret;
 }
 
-Vector<float> String::split_floats(const String &p_splitter, bool p_allow_empty) const {
+std::vector<float> String::split_floats(const String &p_splitter, bool p_allow_empty) const {
 
-	Vector<float> ret;
+	std::vector<float> ret;
 	int from = 0;
 	int len = length();
 
@@ -864,9 +864,9 @@ Vector<float> String::split_floats(const String &p_splitter, bool p_allow_empty)
 	return ret;
 }
 
-Vector<float> String::split_floats_mk(const Vector<String> &p_splitters, bool p_allow_empty) const {
+std::vector<float> String::split_floats_mk(const std::vector<String> &p_splitters, bool p_allow_empty) const {
 
-	Vector<float> ret;
+	std::vector<float> ret;
 	int from = 0;
 	int len = length();
 
@@ -894,9 +894,9 @@ Vector<float> String::split_floats_mk(const Vector<String> &p_splitters, bool p_
 	return ret;
 }
 
-Vector<int> String::split_ints(const String &p_splitter, bool p_allow_empty) const {
+std::vector<int> String::split_ints(const String &p_splitter, bool p_allow_empty) const {
 
-	Vector<int> ret;
+	std::vector<int> ret;
 	int from = 0;
 	int len = length();
 
@@ -917,9 +917,9 @@ Vector<int> String::split_ints(const String &p_splitter, bool p_allow_empty) con
 	return ret;
 }
 
-Vector<int> String::split_ints_mk(const Vector<String> &p_splitters, bool p_allow_empty) const {
+std::vector<int> String::split_ints_mk(const std::vector<String> &p_splitters, bool p_allow_empty) const {
 
-	Vector<int> ret;
+	std::vector<int> ret;
 	int from = 0;
 	int len = length();
 
@@ -946,7 +946,7 @@ Vector<int> String::split_ints_mk(const Vector<String> &p_splitters, bool p_allo
 	return ret;
 }
 
-String String::join(Vector<String> parts) {
+String String::join(std::vector<String> parts) {
 	String ret;
 	for (int i = 0; i < parts.size(); ++i) {
 		if (i > 0) {
@@ -2300,43 +2300,43 @@ String String::sha256_text() const {
 	return String::hex_encode_buffer(hash, 32);
 }
 
-Vector<uint8_t> String::md5_buffer() const {
+std::vector<uint8_t> String::md5_buffer() const {
 
 	CharString cs = utf8();
 	unsigned char hash[16];
 	CryptoCore::md5((unsigned char *)cs.ptr(), cs.length(), hash);
 
-	Vector<uint8_t> ret;
+	std::vector<uint8_t> ret;
 	ret.resize(16);
 	for (int i = 0; i < 16; i++) {
-		ret.write[i] = hash[i];
+		ret[i] = hash[i];
 	}
 	return ret;
 };
 
-Vector<uint8_t> String::sha1_buffer() const {
+std::vector<uint8_t> String::sha1_buffer() const {
 	CharString cs = utf8();
 	unsigned char hash[20];
 	CryptoCore::sha1((unsigned char *)cs.ptr(), cs.length(), hash);
 
-	Vector<uint8_t> ret;
+	std::vector<uint8_t> ret;
 	ret.resize(20);
 	for (int i = 0; i < 20; i++) {
-		ret.write[i] = hash[i];
+		ret[i] = hash[i];
 	}
 
 	return ret;
 }
 
-Vector<uint8_t> String::sha256_buffer() const {
+std::vector<uint8_t> String::sha256_buffer() const {
 	CharString cs = utf8();
 	unsigned char hash[32];
 	CryptoCore::sha256((unsigned char *)cs.ptr(), cs.length(), hash);
 
-	Vector<uint8_t> ret;
+	std::vector<uint8_t> ret;
 	ret.resize(32);
 	for (int i = 0; i < 32; i++) {
-		ret.write[i] = hash[i];
+		ret[i] = hash[i];
 	}
 	return ret;
 }
@@ -2497,7 +2497,7 @@ int String::find_char(const CharType &p_char, int p_from) const {
 	return _cowdata.find(p_char, p_from);
 }
 
-int String::findmk(const Vector<String> &p_keys, int p_from, int *r_key) const {
+int String::findmk(const std::vector<String> &p_keys, int p_from, int *r_key) const {
 
 	if (p_from < 0)
 		return -1;
@@ -2838,15 +2838,15 @@ bool String::_base_is_subsequence_of(const String &p_string, bool case_insensiti
 	return false;
 }
 
-Vector<String> String::bigrams() const {
+std::vector<String> String::bigrams() const {
 	int n_pairs = length() - 1;
-	Vector<String> b;
+	std::vector<String> b;
 	if (n_pairs <= 0) {
 		return b;
 	}
 	b.resize(n_pairs);
 	for (int i = 0; i < n_pairs; i++) {
-		b.write[i] = substr(i, 2);
+		b[i] = substr(i, 2);
 	}
 	return b;
 }
@@ -2862,8 +2862,8 @@ float String::similarity(const String &p_string) const {
 		return 0.0f;
 	}
 
-	Vector<String> src_bigrams = bigrams();
-	Vector<String> tgt_bigrams = p_string.bigrams();
+	std::vector<String> src_bigrams = bigrams();
+	std::vector<String> tgt_bigrams = p_string.bigrams();
 
 	int src_size = src_bigrams.size();
 	int tgt_size = tgt_bigrams.size();
@@ -3267,7 +3267,7 @@ String String::simplify_path() const {
 		else
 			s = compare;
 	}
-	Vector<String> dirs = s.split("/", false);
+	std::vector<String> dirs = s.split("/", false);
 
 	for (int i = 0; i < dirs.size(); i++) {
 
@@ -3313,7 +3313,7 @@ static int _humanize_digits(int p_num) {
 String String::humanize_size(uint64_t p_size) {
 
 	uint64_t _div = 1;
-	Vector<String> prefixes;
+	std::vector<String> prefixes;
 	prefixes.push_back(RTR("B"));
 	prefixes.push_back(RTR("KiB"));
 	prefixes.push_back(RTR("MiB"));
@@ -3846,8 +3846,8 @@ String String::path_to(const String &p_path) const {
 	}
 
 	//remove leading and trailing slash and split
-	Vector<String> src_dirs = src.substr(1, src.length() - 2).split("/");
-	Vector<String> dst_dirs = dst.substr(1, dst.length() - 2).split("/");
+	std::vector<String> src_dirs = src.substr(1, src.length() - 2).split("/");
+	std::vector<String> dst_dirs = dst.substr(1, dst.length() - 2).split("/");
 
 	//find common parent
 	int common_parent = 0;
@@ -3904,7 +3904,7 @@ bool String::is_valid_ip_address() const {
 
 	if (find(":") >= 0) {
 
-		Vector<String> ip = split(":");
+		std::vector<String> ip = split(":");
 		for (int i = 0; i < ip.size(); i++) {
 
 			String n = ip[i];
@@ -3921,7 +3921,7 @@ bool String::is_valid_ip_address() const {
 		};
 
 	} else {
-		Vector<String> ip = split(".");
+		std::vector<String> ip = split(".");
 		if (ip.size() != 4)
 			return false;
 		for (int i = 0; i < ip.size(); i++) {
