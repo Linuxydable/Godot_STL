@@ -78,7 +78,7 @@ class AudioDriverWASAPI : public AudioDriver {
 	Mutex *mutex;
 	Thread *thread;
 
-	Vector<int32_t> samples_in;
+	std::vector<int32_t> samples_in;
 
 	unsigned int channels;
 	int mix_rate;
