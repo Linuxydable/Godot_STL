@@ -95,7 +95,7 @@ private:
 
 		Node *parent;
 		Node *owner;
-		Vector<Node *> children; // list of children
+		std::vector<Node *> children; // list of children
 		int pos;
 		int depth;
 		int blocked; // safeguard that throws an error when attempting to modify the tree in a harmful way while being traversed.
@@ -272,7 +272,7 @@ public:
 	Node *get_node_or_null(const NodePath &p_path) const;
 	Node *find_node(const String &p_mask, bool p_recursive = true, bool p_owned = true) const;
 	bool has_node_and_resource(const NodePath &p_path) const;
-	Node *get_node_and_resource(const NodePath &p_path, RES &r_res, Vector<StringName> &r_leftover_subpath, bool p_last_is_property = true) const;
+	Node *get_node_and_resource(const NodePath &p_path, RES &r_res, std::vector<StringName> &r_leftover_subpath, bool p_last_is_property = true) const;
 
 	Node *get_parent() const;
 	Node *find_parent(const String &p_mask) const;
@@ -379,7 +379,7 @@ public:
 	void set_scene_instance_load_placeholder(bool p_enable);
 	bool get_scene_instance_load_placeholder() const;
 
-	static Vector<Variant> make_binds(VARIANT_ARG_LIST);
+	static std::vector<Variant> make_binds(VARIANT_ARG_LIST);
 
 	void replace_by(Node *p_node, bool p_keep_data = false);
 
