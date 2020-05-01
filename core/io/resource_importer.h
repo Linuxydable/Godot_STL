@@ -52,9 +52,9 @@ class ResourceFormatImporter : public ResourceFormatLoader {
 	//need them to stay in order to compute the settings hash
 	struct SortImporterByName {
 		bool operator()(const Ref<ResourceImporter> &p_a, const Ref<ResourceImporter> &p_b) const;
-	};
+	} SortImporterByName;
 
-	Vector<Ref<ResourceImporter> > importers;
+	std::vector<Ref<ResourceImporter> > importers;
 
 public:
 	static ResourceFormatImporter *get_singleton() { return singleton; }
@@ -80,7 +80,15 @@ public:
 	void add_importer(const Ref<ResourceImporter> &p_importer) {
 		importers.push_back(p_importer);
 	}
-	void remove_importer(const Ref<ResourceImporter> &p_importer) { importers.erase(p_importer); }
+
+	void remove_importer(const Ref<ResourceImporter> &p_importer) {
+		auto it_find = std::find(importers.begin(), importers.end(), p_importer);
+
+		if (it_find != importers.end()) {
+			importers.erase(it_find);
+		}
+	}
+
 	Ref<ResourceImporter> get_importer_by_name(const String &p_name) const;
 	Ref<ResourceImporter> get_importer_by_extension(const String &p_extension) const;
 	void get_importers_for_extension(const String &p_extension, List<Ref<ResourceImporter> > *r_importers);
