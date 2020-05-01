@@ -1321,7 +1321,7 @@ void RasterizerSceneGLES3::_setup_geometry(RenderList::Element *e, const Transfo
 
 			if (s->blend_shapes.size() && e->instance->blend_values.size()) {
 				//blend shapes, use transform feedback
-				storage->mesh_render_blend_shapes(s, e->instance->blend_values.ptr());
+				storage->mesh_render_blend_shapes(s, e->instance->blend_values.data());
 				//rebind shader
 				state.scene_shader.bind();
 #ifdef DEBUG_ENABLED
@@ -1845,7 +1845,7 @@ void RasterizerSceneGLES3::_setup_light(RenderList::Element *e, const Transform 
 	int lc = e->instance->light_instances.size();
 	if (lc) {
 
-		const RID *lights = e->instance->light_instances.ptr();
+		const RID *lights = e->instance->light_instances.data();
 
 		for (int i = 0; i < lc; i++) {
 			LightInstance *li = light_instance_owner.getornull(lights[i]);
@@ -1881,7 +1881,7 @@ void RasterizerSceneGLES3::_setup_light(RenderList::Element *e, const Transform 
 
 	if (rc) {
 
-		const RID *reflections = e->instance->reflection_probe_instances.ptr();
+		const RID *reflections = e->instance->reflection_probe_instances.data();
 
 		for (int i = 0; i < rc; i++) {
 			ReflectionProbeInstance *rpi = reflection_probe_instance_owner.getptr(reflections[i]);
@@ -1901,7 +1901,7 @@ void RasterizerSceneGLES3::_setup_light(RenderList::Element *e, const Transform 
 
 	int gi_probe_count = e->instance->gi_probe_instances.size();
 	if (gi_probe_count) {
-		const RID *ridp = e->instance->gi_probe_instances.ptr();
+		const RID *ridp = e->instance->gi_probe_instances.data();
 
 		GIProbeInstance *gipi = gi_probe_instance_owner.getptr(ridp[0]);
 
@@ -1935,7 +1935,7 @@ void RasterizerSceneGLES3::_setup_light(RenderList::Element *e, const Transform 
 		}
 	} else if (!e->instance->lightmap_capture_data.empty()) {
 
-		glUniform4fv(state.scene_shader.get_uniform_location(SceneShaderGLES3::LIGHTMAP_CAPTURES), 12, (const GLfloat *)e->instance->lightmap_capture_data.ptr());
+		glUniform4fv(state.scene_shader.get_uniform_location(SceneShaderGLES3::LIGHTMAP_CAPTURES), 12, (const GLfloat *)e->instance->lightmap_capture_data.data());
 		state.scene_shader.set_uniform(SceneShaderGLES3::LIGHTMAP_CAPTURE_SKY, false);
 
 	} else if (e->instance->lightmap.is_valid()) {
@@ -3881,8 +3881,8 @@ void RasterizerSceneGLES3::_post_process(Environment *env, const CameraMatrix &p
 		state.exposure_shader.set_conditional(ExposureShaderGLES3::EXPOSURE_END, false);
 
 		//last step, swap with the framebuffer exposure, so the right exposure is kept int he framebuffer
-		SWAP(exposure_shrink.write[exposure_shrink.size() - 1].fbo, storage->frame.current_rt->exposure.fbo);
-		SWAP(exposure_shrink.write[exposure_shrink.size() - 1].color, storage->frame.current_rt->exposure.color);
+		SWAP(exposure_shrink[exposure_shrink.size() - 1].fbo, storage->frame.current_rt->exposure.fbo);
+		SWAP(exposure_shrink[exposure_shrink.size() - 1].color, storage->frame.current_rt->exposure.color);
 
 		glViewport(0, 0, storage->frame.current_rt->width, storage->frame.current_rt->height);
 
@@ -4269,14 +4269,14 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 			glBindFramebuffer(GL_FRAMEBUFFER, storage->frame.current_rt->buffers.fbo);
 			state.scene_shader.set_conditional(SceneShaderGLES3::USE_MULTIPLE_RENDER_TARGETS, true);
 
-			Vector<GLenum> draw_buffers;
+			std::vector<GLenum> draw_buffers;
 			draw_buffers.push_back(GL_COLOR_ATTACHMENT0);
 			draw_buffers.push_back(GL_COLOR_ATTACHMENT1);
 			draw_buffers.push_back(GL_COLOR_ATTACHMENT2);
 			if (state.used_sss) {
 				draw_buffers.push_back(GL_COLOR_ATTACHMENT3);
 			}
-			glDrawBuffers(draw_buffers.size(), draw_buffers.ptr());
+			glDrawBuffers(draw_buffers.size(), draw_buffers.data());
 
 			Color black(0, 0, 0, 0);
 			glClearBufferfv(GL_COLOR, 1, black.components); // specular
@@ -4300,9 +4300,9 @@ void RasterizerSceneGLES3::render_scene(const Transform &p_cam_transform, const 
 			glBindFramebuffer(GL_FRAMEBUFFER, current_fbo);
 			state.scene_shader.set_conditional(SceneShaderGLES3::USE_MULTIPLE_RENDER_TARGETS, false);
 
-			Vector<GLenum> draw_buffers;
+			std::vector<GLenum> draw_buffers;
 			draw_buffers.push_back(GL_COLOR_ATTACHMENT0);
-			glDrawBuffers(draw_buffers.size(), draw_buffers.ptr());
+			glDrawBuffers(draw_buffers.size(), draw_buffers.data());
 		}
 	}
 
