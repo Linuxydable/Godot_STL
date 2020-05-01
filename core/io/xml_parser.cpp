@@ -467,7 +467,7 @@ bool XMLParser::is_empty() const {
 	return node_empty;
 }
 
-Error XMLParser::open_buffer(const Vector<uint8_t> &p_buffer) {
+Error XMLParser::open_buffer(const std::vector<uint8_t> &p_buffer) {
 
 	ERR_FAIL_COND_V(p_buffer.size() == 0, ERR_INVALID_DATA);
 
@@ -477,7 +477,7 @@ Error XMLParser::open_buffer(const Vector<uint8_t> &p_buffer) {
 
 	length = p_buffer.size();
 	data = memnew_arr(char, length + 1);
-	copymem(data, p_buffer.ptr(), length);
+	copymem(data, p_buffer.data(), length);
 	data[length] = 0;
 	P = data;
 	return OK;

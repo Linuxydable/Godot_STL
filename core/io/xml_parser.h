@@ -34,7 +34,6 @@
 #include "core/os/file_access.h"
 #include "core/reference.h"
 #include "core/ustring.h"
-#include "core/vector.h"
 
 /*
   Based on irrXML (see their zlib license). Added mainly for compatibility with their Collada loader.
@@ -70,7 +69,7 @@ private:
 	char *P;
 	uint64_t length;
 	void unescape(String &p_str);
-	Vector<String> special_characters;
+	std::vector<String> special_characters;
 	String node_name;
 	bool node_empty;
 	NodeType node_type;
@@ -81,7 +80,7 @@ private:
 		String value;
 	};
 
-	Vector<Attribute> attributes;
+	std::vector<Attribute> attributes;
 
 	String _replace_special_characters(const String &origstr);
 	bool _set_text(char *start, char *end);
@@ -113,7 +112,7 @@ public:
 	Error seek(uint64_t p_pos);
 
 	Error open(const String &p_path);
-	Error open_buffer(const Vector<uint8_t> &p_buffer);
+	Error open_buffer(const std::vector<uint8_t> &p_buffer);
 
 	void close();
 
