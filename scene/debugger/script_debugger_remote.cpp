@@ -480,7 +480,7 @@ void ScriptDebuggerRemote::_err_handler(void *ud, const char *p_func, const char
 	if (p_type == ERR_HANDLER_SCRIPT)
 		return; //ignore script errors, those go through debugger
 
-	Vector<ScriptLanguage::StackInfo> si;
+	std::vector<ScriptLanguage::StackInfo> si;
 
 	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
 		si = ScriptServer::get_language(i)->debug_get_current_stack_info();
@@ -732,7 +732,7 @@ void ScriptDebuggerRemote::_set_object_property(ObjectID p_id, const String &p_p
 
 	String prop_name = p_property;
 	if (p_property.begins_with("Members/")) {
-		Vector<String> ss = p_property.split("/");
+		std::vector<String> ss = p_property.split("/");
 		prop_name = ss[ss.size() - 1];
 	}
 
@@ -874,17 +874,17 @@ void ScriptDebuggerRemote::_send_profiling_data(bool p_for_frame) {
 
 	for (int i = 0; i < ScriptServer::get_language_count(); i++) {
 		if (p_for_frame)
-			ofs += ScriptServer::get_language(i)->profiling_get_frame_data(&profile_info.write[ofs], profile_info.size() - ofs);
+			ofs += ScriptServer::get_language(i)->profiling_get_frame_data(&profile_info[ofs], profile_info.size() - ofs);
 		else
-			ofs += ScriptServer::get_language(i)->profiling_get_accumulated_data(&profile_info.write[ofs], profile_info.size() - ofs);
+			ofs += ScriptServer::get_language(i)->profiling_get_accumulated_data(&profile_info[ofs], profile_info.size() - ofs);
 	}
 
 	for (int i = 0; i < ofs; i++) {
-		profile_info_ptrs.write[i] = &profile_info.write[i];
+		profile_info_ptrs[i] = &profile_info[i];
 	}
 
 	SortArray<ScriptLanguage::ProfilingInfo *, ProfileInfoSort> sa;
-	sa.sort(profile_info_ptrs.ptrw(), ofs);
+	sa.sort(profile_info_ptrs.data(), ofs);
 
 	int to_send = MIN(ofs, max_frame_functions);
 
@@ -1026,7 +1026,7 @@ void ScriptDebuggerRemote::idle_poll() {
 void ScriptDebuggerRemote::_send_network_profiling_data() {
 	ERR_FAIL_COND(multiplayer.is_null());
 
-	int n_nodes = multiplayer->get_profiling_frame(&network_profile_info.write[0]);
+	int n_nodes = multiplayer->get_profiling_frame(&network_profile_info[0]);
 
 	packet_peer_stream->put_var("network_profile");
 	packet_peer_stream->put_var(n_nodes * 6);
@@ -1069,7 +1069,7 @@ void ScriptDebuggerRemote::send_message(const String &p_message, const Array &p_
 	mutex->unlock();
 }
 
-void ScriptDebuggerRemote::send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const Vector<ScriptLanguage::StackInfo> &p_stack_info) {
+void ScriptDebuggerRemote::send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const std::vector<ScriptLanguage::StackInfo> &p_stack_info) {
 
 	OutputError oe;
 	oe.error = p_err;
@@ -1205,7 +1205,7 @@ void ScriptDebuggerRemote::add_profiling_frame_data(const StringName &p_name, co
 	if (idx == -1) {
 		profile_frame_data.push_back(fd);
 	} else {
-		profile_frame_data.write[idx] = fd;
+		profile_frame_data[idx] = fd;
 	}
 }
 

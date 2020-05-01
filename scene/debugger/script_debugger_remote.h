@@ -54,9 +54,9 @@ class ScriptDebuggerRemote : public ScriptDebugger {
 		}
 	};
 
-	Vector<ScriptLanguage::ProfilingInfo> profile_info;
-	Vector<ScriptLanguage::ProfilingInfo *> profile_info_ptrs;
-	Vector<MultiplayerAPI::ProfilingInfo> network_profile_info;
+	std::vector<ScriptLanguage::ProfilingInfo> profile_info;
+	std::vector<ScriptLanguage::ProfilingInfo *> profile_info_ptrs;
+	std::vector<MultiplayerAPI::ProfilingInfo> network_profile_info;
 
 	Map<StringName, int> profiler_function_signature_map;
 	float frame_time, idle_time, physics_time, physics_frame_time;
@@ -142,7 +142,7 @@ class ScriptDebuggerRemote : public ScriptDebugger {
 		Array data;
 	};
 
-	Vector<FrameData> profile_frame_data;
+	std::vector<FrameData> profile_frame_data;
 
 	void _put_variable(const String &p_name, const Variant &p_variable);
 
@@ -174,7 +174,7 @@ public:
 	virtual void request_quit();
 
 	virtual void send_message(const String &p_message, const Array &p_args);
-	virtual void send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const Vector<ScriptLanguage::StackInfo> &p_stack_info);
+	virtual void send_error(const String &p_func, const String &p_file, int p_line, const String &p_err, const String &p_descr, ErrorHandlerType p_type, const std::vector<ScriptLanguage::StackInfo> &p_stack_info);
 
 	virtual void set_multiplayer(Ref<MultiplayerAPI> p_multiplayer);
 
