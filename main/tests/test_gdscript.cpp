@@ -431,7 +431,7 @@ static void _parser_show_function(const GDScriptParser::FunctionNode *p_func, in
 	_parser_show_block(p_func->body, p_indent + 1);
 }
 
-static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_indent, const Vector<String> &p_code) {
+static void _parser_show_class(const GDScriptParser::ClassNode *p_class, int p_indent, const std::vector<String> &p_code) {
 
 	if (p_indent == 0 && (String(p_class->extends_file) != "" || p_class->extends_class.size())) {
 
@@ -533,7 +533,7 @@ static String _disassemble_addr(const Ref<GDScript> &p_script, const GDScriptFun
 	return "<err>";
 }
 
-static void _disassemble_class(const Ref<GDScript> &p_class, const Vector<String> &p_code) {
+static void _disassemble_class(const Ref<GDScript> &p_class, const std::vector<String> &p_code) {
 
 	const Map<StringName, GDScriptFunction *> &mf = p_class->debug_get_member_functions();
 
@@ -958,16 +958,16 @@ MainLoop *test(TestType p_type) {
 	FileAccess *fa = FileAccess::open(test, FileAccess::READ);
 	ERR_FAIL_COND_V_MSG(!fa, NULL, "Could not open file: " + test);
 
-	Vector<uint8_t> buf;
+	std::vector<uint8_t> buf;
 	int flen = fa->get_len();
 	buf.resize(fa->get_len() + 1);
-	fa->get_buffer(buf.ptrw(), flen);
-	buf.write[flen] = 0;
+	fa->get_buffer(buf.data(), flen);
+	buf[flen] = 0;
 
 	String code;
 	code.parse_utf8((const char *)&buf[0]);
 
-	Vector<String> lines;
+	std::vector<String> lines;
 	int last = 0;
 
 	for (int i = 0; i <= code.length(); i++) {
@@ -1073,10 +1073,10 @@ MainLoop *test(TestType p_type) {
 
 	} else if (p_type == TEST_BYTECODE) {
 
-		Vector<uint8_t> buf2 = GDScriptTokenizerBuffer::parse_code_string(code);
+		std::vector<uint8_t> buf2 = GDScriptTokenizerBuffer::parse_code_string(code);
 		String dst = test.get_basename() + ".gdc";
 		FileAccess *fw = FileAccess::open(dst, FileAccess::WRITE);
-		fw->store_buffer(buf2.ptr(), buf2.size());
+		fw->store_buffer(buf2.data(), buf2.size());
 		memdelete(fw);
 	}
 
