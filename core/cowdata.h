@@ -37,8 +37,6 @@
 #include "core/os/memory.h"
 #include "core/safe_refcount.h"
 
-template <class T>
-class Vector;
 class String;
 class CharString;
 template <class T, class V>
