@@ -144,7 +144,7 @@ void ShaderGLES3::unbind() {
 	active = NULL;
 }
 
-static void _display_error_with_code(const String &p_error, const Vector<const char *> &p_code) {
+static void _display_error_with_code(const String &p_error, const std::vector<const char *> &p_code) {
 
 	int line = 1;
 	String total_code;
@@ -153,7 +153,7 @@ static void _display_error_with_code(const String &p_error, const Vector<const c
 		total_code += String(p_code[i]);
 	}
 
-	Vector<String> lines = String(total_code).split("\n");
+	std::vector<String> lines = String(total_code).split("\n");
 
 	for (int j = 0; j < lines.size(); j++) {
 
@@ -202,7 +202,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	v.ok = false;
 	/* SETUP CONDITIONALS */
 
-	Vector<const char *> strings;
+	std::vector<const char *> strings;
 #ifdef GLES_OVER_GL
 	strings.push_back("#version 330\n");
 	strings.push_back("#define GLES_OVER_GL\n");
@@ -454,7 +454,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 	//if feedback exists, set it up
 
 	if (feedback_count) {
-		Vector<const char *> feedback;
+		std::vector<const char *> feedback;
 		for (int i = 0; i < feedback_count; i++) {
 
 			if (feedbacks[i].conditional == -1 || (1 << feedbacks[i].conditional) & conditional_version.version) {
@@ -464,7 +464,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 		}
 
 		if (feedback.size()) {
-			glTransformFeedbackVaryings(v.id, feedback.size(), feedback.ptr(), GL_INTERLEAVED_ATTRIBS);
+			glTransformFeedbackVaryings(v.id, feedback.size(), feedback.data(), GL_INTERLEAVED_ATTRIBS);
 		}
 	}
 
