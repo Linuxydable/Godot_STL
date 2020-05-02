@@ -59,8 +59,8 @@ class AudioDriverPulseAudio : public AudioDriver {
 	String capture_new_device;
 	String capture_default_device;
 
-	Vector<int32_t> samples_in;
-	Vector<int16_t> samples_out;
+	std::vector<int32_t> samples_in;
+	std::vector<int16_t> samples_out;
 
 	unsigned int mix_rate;
 	unsigned int buffer_frames;
