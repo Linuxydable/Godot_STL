@@ -101,9 +101,9 @@ private:
 		String fragment_globals;
 		String light;
 		uint32_t version;
-		Vector<StringName> texture_uniforms;
-		Vector<StringName> custom_uniforms;
-		Vector<CharString> custom_defines;
+		std::vector<StringName> texture_uniforms;
+		std::vector<StringName> custom_uniforms;
+		std::vector<CharString> custom_defines;
 		Set<uint32_t> versions;
 	};
 
@@ -113,7 +113,7 @@ private:
 		GLuint vert_id;
 		GLuint frag_id;
 		GLint *uniform_location;
-		Vector<GLint> texture_uniform_locations;
+		std::vector<GLint> texture_uniform_locations;
 		Map<StringName, GLint> custom_uniform_locations;
 		uint32_t code_version;
 		bool ok;
@@ -171,7 +171,7 @@ private:
 	CharString vertex_code1;
 	CharString vertex_code2;
 
-	Vector<CharString> custom_defines;
+	std::vector<CharString> custom_defines;
 
 	Version *get_current_version();
 
@@ -179,7 +179,7 @@ private:
 
 	int max_image_units;
 
-	Map<StringName, Pair<ShaderLanguage::DataType, Vector<ShaderLanguage::ConstantNode::Value> > > uniform_values;
+	Map<StringName, Pair<ShaderLanguage::DataType, std::vector<ShaderLanguage::ConstantNode::Value> > > uniform_values;
 
 protected:
 	_FORCE_INLINE_ int _get_uniform(int p_which) const;
@@ -223,9 +223,9 @@ public:
 			const String &p_fragment,
 			const String &p_light,
 			const String &p_fragment_globals,
-			const Vector<StringName> &p_uniforms,
-			const Vector<StringName> &p_texture_uniforms,
-			const Vector<CharString> &p_custom_defines);
+			const std::vector<StringName> &p_uniforms,
+			const std::vector<StringName> &p_texture_uniforms,
+			const std::vector<CharString> &p_custom_defines);
 
 	void set_custom_shader(uint32_t p_code_id);
 	void free_custom_shader(uint32_t p_code_id);
@@ -246,7 +246,7 @@ public:
 		custom_defines.push_back(p_define.utf8());
 	}
 
-	void get_custom_defines(Vector<String> *p_defines) {
+	void get_custom_defines(std::vector<String> *p_defines) {
 		for (int i = 0; i < custom_defines.size(); i++) {
 			p_defines->push_back(custom_defines[i].get_data());
 		}

@@ -109,7 +109,7 @@ void ShaderGLES2::unbind() {
 	active = NULL;
 }
 
-static void _display_error_with_code(const String &p_error, const Vector<const char *> &p_code) {
+static void _display_error_with_code(const String &p_error, const std::vector<const char *> &p_code) {
 
 	int line = 1;
 	String total_code;
@@ -118,7 +118,7 @@ static void _display_error_with_code(const String &p_error, const Vector<const c
 		total_code += String(p_code[i]);
 	}
 
-	Vector<String> lines = String(total_code).split("\n");
+	std::vector<String> lines = String(total_code).split("\n");
 
 	for (int j = 0; j < lines.size(); j++) {
 
@@ -168,7 +168,7 @@ ShaderGLES2::Version *ShaderGLES2::get_current_version() {
 
 	v.ok = false;
 
-	Vector<const char *> strings;
+	std::vector<const char *> strings;
 
 #ifdef GLES_OVER_GL
 	strings.push_back("#version 120\n");
@@ -605,9 +605,9 @@ void ShaderGLES2::set_custom_shader_code(uint32_t p_code_id,
 		const String &p_fragment,
 		const String &p_light,
 		const String &p_fragment_globals,
-		const Vector<StringName> &p_uniforms,
-		const Vector<StringName> &p_texture_uniforms,
-		const Vector<CharString> &p_custom_defines) {
+		const std::vector<StringName> &p_uniforms,
+		const std::vector<StringName> &p_texture_uniforms,
+		const std::vector<CharString> &p_custom_defines) {
 	CustomCode *cc = custom_code_map.getptr(p_code_id);
 	ERR_FAIL_COND(!cc);
 
@@ -849,7 +849,7 @@ void ShaderGLES2::use_material(void *p_material) {
 				} break;
 			}
 		} else if (E->get().default_value.size()) {
-			const Vector<ShaderLanguage::ConstantNode::Value> &values = E->get().default_value;
+			const std::vector<ShaderLanguage::ConstantNode::Value> &values = E->get().default_value;
 			switch (E->get().type) {
 				case ShaderLanguage::TYPE_BOOL: {
 					glUniform1i(location, values[0].boolean);
