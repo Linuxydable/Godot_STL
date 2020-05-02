@@ -93,7 +93,7 @@ static String f2sp0(float p_float) {
 	return num;
 }
 
-static String get_constant_text(SL::DataType p_type, const Vector<SL::ConstantNode::Value> &p_values) {
+static String get_constant_text(SL::DataType p_type, const std::vector<SL::ConstantNode::Value> &p_values) {
 
 	switch (p_type) {
 		case SL::TYPE_BOOL: return p_values[0].boolean ? "true" : "false";
@@ -866,7 +866,7 @@ Error ShaderCompilerGLES2::compile(VS::ShaderMode p_mode, const String &p_code, 
 
 	if (err != OK) {
 
-		Vector<String> shader = p_code.split("\n");
+		std::vector<String> shader = p_code.split("\n");
 		for (int i = 0; i < shader.size(); i++) {
 			print_line(itos(i + 1) + " " + shader[i]);
 		}

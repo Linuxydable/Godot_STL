@@ -51,10 +51,10 @@ public:
 
 	struct GeneratedCode {
 
-		Vector<CharString> custom_defines;
-		Vector<StringName> uniforms;
-		Vector<StringName> texture_uniforms;
-		Vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
+		std::vector<CharString> custom_defines;
+		std::vector<StringName> uniforms;
+		std::vector<StringName> texture_uniforms;
+		std::vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
 
 		String vertex_global;
 		String vertex;
