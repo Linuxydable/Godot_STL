@@ -143,7 +143,7 @@ public:
 		}
 	};
 
-	Vector<Viewport *> active_viewports;
+	std::vector<Viewport *> active_viewports;
 
 private:
 	Color clear_color;
