@@ -184,6 +184,6 @@ private:
 		_list.resize(new_max_size);
 	}
 
-	Vector<T> _list;
+	std::vector<T> _list;
 	int _size;
 };
