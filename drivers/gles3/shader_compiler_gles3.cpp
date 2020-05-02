@@ -181,7 +181,7 @@ static String f2sp0(float p_float) {
 	return num;
 }
 
-static String get_constant_text(SL::DataType p_type, const Vector<SL::ConstantNode::Value> &p_values) {
+static String get_constant_text(SL::DataType p_type, const std::vector<SL::ConstantNode::Value> &p_values) {
 
 	switch (p_type) {
 		case SL::TYPE_BOOL: return p_values[0].boolean ? "true" : "false";
@@ -359,9 +359,9 @@ String ShaderCompilerGLES3::_dump_node_code(SL::Node *p_node, int p_level, Gener
 			r_gen_code.texture_hints.resize(max_texture_uniforms);
 			r_gen_code.texture_types.resize(max_texture_uniforms);
 
-			Vector<int> uniform_sizes;
-			Vector<int> uniform_alignments;
-			Vector<StringName> uniform_defines;
+			std::vector<int> uniform_sizes;
+			std::vector<int> uniform_alignments;
+			std::vector<StringName> uniform_defines;
 			uniform_sizes.resize(max_uniforms);
 			uniform_alignments.resize(max_uniforms);
 			uniform_defines.resize(max_uniforms);
@@ -391,9 +391,9 @@ String ShaderCompilerGLES3::_dump_node_code(SL::Node *p_node, int p_level, Gener
 						r_gen_code.defines.push_back(String("#define USE_MATERIAL\n").ascii());
 						uses_uniforms = true;
 					}
-					uniform_defines.write[E->get().order] = ucode;
-					uniform_sizes.write[E->get().order] = _get_datatype_size(E->get().type);
-					uniform_alignments.write[E->get().order] = _get_datatype_alignment(E->get().type);
+					uniform_defines[E->get().order] = ucode;
+					uniform_sizes[E->get().order] = _get_datatype_size(E->get().type);
+					uniform_alignments[E->get().order] = _get_datatype_alignment(E->get().type);
 				}
 
 				p_actions.uniforms->insert(E->key(), E->get());
@@ -835,7 +835,7 @@ Error ShaderCompilerGLES3::compile(VS::ShaderMode p_mode, const String &p_code, 
 
 	if (err != OK) {
 
-		Vector<String> shader = p_code.split("\n");
+		std::vector<String> shader = p_code.split("\n");
 		for (int i = 0; i < shader.size(); i++) {
 			print_line(itos(i + 1) + " " + shader[i]);
 		}

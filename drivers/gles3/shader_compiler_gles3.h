@@ -50,12 +50,12 @@ public:
 
 	struct GeneratedCode {
 
-		Vector<CharString> defines;
-		Vector<StringName> texture_uniforms;
-		Vector<ShaderLanguage::DataType> texture_types;
-		Vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
+		std::vector<CharString> defines;
+		std::vector<StringName> texture_uniforms;
+		std::vector<ShaderLanguage::DataType> texture_types;
+		std::vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
 
-		Vector<uint32_t> uniform_offsets;
+		std::vector<uint32_t> uniform_offsets;
 		uint32_t uniform_total_size;
 		String uniforms;
 		String vertex_global;
