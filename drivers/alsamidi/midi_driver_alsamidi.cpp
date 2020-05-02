@@ -139,7 +139,7 @@ Error MIDIDriverALSAMidi::open() {
 			snd_rawmidi_t *midi_in;
 			int ret = snd_rawmidi_open(&midi_in, NULL, name, SND_RAWMIDI_NONBLOCK);
 			if (ret >= 0) {
-				connected_inputs.insert(i++, midi_in);
+				connected_inputs.insert(connected_inputs.begin() + (i++), midi_in);
 			}
 		}
 
