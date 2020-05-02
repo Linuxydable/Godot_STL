@@ -37,6 +37,8 @@
 #include <linux/input.h>
 #include <unistd.h>
 
+#include <algorithm>
+
 #ifdef UDEV_ENABLED
 #include <libudev.h>
 #endif
@@ -208,7 +210,7 @@ void JoypadLinux::monitor_joypads() {
 		for (int i = 0; i < 32; i++) {
 			char fname[64];
 			sprintf(fname, "/dev/input/event%d", i);
-			if (attached_devices.find(fname) == -1) {
+			if (std::find(attached_devices.begin(), attached_devices.end(), fname) == attached_devices.end()) {
 				open_joypad(fname);
 			}
 		}
@@ -244,7 +246,10 @@ void JoypadLinux::close_joypad(int p_id) {
 
 		close(joy.fd);
 		joy.fd = -1;
-		attached_devices.remove(attached_devices.find(joy.devpath));
+
+		if (auto it_device = std::find(attached_devices.begin(), attached_devices.end(), joy.devpath); it_device != attached_devices.end()) {
+			attached_devices.erase(it_device);
+		}
 		input->joy_connection_changed(p_id, false, "");
 	};
 }
