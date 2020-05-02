@@ -78,7 +78,7 @@ class FontDrawer {
 		Color modulate;
 	};
 
-	Vector<PendingDraw> pending_draws;
+	std::vector<PendingDraw> pending_draws;
 
 public:
 	FontDrawer(const Ref<Font> &p_font, const Color &p_outline_color) :
@@ -108,7 +108,7 @@ class BitmapFont : public Font {
 	GDCLASS(BitmapFont, Font);
 	RES_BASE_EXTENSION("font");
 
-	Vector<Ref<Texture> > textures;
+	std::vector<Ref<Texture> > textures;
 
 public:
 	struct Character {
@@ -150,8 +150,8 @@ private:
 	PoolVector<int> _get_chars() const;
 	void _set_kernings(const PoolVector<int> &p_kernings);
 	PoolVector<int> _get_kernings() const;
-	void _set_textures(const Vector<Variant> &p_textures);
-	Vector<Variant> _get_textures() const;
+	void _set_textures(const std::vector<Variant> &p_textures);
+	std::vector<Variant> _get_textures() const;
 
 	Ref<BitmapFont> fallback;
 
@@ -172,7 +172,7 @@ public:
 	void add_char(CharType p_char, int p_texture_idx, const Rect2 &p_rect, const Size2 &p_align, float p_advance = -1);
 
 	int get_character_count() const;
-	Vector<CharType> get_char_keys() const;
+	std::vector<CharType> get_char_keys() const;
 	Character get_character(CharType p_char) const;
 
 	int get_texture_count() const;
@@ -180,7 +180,7 @@ public:
 
 	void add_kerning_pair(CharType p_A, CharType p_B, int p_kerning);
 	int get_kerning_pair(CharType p_A, CharType p_B) const;
-	Vector<KerningPairKey> get_kerning_pair_keys() const;
+	std::vector<KerningPairKey> get_kerning_pair_keys() const;
 
 	Size2 get_char_size(CharType p_char, CharType p_next = 0) const;
 
