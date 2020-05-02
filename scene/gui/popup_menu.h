@@ -79,7 +79,7 @@ class PopupMenu : public Popup {
 
 	Timer *submenu_timer;
 	List<Rect2> autohide_areas;
-	Vector<Item> items;
+	std::vector<Item> items;
 	int initial_button_mask;
 	bool during_grabbed_click;
 	int mouse_over;
