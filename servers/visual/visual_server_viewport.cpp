@@ -280,7 +280,7 @@ void VisualServerViewport::draw_viewports() {
 	}
 
 	//sort viewports
-	std::sort(active_viewports.begin(), active_viewports.end(), ViewportSort{});
+	std::sort(active_viewports.begin(), active_viewports.end(), ViewportSort);
 
 	//draw viewports
 	for (int i = 0; i < active_viewports.size(); i++) {
@@ -403,14 +403,16 @@ void VisualServerViewport::viewport_set_size(RID p_viewport, int p_width, int p_
 void VisualServerViewport::viewport_set_active(RID p_viewport, bool p_active) {
 
 	Viewport *viewport = viewport_owner.getornull(p_viewport);
+
 	ERR_FAIL_COND(!viewport);
 
+	auto it_find = std::find(active_viewports.begin(), active_viewports.end(), viewport);
+
 	if (p_active) {
-		ERR_FAIL_COND(active_viewports.find(viewport) != -1); //already active
+		ERR_FAIL_COND(it_find != active_viewports.end()); //already active
 		active_viewports.push_back(viewport);
 	} else {
-
-		if (auto it_find = std::find(active_viewports.begin(), active_viewports.end(), viewport); it_find != active_viewports.end()) {
+		if (it_find != active_viewports.end()) {
 			active_viewports.erase(it_find);
 		}
 	}
@@ -734,7 +736,12 @@ bool VisualServerViewport::free(RID p_rid) {
 		}
 
 		viewport_set_scenario(p_rid, RID());
-		active_viewports.erase(viewport);
+
+		auto it_find = std::find(active_viewports.begin(), active_viewports.end(), viewport);
+
+		if (it_find != active_viewports.end()) {
+			active_viewports.erase(it_find);
+		}
 
 		viewport_owner.free(p_rid);
 		memdelete(viewport);

@@ -141,7 +141,7 @@ public:
 			}
 			return right_to_screen;
 		}
-	};
+	} ViewportSort;
 
 	std::vector<Viewport *> active_viewports;
 
