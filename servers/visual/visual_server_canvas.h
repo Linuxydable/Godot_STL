@@ -77,7 +77,7 @@ public:
 
 			return p_left->index < p_right->index;
 		}
-	};
+	} ItemIndexSort;
 
 	struct ItemPtrSort {
 

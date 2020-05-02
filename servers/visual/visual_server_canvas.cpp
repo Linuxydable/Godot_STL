@@ -53,7 +53,7 @@ void VisualServerCanvas::_render_canvas_item_tree(Item *p_canvas_item, const Tra
 
 void _collect_ysort_children(VisualServerCanvas::Item *p_canvas_item, Transform2D p_transform, VisualServerCanvas::Item *p_material_owner, const Color p_modulate, VisualServerCanvas::Item **r_items, int &r_index) {
 	int child_item_count = p_canvas_item->child_items.size();
-	VisualServerCanvas::Item **child_items = p_canvas_item->child_items.ptrw();
+	VisualServerCanvas::Item **child_items = p_canvas_item->child_items.data();
 	for (int i = 0; i < child_item_count; i++) {
 		if (child_items[i]->visible) {
 			if (r_items) {
@@ -92,7 +92,7 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 
 	if (ci->children_order_dirty) {
 
-		std::sort(ci->child_items.begin(), ci->child_items.end(), ItemIndexSort{});
+		std::sort(ci->child_items.begin(), ci->child_items.end(), ItemIndexSort);
 		ci->children_order_dirty = false;
 	}
 
@@ -114,7 +114,7 @@ void VisualServerCanvas::_render_canvas_item(Item *p_canvas_item, const Transfor
 		return;
 
 	int child_item_count = ci->child_items.size();
-	Item **child_items = ci->child_items.ptrw();
+	Item **child_items = ci->child_items.data();
 
 	if (ci->clip) {
 		if (p_canvas_clip != NULL) {
@@ -233,12 +233,13 @@ void VisualServerCanvas::render_canvas(Canvas *p_canvas, const Transform2D &p_tr
 
 	if (p_canvas->children_order_dirty) {
 
-		p_canvas->child_items.sort();
+		std::sort(p_canvas->child_items.begin(), p_canvas->child_items.end());
+
 		p_canvas->children_order_dirty = false;
 	}
 
 	int l = p_canvas->child_items.size();
-	Canvas::ChildItem *ci = p_canvas->child_items.ptrw();
+	Canvas::ChildItem *ci = p_canvas->child_items.data();
 
 	bool has_mirror = false;
 	for (int i = 0; i < l; i++) {
@@ -320,7 +321,7 @@ void VisualServerCanvas::canvas_set_item_mirroring(RID p_canvas, RID p_item, con
 
 	int idx = canvas->find_item(canvas_item);
 	ERR_FAIL_COND(idx == -1);
-	canvas->child_items.write[idx].mirror = p_mirroring;
+	canvas->child_items[idx].mirror = p_mirroring;
 }
 void VisualServerCanvas::canvas_set_modulate(RID p_canvas, const Color &p_color) {
 
@@ -364,7 +365,12 @@ void VisualServerCanvas::canvas_item_set_parent(RID p_item, RID p_parent) {
 		} else if (canvas_item_owner.owns(canvas_item->parent)) {
 
 			Item *item_owner = canvas_item_owner.get(canvas_item->parent);
-			item_owner->child_items.erase(canvas_item);
+
+			auto it_find = std::find(item_owner->child_items.begin(), item_owner->child_items.end(), canvas_item);
+
+			if (it_find != item_owner->child_items.end()) {
+				item_owner->child_items.erase(it_find);
+			}
 
 			if (item_owner->sort_y) {
 				_mark_ysort_dirty(item_owner, canvas_item_owner);
@@ -555,21 +561,21 @@ void VisualServerCanvas::canvas_item_add_polyline(RID p_item, const std::vector<
 			Vector2 tangent = ((t + prev_t).normalized()) * p_width * 0.5;
 
 			if (p_antialiased) {
-				pline->lines.write[i] = p_points[i] + tangent;
-				pline->lines.write[p_points.size() * 2 - i - 1] = p_points[i] - tangent;
+				pline->lines[i] = p_points[i] + tangent;
+				pline->lines[p_points.size() * 2 - i - 1] = p_points[i] - tangent;
 				if (pline->line_colors.size() > 1) {
-					pline->line_colors.write[i] = p_colors[i];
-					pline->line_colors.write[p_points.size() * 2 - i - 1] = p_colors[i];
+					pline->line_colors[i] = p_colors[i];
+					pline->line_colors[p_points.size() * 2 - i - 1] = p_colors[i];
 				}
 			}
 
-			pline->triangles.write[i * 2 + 0] = p_points[i] + tangent;
-			pline->triangles.write[i * 2 + 1] = p_points[i] - tangent;
+			pline->triangles[i * 2 + 0] = p_points[i] + tangent;
+			pline->triangles[i * 2 + 1] = p_points[i] - tangent;
 
 			if (pline->triangle_colors.size() > 1) {
 
-				pline->triangle_colors.write[i * 2 + 0] = p_colors[i];
-				pline->triangle_colors.write[i * 2 + 1] = p_colors[i];
+				pline->triangle_colors[i * 2 + 0] = p_colors[i];
+				pline->triangle_colors[i * 2 + 1] = p_colors[i];
 			}
 
 			prev_t = t;
@@ -1388,7 +1394,12 @@ bool VisualServerCanvas::free(RID p_rid) {
 			} else if (canvas_item_owner.owns(canvas_item->parent)) {
 
 				Item *item_owner = canvas_item_owner.get(canvas_item->parent);
-				item_owner->child_items.erase(canvas_item);
+
+				auto it_find = std::find(item_owner->child_items.begin(), item_owner->child_items.end(), canvas_item);
+
+				if (it_find != item_owner->child_items.end()) {
+					item_owner->child_items.erase(it_find);
+				}
 
 				if (item_owner->sort_y) {
 					_mark_ysort_dirty(item_owner, canvas_item_owner);
