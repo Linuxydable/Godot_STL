@@ -246,7 +246,7 @@ public:
 				}
 			};
 
-			Vector<Shadow> shadows;
+			std::vector<Shadow> shadows;
 
 			Quadrant() {
 				subdivision = 0;
@@ -271,7 +271,7 @@ public:
 		uint32_t size;
 	};
 
-	Vector<ShadowCubeMap> shadow_cubemaps;
+	std::vector<ShadowCubeMap> shadow_cubemaps;
 
 	RID_Owner<ShadowAtlas> shadow_atlas_owner;
 

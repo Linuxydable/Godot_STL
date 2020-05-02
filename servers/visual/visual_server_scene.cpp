@@ -777,9 +777,9 @@ void VisualServerScene::instance_set_extra_visibility_margin(RID p_instance, rea
 	_instance_queue_update(instance, true, false);
 }
 
-Vector<ObjectID> VisualServerScene::instances_cull_aabb(const AABB &p_aabb, RID p_scenario) const {
+std::vector<ObjectID> VisualServerScene::instances_cull_aabb(const AABB &p_aabb, RID p_scenario) const {
 
-	Vector<ObjectID> instances;
+	std::vector<ObjectID> instances;
 	Scenario *scenario = scenario_owner.get(p_scenario);
 	ERR_FAIL_COND_V(!scenario, instances);
 
@@ -801,9 +801,9 @@ Vector<ObjectID> VisualServerScene::instances_cull_aabb(const AABB &p_aabb, RID 
 
 	return instances;
 }
-Vector<ObjectID> VisualServerScene::instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario) const {
+std::vector<ObjectID> VisualServerScene::instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario) const {
 
-	Vector<ObjectID> instances;
+	std::vector<ObjectID> instances;
 	Scenario *scenario = scenario_owner.get(p_scenario);
 	ERR_FAIL_COND_V(!scenario, instances);
 	const_cast<VisualServerScene *>(this)->update_dirty_instances(); // check dirty instances before culling
@@ -823,9 +823,9 @@ Vector<ObjectID> VisualServerScene::instances_cull_ray(const Vector3 &p_from, co
 
 	return instances;
 }
-Vector<ObjectID> VisualServerScene::instances_cull_convex(const Vector<Plane> &p_convex, RID p_scenario) const {
+std::vector<ObjectID> VisualServerScene::instances_cull_convex(const std::vector<Plane> &p_convex, RID p_scenario) const {
 
-	Vector<ObjectID> instances;
+	std::vector<ObjectID> instances;
 	Scenario *scenario = scenario_owner.get(p_scenario);
 	ERR_FAIL_COND_V(!scenario, instances);
 	const_cast<VisualServerScene *>(this)->update_dirty_instances(); // check dirty instances before culling
@@ -1327,7 +1327,7 @@ bool VisualServerScene::_light_instance_update_shadow(Instance *p_instance, cons
 
 			if (depth_range_mode == VS::LIGHT_DIRECTIONAL_SHADOW_DEPTH_RANGE_OPTIMIZED) {
 				//optimize min/max
-				Vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
+				std::vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
 				int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
 				Plane base(p_cam_transform.origin, -p_cam_transform.basis.get_axis(2));
 				//check distance max and min
@@ -1513,18 +1513,18 @@ bool VisualServerScene::_light_instance_update_shadow(Instance *p_instance, cons
 
 				//now that we now all ranges, we can proceed to make the light frustum planes, for culling octree
 
-				Vector<Plane> light_frustum_planes;
+				std::vector<Plane> light_frustum_planes;
 				light_frustum_planes.resize(6);
 
 				//right/left
-				light_frustum_planes.write[0] = Plane(x_vec, x_max);
-				light_frustum_planes.write[1] = Plane(-x_vec, -x_min);
+				light_frustum_planes[0] = Plane(x_vec, x_max);
+				light_frustum_planes[1] = Plane(-x_vec, -x_min);
 				//top/bottom
-				light_frustum_planes.write[2] = Plane(y_vec, y_max);
-				light_frustum_planes.write[3] = Plane(-y_vec, -y_min);
+				light_frustum_planes[2] = Plane(y_vec, y_max);
+				light_frustum_planes[3] = Plane(-y_vec, -y_min);
 				//near/far
-				light_frustum_planes.write[4] = Plane(z_vec, z_max + 1e6);
-				light_frustum_planes.write[5] = Plane(-z_vec, -z_min); // z_min is ok, since casters further than far-light plane are not needed
+				light_frustum_planes[4] = Plane(z_vec, z_max + 1e6);
+				light_frustum_planes[5] = Plane(-z_vec, -z_min); // z_min is ok, since casters further than far-light plane are not needed
 
 				int cull_count = p_scenario->octree.cull_convex(light_frustum_planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
 
@@ -1582,14 +1582,14 @@ bool VisualServerScene::_light_instance_update_shadow(Instance *p_instance, cons
 					float radius = VSG::storage->light_get_param(p_instance->base, VS::LIGHT_PARAM_RANGE);
 
 					float z = i == 0 ? -1 : 1;
-					Vector<Plane> planes;
+					std::vector<Plane> planes;
 					planes.resize(6);
-					planes.write[0] = light_transform.xform(Plane(Vector3(0, 0, z), radius));
-					planes.write[1] = light_transform.xform(Plane(Vector3(1, 0, z).normalized(), radius));
-					planes.write[2] = light_transform.xform(Plane(Vector3(-1, 0, z).normalized(), radius));
-					planes.write[3] = light_transform.xform(Plane(Vector3(0, 1, z).normalized(), radius));
-					planes.write[4] = light_transform.xform(Plane(Vector3(0, -1, z).normalized(), radius));
-					planes.write[5] = light_transform.xform(Plane(Vector3(0, 0, -z), 0));
+					planes[0] = light_transform.xform(Plane(Vector3(0, 0, z), radius));
+					planes[1] = light_transform.xform(Plane(Vector3(1, 0, z).normalized(), radius));
+					planes[2] = light_transform.xform(Plane(Vector3(-1, 0, z).normalized(), radius));
+					planes[3] = light_transform.xform(Plane(Vector3(0, 1, z).normalized(), radius));
+					planes[4] = light_transform.xform(Plane(Vector3(0, -1, z).normalized(), radius));
+					planes[5] = light_transform.xform(Plane(Vector3(0, 0, -z), 0));
 
 					int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
 					Plane near_plane(light_transform.origin, light_transform.basis.get_axis(2) * z);
@@ -1643,7 +1643,7 @@ bool VisualServerScene::_light_instance_update_shadow(Instance *p_instance, cons
 
 					Transform xform = light_transform * Transform().looking_at(view_normals[i], view_up[i]);
 
-					Vector<Plane> planes = cm.get_projection_planes(xform);
+					std::vector<Plane> planes = cm.get_projection_planes(xform);
 
 					int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
 
@@ -1681,7 +1681,7 @@ bool VisualServerScene::_light_instance_update_shadow(Instance *p_instance, cons
 			CameraMatrix cm;
 			cm.set_perspective(angle * 2.0, 1.0, 0.01, radius);
 
-			Vector<Plane> planes = cm.get_projection_planes(light_transform);
+			std::vector<Plane> planes = cm.get_projection_planes(light_transform);
 			int cull_count = p_scenario->octree.cull_convex(planes, instance_shadow_cull_result, MAX_INSTANCE_CULL, VS::INSTANCE_GEOMETRY_MASK);
 
 			Plane near_plane(light_transform.origin, -light_transform.basis.get_axis(2));
@@ -1859,7 +1859,7 @@ void VisualServerScene::_prepare_scene(const Transform p_cam_transform, const Ca
 
 	//rasterizer->set_camera(camera->transform, camera_matrix,ortho);
 
-	Vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
+	std::vector<Plane> planes = p_cam_projection.get_projection_planes(p_cam_transform);
 
 	Plane near_plane(p_cam_transform.origin, -p_cam_transform.basis.get_axis(2).normalized());
 	float z_far = p_cam_projection.get_z_far();
@@ -2276,7 +2276,7 @@ bool VisualServerScene::_render_reflection_probe_step(Instance *p_instance, int 
 	return false;
 }
 
-void VisualServerScene::_gi_probe_fill_local_data(int p_idx, int p_level, int p_x, int p_y, int p_z, const GIProbeDataCell *p_cell, const GIProbeDataHeader *p_header, InstanceGIProbeData::LocalData *p_local_data, Vector<uint32_t> *prev_cell) {
+void VisualServerScene::_gi_probe_fill_local_data(int p_idx, int p_level, int p_x, int p_y, int p_z, const GIProbeDataCell *p_cell, const GIProbeDataHeader *p_header, InstanceGIProbeData::LocalData *p_local_data, std::vector<uint32_t> *prev_cell) {
 
 	if ((uint32_t)p_level == p_header->cell_subdiv - 1) {
 
@@ -2428,7 +2428,7 @@ void VisualServerScene::_setup_gi_probe(Instance *p_instance) {
 	if (probe->dynamic.compression == RasterizerStorage::GI_PROBE_S3TC) {
 
 		//create all blocks
-		Vector<Map<uint32_t, InstanceGIProbeData::CompBlockS3TC> > comp_blocks;
+		std::vector<Map<uint32_t, InstanceGIProbeData::CompBlockS3TC> > comp_blocks;
 		int mipmap_count = probe->dynamic.mipmaps_3d.size();
 		comp_blocks.resize(mipmap_count);
 
@@ -2452,7 +2452,7 @@ void VisualServerScene::_setup_gi_probe(Instance *p_instance) {
 
 			uint32_t key = blockz * blockw * blockh + blocky * blockw + blockx;
 
-			Map<uint32_t, InstanceGIProbeData::CompBlockS3TC> &cmap = comp_blocks.write[mipmap];
+			Map<uint32_t, InstanceGIProbeData::CompBlockS3TC> &cmap = comp_blocks[mipmap];
 
 			if (!cmap.has(key)) {
 

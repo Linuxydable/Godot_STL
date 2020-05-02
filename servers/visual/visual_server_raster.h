@@ -191,7 +191,7 @@ public:
 	BIND2RC(RID, shader_get_default_texture_param, RID, const StringName &)
 
 	BIND2(shader_add_custom_define, RID, const String &)
-	BIND2C(shader_get_custom_defines, RID, Vector<String> *)
+	BIND2C(shader_get_custom_defines, RID, std::vector<String> *)
 	BIND1(shader_clear_custom_defines, RID)
 
 	/* COMMON MATERIAL API */
@@ -213,7 +213,7 @@ public:
 
 	BIND0R(RID, mesh_create)
 
-	BIND10(mesh_add_surface, RID, uint32_t, PrimitiveType, const PoolVector<uint8_t> &, int, const PoolVector<uint8_t> &, int, const AABB &, const Vector<PoolVector<uint8_t> > &, const Vector<AABB> &)
+	BIND10(mesh_add_surface, RID, uint32_t, PrimitiveType, const PoolVector<uint8_t> &, int, const PoolVector<uint8_t> &, int, const AABB &, const std::vector<PoolVector<uint8_t> > &, const std::vector<AABB> &)
 
 	BIND2(mesh_set_blend_shape_count, RID, int)
 	BIND1RC(int, mesh_get_blend_shape_count, RID)
@@ -236,8 +236,8 @@ public:
 	BIND2RC(PrimitiveType, mesh_surface_get_primitive_type, RID, int)
 
 	BIND2RC(AABB, mesh_surface_get_aabb, RID, int)
-	BIND2RC(Vector<PoolVector<uint8_t> >, mesh_surface_get_blend_shapes, RID, int)
-	BIND2RC(Vector<AABB>, mesh_surface_get_skeleton_aabb, RID, int)
+	BIND2RC(std::vector<PoolVector<uint8_t> >, mesh_surface_get_blend_shapes, RID, int)
+	BIND2RC(std::vector<AABB>, mesh_surface_get_skeleton_aabb, RID, int)
 
 	BIND2(mesh_remove_surface, RID, int)
 	BIND1RC(int, mesh_get_surface_count, RID)
@@ -555,9 +555,9 @@ public:
 	BIND2(instance_set_extra_visibility_margin, RID, real_t)
 
 	// don't use these in a game!
-	BIND2RC(Vector<ObjectID>, instances_cull_aabb, const AABB &, RID)
-	BIND3RC(Vector<ObjectID>, instances_cull_ray, const Vector3 &, const Vector3 &, RID)
-	BIND2RC(Vector<ObjectID>, instances_cull_convex, const Vector<Plane> &, RID)
+	BIND2RC(std::vector<ObjectID>, instances_cull_aabb, const AABB &, RID)
+	BIND3RC(std::vector<ObjectID>, instances_cull_ray, const Vector3 &, const Vector3 &, RID)
+	BIND2RC(std::vector<ObjectID>, instances_cull_convex, const std::vector<Plane> &, RID)
 
 	BIND3(instance_geometry_set_flag, RID, InstanceFlags, bool)
 	BIND2(instance_geometry_set_cast_shadows_setting, RID, ShadowCastingSetting)
@@ -596,16 +596,16 @@ public:
 	BIND2(canvas_item_set_draw_behind_parent, RID, bool)
 
 	BIND6(canvas_item_add_line, RID, const Point2 &, const Point2 &, const Color &, float, bool)
-	BIND5(canvas_item_add_polyline, RID, const Vector<Point2> &, const Vector<Color> &, float, bool)
-	BIND5(canvas_item_add_multiline, RID, const Vector<Point2> &, const Vector<Color> &, float, bool)
+	BIND5(canvas_item_add_polyline, RID, const std::vector<Point2> &, const std::vector<Color> &, float, bool)
+	BIND5(canvas_item_add_multiline, RID, const std::vector<Point2> &, const std::vector<Color> &, float, bool)
 	BIND3(canvas_item_add_rect, RID, const Rect2 &, const Color &)
 	BIND4(canvas_item_add_circle, RID, const Point2 &, float, const Color &)
 	BIND7(canvas_item_add_texture_rect, RID, const Rect2 &, RID, bool, const Color &, bool, RID)
 	BIND8(canvas_item_add_texture_rect_region, RID, const Rect2 &, RID, const Rect2 &, const Color &, bool, RID, bool)
 	BIND11(canvas_item_add_nine_patch, RID, const Rect2 &, const Rect2 &, RID, const Vector2 &, const Vector2 &, NinePatchAxisMode, NinePatchAxisMode, bool, const Color &, RID)
-	BIND7(canvas_item_add_primitive, RID, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, RID, float, RID)
-	BIND7(canvas_item_add_polygon, RID, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, RID, RID, bool)
-	BIND12(canvas_item_add_triangle_array, RID, const Vector<int> &, const Vector<Point2> &, const Vector<Color> &, const Vector<Point2> &, const Vector<int> &, const Vector<float> &, RID, int, RID, bool, bool)
+	BIND7(canvas_item_add_primitive, RID, const std::vector<Point2> &, const std::vector<Color> &, const std::vector<Point2> &, RID, float, RID)
+	BIND7(canvas_item_add_polygon, RID, const std::vector<Point2> &, const std::vector<Color> &, const std::vector<Point2> &, RID, RID, bool)
+	BIND12(canvas_item_add_triangle_array, RID, const std::vector<int> &, const std::vector<Point2> &, const std::vector<Color> &, const std::vector<Point2> &, const std::vector<int> &, const std::vector<float> &, RID, int, RID, bool, bool)
 	BIND6(canvas_item_add_mesh, RID, const RID &, const Transform2D &, const Color &, RID, RID)
 	BIND4(canvas_item_add_multimesh, RID, RID, RID, RID)
 	BIND4(canvas_item_add_particles, RID, RID, RID, RID)

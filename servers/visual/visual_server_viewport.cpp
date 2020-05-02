@@ -280,7 +280,7 @@ void VisualServerViewport::draw_viewports() {
 	}
 
 	//sort viewports
-	active_viewports.sort_custom<ViewportSort>();
+	std::sort(active_viewports.begin(), active_viewports.end(), ViewportSort{});
 
 	//draw viewports
 	for (int i = 0; i < active_viewports.size(); i++) {
@@ -409,7 +409,10 @@ void VisualServerViewport::viewport_set_active(RID p_viewport, bool p_active) {
 		ERR_FAIL_COND(active_viewports.find(viewport) != -1); //already active
 		active_viewports.push_back(viewport);
 	} else {
-		active_viewports.erase(viewport);
+
+		if (auto it_find = std::find(active_viewports.begin(), active_viewports.end(), viewport); it_find != active_viewports.end()) {
+			active_viewports.erase(it_find);
+		}
 	}
 }
 

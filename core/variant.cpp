@@ -1487,7 +1487,7 @@ String Variant::stringify(List<const void *> &stack) const {
 			List<Variant> keys;
 			d.get_key_list(&keys);
 
-			Vector<_VariantStrPair> pairs;
+			std::vector<_VariantStrPair> pairs;
 
 			for (List<Variant>::Element *E = keys.front(); E; E = E->next()) {
 
@@ -1498,7 +1498,7 @@ String Variant::stringify(List<const void *> &stack) const {
 				pairs.push_back(sp);
 			}
 
-			pairs.sort();
+			std::sort(pairs.begin(), pairs.end());
 
 			for (int i = 0; i < pairs.size(); i++) {
 				if (i > 0)
@@ -1939,26 +1939,26 @@ Variant::operator PoolVector<Color>() const {
 
 /* helpers */
 
-Variant::operator Vector<RID>() const {
+Variant::operator std::vector<RID>() const {
 
 	Array va = operator Array();
-	Vector<RID> rids;
+	std::vector<RID> rids;
 	rids.resize(va.size());
 	for (int i = 0; i < rids.size(); i++)
-		rids.write[i] = va[i];
+		rids[i] = va[i];
 	return rids;
 }
 
-Variant::operator Vector<Vector2>() const {
+Variant::operator std::vector<Vector2>() const {
 
 	PoolVector<Vector2> from = operator PoolVector<Vector2>();
-	Vector<Vector2> to;
+	std::vector<Vector2> to;
 	int len = from.size();
 	if (len == 0)
-		return Vector<Vector2>();
+		return std::vector<Vector2>();
 	to.resize(len);
 	PoolVector<Vector2>::Read r = from.read();
-	Vector2 *w = to.ptrw();
+	Vector2 *w = to.data();
 	for (int i = 0; i < len; i++) {
 
 		w[i] = r[i];
@@ -2001,10 +2001,10 @@ Variant::operator PoolVector<Face3>() const {
 	return faces;
 }
 
-Variant::operator Vector<Plane>() const {
+Variant::operator std::vector<Plane>() const {
 
 	Array va = operator Array();
-	Vector<Plane> planes;
+	std::vector<Plane> planes;
 	int va_size = va.size();
 	if (va_size == 0)
 		return planes;
@@ -2012,112 +2012,112 @@ Variant::operator Vector<Plane>() const {
 	planes.resize(va_size);
 
 	for (int i = 0; i < va_size; i++)
-		planes.write[i] = va[i];
+		planes[i] = va[i];
 
 	return planes;
 }
 
-Variant::operator Vector<Variant>() const {
+Variant::operator std::vector<Variant>() const {
 
 	Array from = operator Array();
-	Vector<Variant> to;
+	std::vector<Variant> to;
 	int len = from.size();
 	to.resize(len);
 	for (int i = 0; i < len; i++) {
 
-		to.write[i] = from[i];
+		to[i] = from[i];
 	}
 	return to;
 }
 
-Variant::operator Vector<uint8_t>() const {
+Variant::operator std::vector<uint8_t>() const {
 
 	PoolVector<uint8_t> from = operator PoolVector<uint8_t>();
-	Vector<uint8_t> to;
+	std::vector<uint8_t> to;
 	int len = from.size();
 	to.resize(len);
 	for (int i = 0; i < len; i++) {
 
-		to.write[i] = from[i];
+		to[i] = from[i];
 	}
 	return to;
 }
-Variant::operator Vector<int>() const {
+Variant::operator std::vector<int>() const {
 
 	PoolVector<int> from = operator PoolVector<int>();
-	Vector<int> to;
+	std::vector<int> to;
 	int len = from.size();
 	to.resize(len);
 	for (int i = 0; i < len; i++) {
 
-		to.write[i] = from[i];
+		to[i] = from[i];
 	}
 	return to;
 }
-Variant::operator Vector<real_t>() const {
+Variant::operator std::vector<real_t>() const {
 
 	PoolVector<real_t> from = operator PoolVector<real_t>();
-	Vector<real_t> to;
+	std::vector<real_t> to;
 	int len = from.size();
 	to.resize(len);
 	for (int i = 0; i < len; i++) {
 
-		to.write[i] = from[i];
+		to[i] = from[i];
 	}
 	return to;
 }
 
-Variant::operator Vector<String>() const {
+Variant::operator std::vector<String>() const {
 
 	PoolVector<String> from = operator PoolVector<String>();
-	Vector<String> to;
+	std::vector<String> to;
 	int len = from.size();
 	to.resize(len);
 	for (int i = 0; i < len; i++) {
 
-		to.write[i] = from[i];
+		to[i] = from[i];
 	}
 	return to;
 }
-Variant::operator Vector<StringName>() const {
+Variant::operator std::vector<StringName>() const {
 
 	PoolVector<String> from = operator PoolVector<String>();
-	Vector<StringName> to;
+	std::vector<StringName> to;
 	int len = from.size();
 	to.resize(len);
 	for (int i = 0; i < len; i++) {
 
-		to.write[i] = from[i];
+		to[i] = from[i];
 	}
 	return to;
 }
 
-Variant::operator Vector<Vector3>() const {
+Variant::operator std::vector<Vector3>() const {
 
 	PoolVector<Vector3> from = operator PoolVector<Vector3>();
-	Vector<Vector3> to;
+	std::vector<Vector3> to;
 	int len = from.size();
 	if (len == 0)
-		return Vector<Vector3>();
+		return std::vector<Vector3>();
 	to.resize(len);
 	PoolVector<Vector3>::Read r = from.read();
-	Vector3 *w = to.ptrw();
+	Vector3 *w = to.data();
 	for (int i = 0; i < len; i++) {
 
 		w[i] = r[i];
 	}
 	return to;
 }
-Variant::operator Vector<Color>() const {
+Variant::operator std::vector<Color>() const {
 
 	PoolVector<Color> from = operator PoolVector<Color>();
-	Vector<Color> to;
+	std::vector<Color> to;
 	int len = from.size();
 	if (len == 0)
-		return Vector<Color>();
+		return std::vector<Color>();
 	to.resize(len);
 	PoolVector<Color>::Read r = from.read();
-	Color *w = to.ptrw();
+	Color *w = to.data();
 	for (int i = 0; i < len; i++) {
 
 		w[i] = r[i];
@@ -2369,7 +2369,7 @@ Variant::Variant(const PoolVector<Plane> &p_array) {
 	}
 }
 
-Variant::Variant(const Vector<Plane> &p_array) {
+Variant::Variant(const std::vector<Plane> &p_array) {
 
 	type = ARRAY;
 
@@ -2383,7 +2383,7 @@ Variant::Variant(const Vector<Plane> &p_array) {
 	}
 }
 
-Variant::Variant(const Vector<RID> &p_array) {
+Variant::Variant(const std::vector<RID> &p_array) {
 
 	type = ARRAY;
 
@@ -2397,7 +2397,7 @@ Variant::Variant(const Vector<RID> &p_array) {
 	}
 }
 
-Variant::Variant(const Vector<Vector2> &p_array) {
+Variant::Variant(const std::vector<Vector2> &p_array) {
 
 	type = NIL;
 	PoolVector<Vector2> v;
@@ -2405,7 +2405,7 @@ Variant::Variant(const Vector<Vector2> &p_array) {
 	if (len > 0) {
 		v.resize(len);
 		PoolVector<Vector2>::Write w = v.write();
-		const Vector2 *r = p_array.ptr();
+		const Vector2 *r = p_array.data();
 
 		for (int i = 0; i < len; i++)
 			w[i] = r[i];
@@ -2474,7 +2474,7 @@ Variant::Variant(const PoolVector<Face3> &p_face_array) {
 
 /* helpers */
 
-Variant::Variant(const Vector<Variant> &p_array) {
+Variant::Variant(const std::vector<Variant> &p_array) {
 
 	type = NIL;
 	Array v;
@@ -2485,7 +2485,7 @@ Variant::Variant(const Vector<Variant> &p_array) {
 	*this = v;
 }
 
-Variant::Variant(const Vector<uint8_t> &p_array) {
+Variant::Variant(const std::vector<uint8_t> &p_array) {
 
 	type = NIL;
 	PoolVector<uint8_t> v;
@@ -2496,7 +2496,7 @@ Variant::Variant(const Vector<uint8_t> &p_array) {
 	*this = v;
 }
 
-Variant::Variant(const Vector<int> &p_array) {
+Variant::Variant(const std::vector<int> &p_array) {
 
 	type = NIL;
 	PoolVector<int> v;
@@ -2507,7 +2507,7 @@ Variant::Variant(const Vector<int> &p_array) {
 	*this = v;
 }
 
-Variant::Variant(const Vector<real_t> &p_array) {
+Variant::Variant(const std::vector<real_t> &p_array) {
 
 	type = NIL;
 	PoolVector<real_t> v;
@@ -2518,7 +2518,7 @@ Variant::Variant(const Vector<real_t> &p_array) {
 	*this = v;
 }
 
-Variant::Variant(const Vector<String> &p_array) {
+Variant::Variant(const std::vector<String> &p_array) {
 
 	type = NIL;
 	PoolVector<String> v;
@@ -2529,7 +2529,7 @@ Variant::Variant(const Vector<String> &p_array) {
 	*this = v;
 }
 
-Variant::Variant(const Vector<StringName> &p_array) {
+Variant::Variant(const std::vector<StringName> &p_array) {
 
 	type = NIL;
 	PoolVector<String> v;
@@ -2540,7 +2540,7 @@ Variant::Variant(const Vector<StringName> &p_array) {
 	*this = v;
 }
 
-Variant::Variant(const Vector<Vector3> &p_array) {
+Variant::Variant(const std::vector<Vector3> &p_array) {
 
 	type = NIL;
 	PoolVector<Vector3> v;
@@ -2548,7 +2548,7 @@ Variant::Variant(const Vector<Vector3> &p_array) {
 	if (len > 0) {
 		v.resize(len);
 		PoolVector<Vector3>::Write w = v.write();
-		const Vector3 *r = p_array.ptr();
+		const Vector3 *r = p_array.data();
 
 		for (int i = 0; i < len; i++)
 			w[i] = r[i];
@@ -2556,7 +2556,7 @@ Variant::Variant(const Vector<Vector3> &p_array) {
 	*this = v;
 }
 
-Variant::Variant(const Vector<Color> &p_array) {
+Variant::Variant(const std::vector<Color> &p_array) {
 
 	type = NIL;
 	PoolVector<Color> v;
@@ -3170,35 +3170,35 @@ bool Variant::is_ref() const {
 	return type == OBJECT && !_get_obj().ref.is_null();
 }
 
-Vector<Variant> varray() {
+std::vector<Variant> varray() {
 
-	return Vector<Variant>();
+	return std::vector<Variant>();
 }
 
-Vector<Variant> varray(const Variant &p_arg1) {
+std::vector<Variant> varray(const Variant &p_arg1) {
 
-	Vector<Variant> v;
+	std::vector<Variant> v;
 	v.push_back(p_arg1);
 	return v;
 }
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2) {
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2) {
 
-	Vector<Variant> v;
+	std::vector<Variant> v;
 	v.push_back(p_arg1);
 	v.push_back(p_arg2);
 	return v;
 }
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3) {
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3) {
 
-	Vector<Variant> v;
+	std::vector<Variant> v;
 	v.push_back(p_arg1);
 	v.push_back(p_arg2);
 	v.push_back(p_arg3);
 	return v;
 }
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4) {
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4) {
 
-	Vector<Variant> v;
+	std::vector<Variant> v;
 	v.push_back(p_arg1);
 	v.push_back(p_arg2);
 	v.push_back(p_arg3);
@@ -3206,9 +3206,9 @@ Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Varia
 	return v;
 }
 
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4, const Variant &p_arg5) {
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4, const Variant &p_arg5) {
 
-	Vector<Variant> v;
+	std::vector<Variant> v;
 	v.push_back(p_arg1);
 	v.push_back(p_arg2);
 	v.push_back(p_arg3);

@@ -264,7 +264,7 @@ Error OS_X11::initialize(const VideoMode &p_desired, int p_video_driver, int p_a
 
 		if (getenv("LD_LIBRARY_PATH")) {
 			String ld_library_path(getenv("LD_LIBRARY_PATH"));
-			Vector<String> libraries = ld_library_path.split(":");
+			std::vector<String> libraries = ld_library_path.split(":");
 
 			for (int i = 0; i < libraries.size(); ++i) {
 				if (FileAccess::exists(libraries[i] + "/libGL.so.1") ||
@@ -2567,9 +2567,9 @@ void OS_X11::process_xevents() {
 
 					Property p = read_property(x11_display, x11_window, XInternAtom(x11_display, "PRIMARY", 0));
 
-					Vector<String> files = String((char *)p.data).split("\n", false);
+					std::vector<String> files = String((char *)p.data).split("\n", false);
 					for (int i = 0; i < files.size(); i++) {
-						files.write[i] = files[i].replace("file://", "").http_unescape().strip_edges();
+						files[i] = files[i].replace("file://", "").http_unescape().strip_edges();
 					}
 					main_loop->drop_files(files);
 
@@ -2945,7 +2945,7 @@ void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 
 	if (p_cursor.is_valid()) {
 
-		Map<CursorShape, Vector<Variant> >::Element *cursor_c = cursors_cache.find(p_shape);
+		Map<CursorShape, std::vector<Variant> >::Element *cursor_c = cursors_cache.find(p_shape);
 
 		if (cursor_c) {
 			if (cursor_c->get()[0] == p_cursor && cursor_c->get()[1] == p_hotspot) {
@@ -3024,7 +3024,7 @@ void OS_X11::set_custom_mouse_cursor(const RES &p_cursor, CursorShape p_shape, c
 		// Save it for a further usage
 		cursors[p_shape] = XcursorImageLoadCursor(x11_display, cursor_image);
 
-		Vector<Variant> params;
+		std::vector<Variant> params;
 		params.push_back(p_cursor);
 		params.push_back(p_hotspot);
 		cursors_cache.insert(p_shape, params);
@@ -3076,7 +3076,7 @@ void OS_X11::alert(const String &p_alert, const String &p_title) {
 	const char *message_programs[] = { "zenity", "kdialog", "Xdialog", "xmessage" };
 
 	String path = get_environment("PATH");
-	Vector<String> path_elems = path.split(":", false);
+	std::vector<String> path_elems = path.split(":", false);
 	String program;
 
 	for (int i = 0; i < path_elems.size(); i++) {
@@ -3180,16 +3180,16 @@ void OS_X11::set_icon(const Ref<Image> &p_icon) {
 			}
 
 			// We're using long to have wordsize (32Bit build -> 32 Bits, 64 Bit build -> 64 Bits
-			Vector<long> pd;
+			std::vector<long> pd;
 
 			pd.resize(2 + w * h);
 
-			pd.write[0] = w;
-			pd.write[1] = h;
+			pd[0] = w;
+			pd[1] = h;
 
 			PoolVector<uint8_t>::Read r = img->get_data().read();
 
-			long *wr = &pd.write[2];
+			long *wr = &pd[2];
 			uint8_t const *pr = r.ptr();
 
 			for (int i = 0; i < w * h; i++) {
@@ -3200,7 +3200,7 @@ void OS_X11::set_icon(const Ref<Image> &p_icon) {
 				pr += 4;
 			}
 
-			XChangeProperty(x11_display, x11_window, net_wm_icon, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pd.ptr(), pd.size());
+			XChangeProperty(x11_display, x11_window, net_wm_icon, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)pd.data(), pd.size());
 
 			if (!g_set_icon_error)
 				break;
@@ -3432,7 +3432,7 @@ OS::LatinKeyboardVariant OS_X11::get_latin_keyboard_variant() const {
 	char *layout = XGetAtomName(x11_display, xkbdesc->names->symbols);
 	ERR_FAIL_COND_V(!layout, LATIN_KEYBOARD_QWERTY);
 
-	Vector<String> info = String(layout).split("+");
+	std::vector<String> info = String(layout).split("+");
 	ERR_FAIL_INDEX_V(1, info.size(), LATIN_KEYBOARD_QWERTY);
 
 	if (info[1].find("colemak") != -1) {

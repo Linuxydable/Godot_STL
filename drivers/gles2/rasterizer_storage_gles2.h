@@ -275,7 +275,7 @@ public:
 
 		RenderTarget *render_target;
 
-		Vector<Ref<Image> > images;
+		std::vector<Ref<Image> > images;
 
 		bool redraw_if_visible;
 
@@ -418,7 +418,7 @@ public:
 
 		Map<StringName, RID> default_textures;
 
-		Vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
+		std::vector<ShaderLanguage::ShaderNode::Uniform::Hint> texture_hints;
 
 		bool valid;
 
@@ -530,7 +530,7 @@ public:
 	virtual RID shader_get_default_texture_param(RID p_shader, const StringName &p_name) const;
 
 	virtual void shader_add_custom_define(RID p_shader, const String &p_define);
-	virtual void shader_get_custom_defines(RID p_shader, Vector<String> *p_defines) const;
+	virtual void shader_get_custom_defines(RID p_shader, std::vector<String> *p_defines) const;
 	virtual void shader_clear_custom_defines(RID p_shader);
 
 	void _update_shader(Shader *p_shader) const;
@@ -544,7 +544,7 @@ public:
 		Map<StringName, Variant> params;
 		SelfList<Material> list;
 		SelfList<Material> dirty_list;
-		Vector<Pair<StringName, RID> > textures;
+		std::vector<Pair<StringName, RID> > textures;
 		float line_width;
 		int render_priority;
 
@@ -633,7 +633,7 @@ public:
 			GLuint array_id;
 		};
 
-		Vector<BlendShape> blend_shapes;
+		std::vector<BlendShape> blend_shapes;
 
 		AABB aabb;
 
@@ -646,14 +646,14 @@ public:
 
 		VS::PrimitiveType primitive;
 
-		Vector<AABB> skeleton_bone_aabb;
-		Vector<bool> skeleton_bone_used;
+		std::vector<AABB> skeleton_bone_aabb;
+		std::vector<bool> skeleton_bone_used;
 
 		bool active;
 
 		PoolVector<uint8_t> data;
 		PoolVector<uint8_t> index_data;
-		Vector<PoolVector<uint8_t> > blend_shape_data;
+		std::vector<PoolVector<uint8_t> > blend_shape_data;
 
 		int total_data_size;
 
@@ -675,7 +675,7 @@ public:
 
 		bool active;
 
-		Vector<Surface *> surfaces;
+		std::vector<Surface *> surfaces;
 
 		int blend_shape_count;
 		VS::BlendShapeMode blend_shape_mode;
@@ -705,7 +705,7 @@ public:
 
 	virtual RID mesh_create();
 
-	virtual void mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const Vector<PoolVector<uint8_t> > &p_blend_shapes = Vector<PoolVector<uint8_t> >(), const Vector<AABB> &p_bone_aabbs = Vector<AABB>());
+	virtual void mesh_add_surface(RID p_mesh, uint32_t p_format, VS::PrimitiveType p_primitive, const PoolVector<uint8_t> &p_array, int p_vertex_count, const PoolVector<uint8_t> &p_index_array, int p_index_count, const AABB &p_aabb, const std::vector<PoolVector<uint8_t> > &p_blend_shapes = std::vector<PoolVector<uint8_t> >(), const std::vector<AABB> &p_bone_aabbs = std::vector<AABB>());
 
 	virtual void mesh_set_blend_shape_count(RID p_mesh, int p_amount);
 	virtual int mesh_get_blend_shape_count(RID p_mesh) const;
@@ -728,8 +728,8 @@ public:
 	virtual VS::PrimitiveType mesh_surface_get_primitive_type(RID p_mesh, int p_surface) const;
 
 	virtual AABB mesh_surface_get_aabb(RID p_mesh, int p_surface) const;
-	virtual Vector<PoolVector<uint8_t> > mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const;
-	virtual Vector<AABB> mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const;
+	virtual std::vector<PoolVector<uint8_t> > mesh_surface_get_blend_shapes(RID p_mesh, int p_surface) const;
+	virtual std::vector<AABB> mesh_surface_get_skeleton_aabb(RID p_mesh, int p_surface) const;
 
 	virtual void mesh_remove_surface(RID p_mesh, int p_surface);
 	virtual int mesh_get_surface_count(RID p_mesh) const;
@@ -751,7 +751,7 @@ public:
 		VS::MultimeshColorFormat color_format;
 		VS::MultimeshCustomDataFormat custom_data_format;
 
-		Vector<float> data;
+		std::vector<float> data;
 
 		AABB aabb;
 
@@ -821,12 +821,12 @@ public:
 		struct Chunk {
 			RID texture;
 			VS::PrimitiveType primitive;
-			Vector<Vector3> vertices;
-			Vector<Vector3> normals;
-			Vector<Plane> tangents;
-			Vector<Color> colors;
-			Vector<Vector2> uvs;
-			Vector<Vector2> uv2s;
+			std::vector<Vector3> vertices;
+			std::vector<Vector3> normals;
+			std::vector<Plane> tangents;
+			std::vector<Color> colors;
+			std::vector<Vector2> uvs;
+			std::vector<Vector2> uv2s;
 		};
 
 		List<Chunk> chunks;
@@ -872,7 +872,7 @@ public:
 
 		// TODO use float textures for storage
 
-		Vector<float> bone_data;
+		std::vector<float> bone_data;
 
 		GLuint tex_id;
 
@@ -1176,7 +1176,7 @@ public:
 				int height;
 			};
 
-			Vector<Size> sizes;
+			std::vector<Size> sizes;
 			GLuint color;
 			int levels;
 
