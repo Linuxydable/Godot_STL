@@ -1310,7 +1310,7 @@ bool Variant::is_method_const(Variant::Type p_type, const StringName &p_method) 
 	return E->get()._const;
 }
 
-Vector<StringName> Variant::get_method_argument_names(Variant::Type p_type, const StringName &p_method) {
+std::vector<StringName> Variant::get_method_argument_names(Variant::Type p_type, const StringName &p_method) {
 
 	const _VariantCall::TypeFunc &tf = _VariantCall::type_funcs[p_type];
 
