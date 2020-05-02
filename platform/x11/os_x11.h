@@ -129,7 +129,7 @@ class OS_X11 : public OS_Unix {
 
 	struct {
 		int opcode;
-		Vector<int> touch_devices;
+		std::vector<int> touch_devices;
 		Map<int, Vector2> absolute_devices;
 		Map<int, Vector3> pen_devices;
 		XIEventMask all_event_mask;
