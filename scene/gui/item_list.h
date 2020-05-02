@@ -85,8 +85,8 @@ private:
 	bool auto_height;
 	float auto_height_value;
 
-	Vector<Item> items;
-	Vector<int> separators;
+	std::vector<Item> items;
+	std::vector<int> separators;
 
 	SelectMode select_mode;
 	IconMode icon_mode;
@@ -171,7 +171,7 @@ public:
 	void unselect(int p_idx);
 	void unselect_all();
 	bool is_selected(int p_idx) const;
-	Vector<int> get_selected_items();
+	std::vector<int> get_selected_items();
 	bool is_anything_selected();
 
 	void set_current(int p_current);
