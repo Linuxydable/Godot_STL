@@ -229,18 +229,18 @@ public:
 	operator PoolVector<Plane>() const;
 	operator PoolVector<Face3>() const;
 
-	operator Vector<Variant>() const;
-	operator Vector<uint8_t>() const;
-	operator Vector<int>() const;
-	operator Vector<real_t>() const;
-	operator Vector<String>() const;
-	operator Vector<StringName>() const;
-	operator Vector<Vector3>() const;
-	operator Vector<Color>() const;
-	operator Vector<RID>() const;
-	operator Vector<Vector2>() const;
+	operator std::vector<Variant>() const;
+	operator std::vector<uint8_t>() const;
+	operator std::vector<int>() const;
+	operator std::vector<real_t>() const;
+	operator std::vector<String>() const;
+	operator std::vector<StringName>() const;
+	operator std::vector<Vector3>() const;
+	operator std::vector<Color>() const;
+	operator std::vector<RID>() const;
+	operator std::vector<Vector2>() const;
 	operator PoolVector<Vector2>() const;
-	operator Vector<Plane>() const;
+	operator std::vector<Plane>() const;
 
 	// some core type enums to convert to
 	operator Margin() const;
@@ -294,17 +294,17 @@ public:
 	Variant(const PoolVector<Color> &p_color_array);
 	Variant(const PoolVector<Face3> &p_face_array);
 
-	Variant(const Vector<Variant> &p_array);
-	Variant(const Vector<uint8_t> &p_array);
-	Variant(const Vector<int> &p_array);
-	Variant(const Vector<real_t> &p_array);
-	Variant(const Vector<String> &p_array);
-	Variant(const Vector<StringName> &p_array);
-	Variant(const Vector<Vector3> &p_array);
-	Variant(const Vector<Color> &p_array);
-	Variant(const Vector<Plane> &p_array); // helper
-	Variant(const Vector<RID> &p_array); // helper
-	Variant(const Vector<Vector2> &p_array); // helper
+	Variant(const std::vector<Variant> &p_array);
+	Variant(const std::vector<uint8_t> &p_array);
+	Variant(const std::vector<int> &p_array);
+	Variant(const std::vector<real_t> &p_array);
+	Variant(const std::vector<String> &p_array);
+	Variant(const std::vector<StringName> &p_array);
+	Variant(const std::vector<Vector3> &p_array);
+	Variant(const std::vector<Color> &p_array);
+	Variant(const std::vector<Plane> &p_array); // helper
+	Variant(const std::vector<RID> &p_array); // helper
+	Variant(const std::vector<Vector2> &p_array); // helper
 	Variant(const PoolVector<Vector2> &p_vector2_array); // helper
 
 	Variant(const IP_Address &p_address);
@@ -385,10 +385,10 @@ public:
 
 	void get_method_list(List<MethodInfo> *p_list) const;
 	bool has_method(const StringName &p_method) const;
-	static Vector<Variant::Type> get_method_argument_types(Variant::Type p_type, const StringName &p_method);
-	static Vector<Variant> get_method_default_arguments(Variant::Type p_type, const StringName &p_method);
+	static std::vector<Variant::Type> get_method_argument_types(Variant::Type p_type, const StringName &p_method);
+	static std::vector<Variant> get_method_default_arguments(Variant::Type p_type, const StringName &p_method);
 	static Variant::Type get_method_return_type(Variant::Type p_type, const StringName &p_method, bool *r_has_return = NULL);
-	static Vector<StringName> get_method_argument_names(Variant::Type p_type, const StringName &p_method);
+	static std::vector<StringName> get_method_argument_names(Variant::Type p_type, const StringName &p_method);
 	static bool is_method_const(Variant::Type p_type, const StringName &p_method);
 
 	void set_named(const StringName &p_index, const Variant &p_value, bool *r_valid = NULL);
@@ -438,12 +438,12 @@ public:
 //typedef Dictionary Dictionary; no
 //typedef Array Array;
 
-Vector<Variant> varray();
-Vector<Variant> varray(const Variant &p_arg1);
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2);
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3);
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4);
-Vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4, const Variant &p_arg5);
+std::vector<Variant> varray();
+std::vector<Variant> varray(const Variant &p_arg1);
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2);
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3);
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4);
+std::vector<Variant> varray(const Variant &p_arg1, const Variant &p_arg2, const Variant &p_arg3, const Variant &p_arg4, const Variant &p_arg5);
 
 struct VariantHasher {
 
