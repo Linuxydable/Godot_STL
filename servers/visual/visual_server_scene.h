@@ -373,14 +373,14 @@ public:
 			Map<RID, LightCache> light_cache_changes;
 			PoolVector<int> light_data;
 			PoolVector<LocalData> local_data;
-			Vector<Vector<uint32_t> > level_cell_lists;
+			std::vector<std::vector<uint32_t> > level_cell_lists;
 			RID probe_data;
 			bool enabled;
 			int bake_dynamic_range;
 			RasterizerStorage::GIProbeCompression compression;
 
-			Vector<PoolVector<uint8_t> > mipmaps_3d;
-			Vector<PoolVector<CompBlockS3TC> > mipmaps_s3tc; //for s3tc
+			std::vector<PoolVector<uint8_t> > mipmaps_3d;
+			std::vector<PoolVector<CompBlockS3TC> > mipmaps_s3tc; //for s3tc
 
 			int updating_stage;
 			float propagate;
@@ -454,9 +454,9 @@ public:
 	virtual void instance_set_extra_visibility_margin(RID p_instance, real_t p_margin);
 
 	// don't use these in a game!
-	virtual Vector<ObjectID> instances_cull_aabb(const AABB &p_aabb, RID p_scenario = RID()) const;
-	virtual Vector<ObjectID> instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario = RID()) const;
-	virtual Vector<ObjectID> instances_cull_convex(const Vector<Plane> &p_convex, RID p_scenario = RID()) const;
+	virtual std::vector<ObjectID> instances_cull_aabb(const AABB &p_aabb, RID p_scenario = RID()) const;
+	virtual std::vector<ObjectID> instances_cull_ray(const Vector3 &p_from, const Vector3 &p_to, RID p_scenario = RID()) const;
+	virtual std::vector<ObjectID> instances_cull_convex(const std::vector<Plane> &p_convex, RID p_scenario = RID()) const;
 
 	virtual void instance_geometry_set_flag(RID p_instance, VS::InstanceFlags p_flags, bool p_enabled);
 	virtual void instance_geometry_set_cast_shadows_setting(RID p_instance, VS::ShadowCastingSetting p_shadow_casting_setting);
@@ -517,7 +517,7 @@ public:
 	List<Instance *> probe_bake_list;
 
 	bool _render_reflection_probe_step(Instance *p_instance, int p_step);
-	void _gi_probe_fill_local_data(int p_idx, int p_level, int p_x, int p_y, int p_z, const GIProbeDataCell *p_cell, const GIProbeDataHeader *p_header, InstanceGIProbeData::LocalData *p_local_data, Vector<uint32_t> *prev_cell);
+	void _gi_probe_fill_local_data(int p_idx, int p_level, int p_x, int p_y, int p_z, const GIProbeDataCell *p_cell, const GIProbeDataHeader *p_header, InstanceGIProbeData::LocalData *p_local_data, std::vector<uint32_t> *prev_cell);
 
 	_FORCE_INLINE_ uint32_t _gi_bake_find_cell(const GIProbeDataCell *cells, int x, int y, int z, int p_cell_subdiv);
 	void _bake_gi_downscale_light(int p_idx, int p_level, const GIProbeDataCell *p_cells, const GIProbeDataHeader *p_header, InstanceGIProbeData::LocalData *p_local_data, float p_propagate);
