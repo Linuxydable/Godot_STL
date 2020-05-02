@@ -57,7 +57,7 @@ void DocData::merge_from(const DocData &p_data) {
 
 		for (int i = 0; i < c.methods.size(); i++) {
 
-			MethodDoc &m = c.methods.write[i];
+			MethodDoc &m = c.methods[i];
 
 			for (int j = 0; j < cf.methods.size(); j++) {
 
@@ -68,16 +68,16 @@ void DocData::merge_from(const DocData &p_data) {
 				// since polymorphic functions are allowed we need to check the type of
 				// the arguments so we make sure they are different.
 				int arg_count = cf.methods[j].arguments.size();
-				Vector<bool> arg_used;
+				std::vector<bool> arg_used;
 				arg_used.resize(arg_count);
 				for (int l = 0; l < arg_count; ++l)
-					arg_used.write[l] = false;
+					arg_used[l] = false;
 				// also there is no guarantee that argument ordering will match, so we
 				// have to check one by one so we make sure we have an exact match
 				for (int k = 0; k < arg_count; ++k) {
 					for (int l = 0; l < arg_count; ++l)
 						if (cf.methods[j].arguments[k].type == m.arguments[l].type && !arg_used[l]) {
-							arg_used.write[l] = true;
+							arg_used[l] = true;
 							break;
 						}
 				}
@@ -97,7 +97,7 @@ void DocData::merge_from(const DocData &p_data) {
 
 		for (int i = 0; i < c.signals.size(); i++) {
 
-			MethodDoc &m = c.signals.write[i];
+			MethodDoc &m = c.signals[i];
 
 			for (int j = 0; j < cf.signals.size(); j++) {
 
@@ -112,7 +112,7 @@ void DocData::merge_from(const DocData &p_data) {
 
 		for (int i = 0; i < c.constants.size(); i++) {
 
-			ConstantDoc &m = c.constants.write[i];
+			ConstantDoc &m = c.constants[i];
 
 			for (int j = 0; j < cf.constants.size(); j++) {
 
@@ -127,7 +127,7 @@ void DocData::merge_from(const DocData &p_data) {
 
 		for (int i = 0; i < c.properties.size(); i++) {
 
-			PropertyDoc &p = c.properties.write[i];
+			PropertyDoc &p = c.properties[i];
 
 			for (int j = 0; j < cf.properties.size(); j++) {
 
@@ -142,7 +142,7 @@ void DocData::merge_from(const DocData &p_data) {
 
 		for (int i = 0; i < c.theme_properties.size(); i++) {
 
-			PropertyDoc &p = c.theme_properties.write[i];
+			PropertyDoc &p = c.theme_properties[i];
 
 			for (int j = 0; j < cf.theme_properties.size(); j++) {
 
@@ -704,7 +704,7 @@ void DocData::generate(bool p_basic_types) {
 	}
 }
 
-static Error _parse_methods(Ref<XMLParser> &parser, Vector<DocData::MethodDoc> &methods) {
+static Error _parse_methods(Ref<XMLParser> &parser, std::vector<DocData::MethodDoc> &methods) {
 
 	String section = parser->get_node_name();
 	String element = section.substr(0, section.length() - 1);
@@ -1051,13 +1051,13 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 		_write_string(f, 1, "<tutorials>");
 		for (int i = 0; i < c.tutorials.size(); i++) {
-			_write_string(f, 2, "<link>" + c.tutorials.get(i).xml_escape() + "</link>");
+			_write_string(f, 2, "<link>" + c.tutorials[i].xml_escape() + "</link>");
 		}
 		_write_string(f, 1, "</tutorials>");
 
 		_write_string(f, 1, "<methods>");
 
-		c.methods.sort();
+		std::sort(c.methods.begin(), c.methods.end());
 
 		for (int i = 0; i < c.methods.size(); i++) {
 
@@ -1108,7 +1108,7 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 		if (c.properties.size()) {
 			_write_string(f, 1, "<members>");
 
-			c.properties.sort();
+			std::sort(c.properties.begin(), c.properties.end());
 
 			for (int i = 0; i < c.properties.size(); i++) {
 
@@ -1135,7 +1135,7 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 		if (c.signals.size()) {
 
-			c.signals.sort();
+			std::sort(c.signals.begin(), c.signals.end());
 
 			_write_string(f, 1, "<signals>");
 			for (int i = 0; i < c.signals.size(); i++) {
@@ -1177,7 +1177,7 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 		if (c.theme_properties.size()) {
 
-			c.theme_properties.sort();
+			std::sort(c.theme_properties.begin(), c.theme_properties.end());
 
 			_write_string(f, 1, "<theme_items>");
 			for (int i = 0; i < c.theme_properties.size(); i++) {
@@ -1204,9 +1204,9 @@ Error DocData::save_classes(const String &p_default_path, const Map<String, Stri
 
 Error DocData::load_compressed(const uint8_t *p_data, int p_compressed_size, int p_uncompressed_size) {
 
-	Vector<uint8_t> data;
+	std::vector<uint8_t> data;
 	data.resize(p_uncompressed_size);
-	Compression::decompress(data.ptrw(), p_uncompressed_size, p_data, p_compressed_size, Compression::MODE_DEFLATE);
+	Compression::decompress(data.data(), p_uncompressed_size, p_data, p_compressed_size, Compression::MODE_DEFLATE);
 	class_list.clear();
 
 	Ref<XMLParser> parser = memnew(XMLParser);
