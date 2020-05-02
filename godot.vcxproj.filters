@@ -1122,6 +1122,9 @@
     <Filter Include="Source Files\thirdparty\zstd\decompress">
       <UniqueIdentifier>{CCC189D4-8FDA-240D-6D3C-69DF08D38C4E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\main\tests">
+      <UniqueIdentifier>{132b210e-4db6-4d34-816f-387921845875}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\bind\core_bind.h">
@@ -4621,6 +4624,42 @@
     </ClInclude>
     <ClInclude Include="thirdparty\zstd\decompress\zstd_decompress_block.h">
       <Filter>Header Files\thirdparty\zstd\decompress</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_astar.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_gdscript.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_gui.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_main.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_math.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_oa_hash_map.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_ordered_hash_map.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_physics.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_physics_2d.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_render.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_shader_lang.h">
+      <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="main\tests\test_string.h">
+      <Filter>Header Files\main\tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -9471,6 +9510,42 @@
     </ClCompile>
     <ClCompile Include="thirdparty\zstd\decompress\zstd_decompress_block.c">
       <Filter>Source Files\thirdparty\zstd\decompress</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_astar.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_gdscript.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_gui.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_main.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_math.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_oa_hash_map.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_ordered_hash_map.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_physics.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_physics_2d.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_render.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_shader_lang.cpp">
+      <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="main\tests\test_string.cpp">
+      <Filter>Header Files\main\tests</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
