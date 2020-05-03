@@ -30,6 +30,8 @@
 
 #include "property_selector.h"
 
+#include "helper/std_h.h"
+
 #include "core/os/keyboard.h"
 #include "editor/editor_node.h"
 #include "editor_scale.h"
@@ -175,7 +177,7 @@ void PropertySelector::_update_search() {
 			if (search_box->get_text() != String() && E->get().name.find(search_box->get_text()) == -1)
 				continue;
 
-			if (type_filter.size() && type_filter.find(E->get().type) == -1)
+			if (type_filter.size() && !std_h::isFind(type_filter, E->get().type))
 				continue;
 
 			TreeItem *item = search_options->create_item(category ? category : root);
@@ -536,7 +538,7 @@ void PropertySelector::select_property_from_instance(Object *p_instance, const S
 	_update_search();
 }
 
-void PropertySelector::set_type_filter(const Vector<Variant::Type> &p_type_filter) {
+void PropertySelector::set_type_filter(const std::vector<Variant::Type> &p_type_filter) {
 	type_filter = p_type_filter;
 }
 
