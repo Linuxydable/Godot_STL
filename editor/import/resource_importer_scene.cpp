@@ -284,7 +284,7 @@ static void _gen_shape_list(const Ref<Mesh> &mesh, List<Ref<Shape> > &r_shape_li
 		r_shape_list.push_back(shape);
 	} else {
 
-		Vector<Ref<Shape> > cd = mesh->convex_decompose();
+		std::vector<Ref<Shape> > cd = mesh->convex_decompose();
 		if (cd.size()) {
 			for (int i = 0; i < cd.size(); i++) {
 				r_shape_list.push_back(cd[i]);
@@ -798,10 +798,10 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 	AnimationPlayer *anim = Object::cast_to<AnimationPlayer>(n);
 	ERR_FAIL_COND(!anim);
 
-	Vector<String> strings = p_text.split("\n");
+	std::vector<String> strings = p_text.split("\n");
 	for (int i = 0; i < strings.size(); i++) {
 
-		strings.write[i] = strings[i].strip_edges();
+		strings[i] = strings[i].strip_edges();
 	}
 
 	List<StringName> anim_names;
@@ -825,7 +825,7 @@ void ResourceImporterScene::_filter_tracks(Node *scene, const String &p_text) {
 				}
 				keep_local.clear();
 
-				Vector<String> filters = strings[i].substr(1, strings[i].length()).split(",");
+				std::vector<String> filters = strings[i].substr(1, strings[i].length()).split(",");
 				for (int j = 0; j < filters.size(); j++) {
 
 					String fname = filters[j].strip_edges();
