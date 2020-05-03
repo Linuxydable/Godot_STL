@@ -56,11 +56,11 @@ bool VisualScriptExpression::_set(const StringName &p_name, const Variant &p_val
 		int from = inputs.size();
 		inputs.resize(int(p_value));
 		for (int i = from; i < inputs.size(); i++) {
-			inputs.write[i].name = String::chr('a' + i);
+			inputs[i].name = String::chr('a' + i);
 			if (from == 0) {
-				inputs.write[i].type = output_type;
+				inputs[i].type = output_type;
 			} else {
-				inputs.write[i].type = inputs[from - 1].type;
+				inputs[i].type = inputs[from - 1].type;
 			}
 		}
 		expression_dirty = true;
@@ -78,10 +78,10 @@ bool VisualScriptExpression::_set(const StringName &p_name, const Variant &p_val
 
 		if (what == "type") {
 
-			inputs.write[idx].type = Variant::Type(int(p_value));
+			inputs[idx].type = Variant::Type(int(p_value));
 		} else if (what == "name") {
 
-			inputs.write[idx].name = p_value;
+			inputs[idx].name = p_value;
 		} else {
 			return false;
 		}
@@ -1154,9 +1154,9 @@ VisualScriptExpression::ENode *VisualScriptExpression::_parse_expression() {
 				op->op = expression[i].op;
 				op->nodes[0] = expression[i + 1].node;
 				op->nodes[1] = NULL;
-				expression.write[i].is_op = false;
-				expression.write[i].node = op;
-				expression.remove(i + 1);
+				expression[i].is_op = false;
+				expression[i].node = op;
+				expression.erase(expression.begin() + i + 1);
 			}
 
 		} else {
@@ -1189,9 +1189,9 @@ VisualScriptExpression::ENode *VisualScriptExpression::_parse_expression() {
 			op->nodes[1] = expression[next_op + 1].node; //next expression goes as right
 
 			//replace all 3 nodes by this operator and make it an expression
-			expression.write[next_op - 1].node = op;
-			expression.remove(next_op);
-			expression.remove(next_op);
+			expression[next_op - 1].node = op;
+			expression.erase(expression.begin() + next_op);
+			expression.erase(expression.begin() + next_op);
 		}
 	}
 
