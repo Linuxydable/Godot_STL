@@ -38,6 +38,8 @@
 
 #include "scene/main/scene_tree.h"
 
+#include <helper/std_h.h>
+
 static const String init_symbol = "gdnative_init";
 static const String terminate_symbol = "gdnative_terminate";
 static const String default_symbol_prefix = "godot_";
@@ -48,7 +50,7 @@ static const bool default_reloadable = true;
 // Defined in gdnative_api_struct.gen.cpp
 extern const godot_gdnative_core_api_struct api_struct;
 
-Map<String, Vector<Ref<GDNative> > > GDNativeLibrary::loaded_libraries;
+Map<String, std::vector<Ref<GDNative> > > GDNativeLibrary::loaded_libraries;
 
 GDNativeLibrary::GDNativeLibrary() {
 	config_file.instance();
@@ -165,7 +167,7 @@ void GDNativeLibrary::set_config_file(Ref<ConfigFile> p_config_file) {
 		for (List<String>::Element *E = entry_keys.front(); E; E = E->next()) {
 			String key = E->get();
 
-			Vector<String> tags = key.split(".");
+			std::vector<String> tags = key.split(".");
 
 			bool skip = false;
 			for (int i = 0; i < tags.size(); i++) {
@@ -186,7 +188,7 @@ void GDNativeLibrary::set_config_file(Ref<ConfigFile> p_config_file) {
 		}
 	}
 
-	Vector<String> dependency_paths;
+	std::vector<String> dependency_paths;
 	{
 
 		List<String> dependency_keys;
@@ -197,7 +199,7 @@ void GDNativeLibrary::set_config_file(Ref<ConfigFile> p_config_file) {
 		for (List<String>::Element *E = dependency_keys.front(); E; E = E->next()) {
 			String key = E->get();
 
-			Vector<String> tags = key.split(".");
+			std::vector<String> tags = key.split(".");
 
 			bool skip = false;
 			for (int i = 0; i < tags.size(); i++) {
@@ -373,9 +375,9 @@ bool GDNative::initialize() {
 	initialized = true;
 
 	if (library->should_load_once() && !GDNativeLibrary::loaded_libraries.has(lib_path)) {
-		Vector<Ref<GDNative> > gdnatives;
+		std::vector<Ref<GDNative> > gdnatives;
 		gdnatives.resize(1);
-		gdnatives.write[0] = Ref<GDNative>(this);
+		gdnatives[0] = Ref<GDNative>(this);
 		GDNativeLibrary::loaded_libraries.insert(lib_path, gdnatives);
 	}
 
@@ -390,10 +392,10 @@ bool GDNative::terminate() {
 	}
 
 	if (library->should_load_once()) {
-		Vector<Ref<GDNative> > *gdnatives = &GDNativeLibrary::loaded_libraries[library->get_current_library_path()];
+		std::vector<Ref<GDNative> > *gdnatives = &GDNativeLibrary::loaded_libraries[library->get_current_library_path()];
 		if (gdnatives->size() > 1) {
 			// there are other GDNative's still using this library, so we actually don't terminate
-			gdnatives->erase(Ref<GDNative>(this));
+			std_h::erase(*gdnatives, Ref<GDNative>(this));
 			initialized = false;
 			return true;
 		} else if (gdnatives->size() == 1) {
@@ -439,13 +441,13 @@ void GDNativeCallRegistry::register_native_call_type(StringName p_call_type, nat
 	native_calls.insert(p_call_type, p_callback);
 }
 
-Vector<StringName> GDNativeCallRegistry::get_native_call_types() {
-	Vector<StringName> call_types;
+std::vector<StringName> GDNativeCallRegistry::get_native_call_types() {
+	std::vector<StringName> call_types;
 	call_types.resize(native_calls.size());
 
 	size_t idx = 0;
 	for (Map<StringName, native_call_cb>::Element *E = native_calls.front(); E; E = E->next(), idx++) {
-		call_types.write[idx] = E->key();
+		call_types[idx] = E->key();
 	}
 
 	return call_types;
