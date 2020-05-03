@@ -1007,9 +1007,9 @@ Array TranslationServer::get_loaded_locales() const {
 	return locales;
 }
 
-Vector<String> TranslationServer::get_all_locales() {
+std::vector<String> TranslationServer::get_all_locales() {
 
-	Vector<String> locales;
+	std::vector<String> locales;
 
 	const char **ptr = locale_list;
 
@@ -1021,9 +1021,9 @@ Vector<String> TranslationServer::get_all_locales() {
 	return locales;
 }
 
-Vector<String> TranslationServer::get_all_locale_names() {
+std::vector<String> TranslationServer::get_all_locale_names() {
 
-	Vector<String> locales;
+	std::vector<String> locales;
 
 	const char **ptr = locale_names;
 
