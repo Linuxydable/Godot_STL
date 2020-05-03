@@ -92,7 +92,7 @@ void AreaBullet::dispatch_callbacks() {
 			case OVERLAP_STATE_EXIT:
 				call_event(otherObj.object, PhysicsServer::AREA_BODY_REMOVED);
 				otherObj.object->on_exit_area(this);
-				overlappingObjects.remove(i); // Remove after callback
+				overlappingObjects.erase(overlappingObjects.begin() + i); // Remove after callback
 				break;
 			case OVERLAP_STATE_DIRTY:
 			case OVERLAP_STATE_INSIDE:
