@@ -30,15 +30,16 @@
 
 #include "array.h"
 
+#include "helper/std_h.h"
+
 #include "core/hashfuncs.h"
 #include "core/object.h"
 #include "core/variant.h"
-#include "core/vector.h"
 
 class ArrayPrivate {
 public:
 	SafeRefCount refcount;
-	Vector<Variant> array;
+	std::vector<Variant> array;
 };
 
 void Array::_ref(const Array &p_from) const {
@@ -72,7 +73,7 @@ void Array::_unref() const {
 
 Variant &Array::operator[](int p_idx) {
 
-	return _p->array.write[p_idx];
+	return _p->array[p_idx];
 }
 
 const Variant &Array::operator[](int p_idx) const {
@@ -118,18 +119,17 @@ void Array::push_back(const Variant &p_value) {
 }
 
 Error Array::resize(int p_new_size) {
-
-	return _p->array.resize(p_new_size);
+	_p->array.resize(p_new_size);
+	return OK;
 }
 
 void Array::insert(int p_pos, const Variant &p_value) {
 
-	_p->array.insert(p_pos, p_value);
+	_p->array.insert(_p->array.begin() + p_pos, p_value);
 }
 
 void Array::erase(const Variant &p_value) {
-
-	_p->array.erase(p_value);
+	std_h::erase(_p->array, p_value);
 }
 
 Variant Array::front() const {
@@ -143,8 +143,13 @@ Variant Array::back() const {
 }
 
 int Array::find(const Variant &p_value, int p_from) const {
+	auto it_find = std::find(_p->array.begin() + p_from, _p->array.end(), p_value);
 
-	return _p->array.find(p_value, p_from);
+	if (it_find != _p->array.end()) {
+		return std::distance(_p->array.begin(), it_find);
+	}
+
+	return -1;
 }
 
 int Array::rfind(const Variant &p_value, int p_from) const {
@@ -193,12 +198,12 @@ int Array::count(const Variant &p_value) const {
 }
 
 bool Array::has(const Variant &p_value) const {
-	return _p->array.find(p_value, 0) != -1;
+	return std_h::isFind(_p->array, p_value);
 }
 
 void Array::remove(int p_pos) {
 
-	_p->array.remove(p_pos);
+	_p->array.erase(_p->array.begin() + p_pos);
 }
 
 void Array::set(int p_idx, const Variant &p_value) {
@@ -292,11 +297,11 @@ struct _ArrayVariantSort {
 			res = false;
 		return res;
 	}
-};
+} _ArrayVariantSort;
 
 Array &Array::sort() {
+	std::sort(_p->array.begin(), _p->array.end(), _ArrayVariantSort);
 
-	_p->array.sort_custom<_ArrayVariantSort>();
 	return *this;
 }
 
@@ -322,7 +327,7 @@ Array &Array::sort_custom(Object *p_obj, const StringName &p_function) {
 	SortArray<Variant, _ArrayVariantSortCustom, true> avs;
 	avs.compare.obj = p_obj;
 	avs.compare.func = p_function;
-	avs.sort(_p->array.ptrw(), _p->array.size());
+	avs.sort(_p->array.data(), _p->array.size());
 	return *this;
 }
 
@@ -331,7 +336,7 @@ void Array::shuffle() {
 	const int n = _p->array.size();
 	if (n < 2)
 		return;
-	Variant *data = _p->array.ptrw();
+	Variant *data = _p->array.data();
 	for (int i = n - 1; i >= 1; i--) {
 		const int j = Math::rand() % (i + 1);
 		const Variant tmp = data[j];
@@ -341,7 +346,7 @@ void Array::shuffle() {
 }
 
 template <typename Less>
-_FORCE_INLINE_ int bisect(const Vector<Variant> &p_array, const Variant &p_value, bool p_before, const Less &p_less) {
+_FORCE_INLINE_ int bisect(const std::vector<Variant> &p_array, const Variant &p_value, bool p_before, const Less &p_less) {
 
 	int lo = 0;
 	int hi = p_array.size();
@@ -369,7 +374,7 @@ _FORCE_INLINE_ int bisect(const Vector<Variant> &p_array, const Variant &p_value
 
 int Array::bsearch(const Variant &p_value, bool p_before) {
 
-	return bisect(_p->array, p_value, p_before, _ArrayVariantSort());
+	return bisect(_p->array, p_value, p_before, _ArrayVariantSort);
 }
 
 int Array::bsearch_custom(const Variant &p_value, Object *p_obj, const StringName &p_function, bool p_before) {
@@ -384,21 +389,21 @@ int Array::bsearch_custom(const Variant &p_value, Object *p_obj, const StringNam
 }
 
 Array &Array::invert() {
+	std::reverse(_p->array.begin(), _p->array.end());
 
-	_p->array.invert();
 	return *this;
 }
 
 void Array::push_front(const Variant &p_value) {
 
-	_p->array.insert(0, p_value);
+	_p->array.insert(_p->array.begin(), p_value);
 }
 
 Variant Array::pop_back() {
 
 	if (!_p->array.empty()) {
 		int n = _p->array.size() - 1;
-		Variant ret = _p->array.get(n);
+		Variant ret = _p->array[n];
 		_p->array.resize(n);
 		return ret;
 	}
@@ -408,8 +413,8 @@ Variant Array::pop_back() {
 Variant Array::pop_front() {
 
 	if (!_p->array.empty()) {
-		Variant ret = _p->array.get(0);
-		_p->array.remove(0);
+		Variant ret = _p->array[0];
+		_p->array.erase(_p->array.begin());
 		return ret;
 	}
 	return Variant();
@@ -462,7 +467,7 @@ Variant Array::max() const {
 }
 
 const void *Array::id() const {
-	return _p->array.ptr();
+	return _p->array.data();
 }
 
 Array::Array(const Array &p_from) {
