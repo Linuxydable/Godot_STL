@@ -51,17 +51,17 @@ class FileAccessCompressed : public FileAccess {
 		int offset;
 	};
 
-	mutable Vector<uint8_t> comp_buffer;
+	mutable std::vector<uint8_t> comp_buffer;
 	uint8_t *read_ptr;
 	mutable int read_block;
 	int read_block_count;
 	mutable int read_block_size;
 	mutable int read_pos;
-	Vector<ReadBlock> read_blocks;
+	std::vector<ReadBlock> read_blocks;
 	uint32_t read_total;
 
 	String magic;
-	mutable Vector<uint8_t> buffer;
+	mutable std::vector<uint8_t> buffer;
 	FileAccess *f;
 
 public:
