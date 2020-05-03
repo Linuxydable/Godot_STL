@@ -43,12 +43,12 @@ WSLServer::PendingPeer::PendingPeer() {
 	memset(req_buf, 0, sizeof(req_buf));
 }
 
-bool WSLServer::PendingPeer::_parse_request(const Vector<String> p_protocols) {
-	Vector<String> psa = String((char *)req_buf).split("\r\n");
+bool WSLServer::PendingPeer::_parse_request(const std::vector<String> p_protocols) {
+	std::vector<String> psa = String((char *)req_buf).split("\r\n");
 	int len = psa.size();
 	ERR_FAIL_COND_V_MSG(len < 4, false, "Not enough response headers, got: " + itos(len) + ", expected >= 4.");
 
-	Vector<String> req = psa[0].split(" ", false);
+	std::vector<String> req = psa[0].split(" ", false);
 	ERR_FAIL_COND_V_MSG(req.size() < 2, false, "Invalid protocol or status code.");
 
 	// Wrong protocol
@@ -56,7 +56,7 @@ bool WSLServer::PendingPeer::_parse_request(const Vector<String> p_protocols) {
 
 	Map<String, String> headers;
 	for (int i = 1; i < len; i++) {
-		Vector<String> header = psa[i].split(":", false, 1);
+		std::vector<String> header = psa[i].split(":", false, 1);
 		ERR_FAIL_COND_V_MSG(header.size() != 2, false, "Invalid header -> " + psa[i]);
 		String name = header[0].to_lower();
 		String value = header[1].strip_edges();
@@ -78,7 +78,7 @@ bool WSLServer::PendingPeer::_parse_request(const Vector<String> p_protocols) {
 #undef _WSL_CHECK
 	key = headers["sec-websocket-key"];
 	if (headers.has("sec-websocket-protocol")) {
-		Vector<String> protos = headers["sec-websocket-protocol"].split(",");
+		std::vector<String> protos = headers["sec-websocket-protocol"].split(",");
 		for (int i = 0; i < protos.size(); i++) {
 			String proto = protos[i].strip_edges();
 			// Check if we have the given protocol
@@ -99,7 +99,7 @@ bool WSLServer::PendingPeer::_parse_request(const Vector<String> p_protocols) {
 	return true;
 }
 
-Error WSLServer::PendingPeer::do_handshake(const Vector<String> p_protocols) {
+Error WSLServer::PendingPeer::do_handshake(const std::vector<String> p_protocols) {
 	if (OS::get_singleton()->get_ticks_msec() - time > WSL_SERVER_TIMEOUT)
 		return ERR_TIMEOUT;
 	if (use_ssl) {
@@ -155,13 +155,13 @@ Error WSLServer::PendingPeer::do_handshake(const Vector<String> p_protocols) {
 	return OK;
 }
 
-Error WSLServer::listen(int p_port, const Vector<String> p_protocols, bool gd_mp_api) {
+Error WSLServer::listen(int p_port, const std::vector<String> p_protocols, bool gd_mp_api) {
 	ERR_FAIL_COND_V(is_listening(), ERR_ALREADY_IN_USE);
 
 	_is_multiplayer = gd_mp_api;
 	// Strip edges from protocols.
 	_protocols.resize(p_protocols.size());
-	String *pw = _protocols.ptrw();
+	String *pw = _protocols.data();
 	for (int i = 0; i < p_protocols.size(); i++) {
 		pw[i] = p_protocols[i].strip_edges();
 	}
