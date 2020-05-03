@@ -205,7 +205,7 @@ void SurfaceTool::add_uv2(const Vector2 &p_uv2) {
 	last_uv2 = p_uv2;
 }
 
-void SurfaceTool::add_bones(const Vector<int> &p_bones) {
+void SurfaceTool::add_bones(const std::vector<int> &p_bones) {
 
 	ERR_FAIL_COND(!begun);
 	ERR_FAIL_COND(!first && !(format & Mesh::ARRAY_FORMAT_BONES));
@@ -214,7 +214,7 @@ void SurfaceTool::add_bones(const Vector<int> &p_bones) {
 	last_bones = p_bones;
 }
 
-void SurfaceTool::add_weights(const Vector<float> &p_weights) {
+void SurfaceTool::add_weights(const std::vector<float> &p_weights) {
 
 	ERR_FAIL_COND(!begun);
 	ERR_FAIL_COND(!first && !(format & Mesh::ARRAY_FORMAT_WEIGHTS));
@@ -234,7 +234,7 @@ void SurfaceTool::add_smooth_group(bool p_smooth) {
 	}
 }
 
-void SurfaceTool::add_triangle_fan(const Vector<Vector3> &p_vertices, const Vector<Vector2> &p_uvs, const Vector<Color> &p_colors, const Vector<Vector2> &p_uv2s, const Vector<Vector3> &p_normals, const Vector<Plane> &p_tangents) {
+void SurfaceTool::add_triangle_fan(const std::vector<Vector3> &p_vertices, const std::vector<Vector2> &p_uvs, const std::vector<Color> &p_colors, const std::vector<Vector2> &p_uv2s, const std::vector<Vector3> &p_normals, const std::vector<Plane> &p_tangents) {
 	ERR_FAIL_COND(!begun);
 	ERR_FAIL_COND(primitive != Mesh::PRIMITIVE_TRIANGLES);
 	ERR_FAIL_COND(p_vertices.size() < 3);
@@ -507,12 +507,12 @@ void SurfaceTool::deindex() {
 
 	if (index_array.size() == 0)
 		return; //nothing to deindex
-	Vector<Vertex> varr;
+	std::vector<Vertex> varr;
 	varr.resize(vertex_array.size());
 	int idx = 0;
 	for (List<Vertex>::Element *E = vertex_array.front(); E; E = E->next()) {
 
-		varr.write[idx++] = E->get();
+		varr[idx++] = E->get();
 	}
 	vertex_array.clear();
 	for (List<int>::Element *E = index_array.front(); E; E = E->next()) {
@@ -531,9 +531,9 @@ void SurfaceTool::_create_list(const Ref<Mesh> &p_existing, int p_surface, List<
 	_create_list_from_arrays(arr, r_vertex, r_index, lformat);
 }
 
-Vector<SurfaceTool::Vertex> SurfaceTool::create_vertex_array_from_triangle_arrays(const Array &p_arrays) {
+std::vector<SurfaceTool::Vertex> SurfaceTool::create_vertex_array_from_triangle_arrays(const Array &p_arrays) {
 
-	Vector<SurfaceTool::Vertex> ret;
+	std::vector<SurfaceTool::Vertex> ret;
 
 	PoolVector<Vector3> varr = p_arrays[VS::ARRAY_VERTEX];
 	PoolVector<Vector3> narr = p_arrays[VS::ARRAY_NORMAL];
@@ -614,21 +614,21 @@ Vector<SurfaceTool::Vertex> SurfaceTool::create_vertex_array_from_triangle_array
 		if (lformat & VS::ARRAY_FORMAT_TEX_UV2)
 			v.uv2 = uv2arr[i];
 		if (lformat & VS::ARRAY_FORMAT_BONES) {
-			Vector<int> b;
+			std::vector<int> b;
 			b.resize(4);
-			b.write[0] = barr[i * 4 + 0];
-			b.write[1] = barr[i * 4 + 1];
-			b.write[2] = barr[i * 4 + 2];
-			b.write[3] = barr[i * 4 + 3];
+			b[0] = barr[i * 4 + 0];
+			b[1] = barr[i * 4 + 1];
+			b[2] = barr[i * 4 + 2];
+			b[3] = barr[i * 4 + 3];
 			v.bones = b;
 		}
 		if (lformat & VS::ARRAY_FORMAT_WEIGHTS) {
-			Vector<float> w;
+			std::vector<float> w;
 			w.resize(4);
-			w.write[0] = warr[i * 4 + 0];
-			w.write[1] = warr[i * 4 + 1];
-			w.write[2] = warr[i * 4 + 2];
-			w.write[3] = warr[i * 4 + 3];
+			w[0] = warr[i * 4 + 0];
+			w[1] = warr[i * 4 + 1];
+			w[2] = warr[i * 4 + 2];
+			w[3] = warr[i * 4 + 3];
 			v.weights = w;
 		}
 
@@ -719,21 +719,21 @@ void SurfaceTool::_create_list_from_arrays(Array arr, List<Vertex> *r_vertex, Li
 		if (lformat & VS::ARRAY_FORMAT_TEX_UV2)
 			v.uv2 = uv2arr[i];
 		if (lformat & VS::ARRAY_FORMAT_BONES) {
-			Vector<int> b;
+			std::vector<int> b;
 			b.resize(4);
-			b.write[0] = barr[i * 4 + 0];
-			b.write[1] = barr[i * 4 + 1];
-			b.write[2] = barr[i * 4 + 2];
-			b.write[3] = barr[i * 4 + 3];
+			b[0] = barr[i * 4 + 0];
+			b[1] = barr[i * 4 + 1];
+			b[2] = barr[i * 4 + 2];
+			b[3] = barr[i * 4 + 3];
 			v.bones = b;
 		}
 		if (lformat & VS::ARRAY_FORMAT_WEIGHTS) {
-			Vector<float> w;
+			std::vector<float> w;
 			w.resize(4);
-			w.write[0] = warr[i * 4 + 0];
-			w.write[1] = warr[i * 4 + 1];
-			w.write[2] = warr[i * 4 + 2];
-			w.write[3] = warr[i * 4 + 3];
+			w[0] = warr[i * 4 + 0];
+			w[1] = warr[i * 4 + 1];
+			w[2] = warr[i * 4 + 2];
+			w[3] = warr[i * 4 + 3];
 			v.weights = w;
 		}
 
@@ -831,8 +831,8 @@ void SurfaceTool::append_from(const Ref<Mesh> &p_existing, int p_surface, const 
 //mikktspace callbacks
 namespace {
 struct TangentGenerationContextUserData {
-	Vector<List<SurfaceTool::Vertex>::Element *> vertices;
-	Vector<List<int>::Element *> indices;
+	std::vector<List<SurfaceTool::Vertex>::Element *> vertices;
+	std::vector<List<int>::Element *> indices;
 };
 } // namespace
 
@@ -943,14 +943,14 @@ void SurfaceTool::generate_tangents() {
 	triangle_data.vertices.resize(vertex_array.size());
 	int idx = 0;
 	for (List<Vertex>::Element *E = vertex_array.front(); E; E = E->next()) {
-		triangle_data.vertices.write[idx++] = E;
+		triangle_data.vertices[idx++] = E;
 		E->get().binormal = Vector3();
 		E->get().tangent = Vector3();
 	}
 	triangle_data.indices.resize(index_array.size());
 	idx = 0;
 	for (List<int>::Element *E = index_array.front(); E; E = E->next()) {
-		triangle_data.indices.write[idx++] = E;
+		triangle_data.indices[idx++] = E;
 	}
 	msc.m_pUserData = &triangle_data;
 
@@ -1077,7 +1077,7 @@ void SurfaceTool::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_weights", "weights"), &SurfaceTool::add_weights);
 	ClassDB::bind_method(D_METHOD("add_smooth_group", "smooth"), &SurfaceTool::add_smooth_group);
 
-	ClassDB::bind_method(D_METHOD("add_triangle_fan", "vertices", "uvs", "colors", "uv2s", "normals", "tangents"), &SurfaceTool::add_triangle_fan, DEFVAL(Vector<Vector2>()), DEFVAL(Vector<Color>()), DEFVAL(Vector<Vector2>()), DEFVAL(Vector<Vector3>()), DEFVAL(Vector<Plane>()));
+	ClassDB::bind_method(D_METHOD("add_triangle_fan", "vertices", "uvs", "colors", "uv2s", "normals", "tangents"), &SurfaceTool::add_triangle_fan, DEFVAL(std::vector<Vector2>()), DEFVAL(std::vector<Color>()), DEFVAL(std::vector<Vector2>()), DEFVAL(std::vector<Vector3>()), DEFVAL(std::vector<Plane>()));
 
 	ClassDB::bind_method(D_METHOD("add_index", "index"), &SurfaceTool::add_index);
 
