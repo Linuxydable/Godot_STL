@@ -80,7 +80,7 @@ std::vector<StringName> MethodBind::get_argument_names() const {
 
 #endif
 
-void MethodBind::set_default_arguments(const Vector<Variant> &p_defargs) {
+void MethodBind::set_default_arguments(const std::vector<Variant> &p_defargs) {
 	default_arguments = p_defargs;
 	default_argument_count = default_arguments.size();
 }
