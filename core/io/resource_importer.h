@@ -33,6 +33,8 @@
 
 #include "core/io/resource_loader.h"
 
+#include <helper/std_h.h>
+
 class ResourceImporter;
 
 class ResourceFormatImporter : public ResourceFormatLoader {
@@ -82,11 +84,8 @@ public:
 	}
 
 	void remove_importer(const Ref<ResourceImporter> &p_importer) {
-		auto it_find = std::find(importers.begin(), importers.end(), p_importer);
 
-		if (it_find != importers.end()) {
-			importers.erase(it_find);
-		}
+		std_h::erase(importers, p_importer);
 	}
 
 	Ref<ResourceImporter> get_importer_by_name(const String &p_name) const;
