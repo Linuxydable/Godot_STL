@@ -567,9 +567,6 @@
     <Filter Include="Source Files\drivers\alsamidi">
       <UniqueIdentifier>{820EA84F-CF6D-4432-5BE9-845FD9DF134B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\drivers\coreaudio">
-      <UniqueIdentifier>{B659FC6B-524E-3FF2-F986-0DB79233E18C}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\drivers\coremidi">
       <UniqueIdentifier>{A9D75B1F-59EB-0163-54DD-E0A9B31A2FF1}</UniqueIdentifier>
     </Filter>
@@ -1477,9 +1474,6 @@
     </ClInclude>
     <ClInclude Include="drivers\alsamidi\midi_driver_alsamidi.h">
       <Filter>Header Files\drivers\alsamidi</Filter>
-    </ClInclude>
-    <ClInclude Include="drivers\coreaudio\audio_driver_coreaudio.h">
-      <Filter>Header Files\drivers\coreaudio</Filter>
     </ClInclude>
     <ClInclude Include="drivers\coremidi\midi_driver_coremidi.h">
       <Filter>Header Files\drivers\coremidi</Filter>
@@ -4667,6 +4661,9 @@
     <ClInclude Include="helper\std_h.h">
       <Filter>Header Files\helper</Filter>
     </ClInclude>
+    <ClInclude Include="drivers\coreaudio\audio_driver_coreaudio.h">
+      <Filter>Header Files\drivers\coreaudio</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="core\bind\core_bind.cpp">
@@ -5022,9 +5019,6 @@
     </ClCompile>
     <ClCompile Include="drivers\alsamidi\midi_driver_alsamidi.cpp">
       <Filter>Source Files\drivers\alsamidi</Filter>
-    </ClCompile>
-    <ClCompile Include="drivers\coreaudio\audio_driver_coreaudio.cpp">
-      <Filter>Source Files\drivers\coreaudio</Filter>
     </ClCompile>
     <ClCompile Include="drivers\coremidi\midi_driver_coremidi.cpp">
       <Filter>Source Files\drivers\coremidi</Filter>
@@ -9552,6 +9546,9 @@
     </ClCompile>
     <ClCompile Include="main\tests\test_string.cpp">
       <Filter>Header Files\main\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="drivers\coreaudio\audio_driver_coreaudio.cpp">
+      <Filter>Header Files\drivers\coreaudio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
