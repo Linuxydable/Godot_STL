@@ -37,6 +37,11 @@ namespace std_h {
 		}
 		return -1;
 	}
+
+	template <typename T>
+	static void appendArray(std::vector<T> &v1, std::vector<T> &v2) {
+		v1.insert(v1.end(), v2.begin(), v2.end());
+	}
 }
 
 #endif // !STD_H
