@@ -154,7 +154,7 @@ void VisualScriptPropertySelector::_update_search() {
 				if (!(F->get().usage & PROPERTY_USAGE_EDITOR) && !(F->get().usage & PROPERTY_USAGE_SCRIPT_VARIABLE))
 					continue;
 
-				if (type_filter.size() && type_filter.find(F->get().type) == -1)
+				if (type_filter.size() && !std_h::isFind(type_filter, F->get().type))
 					continue;
 
 				// capitalize() also converts underscore to space, we'll match again both possible styles
