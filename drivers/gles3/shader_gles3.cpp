@@ -547,7 +547,7 @@ ShaderGLES3::Version *ShaderGLES3::get_current_version() {
 		v.texture_uniform_locations.resize(cc->texture_uniforms.size());
 		for (int i = 0; i < cc->texture_uniforms.size(); i++) {
 
-			v.texture_uniform_locations.write[i] = glGetUniformLocation(v.id, String(cc->texture_uniforms[i]).ascii().get_data());
+			v.texture_uniform_locations[i] = glGetUniformLocation(v.id, String(cc->texture_uniforms[i]).ascii().get_data());
 			glUniform1i(v.texture_uniform_locations[i], i + base_material_tex_index);
 		}
 	}
@@ -716,7 +716,7 @@ uint32_t ShaderGLES3::create_custom_shader() {
 	return last_custom_code++;
 }
 
-void ShaderGLES3::set_custom_shader_code(uint32_t p_code_id, const String &p_vertex, const String &p_vertex_globals, const String &p_fragment, const String &p_light, const String &p_fragment_globals, const String &p_uniforms, const Vector<StringName> &p_texture_uniforms, const Vector<CharString> &p_custom_defines) {
+void ShaderGLES3::set_custom_shader_code(uint32_t p_code_id, const String &p_vertex, const String &p_vertex_globals, const String &p_fragment, const String &p_light, const String &p_fragment_globals, const String &p_uniforms, const std::vector<StringName> &p_texture_uniforms, const std::vector<CharString> &p_custom_defines) {
 
 	ERR_FAIL_COND(!custom_code_map.has(p_code_id));
 	CustomCode *cc = &custom_code_map[p_code_id];
