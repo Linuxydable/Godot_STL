@@ -52,10 +52,10 @@ typedef HashMap<String, const lsp::DocumentSymbol *> ClassMembers;
 class ExtendGDScriptParser : public GDScriptParser {
 
 	String path;
-	Vector<String> lines;
+	std::vector<String> lines;
 
 	lsp::DocumentSymbol class_symbol;
-	Vector<lsp::Diagnostic> diagnostics;
+	std::vector<lsp::Diagnostic> diagnostics;
 	List<lsp::DocumentLink> document_links;
 	ClassMembers members;
 	HashMap<String, ClassMembers> inner_classes;
@@ -77,9 +77,9 @@ class ExtendGDScriptParser : public GDScriptParser {
 
 public:
 	_FORCE_INLINE_ const String &get_path() const { return path; }
-	_FORCE_INLINE_ const Vector<String> &get_lines() const { return lines; }
+	_FORCE_INLINE_ const std::vector<String> &get_lines() const { return lines; }
 	_FORCE_INLINE_ const lsp::DocumentSymbol &get_symbols() const { return class_symbol; }
-	_FORCE_INLINE_ const Vector<lsp::Diagnostic> &get_diagnostics() const { return diagnostics; }
+	_FORCE_INLINE_ const std::vector<lsp::Diagnostic> &get_diagnostics() const { return diagnostics; }
 	_FORCE_INLINE_ const ClassMembers &get_members() const { return members; }
 	_FORCE_INLINE_ const HashMap<String, ClassMembers> &get_inner_classes() const { return inner_classes; }
 
