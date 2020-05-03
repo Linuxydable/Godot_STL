@@ -286,10 +286,10 @@ void CSGShape::_update_shape() {
 
 	OAHashMap<Vector3, Vector3> vec_map;
 
-	Vector<int> face_count;
+	std::vector<int> face_count;
 	face_count.resize(n->materials.size() + 1);
 	for (int i = 0; i < face_count.size(); i++) {
-		face_count.write[i] = 0;
+		face_count[i] = 0;
 	}
 
 	for (int i = 0; i < n->faces.size(); i++) {
@@ -313,30 +313,30 @@ void CSGShape::_update_shape() {
 		face_count.write[idx]++;
 	}
 
-	Vector<ShapeUpdateSurface> surfaces;
+	std::vector<ShapeUpdateSurface> surfaces;
 
 	surfaces.resize(face_count.size());
 
 	//create arrays
 	for (int i = 0; i < surfaces.size(); i++) {
 
-		surfaces.write[i].vertices.resize(face_count[i] * 3);
-		surfaces.write[i].normals.resize(face_count[i] * 3);
-		surfaces.write[i].uvs.resize(face_count[i] * 3);
+		surfaces[i].vertices.resize(face_count[i] * 3);
+		surfaces[i].normals.resize(face_count[i] * 3);
+		surfaces[i].uvs.resize(face_count[i] * 3);
 		if (calculate_tangents) {
-			surfaces.write[i].tans.resize(face_count[i] * 3 * 4);
+			surfaces[i].tans.resize(face_count[i] * 3 * 4);
 		}
-		surfaces.write[i].last_added = 0;
+		surfaces[i].last_added = 0;
 
 		if (i != surfaces.size() - 1) {
-			surfaces.write[i].material = n->materials[i];
+			surfaces[i].material = n->materials[i];
 		}
 
-		surfaces.write[i].verticesw = surfaces.write[i].vertices.write();
-		surfaces.write[i].normalsw = surfaces.write[i].normals.write();
-		surfaces.write[i].uvsw = surfaces.write[i].uvs.write();
+		surfaces[i].verticesw = surfaces[i].vertices.write();
+		surfaces[i].normalsw = surfaces[i].normals.write();
+		surfaces[i].uvsw = surfaces[i].uvs.write();
 		if (calculate_tangents) {
-			surfaces.write[i].tansw = surfaces.write[i].tans.write();
+			surfaces[i].tansw = surfaces[i].tans.write();
 		}
 	}
 
@@ -1772,13 +1772,13 @@ CSGBrush *CSGPolygon::_build_brush() {
 	if (polygon.size() < 3)
 		return NULL;
 
-	Vector<Point2> final_polygon = polygon;
+	std::vector<Point2> final_polygon = polygon;
 
 	if (Triangulate::get_area(final_polygon) > 0) {
-		final_polygon.invert();
+		std::reverse(final_polygon.begin(), final_polygon.end());
 	}
 
-	Vector<int> triangles = Geometry::triangulate_polygon(final_polygon);
+	std::vector<int> triangles = Geometry::triangulate_polygon(final_polygon);
 
 	if (triangles.size() < 3)
 		return NULL;
@@ -2339,13 +2339,13 @@ void CSGPolygon::_bind_methods() {
 	BIND_ENUM_CONSTANT(PATH_ROTATION_PATH_FOLLOW);
 }
 
-void CSGPolygon::set_polygon(const Vector<Vector2> &p_polygon) {
+void CSGPolygon::set_polygon(const std::vector<Vector2> &p_polygon) {
 	polygon = p_polygon;
 	_make_dirty();
 	update_gizmo();
 }
 
-Vector<Vector2> CSGPolygon::get_polygon() const {
+std::vector<Vector2> CSGPolygon::get_polygon() const {
 	return polygon;
 }
 
