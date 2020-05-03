@@ -273,8 +273,8 @@ Ref<RegExMatch> RegEx::search(const String &p_subject, int p_offset, int p_end) 
 
 		for (uint32_t i = 0; i < size; i++) {
 
-			result->data.write[i].start = ovector[i * 2];
-			result->data.write[i].end = ovector[i * 2 + 1];
+			result->data[i].start = ovector[i * 2];
+			result->data[i].end = ovector[i * 2 + 1];
 		}
 
 		pcre2_match_data_free_16(match);
@@ -305,8 +305,8 @@ Ref<RegExMatch> RegEx::search(const String &p_subject, int p_offset, int p_end) 
 
 		for (uint32_t i = 0; i < size; i++) {
 
-			result->data.write[i].start = ovector[i * 2];
-			result->data.write[i].end = ovector[i * 2 + 1];
+			result->data[i].start = ovector[i * 2];
+			result->data[i].end = ovector[i * 2 + 1];
 		}
 
 		pcre2_match_data_free_32(match);
@@ -382,7 +382,7 @@ String RegEx::sub(const String &p_subject, const String &p_replacement, bool p_a
 		pcre2_match_context_16 *mctx = pcre2_match_context_create_16(gctx);
 		PCRE2_SPTR16 s = (PCRE2_SPTR16)p_subject.c_str();
 		PCRE2_SPTR16 r = (PCRE2_SPTR16)p_replacement.c_str();
-		PCRE2_UCHAR16 *o = (PCRE2_UCHAR16 *)output.ptrw();
+		PCRE2_UCHAR16 *o = (PCRE2_UCHAR16 *)output.data();
 
 		pcre2_match_data_16 *match = pcre2_match_data_create_from_pattern_16(c, gctx);
 
@@ -390,7 +390,7 @@ String RegEx::sub(const String &p_subject, const String &p_replacement, bool p_a
 
 		if (res == PCRE2_ERROR_NOMEMORY) {
 			output.resize(olength + safety_zone);
-			o = (PCRE2_UCHAR16 *)output.ptrw();
+			o = (PCRE2_UCHAR16 *)output.data();
 			res = pcre2_substitute_16(c, s, length, p_offset, flags, match, mctx, r, p_replacement.length(), o, &olength);
 		}
 
@@ -407,7 +407,7 @@ String RegEx::sub(const String &p_subject, const String &p_replacement, bool p_a
 		pcre2_match_context_32 *mctx = pcre2_match_context_create_32(gctx);
 		PCRE2_SPTR32 s = (PCRE2_SPTR32)p_subject.c_str();
 		PCRE2_SPTR32 r = (PCRE2_SPTR32)p_replacement.c_str();
-		PCRE2_UCHAR32 *o = (PCRE2_UCHAR32 *)output.ptrw();
+		PCRE2_UCHAR32 *o = (PCRE2_UCHAR32 *)output.data();
 
 		pcre2_match_data_32 *match = pcre2_match_data_create_from_pattern_32(c, gctx);
 
@@ -415,7 +415,7 @@ String RegEx::sub(const String &p_subject, const String &p_replacement, bool p_a
 
 		if (res == PCRE2_ERROR_NOMEMORY) {
 			output.resize(olength + safety_zone);
-			o = (PCRE2_UCHAR32 *)output.ptrw();
+			o = (PCRE2_UCHAR32 *)output.data();
 			res = pcre2_substitute_32(c, s, length, p_offset, flags, match, mctx, r, p_replacement.length(), o, &olength);
 		}
 
@@ -426,7 +426,7 @@ String RegEx::sub(const String &p_subject, const String &p_replacement, bool p_a
 			return String();
 	}
 
-	return String(output.ptr(), olength);
+	return String(output.data(), olength);
 }
 
 bool RegEx::is_valid() const {
