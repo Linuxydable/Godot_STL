@@ -237,7 +237,7 @@ int UPNP::get_device_count() const {
 Ref<UPNPDevice> UPNP::get_device(int index) const {
 	ERR_FAIL_INDEX_V(index, devices.size(), NULL);
 
-	return devices.get(index);
+	return devices[index];
 }
 
 void UPNP::add_device(Ref<UPNPDevice> device) {
@@ -250,13 +250,13 @@ void UPNP::set_device(int index, Ref<UPNPDevice> device) {
 	ERR_FAIL_INDEX(index, devices.size());
 	ERR_FAIL_COND(device == NULL);
 
-	devices.set(index, device);
+	devices[index] = device;
 }
 
 void UPNP::remove_device(int index) {
 	ERR_FAIL_INDEX(index, devices.size());
 
-	devices.remove(index);
+	devices.erase(devices.begin() + index);
 }
 
 void UPNP::clear_devices() {
