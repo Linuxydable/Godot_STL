@@ -390,7 +390,7 @@ struct NaturalNoCaseComparator {
 
 		return p_a.naturalnocasecmp_to(p_b) < 0;
 	}
-};
+} NaturalNoCaseComparator;
 
 template <typename L, typename R>
 _FORCE_INLINE_ bool is_str_less(const L *l_ptr, const R *r_ptr) {
