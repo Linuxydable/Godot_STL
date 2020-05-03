@@ -285,7 +285,7 @@ Array NavigationMesh::_get_polygons() const {
 	return ret;
 }
 
-void NavigationMesh::add_polygon(const Vector<int> &p_polygon) {
+void NavigationMesh::add_polygon(const std::vector<int> &p_polygon) {
 
 	Polygon polygon;
 	polygon.indices = p_polygon;
@@ -296,9 +296,9 @@ int NavigationMesh::get_polygon_count() const {
 
 	return polygons.size();
 }
-Vector<int> NavigationMesh::get_polygon(int p_idx) {
+std::vector<int> NavigationMesh::get_polygon(int p_idx) {
 
-	ERR_FAIL_INDEX_V(p_idx, polygons.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_idx, polygons.size(), std::vector<int>());
 	return polygons[p_idx].indices;
 }
 void NavigationMesh::clear_polygons() {
@@ -315,7 +315,7 @@ Ref<Mesh> NavigationMesh::get_debug_mesh() {
 	PoolVector<Vector3>::Read vr = vertices.read();
 	List<Face3> faces;
 	for (int i = 0; i < get_polygon_count(); i++) {
-		Vector<int> p = get_polygon(i);
+		std::vector<int> p = get_polygon(i);
 
 		for (int j = 2; j < p.size(); j++) {
 			Face3 f;
