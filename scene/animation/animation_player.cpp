@@ -116,11 +116,19 @@ bool AnimationPlayer::_get(const StringName &p_name, Variant &r_ret) const {
 
 	} else if (name == "blend_times") {
 
-		Vector<BlendKey> keys;
+		std::vector<BlendKey> keys;
+
+		keys.reserve(blend_times.size());
+
 		for (Map<BlendKey, float>::Element *E = blend_times.front(); E; E = E->next()) {
 
-			keys.ordered_insert(E->key());
+			// need_update : maybe use std::set
+			//keys.ordered_insert(E->key());
+
+			keys.push_back(E->key());
 		}
+
+		std::sort(keys.begin(), keys.end());
 
 		Array array;
 		for (int i = 0; i < keys.size(); i++) {
@@ -244,9 +252,9 @@ void AnimationPlayer::_ensure_node_caches(AnimationData *p_anim) {
 
 	for (int i = 0; i < a->get_track_count(); i++) {
 
-		p_anim->node_cache.write[i] = NULL;
+		p_anim->node_cache[i] = NULL;
 		RES resource;
-		Vector<StringName> leftover_path;
+		std::vector<StringName> leftover_path;
 		Node *child = parent->get_node_and_resource(a->track_get_path(i), resource, leftover_path);
 		ERR_CONTINUE_MSG(!child, "On Animation: '" + p_anim->name + "', couldn't resolve track:  '" + String(a->track_get_path(i)) + "'."); // couldn't find the child node
 		uint32_t id = resource.is_valid() ? resource->get_instance_id() : child->get_instance_id();
@@ -274,7 +282,7 @@ void AnimationPlayer::_ensure_node_caches(AnimationData *p_anim) {
 		if (!node_cache_map.has(key))
 			node_cache_map[key] = TrackNodeCache();
 
-		p_anim->node_cache.write[i] = &node_cache_map[key];
+		p_anim->node_cache[i] = &node_cache_map[key];
 		p_anim->node_cache[i]->path = a->track_get_path(i);
 		p_anim->node_cache[i]->node = child;
 		p_anim->node_cache[i]->resource = resource;
@@ -546,7 +554,7 @@ void AnimationPlayer::_animation_process_animation(AnimationData *p_anim, float 
 				for (List<int>::Element *E = indices.front(); E; E = E->next()) {
 
 					StringName method = a->method_track_get_name(i, E->get());
-					Vector<Variant> params = a->method_track_get_params(i, E->get());
+					std::vector<Variant> params = a->method_track_get_params(i, E->get());
 
 					int s = params.size();
 
