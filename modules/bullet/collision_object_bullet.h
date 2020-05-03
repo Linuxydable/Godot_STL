@@ -132,7 +132,7 @@ protected:
 	/// This array is used to know all areas where this Object is overlapped in
 	/// New area is added when overlap with new area (AreaBullet::addOverlap), then is removed when it exit (CollisionObjectBullet::onExitArea)
 	/// This array is used mainly to know which area hold the pointer of this object
-	Vector<AreaBullet *> areasOverlapped;
+	std::vector<AreaBullet *> areasOverlapped;
 	bool isTransformChanged;
 
 public:
@@ -219,13 +219,13 @@ public:
 class RigidCollisionObjectBullet : public CollisionObjectBullet, public ShapeOwnerBullet {
 protected:
 	btCollisionShape *mainShape;
-	Vector<ShapeWrapper> shapes;
+	std::vector<ShapeWrapper> shapes;
 
 public:
 	RigidCollisionObjectBullet(Type p_type);
 	~RigidCollisionObjectBullet();
 
-	_FORCE_INLINE_ const Vector<ShapeWrapper> &get_shapes_wrappers() const { return shapes; }
+	_FORCE_INLINE_ const std::vector<ShapeWrapper> &get_shapes_wrappers() const { return shapes; }
 
 	_FORCE_INLINE_ btCollisionShape *get_main_shape() const { return mainShape; }
 
