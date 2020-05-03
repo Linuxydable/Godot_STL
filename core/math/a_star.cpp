@@ -30,6 +30,8 @@
 
 #include "a_star.h"
 
+#include "helper/std_h.h"
+
 #include "core/math/geometry.h"
 #include "core/script_language.h"
 #include "scene/scene_string_names.h"
@@ -344,7 +346,7 @@ bool AStar::_solve(Point *begin_point, Point *end_point) {
 
 	bool found_route = false;
 
-	Vector<Point *> open_list;
+	std::vector<Point *> open_list;
 	SortArray<Point *, SortPoints> sorter;
 
 	begin_point->g_score = 0;
@@ -360,8 +362,8 @@ bool AStar::_solve(Point *begin_point, Point *end_point) {
 			break;
 		}
 
-		sorter.pop_heap(0, open_list.size(), open_list.ptrw()); // Remove the current point from the open list
-		open_list.remove(open_list.size() - 1);
+		sorter.pop_heap(0, open_list.size(), open_list.data()); // Remove the current point from the open list
+		open_list.erase(open_list.begin() + open_list.size() - 1);
 		p->closed_pass = pass; // Mark the point as closed
 
 		for (OAHashMap<int, Point *>::Iterator it = p->neighbours.iter(); it.valid; it = p->neighbours.next_iter(it)) {
@@ -389,9 +391,9 @@ bool AStar::_solve(Point *begin_point, Point *end_point) {
 			e->f_score = e->g_score + _estimate_cost(e->id, end_point->id);
 
 			if (new_point) { // The position of the new points is already known.
-				sorter.push_heap(0, open_list.size() - 1, 0, e, open_list.ptrw());
+				sorter.push_heap(0, open_list.size() - 1, 0, e, open_list.data());
 			} else {
-				sorter.push_heap(0, open_list.find(e), 0, e, open_list.ptrw());
+				sorter.push_heap(0, std_h::getIndex(open_list, e), 0, e, open_list.data());
 			}
 		}
 	}
@@ -813,7 +815,7 @@ bool AStar2D::_solve(AStar::Point *begin_point, AStar::Point *end_point) {
 
 	bool found_route = false;
 
-	Vector<AStar::Point *> open_list;
+	std::vector<AStar::Point *> open_list;
 	SortArray<AStar::Point *, AStar::SortPoints> sorter;
 
 	begin_point->g_score = 0;
@@ -829,8 +831,8 @@ bool AStar2D::_solve(AStar::Point *begin_point, AStar::Point *end_point) {
 			break;
 		}
 
-		sorter.pop_heap(0, open_list.size(), open_list.ptrw()); // Remove the current point from the open list
-		open_list.remove(open_list.size() - 1);
+		sorter.pop_heap(0, open_list.size(), open_list.data()); // Remove the current point from the open list
+		open_list.erase(open_list.begin() + open_list.size() - 1);
 		p->closed_pass = astar.pass; // Mark the point as closed
 
 		for (OAHashMap<int, AStar::Point *>::Iterator it = p->neighbours.iter(); it.valid; it = p->neighbours.next_iter(it)) {
@@ -858,9 +860,9 @@ bool AStar2D::_solve(AStar::Point *begin_point, AStar::Point *end_point) {
 			e->f_score = e->g_score + _estimate_cost(e->id, end_point->id);
 
 			if (new_point) { // The position of the new points is already known.
-				sorter.push_heap(0, open_list.size() - 1, 0, e, open_list.ptrw());
+				sorter.push_heap(0, open_list.size() - 1, 0, e, open_list.data());
 			} else {
-				sorter.push_heap(0, open_list.find(e), 0, e, open_list.ptrw());
+				sorter.push_heap(0, std_h::getIndex(open_list, e), 0, e, open_list.data());
 			}
 		}
 	}
