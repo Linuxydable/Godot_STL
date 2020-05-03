@@ -143,7 +143,7 @@ public:
 	virtual ~EditorScriptCodeCompletionCache() {}
 };
 
-void ScriptEditorQuickOpen::popup_dialog(const Vector<String> &p_functions, bool p_dontclear) {
+void ScriptEditorQuickOpen::popup_dialog(const std::vector<String> &p_functions, bool p_dontclear) {
 
 	popup_centered_ratio(0.6);
 	if (p_dontclear)
@@ -2936,7 +2936,7 @@ void ScriptEditor::_history_back() {
 	}
 }
 
-Vector<Ref<Script> > ScriptEditor::get_open_scripts() const {
+std::vector<Ref<Script> > ScriptEditor::get_open_scripts() const {
 
 	Vector<Ref<Script> > out_scripts = Vector<Ref<Script> >();
 
