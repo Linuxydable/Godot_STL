@@ -219,10 +219,10 @@ void EditorProfiler::_update_plot() {
 		highest *= 1.2; //leave some upper room
 		graph_height = highest;
 
-		Vector<int> columnv;
+		std::vector<int> columnv;
 		columnv.resize(h * 4);
 
-		int *column = columnv.ptrw();
+		int *column = columnv.data();
 
 		Map<StringName, int> plot_prev;
 		//Map<StringName,int> plot_max;
@@ -624,16 +624,16 @@ bool EditorProfiler::is_profiling() {
 	return activate->is_pressed();
 }
 
-Vector<Vector<String> > EditorProfiler::get_data_as_csv() const {
-	Vector<Vector<String> > res;
+std::vector<std::vector<String> > EditorProfiler::get_data_as_csv() const {
+	std::vector<std::vector<String> > res;
 
 	if (frame_metrics.empty()) {
 		return res;
 	}
 
 	// signatures
-	Vector<String> signatures;
-	const Vector<EditorProfiler::Metric::Category> &categories = frame_metrics[0].categories;
+	std::vector<String> signatures;
+	const std::vector<EditorProfiler::Metric::Category> &categories = frame_metrics[0].categories;
 
 	for (int j = 0; j < categories.size(); j++) {
 
@@ -647,7 +647,7 @@ Vector<Vector<String> > EditorProfiler::get_data_as_csv() const {
 	res.push_back(signatures);
 
 	// values
-	Vector<String> values;
+	std::vector<String> values;
 	values.resize(signatures.size());
 
 	int index = last_metric;
@@ -664,15 +664,15 @@ Vector<Vector<String> > EditorProfiler::get_data_as_csv() const {
 			continue;
 		}
 		int it = 0;
-		const Vector<EditorProfiler::Metric::Category> &frame_cat = frame_metrics[index].categories;
+		const std::vector<EditorProfiler::Metric::Category> &frame_cat = frame_metrics[index].categories;
 
 		for (int j = 0; j < frame_cat.size(); j++) {
 
 			const EditorProfiler::Metric::Category &c = frame_cat[j];
-			values.write[it++] = String::num_real(c.total_time);
+			values[it++] = String::num_real(c.total_time);
 
 			for (int k = 0; k < c.items.size(); k++) {
-				values.write[it++] = String::num_real(c.items[k].total);
+				values[it++] = String::num_real(c.items[k].total);
 			}
 		}
 		res.push_back(values);
