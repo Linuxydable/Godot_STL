@@ -268,8 +268,8 @@ Error ResourceInteractiveLoaderBinary::parse_variant(Variant &r_v) {
 
 		case VARIANT_NODE_PATH: {
 
-			Vector<StringName> names;
-			Vector<StringName> subnames;
+			std::vector<StringName> names;
+			std::vector<StringName> subnames;
 			bool absolute;
 
 			int name_count = f->get_16();
@@ -788,7 +788,7 @@ static void save_ustring(FileAccess *f, const String &p_string) {
 static String get_ustring(FileAccess *f) {
 
 	int len = f->get_32();
-	Vector<char> str_buf;
+	std::vector<char> str_buf;
 	str_buf.resize(len);
 	f->get_buffer((uint8_t *)&str_buf[0], len);
 	String s;
@@ -892,7 +892,7 @@ void ResourceInteractiveLoaderBinary::open(FileAccess *p_f) {
 	for (uint32_t i = 0; i < string_table_size; i++) {
 
 		StringName s = get_unicode_string();
-		string_map.write[i] = s;
+		string_map[i] = s;
 	}
 
 	print_bl("strings: " + itos(string_table_size));
@@ -1862,11 +1862,11 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 
 	// save external resource table
 	f->store_32(external_resources.size()); //amount of external resources
-	Vector<RES> save_order;
+	std::vector<RES> save_order;
 	save_order.resize(external_resources.size());
 
 	for (Map<RES, int>::Element *E = external_resources.front(); E; E = E->next()) {
-		save_order.write[E->get()] = E->key();
+		save_order[E->get()] = E->key();
 	}
 
 	for (int i = 0; i < save_order.size(); i++) {
@@ -1878,7 +1878,7 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 	}
 	// save internal resource table
 	f->store_32(saved_resources.size()); //amount of internal resources
-	Vector<uint64_t> ofs_pos;
+	std::vector<uint64_t> ofs_pos;
 	Set<int> used_indices;
 
 	for (List<RES>::Element *E = saved_resources.front(); E; E = E->next()) {
@@ -1924,7 +1924,7 @@ Error ResourceFormatSaverBinaryInstance::save(const String &p_path, const RES &p
 		f->store_64(0); //offset in 64 bits
 	}
 
-	Vector<uint64_t> ofs_table;
+	std::vector<uint64_t> ofs_table;
 
 	//now actually save the resources
 	for (List<ResourceData>::Element *E = resources.front(); E; E = E->next()) {
