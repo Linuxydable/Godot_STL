@@ -32,7 +32,6 @@
 #define AREABULLET_H
 
 #include "collision_object_bullet.h"
-#include "core/vector.h"
 #include "servers/physics_server.h"
 #include "space_bullet.h"
 
