@@ -31,8 +31,9 @@
 #ifndef DISJOINT_SET_H
 #define DISJOINT_SET_H
 
+#include <vector>
+
 #include "core/map.h"
-#include "core/vector.h"
 
 /**
 	@author Marios Staikopoulos <marios@staik.net>
@@ -63,9 +64,9 @@ public:
 
 	void create_union(T a, T b);
 
-	void get_representatives(Vector<T> &out_roots);
+	void get_representatives(std::vector<T> &out_roots);
 
-	void get_members(Vector<T> &out_members, T representative);
+	void get_members(std::vector<T> &out_members, T representative);
 };
 
 /* FUNCTIONS */
@@ -127,7 +128,7 @@ void DisjointSet<T, C, AL>::create_union(T a, T b) {
 }
 
 template <typename T, class C, class AL>
-void DisjointSet<T, C, AL>::get_representatives(Vector<T> &out_representatives) {
+void DisjointSet<T, C, AL>::get_representatives(std::vector<T> &out_representatives) {
 	for (typename MapT::Element *itr = elements.front(); itr != nullptr; itr = itr->next()) {
 		Element *element = itr->value();
 		if (element->parent == element) {
@@ -137,7 +138,7 @@ void DisjointSet<T, C, AL>::get_representatives(Vector<T> &out_representatives) 
 }
 
 template <typename T, class C, class AL>
-void DisjointSet<T, C, AL>::get_members(Vector<T> &out_members, T representative) {
+void DisjointSet<T, C, AL>::get_members(std::vector<T> &out_members, T representative) {
 	typename MapT::Element *rep_itr = elements.find(representative);
 	ERR_FAIL_COND(rep_itr == nullptr);
 
