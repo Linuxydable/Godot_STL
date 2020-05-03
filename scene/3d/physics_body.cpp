@@ -1382,7 +1382,7 @@ Ref<KinematicCollision> KinematicBody::_get_slide_collision(int p_bounce) {
 		slide_colliders.write[p_bounce]->owner = this;
 	}
 
-	slide_colliders.write[p_bounce]->collision = colliders[p_bounce];
+	slide_colliders[p_bounce]->collision = colliders[p_bounce];
 	return slide_colliders[p_bounce];
 }
 
