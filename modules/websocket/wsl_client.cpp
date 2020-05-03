@@ -101,11 +101,11 @@ void WSLClient::_do_handshake() {
 
 bool WSLClient::_verify_headers(String &r_protocol) {
 	String s = (char *)_resp_buf;
-	Vector<String> psa = s.split("\r\n");
+	std::vector<String> psa = s.split("\r\n");
 	int len = psa.size();
 	ERR_FAIL_COND_V_MSG(len < 4, false, "Not enough response headers, got: " + itos(len) + ", expected >= 4.");
 
-	Vector<String> req = psa[0].split(" ", false);
+	std::vector<String> req = psa[0].split(" ", false);
 	ERR_FAIL_COND_V_MSG(req.size() < 2, false, "Invalid protocol or status code.");
 
 	// Wrong protocol
@@ -113,7 +113,7 @@ bool WSLClient::_verify_headers(String &r_protocol) {
 
 	Map<String, String> headers;
 	for (int i = 1; i < len; i++) {
-		Vector<String> header = psa[i].split(":", false, 1);
+		std::vector<String> header = psa[i].split(":", false, 1);
 		ERR_FAIL_COND_V_MSG(header.size() != 2, false, "Invalid header -> " + psa[i] + ".");
 		String name = header[0].to_lower();
 		String value = header[1].strip_edges();
@@ -153,7 +153,7 @@ bool WSLClient::_verify_headers(String &r_protocol) {
 	return true;
 }
 
-Error WSLClient::connect_to_host(String p_host, String p_path, uint16_t p_port, bool p_ssl, const Vector<String> p_protocols, const Vector<String> p_custom_headers) {
+Error WSLClient::connect_to_host(String p_host, String p_path, uint16_t p_port, bool p_ssl, const std::vector<String> p_protocols, const std::vector<String> p_custom_headers) {
 
 	ERR_FAIL_COND_V(_connection.is_valid(), ERR_ALREADY_IN_USE);
 
