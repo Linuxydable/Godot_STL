@@ -51,7 +51,7 @@ class CollisionObject : public Spatial {
 			int index;
 		};
 
-		Vector<ShapeBase> shapes;
+		std::vector<ShapeBase> shapes;
 		bool disabled;
 
 		ShapeData() {

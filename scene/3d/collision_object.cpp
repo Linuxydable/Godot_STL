@@ -301,7 +301,7 @@ void CollisionObject::shape_owner_remove_shape(uint32_t p_owner, int p_shape) {
 		PhysicsServer::get_singleton()->body_remove_shape(rid, index_to_remove);
 	}
 
-	shapes[p_owner].shapes.remove(p_shape);
+	shapes[p_owner].shapes.erase(shapes[p_owner].shapes.begin() + p_shape);
 
 	for (Map<uint32_t, ShapeData>::Element *E = shapes.front(); E; E = E->next()) {
 		for (int i = 0; i < E->get().shapes.size(); i++) {
