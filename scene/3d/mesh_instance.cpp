@@ -313,8 +313,8 @@ void MeshInstance::_mesh_changed() {
 
 void MeshInstance::create_debug_tangents() {
 
-	Vector<Vector3> lines;
-	Vector<Color> colors;
+	std::vector<Vector3> lines;
+	std::vector<Color> colors;
 
 	Ref<Mesh> mesh = get_mesh();
 	if (!mesh.is_valid())
@@ -322,11 +322,11 @@ void MeshInstance::create_debug_tangents() {
 
 	for (int i = 0; i < mesh->get_surface_count(); i++) {
 		Array arrays = mesh->surface_get_arrays(i);
-		Vector<Vector3> verts = arrays[Mesh::ARRAY_VERTEX];
-		Vector<Vector3> norms = arrays[Mesh::ARRAY_NORMAL];
+		std::vector<Vector3> verts = arrays[Mesh::ARRAY_VERTEX];
+		std::vector<Vector3> norms = arrays[Mesh::ARRAY_NORMAL];
 		if (norms.size() == 0)
 			continue;
-		Vector<float> tangents = arrays[Mesh::ARRAY_TANGENT];
+		std::vector<float> tangents = arrays[Mesh::ARRAY_TANGENT];
 		if (tangents.size() == 0)
 			continue;
 
