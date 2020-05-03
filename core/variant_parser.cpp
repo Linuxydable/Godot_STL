@@ -412,7 +412,7 @@ Error VariantParser::get_token(Stream *p_stream, Token &r_token, int &line, Stri
 	return ERR_PARSE_ERROR;
 }
 
-Error VariantParser::_parse_enginecfg(Stream *p_stream, Vector<String> &strings, int &line, String &r_err_str) {
+Error VariantParser::_parse_enginecfg(Stream *p_stream, std::vector<String> &strings, int &line, String &r_err_str) {
 
 	Token token;
 	get_token(p_stream, token, line, r_err_str);
@@ -445,7 +445,7 @@ Error VariantParser::_parse_enginecfg(Stream *p_stream, Vector<String> &strings,
 }
 
 template <class T>
-Error VariantParser::_parse_construct(Stream *p_stream, Vector<T> &r_construct, int &line, String &r_err_str) {
+Error VariantParser::_parse_construct(Stream *p_stream, std::vector<VariantParser::T> &r_construct, int &line, String &r_err_str) {
 
 	Token token;
 	get_token(p_stream, token, line, r_err_str);
@@ -524,7 +524,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			value = Math_NAN;
 		else if (id == "Vector2") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -537,7 +537,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			return OK;
 		} else if (id == "Rect2") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -550,7 +550,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			return OK;
 		} else if (id == "Vector3") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -563,7 +563,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			return OK;
 		} else if (id == "Transform2D" || id == "Matrix32") { //compatibility
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -579,7 +579,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			return OK;
 		} else if (id == "Plane") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -592,7 +592,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			return OK;
 		} else if (id == "Quat") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -606,7 +606,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "AABB" || id == "Rect3") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -620,7 +620,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "Basis" || id == "Matrix3") { //compatibility
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -633,7 +633,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 			return OK;
 		} else if (id == "Transform") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -647,7 +647,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "Color") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -1064,7 +1064,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 #endif
 		} else if (id == "PoolByteArray" || id == "ByteArray") {
 
-			Vector<uint8_t> args;
+			std::vector<uint8_t> args;
 			Error err = _parse_construct<uint8_t>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -1085,7 +1085,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "PoolIntArray" || id == "IntArray") {
 
-			Vector<int> args;
+			std::vector<int> args;
 			Error err = _parse_construct<int>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -1106,7 +1106,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "PoolRealArray" || id == "FloatArray") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -1132,7 +1132,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 				return ERR_PARSE_ERROR;
 			}
 
-			Vector<String> cs;
+			std::vector<String> cs;
 
 			bool first = true;
 			while (true) {
@@ -1177,7 +1177,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "PoolVector2Array" || id == "Vector2Array") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -1198,7 +1198,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "PoolVector3Array" || id == "Vector3Array") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
@@ -1219,7 +1219,7 @@ Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream,
 
 		} else if (id == "PoolColorArray" || id == "ColorArray") {
 
-			Vector<float> args;
+			std::vector<float> args;
 			Error err = _parse_construct<float>(p_stream, args, line, r_err_str);
 			if (err)
 				return err;
