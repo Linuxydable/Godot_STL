@@ -272,7 +272,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 		// Some locales are not properly supported currently in Godot due to lack of font shaping
 		// (e.g. Arabic or Hindi), so even though we have work in progress translations for them,
 		// we skip them as they don't render properly. (GH-28577)
-		const Vector<String> locales_to_skip = String("ar,bn,fa,he,hi,ml,si,ta,te,ur").split(",");
+		const std::vector<String> locales_to_skip = String("ar,bn,fa,he,hi,ml,si,ta,te,ur").split(",");
 
 		String best;
 
@@ -285,7 +285,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 			// Skip locales which we can't render properly (see above comment).
 			// Test against language code without regional variants (e.g. ur_PK).
 			String lang_code = locale.get_slice("_", 0);
-			if (locales_to_skip.find(lang_code) != -1) {
+			if (std::find(locales_to_skip.begin(), locales_to_skip.end(), lang_code) != locales_to_skip.end()) {
 				etl++;
 				continue;
 			}
@@ -636,7 +636,7 @@ void EditorSettings::_load_defaults(Ref<ConfigFile> p_extra_config) {
 
 		if (p_extra_config->has_section("init_projects") && p_extra_config->has_section_key("init_projects", "list")) {
 
-			Vector<String> list = p_extra_config->get_value("init_projects", "list");
+			std::vector<String> list = p_extra_config->get_value("init_projects", "list");
 			for (int i = 0; i < list.size(); i++) {
 
 				String name = list[i].replace("/", "::");
@@ -958,10 +958,10 @@ fail:
 
 	// patch init projects
 	if (extra_config->has_section("init_projects")) {
-		Vector<String> list = extra_config->get_value("init_projects", "list");
+		std::vector<String> list = extra_config->get_value("init_projects", "list");
 		for (int i = 0; i < list.size(); i++) {
 
-			list.write[i] = exe_path.plus_file(list[i]);
+			list[i] = exe_path.plus_file(list[i]);
 		};
 		extra_config->set_value("init_projects", "list", list);
 	};
@@ -990,12 +990,12 @@ void EditorSettings::setup_language() {
 
 		if (etl->lang == lang) {
 
-			Vector<uint8_t> data;
+			std::vector<uint8_t> data;
 			data.resize(etl->uncomp_size);
-			Compression::decompress(data.ptrw(), etl->uncomp_size, etl->data, etl->comp_size, Compression::MODE_DEFLATE);
+			Compression::decompress(data.data(), etl->uncomp_size, etl->data, etl->comp_size, Compression::MODE_DEFLATE);
 
 			FileAccessMemory *fa = memnew(FileAccessMemory);
-			fa->open_custom(data.ptr(), data.size());
+			fa->open_custom(data.data(), data.size());
 
 			Ref<Translation> tr = TranslationLoaderPO::load_translation(fa, NULL, "translation_" + String(etl->lang));
 
@@ -1254,7 +1254,7 @@ Variant EditorSettings::get_project_metadata(const String &p_section, const Stri
 	return cf->get_value(p_section, p_key, p_default);
 }
 
-void EditorSettings::set_favorites(const Vector<String> &p_favorites) {
+void EditorSettings::set_favorites(const std::vector<String> &p_favorites) {
 
 	favorites = p_favorites;
 	FileAccess *f = FileAccess::open(get_project_settings_dir().plus_file("favorites"), FileAccess::WRITE);
@@ -1265,12 +1265,12 @@ void EditorSettings::set_favorites(const Vector<String> &p_favorites) {
 	}
 }
 
-Vector<String> EditorSettings::get_favorites() const {
+std::vector<String> EditorSettings::get_favorites() const {
 
 	return favorites;
 }
 
-void EditorSettings::set_recent_dirs(const Vector<String> &p_recent_dirs) {
+void EditorSettings::set_recent_dirs(const std::vector<String> &p_recent_dirs) {
 
 	recent_dirs = p_recent_dirs;
 	FileAccess *f = FileAccess::open(get_project_settings_dir().plus_file("recent_dirs"), FileAccess::WRITE);
@@ -1281,7 +1281,7 @@ void EditorSettings::set_recent_dirs(const Vector<String> &p_recent_dirs) {
 	}
 }
 
-Vector<String> EditorSettings::get_recent_dirs() const {
+std::vector<String> EditorSettings::get_recent_dirs() const {
 
 	return recent_dirs;
 }
@@ -1439,9 +1439,9 @@ bool EditorSettings::is_default_text_editor_theme() {
 	return _is_default_text_editor_theme(p_file.get_file().to_lower());
 }
 
-Vector<String> EditorSettings::get_script_templates(const String &p_extension, const String &p_custom_path) {
+std::vector<String> EditorSettings::get_script_templates(const String &p_extension, const String &p_custom_path) {
 
-	Vector<String> templates;
+	std::vector<String> templates;
 	String template_dir = get_script_templates_dir();
 	if (!p_custom_path.empty()) {
 		template_dir = p_custom_path;
