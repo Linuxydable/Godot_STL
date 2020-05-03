@@ -33,7 +33,7 @@
 void Skin::set_bind_count(int p_size) {
 	ERR_FAIL_COND(p_size < 0);
 	binds.resize(p_size);
-	binds_ptr = binds.ptrw();
+	binds_ptr = binds.data();
 	bind_count = p_size;
 	emit_changed();
 }

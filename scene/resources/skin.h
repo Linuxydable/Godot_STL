@@ -42,7 +42,7 @@ class Skin : public Resource {
 		Transform pose;
 	};
 
-	Vector<Bind> binds;
+	std::vector<Bind> binds;
 
 	Bind *binds_ptr;
 	int bind_count;
