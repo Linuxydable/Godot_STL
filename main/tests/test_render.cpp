@@ -78,7 +78,7 @@ public:
 		test_cube = vs->get_test_cube();
 		scenario = vs->scenario_create();
 
-		Vector<Vector3> vts;
+		std::vector<Vector3> vts;
 
 		/*
 		PoolVector<Plane> sp = Geometry::build_sphere_planes(2,5,5);
