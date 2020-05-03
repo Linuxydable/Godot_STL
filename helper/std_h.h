@@ -1,6 +1,9 @@
 #include <algorithm>
 #include <vector>
 
+#ifndef STD_H
+#define STD_H
+
 namespace std_h {
 	template <typename T>
 	static bool isFind(const std::vector<T> &v, const T &value) {
@@ -35,3 +38,5 @@ namespace std_h {
 		return -1;
 	}
 }
+
+#endif // !STD_H
