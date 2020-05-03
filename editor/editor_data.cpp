@@ -284,8 +284,8 @@ EditorPlugin *EditorData::get_subeditor(Object *p_object) {
 	return NULL;
 }
 
-Vector<EditorPlugin *> EditorData::get_subeditors(Object *p_object) {
-	Vector<EditorPlugin *> sub_plugins;
+std::vector<EditorPlugin *> EditorData::get_subeditors(Object *p_object) {
+	std::vector<EditorPlugin *> sub_plugins;
 	for (int i = 0; i < editor_plugins.size(); i++) {
 		if (!editor_plugins[i]->has_main_screen() && editor_plugins[i]->handles(p_object)) {
 			sub_plugins.push_back(editor_plugins[i]);
@@ -491,7 +491,7 @@ void EditorData::add_custom_type(const String &p_type, const String &p_inherits,
 	ct.icon = p_icon;
 	ct.script = p_script;
 	if (!custom_types.has(p_inherits)) {
-		custom_types[p_inherits] = Vector<CustomType>();
+		custom_types[p_inherits] = std::vector<CustomType>();
 	}
 
 	custom_types[p_inherits].push_back(ct);
@@ -521,11 +521,11 @@ Object *EditorData::instance_custom_type(const String &p_type, const String &p_i
 
 void EditorData::remove_custom_type(const String &p_type) {
 
-	for (Map<String, Vector<CustomType> >::Element *E = custom_types.front(); E; E = E->next()) {
+	for (Map<String, std::vector<CustomType> >::Element *E = custom_types.front(); E; E = E->next()) {
 
 		for (int i = 0; i < E->get().size(); i++) {
 			if (E->get()[i].name == p_type) {
-				E->get().remove(i);
+				E->get().erase(E->get().begin() + i);
 				if (E->get().empty()) {
 					custom_types.erase(E->key());
 				}
@@ -704,9 +704,9 @@ int EditorData::get_edited_scene_count() const {
 	return edited_scene.size();
 }
 
-Vector<EditorData::EditedScene> EditorData::get_edited_scenes() const {
+std::vector<EditorData::EditedScene> EditorData::get_edited_scenes() const {
 
-	Vector<EditedScene> out_edited_scenes_list = Vector<EditedScene>();
+	std::vector<EditedScene> out_edited_scenes_list = std::vector<EditedScene>();
 
 	for (int i = 0; i < edited_scene.size(); i++) {
 		out_edited_scenes_list.push_back(edited_scene[i]);
@@ -718,10 +718,10 @@ Vector<EditorData::EditedScene> EditorData::get_edited_scenes() const {
 void EditorData::set_edited_scene_version(uint64_t version, int p_scene_idx) {
 	ERR_FAIL_INDEX(current_edited_scene, edited_scene.size());
 	if (p_scene_idx < 0) {
-		edited_scene.write[current_edited_scene].version = version;
+		edited_scene[current_edited_scene].version = version;
 	} else {
 		ERR_FAIL_INDEX(p_scene_idx, edited_scene.size());
-		edited_scene.write[p_scene_idx].version = version;
+		edited_scene[p_scene_idx].version = version;
 	}
 }
 

@@ -590,7 +590,7 @@ void EditorHelp::_update_doc() {
 	bool method_descr = false;
 	bool sort_methods = EditorSettings::get_singleton()->get("text_editor/help/sort_functions_alphabetically");
 
-	Vector<DocData::MethodDoc> methods;
+	std::vector<DocData::MethodDoc> methods;
 
 	for (int i = 0; i < cd.methods.size(); i++) {
 		if (skip_methods.has(cd.methods[i].name)) {
@@ -604,7 +604,7 @@ void EditorHelp::_update_doc() {
 	if (methods.size()) {
 
 		if (sort_methods)
-			methods.sort();
+			std::sort(methods.begin(), methods.end());
 
 		section_line.push_back(Pair<String, int>(TTR("Methods"), class_desc->get_line_count() - 2));
 		class_desc->push_color(title_color);
@@ -621,7 +621,7 @@ void EditorHelp::_update_doc() {
 
 		bool any_previous = false;
 		for (int pass = 0; pass < 2; pass++) {
-			Vector<DocData::MethodDoc> m;
+			std::vector<DocData::MethodDoc> m;
 
 			for (int i = 0; i < methods.size(); i++) {
 				const String &q = methods[i].qualifiers;
@@ -810,14 +810,14 @@ void EditorHelp::_update_doc() {
 	// Constants and enums
 	if (cd.constants.size()) {
 
-		Map<String, Vector<DocData::ConstantDoc> > enums;
-		Vector<DocData::ConstantDoc> constants;
+		Map<String, std::vector<DocData::ConstantDoc> > enums;
+		std::vector<DocData::ConstantDoc> constants;
 
 		for (int i = 0; i < cd.constants.size(); i++) {
 
 			if (cd.constants[i].enumeration != String()) {
 				if (!enums.has(cd.constants[i].enumeration)) {
-					enums[cd.constants[i].enumeration] = Vector<DocData::ConstantDoc>();
+					enums[cd.constants[i].enumeration] = std::vector<DocData::ConstantDoc>();
 				}
 
 				enums[cd.constants[i].enumeration].push_back(cd.constants[i]);
@@ -840,7 +840,7 @@ void EditorHelp::_update_doc() {
 
 			class_desc->add_newline();
 
-			for (Map<String, Vector<DocData::ConstantDoc> >::Element *E = enums.front(); E; E = E->next()) {
+			for (Map<String, std::vector<DocData::ConstantDoc> >::Element *E = enums.front(); E; E = E->next()) {
 
 				enum_line[E->key()] = class_desc->get_line_count() - 2;
 
@@ -863,7 +863,7 @@ void EditorHelp::_update_doc() {
 				class_desc->add_newline();
 
 				class_desc->push_indent(1);
-				Vector<DocData::ConstantDoc> enum_list = E->get();
+				std::vector<DocData::ConstantDoc> enum_list = E->get();
 
 				Map<String, int> enumValuesContainer;
 				int enumStartingLine = enum_line[E->key()];
@@ -933,7 +933,7 @@ void EditorHelp::_update_doc() {
 
 				if (constants[i].value.begins_with("Color(") && constants[i].value.ends_with(")")) {
 					String stripped = constants[i].value.replace(" ", "").replace("Color(", "").replace(")", "");
-					Vector<float> color = stripped.split_floats(",");
+					std::vector<float> color = stripped.split_floats(",");
 					if (color.size() >= 3) {
 						class_desc->push_color(Color(color[0], color[1], color[2]));
 						static const CharType prefix[3] = { 0x25CF /* filled circle */, ' ', 0 };
@@ -1099,7 +1099,7 @@ void EditorHelp::_update_doc() {
 		class_desc->add_newline();
 
 		for (int pass = 0; pass < 2; pass++) {
-			Vector<DocData::MethodDoc> methods_filtered;
+			std::vector<DocData::MethodDoc> methods_filtered;
 
 			for (int i = 0; i < methods.size(); i++) {
 				const String &q = methods[i].qualifiers;
@@ -1487,8 +1487,8 @@ void EditorHelp::go_to_class(const String &p_class, int p_scroll) {
 	_goto_desc(p_class, p_scroll);
 }
 
-Vector<Pair<String, int> > EditorHelp::get_sections() {
-	Vector<Pair<String, int> > sections;
+std::vector<Pair<String, int> > EditorHelp::get_sections() {
+	std::vector<Pair<String, int> > sections;
 
 	for (int i = 0; i < section_line.size(); i++) {
 		sections.push_back(Pair<String, int>(section_line[i].first, i));

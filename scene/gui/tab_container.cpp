@@ -51,7 +51,7 @@ int TabContainer::_get_top_margin() const {
 	Ref<Font> font = get_font("font");
 	int content_height = font->get_height();
 
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	for (int i = 0; i < tabs.size(); i++) {
 
 		Control *c = tabs[i];
@@ -98,7 +98,7 @@ void TabContainer::_gui_input(const Ref<InputEvent> &p_event) {
 		if (get_tab_count() == 0)
 			return;
 
-		Vector<Control *> tabs = _get_tabs();
+		std::vector<Control *> tabs = _get_tabs();
 
 		// Handle navigation buttons.
 		if (buttons_visible_cache) {
@@ -223,7 +223,7 @@ void TabContainer::_notification(int p_what) {
 		} break;
 		case NOTIFICATION_RESIZED: {
 
-			Vector<Control *> tabs = _get_tabs();
+			std::vector<Control *> tabs = _get_tabs();
 			int side_margin = get_constant("side_margin");
 			Ref<Texture> menu = get_icon("menu");
 			Ref<Texture> increment = get_icon("increment");
@@ -268,7 +268,7 @@ void TabContainer::_notification(int p_what) {
 				return;
 			}
 
-			Vector<Control *> tabs = _get_tabs();
+			std::vector<Control *> tabs = _get_tabs();
 			Ref<StyleBox> tab_bg = get_stylebox("tab_bg");
 			Ref<StyleBox> tab_fg = get_stylebox("tab_fg");
 			Ref<StyleBox> tab_disabled = get_stylebox("tab_disabled");
@@ -321,7 +321,7 @@ void TabContainer::_notification(int p_what) {
 
 			// Go through the visible tabs to find the width they occupy.
 			all_tabs_width = 0;
-			Vector<int> tab_widths;
+			std::vector<int> tab_widths;
 			for (int i = first_tab_cache; i < tabs.size(); i++) {
 				if (get_tab_hidden(i)) {
 					continue;
@@ -487,9 +487,9 @@ int TabContainer::_get_tab_width(int p_index) const {
 	return width;
 }
 
-Vector<Control *> TabContainer::_get_tabs() const {
+std::vector<Control *> TabContainer::_get_tabs() const {
 
-	Vector<Control *> controls;
+	std::vector<Control *> controls;
 	for (int i = 0; i < get_child_count(); i++) {
 
 		Control *control = Object::cast_to<Control>(get_child(i));
@@ -555,7 +555,7 @@ void TabContainer::set_current_tab(int p_current) {
 	current = p_current;
 
 	Ref<StyleBox> sb = get_stylebox("panel");
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	for (int i = 0; i < tabs.size(); i++) {
 
 		Control *c = tabs[i];
@@ -598,7 +598,7 @@ int TabContainer::get_previous_tab() const {
 
 Control *TabContainer::get_tab_control(int p_idx) const {
 
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	if (p_idx >= 0 && p_idx < tabs.size())
 		return tabs[p_idx];
 	else
@@ -607,7 +607,7 @@ Control *TabContainer::get_tab_control(int p_idx) const {
 
 Control *TabContainer::get_current_tab_control() const {
 
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	if (current >= 0 && current < tabs.size())
 		return tabs[current];
 	else
@@ -758,7 +758,7 @@ int TabContainer::get_tab_idx_at_point(const Point2 &p_point) const {
 	}
 
 	// get the tab at the point
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	int px = p_point.x;
 	px -= tabs_ofs_cache;
 	for (int i = first_tab_cache; i <= last_tab_cache; i++) {
@@ -792,7 +792,7 @@ void TabContainer::set_tabs_visible(bool p_visible) {
 
 	tabs_visible = p_visible;
 
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	for (int i = 0; i < tabs.size(); i++) {
 
 		Control *c = tabs[i];
@@ -901,7 +901,7 @@ bool TabContainer::get_tab_hidden(int p_tab) const {
 
 void TabContainer::get_translatable_strings(List<String> *p_strings) const {
 
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	for (int i = 0; i < tabs.size(); i++) {
 
 		Control *c = tabs[i];
@@ -920,7 +920,7 @@ Size2 TabContainer::get_minimum_size() const {
 
 	Size2 ms;
 
-	Vector<Control *> tabs = _get_tabs();
+	std::vector<Control *> tabs = _get_tabs();
 	for (int i = 0; i < tabs.size(); i++) {
 
 		Control *c = tabs[i];

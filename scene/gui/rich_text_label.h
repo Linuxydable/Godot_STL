@@ -86,11 +86,11 @@ private:
 	struct Line {
 
 		Item *from;
-		Vector<int> offset_caches;
-		Vector<int> height_caches;
-		Vector<int> ascent_caches;
-		Vector<int> descent_caches;
-		Vector<int> space_caches;
+		std::vector<int> offset_caches;
+		std::vector<int> height_caches;
+		std::vector<int> ascent_caches;
+		std::vector<int> descent_caches;
+		std::vector<int> space_caches;
 		int height_cache;
 		int height_accum_cache;
 		int char_count;
@@ -129,7 +129,7 @@ private:
 	struct ItemFrame : public Item {
 		int parent_line;
 		bool cell;
-		Vector<Line> lines;
+		std::vector<Line> lines;
 		int first_invalid_line;
 		ItemFrame *parent_frame;
 
@@ -203,7 +203,7 @@ private:
 			int width;
 		};
 
-		Vector<Column> columns;
+		std::vector<Column> columns;
 		int total_width;
 		ItemTable() { type = ITEM_TABLE; }
 	};
@@ -330,7 +330,7 @@ private:
 	ItemMeta *meta_hovering;
 	Variant current_meta;
 
-	Vector<Ref<RichTextEffect> > custom_effects;
+	std::vector<Ref<RichTextEffect> > custom_effects;
 
 	void _invalidate_current_line(ItemFrame *p_frame);
 	void _validate_line_caches(ItemFrame *p_frame);
@@ -380,7 +380,7 @@ private:
 	bool _find_meta(Item *p_item, Variant *r_meta, ItemMeta **r_item = NULL);
 	bool _find_layout_subitem(Item *from, Item *to);
 	bool _find_by_type(Item *p_item, ItemType p_type);
-	void _fetch_item_fx_stack(Item *p_item, Vector<ItemFX *> &r_stack);
+	void _fetch_item_fx_stack(Item *p_item, std::vector<ItemFX *> &r_stack);
 
 	void _update_scroll();
 	void _update_fx(ItemFrame *p_frame, float p_delta_time);
@@ -392,7 +392,7 @@ private:
 
 	Rect2 _get_text_rect();
 	Ref<RichTextEffect> _get_custom_effect_by_code(String p_bbcode_identifier);
-	virtual Dictionary parse_expressions_for_values(Vector<String> p_expressions);
+	virtual Dictionary parse_expressions_for_values(std::vector<String> p_expressions);
 
 	bool use_bbcode;
 	String bbcode;
@@ -488,8 +488,8 @@ public:
 	void set_percent_visible(float p_percent);
 	float get_percent_visible() const;
 
-	void set_effects(const Vector<Variant> &effects);
-	Vector<Variant> get_effects();
+	void set_effects(const std::vector<Variant> &effects);
+	std::vector<Variant> get_effects();
 
 	void install_effect(const Variant effect);
 

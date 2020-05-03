@@ -108,7 +108,7 @@ private:
 			}
 		};
 
-		Vector<Button> buttons;
+		std::vector<Button> buttons;
 
 		Cell() {
 
@@ -136,7 +136,7 @@ private:
 		void draw_icon(const RID &p_where, const Point2 &p_pos, const Size2 &p_size = Size2(), const Color &p_color = Color()) const;
 	};
 
-	Vector<Cell> cells;
+	std::vector<Cell> cells;
 
 	bool collapsed; // won't show children
 	bool disable_folding;
@@ -365,7 +365,7 @@ private:
 	int64_t focus_in_id;
 	PopupMenu *popup_menu;
 
-	Vector<ColumnInfo> columns;
+	std::vector<ColumnInfo> columns;
 
 	Timer *range_click_timer;
 	TreeItem *range_item_last;

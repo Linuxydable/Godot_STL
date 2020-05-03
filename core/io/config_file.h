@@ -69,10 +69,10 @@ public:
 	Error load(const String &p_path);
 	Error parse(const String &p_data);
 
-	Error load_encrypted(const String &p_path, const Vector<uint8_t> &p_key);
+	Error load_encrypted(const String &p_path, const std::vector<uint8_t> &p_key);
 	Error load_encrypted_pass(const String &p_path, const String &p_pass);
 
-	Error save_encrypted(const String &p_path, const Vector<uint8_t> &p_key);
+	Error save_encrypted(const String &p_path, const std::vector<uint8_t> &p_key);
 	Error save_encrypted_pass(const String &p_path, const String &p_pass);
 };
 

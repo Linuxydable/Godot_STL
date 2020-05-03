@@ -45,13 +45,13 @@
 
 Array EditorInterface::_make_mesh_previews(const Array &p_meshes, int p_preview_size) {
 
-	Vector<Ref<Mesh> > meshes;
+	std::vector<Ref<Mesh> > meshes;
 
 	for (int i = 0; i < p_meshes.size(); i++) {
 		meshes.push_back(p_meshes[i]);
 	}
 
-	Vector<Ref<Texture> > textures = make_mesh_previews(meshes, NULL, p_preview_size);
+	std::vector<Ref<Texture> > textures = make_mesh_previews(meshes, NULL, p_preview_size);
 	Array ret;
 	for (int i = 0; i < textures.size(); i++) {
 		ret.push_back(textures[i]);
@@ -60,7 +60,7 @@ Array EditorInterface::_make_mesh_previews(const Array &p_meshes, int p_preview_
 	return ret;
 }
 
-Vector<Ref<Texture> > EditorInterface::make_mesh_previews(const Vector<Ref<Mesh> > &p_meshes, Vector<Transform> *p_transforms, int p_preview_size) {
+std::vector<Ref<Texture> > EditorInterface::make_mesh_previews(const std::vector<Ref<Mesh> > &p_meshes, std::vector<Transform> *p_transforms, int p_preview_size) {
 
 	int size = p_preview_size;
 
@@ -87,7 +87,7 @@ Vector<Ref<Texture> > EditorInterface::make_mesh_previews(const Vector<Ref<Mesh>
 
 	EditorProgress ep("mlib", TTR("Creating Mesh Previews"), p_meshes.size());
 
-	Vector<Ref<Texture> > textures;
+	std::vector<Ref<Texture> > textures;
 
 	for (int i = 0; i < p_meshes.size(); i++) {
 
@@ -191,7 +191,7 @@ Node *EditorInterface::get_edited_scene_root() {
 Array EditorInterface::get_open_scenes() const {
 
 	Array ret;
-	Vector<EditorData::EditedScene> scenes = EditorNode::get_editor_data().get_edited_scenes();
+	std::vector<EditorData::EditedScene> scenes = EditorNode::get_editor_data().get_edited_scenes();
 
 	int scns_amount = scenes.size();
 	for (int idx_scn = 0; idx_scn < scns_amount; idx_scn++) {
