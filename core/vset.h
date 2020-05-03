@@ -32,12 +32,13 @@
 #define VSET_H
 
 #include "core/typedefs.h"
-#include "core/vector.h"
+
+#include <vector>
 
 template <class T>
 class VSet {
 
-	Vector<T> _data;
+	std::vector<T> _data;
 
 	_FORCE_INLINE_ int _find(const T &p_val, bool &r_exact) const {
 
