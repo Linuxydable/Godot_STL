@@ -38,7 +38,7 @@
 class AudioStreamPreview : public Reference {
 	GDCLASS(AudioStreamPreview, Reference);
 	friend class AudioStream;
-	Vector<uint8_t> preview;
+	std::vector<uint8_t> preview;
 	float length;
 
 	friend class AudioStreamPreviewGenerator;
