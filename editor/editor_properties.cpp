@@ -187,7 +187,7 @@ void EditorPropertyTextEnum::update_property() {
 	}
 }
 
-void EditorPropertyTextEnum::setup(const Vector<String> &p_options) {
+void EditorPropertyTextEnum::setup(const std::vector<String> &p_options) {
 	for (int i = 0; i < p_options.size(); i++) {
 		options->add_item(p_options[i], i);
 	}
@@ -257,7 +257,7 @@ void EditorPropertyPath::update_property() {
 	path->set_tooltip(full_path);
 }
 
-void EditorPropertyPath::setup(const Vector<String> &p_extensions, bool p_folder, bool p_global) {
+void EditorPropertyPath::setup(const std::vector<String> &p_extensions, bool p_folder, bool p_global) {
 
 	extensions = p_extensions;
 	folder = p_folder;
@@ -503,11 +503,11 @@ void EditorPropertyEnum::update_property() {
 	}
 }
 
-void EditorPropertyEnum::setup(const Vector<String> &p_options) {
+void EditorPropertyEnum::setup(const std::vector<String> &p_options) {
 
 	int64_t current_val = 0;
 	for (int i = 0; i < p_options.size(); i++) {
-		Vector<String> text_split = p_options[i].split(":");
+		std::vector<String> text_split = p_options[i].split(":");
 		if (text_split.size() != 1)
 			current_val = text_split[1].to_int64();
 		options->add_item(text_split[0]);
@@ -566,7 +566,7 @@ void EditorPropertyFlags::update_property() {
 	}
 }
 
-void EditorPropertyFlags::setup(const Vector<String> &p_options) {
+void EditorPropertyFlags::setup(const std::vector<String> &p_options) {
 	ERR_FAIL_COND(flags.size());
 
 	bool first = true;
@@ -607,9 +607,9 @@ class EditorPropertyLayersGrid : public Control {
 
 public:
 	uint32_t value;
-	Vector<Rect2> flag_rects;
-	Vector<String> names;
-	Vector<String> tooltips;
+	std::vector<Rect2> flag_rects;
+	std::vector<String> names;
+	std::vector<String> tooltips;
 
 	virtual Size2 get_minimum_size() const {
 		Ref<Font> font = get_font("font", "Label");
@@ -724,8 +724,8 @@ void EditorPropertyLayers::setup(LayerType p_layer_type) {
 			break;
 	}
 
-	Vector<String> names;
-	Vector<String> tooltips;
+	std::vector<String> names;
+	std::vector<String> tooltips;
 	for (int i = 0; i < 20; i++) {
 		String name;
 
@@ -1001,7 +1001,7 @@ void EditorPropertyEasing::_draw_easing() {
 		line_color = get_color("font_color", "Label") * Color(1, 1, 1, 0.9);
 	}
 
-	Vector<Point2> lines;
+	std::vector<Point2> lines;
 	for (int i = 1; i <= points; i++) {
 
 		float ifl = i / float(points);
@@ -2018,7 +2018,7 @@ void EditorPropertyNodePath::update_property() {
 	assign->set_icon(EditorNode::get_singleton()->get_object_icon(target_node, "Node"));
 }
 
-void EditorPropertyNodePath::setup(const NodePath &p_base_hint, Vector<StringName> p_valid_types, bool p_use_path_from_scene_root) {
+void EditorPropertyNodePath::setup(const NodePath &p_base_hint, std::vector<StringName> p_valid_types, bool p_use_path_from_scene_root) {
 
 	base_hint = p_base_hint;
 	valid_types = p_valid_types;
@@ -2096,7 +2096,7 @@ void EditorPropertyResource::_file_selected(const String &p_path) {
 	}
 	if (!property_types.empty()) {
 		bool any_type_matches = false;
-		const Vector<String> split_property_types = property_types.split(",");
+		const std::vector<String> split_property_types = property_types.split(",");
 		for (int i = 0; i < split_property_types.size(); ++i) {
 			if (res->is_class(split_property_types[i])) {
 				any_type_matches = true;
@@ -2255,7 +2255,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 
 				int to_type = p_which - CONVERT_BASE_ID;
 
-				Vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
+				std::vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
 
 				ERR_FAIL_INDEX(to_type, conversions.size());
 
@@ -2284,7 +2284,7 @@ void EditorPropertyResource::_menu_option(int p_which) {
 
 				if (!scene_tree) {
 					scene_tree = memnew(SceneTreeDialog);
-					Vector<StringName> valid_types;
+					std::vector<StringName> valid_types;
 					valid_types.push_back("Viewport");
 					scene_tree->get_scene_tree()->set_valid_types(valid_types);
 					scene_tree->get_scene_tree()->set_show_enabled_subscene(true);
@@ -2373,7 +2373,7 @@ void EditorPropertyResource::_update_menu_items() {
 	} else if (base_type != "") {
 		int idx = 0;
 
-		Vector<EditorData::CustomType> custom_resources;
+		std::vector<EditorData::CustomType> custom_resources;
 
 		if (EditorNode::get_editor_data().get_custom_types().has("Resource")) {
 			custom_resources = EditorNode::get_editor_data().get_custom_types()["Resource"];
@@ -2487,7 +2487,7 @@ void EditorPropertyResource::_update_menu_items() {
 
 	if (!res.is_null()) {
 
-		Vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
+		std::vector<Ref<EditorResourceConversionPlugin> > conversions = EditorNode::get_singleton()->find_resource_conversion_plugin(res);
 		if (conversions.size()) {
 			menu->add_separator();
 		}
@@ -2800,7 +2800,7 @@ bool EditorPropertyResource::_is_drop_valid(const Dictionary &p_drag_data) const
 
 	if (drag_data.has("type") && String(drag_data["type"]) == "files") {
 
-		Vector<String> files = drag_data["files"];
+		std::vector<String> files = drag_data["files"];
 
 		if (files.size() == 1) {
 			String file = files[0];
@@ -2841,7 +2841,7 @@ void EditorPropertyResource::drop_data_fw(const Point2 &p_point, const Variant &
 
 	if (drag_data.has("type") && String(drag_data["type"]) == "files") {
 
-		Vector<String> files = drag_data["files"];
+		std::vector<String> files = drag_data["files"];
 
 		if (files.size() == 1) {
 			String file = files[0];
@@ -2955,13 +2955,13 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 
 			if (p_hint == PROPERTY_HINT_ENUM) {
 				EditorPropertyEnum *editor = memnew(EditorPropertyEnum);
-				Vector<String> options = p_hint_text.split(",");
+				std::vector<String> options = p_hint_text.split(",");
 				editor->setup(options);
 				add_property_editor(p_path, editor);
 
 			} else if (p_hint == PROPERTY_HINT_FLAGS) {
 				EditorPropertyFlags *editor = memnew(EditorPropertyFlags);
-				Vector<String> options = p_hint_text.split(",");
+				std::vector<String> options = p_hint_text.split(",");
 				editor->setup(options);
 				add_property_editor(p_path, editor);
 
@@ -3030,7 +3030,7 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 				EditorPropertyEasing *editor = memnew(EditorPropertyEasing);
 				bool full = true;
 				bool flip = false;
-				Vector<String> hints = p_hint_text.split(",");
+				std::vector<String> hints = p_hint_text.split(",");
 				for (int i = 0; i < hints.size(); i++) {
 					String h = hints[i].strip_edges();
 					if (h == "attenuation") {
@@ -3081,7 +3081,7 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 
 			if (p_hint == PROPERTY_HINT_ENUM) {
 				EditorPropertyTextEnum *editor = memnew(EditorPropertyTextEnum);
-				Vector<String> options = p_hint_text.split(",");
+				std::vector<String> options = p_hint_text.split(",");
 				editor->setup(options);
 				add_property_editor(p_path, editor);
 			} else if (p_hint == PROPERTY_HINT_MULTILINE_TEXT) {
@@ -3093,7 +3093,7 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 				add_property_editor(p_path, editor);
 			} else if (p_hint == PROPERTY_HINT_DIR || p_hint == PROPERTY_HINT_FILE || p_hint == PROPERTY_HINT_SAVE_FILE || p_hint == PROPERTY_HINT_GLOBAL_DIR || p_hint == PROPERTY_HINT_GLOBAL_FILE) {
 
-				Vector<String> extensions = p_hint_text.split(",");
+				std::vector<String> extensions = p_hint_text.split(",");
 				bool global = p_hint == PROPERTY_HINT_GLOBAL_DIR || p_hint == PROPERTY_HINT_GLOBAL_FILE;
 				bool folder = p_hint == PROPERTY_HINT_DIR || p_hint == PROPERTY_HINT_GLOBAL_DIR;
 				bool save = p_hint == PROPERTY_HINT_SAVE_FILE;
@@ -3309,11 +3309,11 @@ bool EditorInspectorDefaultPlugin::parse_property(Object *p_object, Variant::Typ
 
 			EditorPropertyNodePath *editor = memnew(EditorPropertyNodePath);
 			if (p_hint == PROPERTY_HINT_NODE_PATH_TO_EDITED_NODE && p_hint_text != String()) {
-				editor->setup(p_hint_text, Vector<StringName>(), (p_usage & PROPERTY_USAGE_NODE_PATH_FROM_SCENE_ROOT));
+				editor->setup(p_hint_text, std::vector<StringName>(), (p_usage & PROPERTY_USAGE_NODE_PATH_FROM_SCENE_ROOT));
 			}
 			if (p_hint == PROPERTY_HINT_NODE_PATH_VALID_TYPES && p_hint_text != String()) {
-				Vector<String> types = p_hint_text.split(",", false);
-				Vector<StringName> sn = Variant(types); //convert via variant
+				std::vector<String> types = p_hint_text.split(",", false);
+				std::vector<StringName> sn = Variant(types); //convert via variant
 				editor->setup(NodePath(), sn, (p_usage & PROPERTY_USAGE_NODE_PATH_FROM_SCENE_ROOT));
 			}
 			add_property_editor(p_path, editor);
