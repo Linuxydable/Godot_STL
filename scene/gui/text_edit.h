@@ -101,8 +101,8 @@ public:
 		};
 
 	private:
-		const Vector<ColorRegion> *color_regions;
-		mutable Vector<Line> text;
+		const std::vector<ColorRegion> *color_regions;
+		mutable std::vector<Line> text;
 		Ref<Font> font;
 		int indent_size;
 
@@ -111,7 +111,7 @@ public:
 	public:
 		void set_indent_size(int p_indent_size);
 		void set_font(const Ref<Font> &p_font);
-		void set_color_regions(const Vector<ColorRegion> *p_regions) { color_regions = p_regions; }
+		void set_color_regions(const std::vector<ColorRegion> *p_regions) { color_regions = p_regions; }
 		int get_line_width(int p_line) const;
 		int get_max_width(bool p_exclude_hidden = false) const;
 		int get_char_width(CharType c, CharType next_c, int px) const;
@@ -119,24 +119,24 @@ public:
 		int get_line_wrap_amount(int p_line) const;
 		const Map<int, ColorRegionInfo> &get_color_region_info(int p_line) const;
 		void set(int p_line, const String &p_text);
-		void set_marked(int p_line, bool p_marked) { text.write[p_line].marked = p_marked; }
+		void set_marked(int p_line, bool p_marked) { text[p_line].marked = p_marked; }
 		bool is_marked(int p_line) const { return text[p_line].marked; }
-		void set_bookmark(int p_line, bool p_bookmark) { text.write[p_line].bookmark = p_bookmark; }
+		void set_bookmark(int p_line, bool p_bookmark) { text[p_line].bookmark = p_bookmark; }
 		bool is_bookmark(int p_line) const { return text[p_line].bookmark; }
-		void set_breakpoint(int p_line, bool p_breakpoint) { text.write[p_line].breakpoint = p_breakpoint; }
+		void set_breakpoint(int p_line, bool p_breakpoint) { text[p_line].breakpoint = p_breakpoint; }
 		bool is_breakpoint(int p_line) const { return text[p_line].breakpoint; }
-		void set_hidden(int p_line, bool p_hidden) { text.write[p_line].hidden = p_hidden; }
+		void set_hidden(int p_line, bool p_hidden) { text[p_line].hidden = p_hidden; }
 		bool is_hidden(int p_line) const { return text[p_line].hidden; }
-		void set_safe(int p_line, bool p_safe) { text.write[p_line].safe = p_safe; }
+		void set_safe(int p_line, bool p_safe) { text[p_line].safe = p_safe; }
 		bool is_safe(int p_line) const { return text[p_line].safe; }
 		void set_info_icon(int p_line, Ref<Texture> p_icon, String p_info) {
 			if (p_icon.is_null()) {
-				text.write[p_line].has_info = false;
+				text[p_line].has_info = false;
 				return;
 			}
-			text.write[p_line].info_icon = p_icon;
-			text.write[p_line].info = p_info;
-			text.write[p_line].has_info = true;
+			text[p_line].info_icon = p_icon;
+			text[p_line].info = p_info;
+			text[p_line].has_info = true;
 		}
 		bool has_info_icon(int p_line) const { return text[p_line].has_info; }
 		const Ref<Texture> &get_info_icon(int p_line) const { return text[p_line].info_icon; }
@@ -318,12 +318,12 @@ private:
 
 	Map<int, HighlighterInfo> _get_line_syntax_highlighting(int p_line);
 
-	Vector<ColorRegion> color_regions;
+	std::vector<ColorRegion> color_regions;
 
 	Set<String> completion_prefixes;
 	bool completion_enabled;
 	List<ScriptCodeCompletionOption> completion_sources;
-	Vector<ScriptCodeCompletionOption> completion_options;
+	std::vector<ScriptCodeCompletionOption> completion_options;
 	bool completion_active;
 	bool completion_forced;
 	ScriptCodeCompletionOption completion_current;
@@ -448,7 +448,7 @@ private:
 	void _update_wrap_at();
 	bool line_wraps(int line) const;
 	int times_line_wraps(int line) const;
-	Vector<String> get_wrap_rows_text(int p_line) const;
+	std::vector<String> get_wrap_rows_text(int p_line) const;
 	int get_cursor_wrap_index() const;
 	int get_line_wrap_index_at_col(int p_line, int p_column) const;
 	int get_char_count();
@@ -617,7 +617,7 @@ public:
 
 	bool can_fold(int p_line) const;
 	bool is_folded(int p_line) const;
-	Vector<int> get_folded_lines() const;
+	std::vector<int> get_folded_lines() const;
 	void fold_line(int p_line);
 	void unfold_line(int p_line);
 	void toggle_fold_line(int p_line);
@@ -801,7 +801,7 @@ public:
 
 	void set_tooltip_request_func(Object *p_obj, const StringName &p_function, const Variant &p_udata);
 
-	void set_completion(bool p_enabled, const Vector<String> &p_prefixes);
+	void set_completion(bool p_enabled, const std::vector<String> &p_prefixes);
 	void code_complete(const List<ScriptCodeCompletionOption> &p_strings, bool p_forced = false);
 	void set_code_hint(const String &p_hint);
 	void query_code_comple();
