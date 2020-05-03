@@ -497,7 +497,7 @@ Error _OS::shell_open(String p_uri) {
 	return OS::get_singleton()->shell_open(p_uri);
 };
 
-int _OS::execute(const String &p_path, const Vector<String> &p_arguments, bool p_blocking, Array p_output, bool p_read_stderr) {
+int _OS::execute(const String &p_path, const std::vector<String> &p_arguments, bool p_blocking, Array p_output, bool p_read_stderr) {
 
 	OS::ProcessID pid = -2;
 	int exitcode = 0;
@@ -539,10 +539,10 @@ String _OS::get_name() const {
 
 	return OS::get_singleton()->get_name();
 }
-Vector<String> _OS::get_cmdline_args() {
+std::vector<String> _OS::get_cmdline_args() {
 
 	List<String> cmdline = OS::get_singleton()->get_cmdline_args();
-	Vector<String> cmdlinev;
+	std::vector<String> cmdlinev;
 	for (List<String>::Element *E = cmdline.front(); E; E = E->next()) {
 
 		cmdlinev.push_back(E->get());
@@ -1005,7 +1005,7 @@ void _OS::print_all_textures_by_size() {
 	}
 }
 
-void _OS::print_resources_by_type(const Vector<String> &p_types) {
+void _OS::print_resources_by_type(const std::vector<String> &p_types) {
 
 	Map<String, int> type_count;
 
@@ -1173,7 +1173,7 @@ bool _OS::request_permissions() {
 	return OS::get_singleton()->request_permissions();
 }
 
-Vector<String> _OS::get_granted_permissions() const {
+std::vector<String> _OS::get_granted_permissions() const {
 
 	return OS::get_singleton()->get_granted_permissions();
 }
@@ -1608,11 +1608,11 @@ PoolVector<Vector3> _Geometry::segment_intersects_cylinder(const Vector3 &p_from
 	r.set(1, norm);
 	return r;
 }
-PoolVector<Vector3> _Geometry::segment_intersects_convex(const Vector3 &p_from, const Vector3 &p_to, const Vector<Plane> &p_planes) {
+PoolVector<Vector3> _Geometry::segment_intersects_convex(const Vector3 &p_from, const Vector3 &p_to, const std::vector<Plane> &p_planes) {
 
 	PoolVector<Vector3> r;
 	Vector3 res, norm;
-	if (!Geometry::segment_intersects_convex(p_from, p_to, p_planes.ptr(), p_planes.size(), &res, &norm))
+	if (!Geometry::segment_intersects_convex(p_from, p_to, p_planes.data(), p_planes.size(), &res, &norm))
 		return r;
 
 	r.resize(2);
@@ -1621,51 +1621,39 @@ PoolVector<Vector3> _Geometry::segment_intersects_convex(const Vector3 &p_from, 
 	return r;
 }
 
-bool _Geometry::is_polygon_clockwise(const Vector<Vector2> &p_polygon) {
+bool _Geometry::is_polygon_clockwise(const std::vector<Vector2> &p_polygon) {
 
 	return Geometry::is_polygon_clockwise(p_polygon);
 }
 
-bool _Geometry::is_point_in_polygon(const Point2 &p_point, const Vector<Vector2> &p_polygon) {
+bool _Geometry::is_point_in_polygon(const Point2 &p_point, const std::vector<Vector2> &p_polygon) {
 
 	return Geometry::is_point_in_polygon(p_point, p_polygon);
 }
 
-Vector<int> _Geometry::triangulate_polygon(const Vector<Vector2> &p_polygon) {
+std::vector<int> _Geometry::triangulate_polygon(const std::vector<Vector2> &p_polygon) {
 
 	return Geometry::triangulate_polygon(p_polygon);
 }
 
-Vector<int> _Geometry::triangulate_delaunay_2d(const Vector<Vector2> &p_points) {
+std::vector<int> _Geometry::triangulate_delaunay_2d(const std::vector<Vector2> &p_points) {
 
 	return Geometry::triangulate_delaunay_2d(p_points);
 }
 
-Vector<Point2> _Geometry::convex_hull_2d(const Vector<Point2> &p_points) {
+std::vector<Point2> _Geometry::convex_hull_2d(const std::vector<Point2> &p_points) {
 
 	return Geometry::convex_hull_2d(p_points);
 }
 
-Vector<Vector3> _Geometry::clip_polygon(const Vector<Vector3> &p_points, const Plane &p_plane) {
+std::vector<Vector3> _Geometry::clip_polygon(const std::vector<Vector3> &p_points, const Plane &p_plane) {
 
 	return Geometry::clip_polygon(p_points, p_plane);
 }
 
-Array _Geometry::merge_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b) {
+Array _Geometry::merge_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b) {
 
-	Vector<Vector<Point2> > polys = Geometry::merge_polygons_2d(p_polygon_a, p_polygon_b);
-
-	Array ret;
-
-	for (int i = 0; i < polys.size(); ++i) {
-		ret.push_back(polys[i]);
-	}
-	return ret;
-}
-
-Array _Geometry::clip_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b) {
-
-	Vector<Vector<Point2> > polys = Geometry::clip_polygons_2d(p_polygon_a, p_polygon_b);
+	std::vector<std::vector<Point2> > polys = Geometry::merge_polygons_2d(p_polygon_a, p_polygon_b);
 
 	Array ret;
 
@@ -1675,21 +1663,9 @@ Array _Geometry::clip_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vect
 	return ret;
 }
 
-Array _Geometry::intersect_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b) {
+Array _Geometry::clip_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b) {
 
-	Vector<Vector<Point2> > polys = Geometry::intersect_polygons_2d(p_polygon_a, p_polygon_b);
-
-	Array ret;
-
-	for (int i = 0; i < polys.size(); ++i) {
-		ret.push_back(polys[i]);
-	}
-	return ret;
-}
-
-Array _Geometry::exclude_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b) {
-
-	Vector<Vector<Point2> > polys = Geometry::exclude_polygons_2d(p_polygon_a, p_polygon_b);
+	std::vector<std::vector<Point2> > polys = Geometry::clip_polygons_2d(p_polygon_a, p_polygon_b);
 
 	Array ret;
 
@@ -1699,21 +1675,9 @@ Array _Geometry::exclude_polygons_2d(const Vector<Vector2> &p_polygon_a, const V
 	return ret;
 }
 
-Array _Geometry::clip_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon) {
+Array _Geometry::intersect_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b) {
 
-	Vector<Vector<Point2> > polys = Geometry::clip_polyline_with_polygon_2d(p_polyline, p_polygon);
-
-	Array ret;
-
-	for (int i = 0; i < polys.size(); ++i) {
-		ret.push_back(polys[i]);
-	}
-	return ret;
-}
-
-Array _Geometry::intersect_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon) {
-
-	Vector<Vector<Point2> > polys = Geometry::intersect_polyline_with_polygon_2d(p_polyline, p_polygon);
+	std::vector<std::vector<Point2> > polys = Geometry::intersect_polygons_2d(p_polygon_a, p_polygon_b);
 
 	Array ret;
 
@@ -1723,21 +1687,9 @@ Array _Geometry::intersect_polyline_with_polygon_2d(const Vector<Vector2> &p_pol
 	return ret;
 }
 
-Array _Geometry::offset_polygon_2d(const Vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type) {
+Array _Geometry::exclude_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b) {
 
-	Vector<Vector<Point2> > polys = Geometry::offset_polygon_2d(p_polygon, p_delta, Geometry::PolyJoinType(p_join_type));
-
-	Array ret;
-
-	for (int i = 0; i < polys.size(); ++i) {
-		ret.push_back(polys[i]);
-	}
-	return ret;
-}
-
-Array _Geometry::offset_polyline_2d(const Vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type) {
-
-	Vector<Vector<Point2> > polys = Geometry::offset_polyline_2d(p_polygon, p_delta, Geometry::PolyJoinType(p_join_type), Geometry::PolyEndType(p_end_type));
+	std::vector<std::vector<Point2> > polys = Geometry::exclude_polygons_2d(p_polygon_a, p_polygon_b);
 
 	Array ret;
 
@@ -1747,23 +1699,71 @@ Array _Geometry::offset_polyline_2d(const Vector<Vector2> &p_polygon, real_t p_d
 	return ret;
 }
 
-Dictionary _Geometry::make_atlas(const Vector<Size2> &p_rects) {
+Array _Geometry::clip_polyline_with_polygon_2d(const std::vector<Vector2> &p_polyline, const std::vector<Vector2> &p_polygon) {
+
+	std::vector<std::vector<Point2> > polys = Geometry::clip_polyline_with_polygon_2d(p_polyline, p_polygon);
+
+	Array ret;
+
+	for (int i = 0; i < polys.size(); ++i) {
+		ret.push_back(polys[i]);
+	}
+	return ret;
+}
+
+Array _Geometry::intersect_polyline_with_polygon_2d(const std::vector<Vector2> &p_polyline, const std::vector<Vector2> &p_polygon) {
+
+	std::vector<std::vector<Point2> > polys = Geometry::intersect_polyline_with_polygon_2d(p_polyline, p_polygon);
+
+	Array ret;
+
+	for (int i = 0; i < polys.size(); ++i) {
+		ret.push_back(polys[i]);
+	}
+	return ret;
+}
+
+Array _Geometry::offset_polygon_2d(const std::vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type) {
+
+	std::vector<std::vector<Point2> > polys = Geometry::offset_polygon_2d(p_polygon, p_delta, Geometry::PolyJoinType(p_join_type));
+
+	Array ret;
+
+	for (int i = 0; i < polys.size(); ++i) {
+		ret.push_back(polys[i]);
+	}
+	return ret;
+}
+
+Array _Geometry::offset_polyline_2d(const std::vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type, PolyEndType p_end_type) {
+
+	std::vector<std::vector<Point2> > polys = Geometry::offset_polyline_2d(p_polygon, p_delta, Geometry::PolyJoinType(p_join_type), Geometry::PolyEndType(p_end_type));
+
+	Array ret;
+
+	for (int i = 0; i < polys.size(); ++i) {
+		ret.push_back(polys[i]);
+	}
+	return ret;
+}
+
+Dictionary _Geometry::make_atlas(const std::vector<Size2> &p_rects) {
 
 	Dictionary ret;
 
-	Vector<Size2i> rects;
+	std::vector<Size2i> rects;
 	for (int i = 0; i < p_rects.size(); i++) {
 
 		rects.push_back(p_rects[i]);
 	};
 
-	Vector<Point2i> result;
+	std::vector<Point2i> result;
 	Size2i size;
 
 	Geometry::make_atlas(rects, result, size);
 
 	Size2 r_size = size;
-	Vector<Point2> r_result;
+	std::vector<Point2> r_result;
 	for (int i = 0; i < result.size(); i++) {
 
 		r_result.push_back(result[i]);
@@ -1850,7 +1850,7 @@ _Geometry::_Geometry() {
 
 ///////////////////////// FILE
 
-Error _File::open_encrypted(const String &p_path, ModeFlags p_mode_flags, const Vector<uint8_t> &p_key) {
+Error _File::open_encrypted(const String &p_path, ModeFlags p_mode_flags, const std::vector<uint8_t> &p_key) {
 
 	Error err = open(p_path, p_mode_flags);
 	if (err)
@@ -2059,8 +2059,8 @@ String _File::get_line() const {
 	return f->get_line();
 }
 
-Vector<String> _File::get_csv_line(const String &p_delim) const {
-	ERR_FAIL_COND_V_MSG(!f, Vector<String>(), "File must be opened before use.");
+std::vector<String> _File::get_csv_line(const String &p_delim) const {
+	ERR_FAIL_COND_V_MSG(!f, std::vector<String>(), "File must be opened before use.");
 	return f->get_csv_line(p_delim);
 }
 
@@ -2158,7 +2158,7 @@ void _File::store_line(const String &p_string) {
 	f->store_line(p_string);
 }
 
-void _File::store_csv_line(const Vector<String> &p_values, const String &p_delim) {
+void _File::store_csv_line(const std::vector<String> &p_values, const String &p_delim) {
 	ERR_FAIL_COND_MSG(!f, "File must be opened before use.");
 	f->store_csv_line(p_values, p_delim);
 }

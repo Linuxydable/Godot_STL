@@ -227,7 +227,7 @@ public:
 	int get_low_processor_usage_mode_sleep_usec() const;
 
 	String get_executable_path() const;
-	int execute(const String &p_path, const Vector<String> &p_arguments, bool p_blocking = true, Array p_output = Array(), bool p_read_stderr = false);
+	int execute(const String &p_path, const std::vector<String> &p_arguments, bool p_blocking = true, Array p_output = Array(), bool p_read_stderr = false);
 
 	Error kill(int p_pid);
 	Error shell_open(String p_uri);
@@ -238,7 +238,7 @@ public:
 	String get_environment(const String &p_var) const;
 
 	String get_name() const;
-	Vector<String> get_cmdline_args();
+	std::vector<String> get_cmdline_args();
 
 	String get_locale() const;
 	String get_latin_keyboard_variant() const;
@@ -256,7 +256,7 @@ public:
 	void print_resources_in_use(bool p_short = false);
 	void print_all_resources(const String &p_to_file);
 	void print_all_textures_by_size();
-	void print_resources_by_type(const Vector<String> &p_types);
+	void print_resources_by_type(const std::vector<String> &p_types);
 
 	bool has_touchscreen_ui_hint() const;
 
@@ -357,7 +357,7 @@ public:
 
 	bool request_permission(const String &p_name);
 	bool request_permissions();
-	Vector<String> get_granted_permissions() const;
+	std::vector<String> get_granted_permissions() const;
 
 	static _OS *get_singleton() { return singleton; }
 
@@ -399,17 +399,17 @@ public:
 
 	PoolVector<Vector3> segment_intersects_sphere(const Vector3 &p_from, const Vector3 &p_to, const Vector3 &p_sphere_pos, real_t p_sphere_radius);
 	PoolVector<Vector3> segment_intersects_cylinder(const Vector3 &p_from, const Vector3 &p_to, float p_height, float p_radius);
-	PoolVector<Vector3> segment_intersects_convex(const Vector3 &p_from, const Vector3 &p_to, const Vector<Plane> &p_planes);
+	PoolVector<Vector3> segment_intersects_convex(const Vector3 &p_from, const Vector3 &p_to, const std::vector<Plane> &p_planes);
 	bool is_point_in_circle(const Vector2 &p_point, const Vector2 &p_circle_pos, real_t p_circle_radius);
 	real_t segment_intersects_circle(const Vector2 &p_from, const Vector2 &p_to, const Vector2 &p_circle_pos, real_t p_circle_radius);
 	int get_uv84_normal_bit(const Vector3 &p_vector);
 
-	bool is_polygon_clockwise(const Vector<Vector2> &p_polygon);
-	bool is_point_in_polygon(const Point2 &p_point, const Vector<Vector2> &p_polygon);
-	Vector<int> triangulate_polygon(const Vector<Vector2> &p_polygon);
-	Vector<int> triangulate_delaunay_2d(const Vector<Vector2> &p_points);
-	Vector<Point2> convex_hull_2d(const Vector<Point2> &p_points);
-	Vector<Vector3> clip_polygon(const Vector<Vector3> &p_points, const Plane &p_plane);
+	bool is_polygon_clockwise(const std::vector<Vector2> &p_polygon);
+	bool is_point_in_polygon(const Point2 &p_point, const std::vector<Vector2> &p_polygon);
+	std::vector<int> triangulate_polygon(const std::vector<Vector2> &p_polygon);
+	std::vector<int> triangulate_delaunay_2d(const std::vector<Vector2> &p_points);
+	std::vector<Point2> convex_hull_2d(const std::vector<Point2> &p_points);
+	std::vector<Vector3> clip_polygon(const std::vector<Vector3> &p_points, const Plane &p_plane);
 
 	enum PolyBooleanOperation {
 		OPERATION_UNION,
@@ -418,14 +418,14 @@ public:
 		OPERATION_XOR
 	};
 	// 2D polygon boolean operations.
-	Array merge_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // Union (add).
-	Array clip_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // Difference (subtract).
-	Array intersect_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // Common area (multiply).
-	Array exclude_polygons_2d(const Vector<Vector2> &p_polygon_a, const Vector<Vector2> &p_polygon_b); // All but common area (xor).
+	Array merge_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b); // Union (add).
+	Array clip_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b); // Difference (subtract).
+	Array intersect_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b); // Common area (multiply).
+	Array exclude_polygons_2d(const std::vector<Vector2> &p_polygon_a, const std::vector<Vector2> &p_polygon_b); // All but common area (xor).
 
 	// 2D polyline vs polygon operations.
-	Array clip_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon); // Cut.
-	Array intersect_polyline_with_polygon_2d(const Vector<Vector2> &p_polyline, const Vector<Vector2> &p_polygon); // Chop.
+	Array clip_polyline_with_polygon_2d(const std::vector<Vector2> &p_polyline, const std::vector<Vector2> &p_polygon); // Cut.
+	Array intersect_polyline_with_polygon_2d(const std::vector<Vector2> &p_polyline, const std::vector<Vector2> &p_polygon); // Chop.
 
 	// 2D offset polygons/polylines.
 	enum PolyJoinType {
@@ -440,10 +440,10 @@ public:
 		END_SQUARE,
 		END_ROUND
 	};
-	Array offset_polygon_2d(const Vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type = JOIN_SQUARE);
-	Array offset_polyline_2d(const Vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type = JOIN_SQUARE, PolyEndType p_end_type = END_SQUARE);
+	Array offset_polygon_2d(const std::vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type = JOIN_SQUARE);
+	Array offset_polyline_2d(const std::vector<Vector2> &p_polygon, real_t p_delta, PolyJoinType p_join_type = JOIN_SQUARE, PolyEndType p_end_type = END_SQUARE);
 
-	Dictionary make_atlas(const Vector<Size2> &p_rects);
+	Dictionary make_atlas(const std::vector<Size2> &p_rects);
 
 	_Geometry();
 };
@@ -477,7 +477,7 @@ public:
 		COMPRESSION_GZIP = Compression::MODE_GZIP
 	};
 
-	Error open_encrypted(const String &p_path, ModeFlags p_mode_flags, const Vector<uint8_t> &p_key);
+	Error open_encrypted(const String &p_path, ModeFlags p_mode_flags, const std::vector<uint8_t> &p_key);
 	Error open_encrypted_pass(const String &p_path, ModeFlags p_mode_flags, const String &p_pass);
 	Error open_compressed(const String &p_path, ModeFlags p_mode_flags, CompressionMode p_compress_mode = COMPRESSION_FASTLZ);
 
@@ -508,7 +508,7 @@ public:
 
 	PoolVector<uint8_t> get_buffer(int p_length) const; // Get an array of bytes.
 	String get_line() const;
-	Vector<String> get_csv_line(const String &p_delim = ",") const;
+	std::vector<String> get_csv_line(const String &p_delim = ",") const;
 	String get_as_text() const;
 	String get_md5(const String &p_path) const;
 	String get_sha256(const String &p_path) const;
@@ -534,7 +534,7 @@ public:
 
 	void store_string(const String &p_string);
 	void store_line(const String &p_string);
-	void store_csv_line(const Vector<String> &p_values, const String &p_delim = ",");
+	void store_csv_line(const std::vector<String> &p_values, const String &p_delim = ",");
 
 	virtual void store_pascal_string(const String &p_string);
 	virtual String get_pascal_string();
