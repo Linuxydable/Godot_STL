@@ -444,6 +444,7 @@
     <ClInclude Include="editor\script_editor_debugger.h" />
     <ClInclude Include="editor\settings_config_dialog.h" />
     <ClInclude Include="editor\spatial_editor_gizmos.h" />
+    <ClInclude Include="helper\std_h.h" />
     <ClInclude Include="main\default_controller_mappings.h" />
     <ClInclude Include="main\input_default.h" />
     <ClInclude Include="main\main.h" />

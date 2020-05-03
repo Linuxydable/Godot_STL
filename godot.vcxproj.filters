@@ -1125,6 +1125,9 @@
     <Filter Include="Header Files\main\tests">
       <UniqueIdentifier>{132b210e-4db6-4d34-816f-387921845875}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\helper">
+      <UniqueIdentifier>{763d2ec5-d7c7-483a-a3db-412015b6f6c9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="core\bind\core_bind.h">
@@ -4660,6 +4663,9 @@
     </ClInclude>
     <ClInclude Include="main\tests\test_string.h">
       <Filter>Header Files\main\tests</Filter>
+    </ClInclude>
+    <ClInclude Include="helper\std_h.h">
+      <Filter>Header Files\helper</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
