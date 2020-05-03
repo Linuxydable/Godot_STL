@@ -40,7 +40,7 @@ class EditorPath : public MenuButton {
 
 	EditorHistory *history;
 
-	Vector<ObjectID> objects;
+	std::vector<ObjectID> objects;
 	EditorPath();
 
 	void _id_pressed(int p_idx);
