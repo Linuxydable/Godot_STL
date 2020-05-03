@@ -74,7 +74,7 @@ static String _opstr(SL::Operator p_op) {
 	return ShaderLanguage::get_operator_text(p_op);
 }
 
-static String get_constant_text(SL::DataType p_type, const Vector<SL::ConstantNode::Value> &p_values) {
+static String get_constant_text(SL::DataType p_type, const std::vector<SL::ConstantNode::Value> &p_values) {
 
 	switch (p_type) {
 		case SL::TYPE_BOOL: return p_values[0].boolean ? "true" : "false";
@@ -331,7 +331,7 @@ MainLoop *test() {
 	dt["fragment"].built_ins["ALBEDO"] = SL::TYPE_VEC3;
 	dt["fragment"].can_discard = true;
 
-	Vector<StringName> rm;
+	std::vector<StringName> rm;
 	rm.push_back("popo");
 	Set<String> types;
 	types.insert("spatial");
