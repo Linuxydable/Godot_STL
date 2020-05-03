@@ -152,7 +152,7 @@ int RasterizerCanvasGLES2::_batch_find_or_create_tex(const RID &p_texture, const
 		}
 	}
 
-	// pushing back from local variable .. not ideal but has to use a Vector because non pod
+	// pushing back from local variable .. not ideal but has to use a std::vector because non pod
 	// due to RIDs
 	BatchTex new_batch_tex;
 	new_batch_tex.RID_texture = p_texture;
@@ -243,7 +243,7 @@ RasterizerCanvasGLES2::Batch *RasterizerCanvasGLES2::_batch_request_new(bool p_b
 bool RasterizerCanvasGLES2::prefill_joined_item(FillState &r_fill_state, int &r_command_start, Item *p_item, Item *p_current_clip, bool &r_reclip, RasterizerStorageGLES2::Material *p_material) {
 	// we will prefill batches and vertices ready for sending in one go to the vertex buffer
 	int command_count = p_item->commands.size();
-	Item::Command *const *commands = p_item->commands.ptr();
+	Item::Command *const *commands = p_item->commands.data();
 
 	// just a local, might be more efficient in a register (check)
 	Vector2 texpixel_size = r_fill_state.texpixel_size;
@@ -1281,14 +1281,14 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 								state.canvas_shader.set_uniform(CanvasShaderGLES2::COLOR_TEXPIXEL_SIZE, texpixel_size);
 							}
 
-							_draw_polygon(polygon->indices.ptr(), polygon->count, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1, polygon->weights.ptr(), polygon->bones.ptr());
+							_draw_polygon(polygon->indices.data(), polygon->count, polygon->points.size(), polygon->points.data(), polygon->uvs.data(), polygon->colors.data(), polygon->colors.size() == 1, polygon->weights.data(), polygon->bones.data());
 #ifdef GLES_OVER_GL
 							if (polygon->antialiased) {
 								glEnable(GL_LINE_SMOOTH);
 								if (polygon->antialiasing_use_indices) {
-									_draw_generic_indices(GL_LINE_STRIP, polygon->indices.ptr(), polygon->count, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1);
+									_draw_generic_indices(GL_LINE_STRIP, polygon->indices.data(), polygon->count, polygon->points.size(), polygon->points.data(), polygon->uvs.data(), polygon->colors.data(), polygon->colors.size() == 1);
 								} else {
-									_draw_generic(GL_LINE_LOOP, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1);
+									_draw_generic(GL_LINE_LOOP, polygon->points.size(), polygon->points.data(), polygon->uvs.data(), polygon->colors.data(), polygon->colors.size() == 1);
 								}
 								glDisable(GL_LINE_SMOOTH);
 							}
@@ -1403,7 +1403,7 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 
 							// drawing
 
-							const float *base_buffer = multi_mesh->data.ptr();
+							const float *base_buffer = multi_mesh->data.data();
 
 							for (int j = 0; j < mesh_data->surfaces.size(); j++) {
 								RasterizerStorageGLES2::Surface *s = mesh_data->surfaces[j];
@@ -1496,13 +1496,13 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 							_bind_canvas_texture(RID(), RID());
 
 							if (pline->triangles.size()) {
-								_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.ptr(), NULL, pline->triangle_colors.ptr(), pline->triangle_colors.size() == 1);
+								_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.data(), NULL, pline->triangle_colors.data(), pline->triangle_colors.size() == 1);
 #ifdef GLES_OVER_GL
 								glEnable(GL_LINE_SMOOTH);
 								if (pline->multiline) {
 									//needs to be different
 								} else {
-									_draw_generic(GL_LINE_LOOP, pline->lines.size(), pline->lines.ptr(), NULL, pline->line_colors.ptr(), pline->line_colors.size() == 1);
+									_draw_generic(GL_LINE_LOOP, pline->lines.size(), pline->lines.data(), NULL, pline->line_colors.data(), pline->line_colors.size() == 1);
 								}
 								glDisable(GL_LINE_SMOOTH);
 #endif
@@ -1520,12 +1520,12 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 
 									while (todo) {
 										int to_draw = MIN(max_per_call, todo);
-										_draw_generic(GL_LINES, to_draw * 2, &pline->lines.ptr()[offset], NULL, pline->line_colors.size() == 1 ? pline->line_colors.ptr() : &pline->line_colors.ptr()[offset], pline->line_colors.size() == 1);
+										_draw_generic(GL_LINES, to_draw * 2, &pline->lines.data()[offset], NULL, pline->line_colors.size() == 1 ? pline->line_colors.data() : &pline->line_colors.data()[offset], pline->line_colors.size() == 1);
 										todo -= to_draw;
 										offset += to_draw * 2;
 									}
 								} else {
-									_draw_generic(GL_LINES, pline->lines.size(), pline->lines.ptr(), NULL, pline->line_colors.ptr(), pline->line_colors.size() == 1);
+									_draw_generic(GL_LINES, pline->lines.size(), pline->lines.data(), NULL, pline->line_colors.data(), pline->line_colors.size() == 1);
 								}
 
 #ifdef GLES_OVER_GL
@@ -1562,7 +1562,7 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 								glVertexAttrib4f(VS::ARRAY_COLOR, 1, 1, 1, 1);
 							}
 
-							_draw_gui_primitive(primitive->points.size(), primitive->points.ptr(), primitive->colors.ptr(), primitive->uvs.ptr());
+							_draw_gui_primitive(primitive->points.size(), primitive->points.data(), primitive->colors.data(), primitive->uvs.data());
 							storage->info.render._2d_draw_call_count++;
 						} break;
 
@@ -1705,7 +1705,7 @@ void RasterizerCanvasGLES2::flush_render_batches(Item *p_first_item, Item *p_cur
 	// send buffers to opengl
 	_batch_upload_buffers();
 
-	Item::Command *const *commands = p_first_item->commands.ptr();
+	Item::Command *const *commands = p_first_item->commands.data();
 
 #ifdef DEBUG_ENABLED
 	if (bdata.diagnose_frame) {
@@ -1720,7 +1720,7 @@ void RasterizerCanvasGLES2::_canvas_item_render_commands(Item *p_item, Item *p_c
 
 	int command_count = p_item->commands.size();
 
-	Item::Command *const *commands = p_item->commands.ptr();
+	Item::Command *const *commands = p_item->commands.data();
 
 	// legacy .. just create one massive batch and render everything as before
 	bdata.batches.reset();
@@ -2398,7 +2398,7 @@ bool RasterizerCanvasGLES2::_detect_batch_break(Item *p_ci) {
 	if (command_count > bdata.settings_max_join_item_commands) {
 		return true;
 	} else {
-		Item::Command *const *commands = p_ci->commands.ptr();
+		Item::Command *const *commands = p_ci->commands.data();
 
 		// do as many commands as possible until the vertex buffer will be full up
 		for (int command_num = 0; command_num < command_count; command_num++) {
@@ -2528,9 +2528,9 @@ void RasterizerCanvasGLES2::_canvas_render_item(Item *p_ci, RenderItemState &r_r
 			}
 
 			int tc = material_ptr->textures.size();
-			Pair<StringName, RID> *textures = material_ptr->textures.ptrw();
+			Pair<StringName, RID> *textures = material_ptr->textures.data();
 
-			ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.ptrw();
+			ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.data();
 
 			for (int i = 0; i < tc; i++) {
 
@@ -2909,9 +2909,9 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 			}
 
 			int tc = material_ptr->textures.size();
-			Pair<StringName, RID> *textures = material_ptr->textures.ptrw();
+			Pair<StringName, RID> *textures = material_ptr->textures.data();
 
-			ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.ptrw();
+			ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.data();
 
 			for (int i = 0; i < tc; i++) {
 
@@ -3439,18 +3439,18 @@ void RasterizerCanvasGLES2::initialize() {
 		glGenBuffers(1, &bdata.gl_index_buffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bdata.gl_index_buffer);
 
-		Vector<uint16_t> indices;
+		std::vector<uint16_t> indices;
 		indices.resize(bdata.index_buffer_size_units);
 
 		for (int q = 0; q < max_quads; q++) {
 			int i_pos = q * 6; //  6 inds per quad
 			int q_pos = q * 4; // 4 verts per quad
-			indices.set(i_pos, q_pos);
-			indices.set(i_pos + 1, q_pos + 1);
-			indices.set(i_pos + 2, q_pos + 2);
-			indices.set(i_pos + 3, q_pos);
-			indices.set(i_pos + 4, q_pos + 2);
-			indices.set(i_pos + 5, q_pos + 3);
+			indices[i_pos] = q_pos;
+			indices[i_pos + 1] = q_pos + 1;
+			indices[i_pos + 2] = q_pos + 2;
+			indices[i_pos + 3] = q_pos;
+			indices[i_pos + 4] = q_pos + 2;
+			indices[i_pos + 5] = q_pos + 3;
 
 			// we can only use 16 bit indices in GLES2!
 #ifdef DEBUG_ENABLED
