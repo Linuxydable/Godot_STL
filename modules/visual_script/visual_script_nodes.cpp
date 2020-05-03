@@ -3908,7 +3908,7 @@ void VisualScriptInputAction::_validate_property(PropertyInfo &property) const {
 
 		List<PropertyInfo> pinfo;
 		ProjectSettings::get_singleton()->get_property_list(&pinfo);
-		Vector<String> al;
+		std::vector<String> al;
 
 		for (List<PropertyInfo>::Element *E = pinfo.front(); E; E = E->next()) {
 			const PropertyInfo &pi = E->get();
@@ -4061,7 +4061,7 @@ Array VisualScriptDeconstruct::_get_elem_cache() const {
 class VisualScriptNodeInstanceDeconstruct : public VisualScriptNodeInstance {
 public:
 	VisualScriptInstance *instance;
-	Vector<StringName> outputs;
+	std::vector<StringName> outputs;
 
 	//virtual int get_working_memory_size() const { return 0; }
 
@@ -4089,7 +4089,7 @@ VisualScriptNodeInstance *VisualScriptDeconstruct::instance(VisualScriptInstance
 	instance->instance = p_instance;
 	instance->outputs.resize(elements.size());
 	for (int i = 0; i < elements.size(); i++) {
-		instance->outputs.write[i] = elements[i].name;
+		instance->outputs[i] = elements[i].name;
 	}
 
 	return instance;

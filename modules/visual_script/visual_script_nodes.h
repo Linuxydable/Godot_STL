@@ -44,7 +44,7 @@ class VisualScriptFunction : public VisualScriptNode {
 		String hint_string;
 	};
 
-	Vector<Argument> arguments;
+	std::vector<Argument> arguments;
 
 	bool stack_less;
 	int stack_size;
@@ -113,8 +113,8 @@ class VisualScriptLists : public VisualScriptNode {
 	};
 
 protected:
-	Vector<Port> inputports;
-	Vector<Port> outputports;
+	std::vector<Port> inputports;
+	std::vector<Port> outputports;
 
 	enum {
 		OUTPUT_EDITABLE = 0x0001,
@@ -1053,7 +1053,7 @@ class VisualScriptDeconstruct : public VisualScriptNode {
 		Variant::Type type;
 	};
 
-	Vector<Element> elements;
+	std::vector<Element> elements;
 
 	void _update_elements();
 	Variant::Type type;
