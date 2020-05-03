@@ -733,7 +733,7 @@ void VisualScript::add_custom_signal(const StringName &p_name) {
 	ERR_FAIL_COND(!String(p_name).is_valid_identifier());
 	ERR_FAIL_COND(custom_signals.has(p_name));
 
-	custom_signals[p_name] = Vector<Argument>();
+	custom_signals[p_name] = std::vector<Argument>();
 }
 
 bool VisualScript::has_custom_signal(const StringName &p_name) const {
@@ -825,7 +825,7 @@ void VisualScript::rename_custom_signal(const StringName &p_name, const StringNa
 
 void VisualScript::get_custom_signal_list(List<StringName> *r_custom_signals) const {
 
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 		r_custom_signals->push_back(E->key());
 	}
 
@@ -981,7 +981,7 @@ bool VisualScript::has_script_signal(const StringName &p_signal) const {
 
 void VisualScript::get_script_signal_list(List<MethodInfo> *r_signals) const {
 
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 
 		MethodInfo mi;
 		mi.name = E->key();
@@ -1224,7 +1224,7 @@ Dictionary VisualScript::_get_data() const {
 	d["variables"] = vars;
 
 	Array sigs;
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 
 		Dictionary cs;
 		cs["name"] = E->key();
@@ -2365,7 +2365,7 @@ Variant VisualScriptFunctionState::_signal_callback(const Variant **p_args, int 
 
 void VisualScriptFunctionState::connect_to_signal(Object *p_obj, const String &p_signal, Array p_binds) {
 
-	Vector<Variant> binds;
+	std::vector<Variant> binds;
 	for (int i = 0; i < p_binds.size(); i++) {
 		binds.push_back(p_binds[i]);
 	}

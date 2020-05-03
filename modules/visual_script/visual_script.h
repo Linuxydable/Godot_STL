@@ -116,7 +116,7 @@ class VisualScriptNodeInstance {
 	int sequence_index;
 	VisualScriptNodeInstance **sequence_outputs;
 	int sequence_output_count;
-	Vector<VisualScriptNodeInstance *> dependencies;
+	std::vector<VisualScriptNodeInstance *> dependencies;
 	int *input_ports;
 	int input_port_count;
 	int *output_ports;
@@ -244,7 +244,7 @@ private:
 
 	Map<StringName, Function> functions;
 	Map<StringName, Variable> variables;
-	Map<StringName, Vector<Argument> > custom_signals;
+	Map<StringName, std::vector<Argument> > custom_signals;
 
 	Map<Object *, VisualScriptInstance *> instances;
 
@@ -389,7 +389,7 @@ class VisualScriptInstance : public ScriptInstance {
 
 	Map<StringName, Function> functions;
 
-	Vector<Variant> default_values;
+	std::vector<Variant> default_values;
 	int max_input_args, max_output_args;
 
 	StringName source;
@@ -457,7 +457,7 @@ class VisualScriptFunctionState : public Reference {
 	ObjectID script_id;
 	VisualScriptInstance *instance;
 	StringName function;
-	Vector<uint8_t> stack;
+	std::vector<uint8_t> stack;
 	int working_mem_index;
 	int variant_stack_size;
 	VisualScriptNodeInstance *node;
