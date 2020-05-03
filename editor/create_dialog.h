@@ -43,7 +43,7 @@ class CreateDialog : public ConfirmationDialog {
 
 	GDCLASS(CreateDialog, ConfirmationDialog);
 
-	Vector<String> favorite_list;
+	std::vector<String> favorite_list;
 	Tree *favorites;
 	Tree *recent;
 

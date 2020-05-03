@@ -30,6 +30,8 @@
 
 #include "create_dialog.h"
 
+#include "helper/std_h.h"
+
 #include "core/class_db.h"
 #include "core/os/keyboard.h"
 #include "core/print_string.h"
@@ -375,7 +377,7 @@ void CreateDialog::_update_search() {
 		if (EditorNode::get_editor_data().get_custom_types().has(type) && ClassDB::is_parent_class(type, base_type)) {
 			//there are custom types based on this... cool.
 
-			const Vector<EditorData::CustomType> &ct = EditorNode::get_editor_data().get_custom_types()[type];
+			const std::vector<EditorData::CustomType> &ct = EditorNode::get_editor_data().get_custom_types()[type];
 			for (int i = 0; i < ct.size(); i++) {
 
 				bool show = search_box->get_text().is_subsequence_ofi(ct[i].name);
@@ -414,7 +416,7 @@ void CreateDialog::_update_search() {
 		to_select->select(0);
 		search_options->scroll_to_item(to_select);
 		favorite->set_disabled(false);
-		favorite->set_pressed(favorite_list.find(to_select->get_text(0)) != -1);
+		favorite->set_pressed(std_h::isFind(favorite_list, to_select->get_text(0)));
 	}
 
 	get_ok()->set_disabled(root->get_children() == NULL);
@@ -551,7 +553,7 @@ void CreateDialog::_item_selected() {
 	String name = item->get_text(0);
 
 	favorite->set_disabled(false);
-	favorite->set_pressed(favorite_list.find(name) != -1);
+	favorite->set_pressed(std_h::isFind(favorite_list, name));
 
 	if (!EditorHelp::get_doc_data()->class_list.has(name))
 		return;
@@ -569,11 +571,12 @@ void CreateDialog::_favorite_toggled() {
 
 	String name = item->get_text(0);
 
-	if (favorite_list.find(name) == -1) {
+	if (std_h::isFind(favorite_list, name)) {
 		favorite_list.push_back(name);
 		favorite->set_pressed(true);
 	} else {
-		favorite_list.erase(name);
+		std_h::erase(favorite_list, name);
+
 		favorite->set_pressed(false);
 	}
 
@@ -687,13 +690,13 @@ void CreateDialog::drop_data_fw(const Point2 &p_point, const Variant &p_data, Co
 	String drop_at = ti->get_text(0);
 	int ds = favorites->get_drop_section_at_position(p_point);
 
-	int drop_idx = favorite_list.find(drop_at);
+	int drop_idx = std_h::getIndex(favorite_list, drop_at);
 	if (drop_idx < 0)
 		return;
 
 	String type = d["class"];
 
-	int from_idx = favorite_list.find(type);
+	int from_idx = std_h::getIndex(favorite_list, type);
 	if (from_idx < 0)
 		return;
 
@@ -703,15 +706,15 @@ void CreateDialog::drop_data_fw(const Point2 &p_point, const Variant &p_data, Co
 		drop_idx--;
 	}
 
-	favorite_list.remove(from_idx);
+	favorite_list.erase(favorite_list.begin() + from_idx);
 
 	if (ds < 0) {
-		favorite_list.insert(drop_idx, type);
+		favorite_list.insert(favorite_list.begin() + drop_idx, type);
 	} else {
 		if (drop_idx >= favorite_list.size() - 1) {
 			favorite_list.push_back(type);
 		} else {
-			favorite_list.insert(drop_idx + 1, type);
+			favorite_list.insert(favorite_list.begin() + drop_idx + 1, type);
 		}
 	}
 
