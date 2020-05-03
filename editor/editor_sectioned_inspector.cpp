@@ -252,7 +252,7 @@ void SectionedInspector::update_category_list() {
 		if (sp == -1)
 			pi.name = "global/" + pi.name;
 
-		Vector<String> sectionarr = pi.name.split("/");
+		std::vector<String> sectionarr = pi.name.split("/");
 		String metasection;
 
 		int sc = MIN(2, sectionarr.size() - 1);
