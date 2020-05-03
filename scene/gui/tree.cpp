@@ -162,7 +162,7 @@ void TreeItem::set_text(int p_column, String p_text) {
 
 	if (cells[p_column].mode == TreeItem::CELL_MODE_RANGE) {
 
-		Vector<String> strings = p_text.split(",");
+		std::vector<String> strings = p_text.split(",");
 		cells.write[p_column].min = INT_MAX;
 		cells.write[p_column].max = INT_MIN;
 		for (int i = 0; i < strings.size(); i++) {
@@ -1335,7 +1335,7 @@ int Tree::draw_item(const Point2i &p_pos, const Point2 &p_draw_ofs, const Size2 
 						int option = (int)p_item->cells[i].val;
 
 						String s = RTR("(Other)");
-						Vector<String> strings = p_item->cells[i].text.split(",");
+						std::vector<String> strings = p_item->cells[i].text.split(",");
 						for (int j = 0; j < strings.size(); j++) {
 							int value = j;
 							if (!strings[j].get_slicec(':', 1).empty()) {
