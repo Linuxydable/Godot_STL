@@ -614,7 +614,7 @@ void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &
 	Dictionary drop_data = p_data;
 	PoolStringArray autoloads = drop_data["autoloads"];
 
-	Vector<int> orders;
+	std::vector<int> orders;
 	orders.resize(autoload_cache.size());
 
 	for (int i = 0; i < autoloads.size(); i++) {
@@ -636,10 +636,10 @@ void EditorAutoloadSettings::drop_data_fw(const Point2 &p_point, const Variant &
 	int i = 0;
 
 	for (List<AutoLoadInfo>::Element *F = autoload_cache.front(); F; F = F->next()) {
-		orders.write[i++] = F->get().order;
+		orders[i++] = F->get().order;
 	}
 
-	orders.sort();
+	std::sort(orders.begin(), orders.end());
 
 	UndoRedo *undo_redo = EditorNode::get_undo_redo();
 
