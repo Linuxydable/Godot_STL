@@ -213,7 +213,7 @@ void RigidBodyBullet::KinematicUtilities::setSafeMargin(btScalar p_margin) {
 }
 
 void RigidBodyBullet::KinematicUtilities::copyAllOwnerShapes() {
-	const Vector<CollisionObjectBullet::ShapeWrapper> &shapes_wrappers(owner->get_shapes_wrappers());
+	const std::vector<CollisionObjectBullet::ShapeWrapper> &shapes_wrappers(owner->get_shapes_wrappers());
 	const int shapes_count = shapes_wrappers.size();
 
 	just_delete_shapes(shapes_count);
@@ -421,7 +421,7 @@ void RigidBodyBullet::on_collision_checker_start() {
 	collisionsCount = 0;
 
 	// Swap array
-	Vector<RigidBodyBullet *> *s = prev_collision_traces;
+	std::vector<RigidBodyBullet *> *s = prev_collision_traces;
 	prev_collision_traces = curr_collision_traces;
 	curr_collision_traces = s;
 }
