@@ -126,7 +126,7 @@ StringName VisualScriptFunctionCall::_get_base_type() const {
 int VisualScriptFunctionCall::get_input_value_port_count() const {
 
 	if (call_mode == CALL_MODE_BASIC_TYPE) {
-		Vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
+		std::vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
 		return types.size() + (rpc_call_mode >= RPC_RELIABLE_TO_ID ? 1 : 0) + 1;
 
 	} else {
@@ -196,8 +196,8 @@ PropertyInfo VisualScriptFunctionCall::get_input_value_port_info(int p_idx) cons
 
 	if (call_mode == CALL_MODE_BASIC_TYPE) {
 
-		Vector<StringName> names = Variant::get_method_argument_names(basic_type, function);
-		Vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
+		std::vector<StringName> names = Variant::get_method_argument_names(basic_type, function);
+		std::vector<Variant::Type> types = Variant::get_method_argument_types(basic_type, function);
 		return PropertyInfo(types[p_idx], names[p_idx]);
 
 	} else {
@@ -2459,7 +2459,7 @@ VisualScriptEmitSignal::VisualScriptEmitSignal() {
 
 static Ref<VisualScriptNode> create_basic_type_call_node(const String &p_name) {
 
-	Vector<String> path = p_name.split("/");
+	std::vector<String> path = p_name.split("/");
 	ERR_FAIL_COND_V(path.size() < 4, Ref<VisualScriptNode>());
 	String base_type = path[2];
 	String method = path[3];
