@@ -53,11 +53,11 @@ void NavigationMesh::create_from_mesh(const Ref<Mesh> &p_mesh) {
 		PoolVector<int>::Read r = iarr.read();
 
 		for (int j = 0; j < rlen; j += 3) {
-			Vector<int> vi;
+			std::vector<int> vi;
 			vi.resize(3);
-			vi.write[0] = r[j + 0] + from;
-			vi.write[1] = r[j + 1] + from;
-			vi.write[2] = r[j + 2] + from;
+			vi[0] = r[j + 0] + from;
+			vi[1] = r[j + 1] + from;
+			vi[2] = r[j + 2] + from;
 
 			add_polygon(vi);
 		}

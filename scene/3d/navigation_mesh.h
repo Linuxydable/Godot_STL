@@ -42,9 +42,9 @@ class NavigationMesh : public Resource {
 
 	PoolVector<Vector3> vertices;
 	struct Polygon {
-		Vector<int> indices;
+		std::vector<int> indices;
 	};
-	Vector<Polygon> polygons;
+	std::vector<Polygon> polygons;
 	Ref<ArrayMesh> debug_mesh;
 
 	struct _EdgeKey {
