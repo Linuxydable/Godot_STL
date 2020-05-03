@@ -341,30 +341,30 @@ void ScriptEditorDebugger::_file_selected(const String &p_file) {
 				ERR_PRINTS("Failed to open " + p_file);
 				return;
 			}
-			Vector<String> line;
+			std::vector<String> line;
 			line.resize(Performance::MONITOR_MAX);
 
 			// signatures
 			for (int i = 0; i < Performance::MONITOR_MAX; i++) {
-				line.write[i] = Performance::get_singleton()->get_monitor_name(Performance::Monitor(i));
+				line[i] = Performance::get_singleton()->get_monitor_name(Performance::Monitor(i));
 			}
 			file->store_csv_line(line);
 
 			// values
-			List<Vector<float> >::Element *E = perf_history.back();
+			List<std::vector<float> >::Element *E = perf_history.back();
 			while (E) {
 
-				Vector<float> &perf_data = E->get();
+				std::vector<float> &perf_data = E->get();
 				for (int i = 0; i < perf_data.size(); i++) {
 
-					line.write[i] = String::num_real(perf_data[i]);
+					line[i] = String::num_real(perf_data[i]);
 				}
 				file->store_csv_line(line);
 				E = E->prev();
 			}
 			file->store_string("\n");
 
-			Vector<Vector<String> > profiler_data = profiler->get_data_as_csv();
+			std::vector<std::vector<String> > profiler_data = profiler->get_data_as_csv();
 			for (int i = 0; i < profiler_data.size(); i++) {
 				file->store_csv_line(profiler_data[i]);
 			}
@@ -379,20 +379,20 @@ void ScriptEditorDebugger::_file_selected(const String &p_file) {
 				return;
 			}
 
-			Vector<String> headers;
+			std::vector<String> headers;
 			headers.resize(vmem_tree->get_columns());
 			for (int i = 0; i < vmem_tree->get_columns(); ++i) {
-				headers.write[i] = vmem_tree->get_column_title(i);
+				headers[i] = vmem_tree->get_column_title(i);
 			}
 			file->store_csv_line(headers);
 
 			if (vmem_tree->get_root()) {
 				TreeItem *ti = vmem_tree->get_root()->get_children();
 				while (ti) {
-					Vector<String> values;
+					std::vector<String> values;
 					values.resize(vmem_tree->get_columns());
 					for (int i = 0; i < vmem_tree->get_columns(); ++i) {
-						values.write[i] = ti->get_text(i);
+						values[i] = ti->get_text(i);
 					}
 					file->store_csv_line(values);
 
@@ -841,10 +841,10 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 
 	} else if (p_msg == "performance") {
 		Array arr = p_data[0];
-		Vector<float> p;
+		std::vector<float> p;
 		p.resize(arr.size());
 		for (int i = 0; i < arr.size(); i++) {
-			p.write[i] = arr[i];
+			p[i] = arr[i];
 			if (i < perf_items.size()) {
 
 				const float value = p[i];
@@ -867,7 +867,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 				perf_items[i]->set_text(1, label);
 				perf_items[i]->set_tooltip(1, tooltip);
 				if (p[i] > perf_max[i])
-					perf_max.write[i] = p[i];
+					perf_max[i] = p[i];
 			}
 		}
 		perf_history.push_front(p);
@@ -1065,7 +1065,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 				item.signature = "categ::" + name + "::" + item.name;
 				item.name = item.name.capitalize();
 				c.total_time += item.total;
-				c.items.write[j / 2] = item;
+				c.items[j / 2] = item;
 			}
 			metric.categories.push_back(c);
 		}
@@ -1088,7 +1088,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 				item.signature = profiler_signature[signature];
 
 				String name = profiler_signature[signature];
-				Vector<String> strings = name.split("::");
+				std::vector<String> strings = name.split("::");
 				if (strings.size() == 3) {
 					item.name = strings[2];
 					item.script = strings[0];
@@ -1106,7 +1106,7 @@ void ScriptEditorDebugger::_parse_message(const String &p_msg, const Array &p_da
 			item.calls = calls;
 			item.self = self;
 			item.total = total;
-			funcs.items.write[i] = item;
+			funcs.items[i] = item;
 		}
 
 		metric.categories.push_back(funcs);
@@ -1157,7 +1157,7 @@ void ScriptEditorDebugger::_performance_select() {
 
 void ScriptEditorDebugger::_performance_draw() {
 
-	Vector<int> which;
+	std::vector<int> which;
 	for (int i = 0; i < perf_items.size(); i++) {
 
 		if (perf_items[i]->is_checked(0))
@@ -1206,7 +1206,7 @@ void ScriptEditorDebugger::_performance_draw() {
 		float spacing = point_sep / float(cols);
 		float from = r.size.width;
 
-		List<Vector<float> >::Element *E = perf_history.front();
+		List<std::vector<float> >::Element *E = perf_history.front();
 		float prev = -1;
 		while (from >= 0 && E) {
 
@@ -1514,7 +1514,7 @@ void ScriptEditorDebugger::start() {
 	perf_history.clear();
 	for (int i = 0; i < Performance::MONITOR_MAX; i++) {
 
-		perf_max.write[i] = 0;
+		perf_max[i] = 0;
 	}
 
 	int remote_port = (int)EditorSettings::get_singleton()->get("network/debug/remote_port");
@@ -2553,7 +2553,7 @@ ScriptEditorDebugger::ScriptEditorDebugger(EditorNode *p_editor) {
 			it->set_selectable(1, false);
 			it->set_text(0, name.capitalize());
 			perf_items.push_back(it);
-			perf_max.write[i] = 0;
+			perf_max[i] = 0;
 		}
 
 		info_message = memnew(Label);
