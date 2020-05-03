@@ -32,7 +32,6 @@
 #define SPACE_BULLET_H
 
 #include "core/variant.h"
-#include "core/vector.h"
 #include "godot_result_callbacks.h"
 #include "rid_bullet.h"
 #include "servers/physics_server.h"
