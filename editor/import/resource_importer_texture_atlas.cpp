@@ -196,15 +196,15 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 
 	ERR_FAIL_COND_V(p_source_file_options.size() == 0, ERR_BUG); //should never happen
 
-	Vector<EditorAtlasPacker::Chart> charts;
-	Vector<PackData> pack_data_files;
+	std::vector<EditorAtlasPacker::Chart> charts;
+	std::vector<PackData> pack_data_files;
 
 	pack_data_files.resize(p_source_file_options.size());
 
 	int idx = 0;
 	for (const Map<String, Map<StringName, Variant> >::Element *E = p_source_file_options.front(); E; E = E->next(), idx++) {
 
-		PackData &pack_data = pack_data_files.write[idx];
+		PackData &pack_data = pack_data_files[idx];
 		const String &source = E->key();
 		const Map<StringName, Variant> &options = E->get();
 
@@ -251,7 +251,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 			Ref<BitMap> bit_map;
 			bit_map.instance();
 			bit_map->create_from_image_alpha(image);
-			Vector<Vector<Vector2> > polygons = bit_map->clip_opaque_to_polygons(Rect2(0, 0, image->get_width(), image->get_height()));
+			std::vector<std::vector<Vector2> > polygons = bit_map->clip_opaque_to_polygons(Rect2(0, 0, image->get_width(), image->get_height()));
 
 			for (int j = 0; j < polygons.size(); j++) {
 
@@ -259,7 +259,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 				chart.vertices = polygons[j];
 				chart.can_transpose = true;
 
-				Vector<int> poly = Geometry::triangulate_polygon(polygons[j]);
+				std::vector<int> poly = Geometry::triangulate_polygon(polygons[j]);
 				for (int i = 0; i < poly.size(); i += 3) {
 
 					EditorAtlasPacker::Chart::Face f;
@@ -290,7 +290,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 
 	for (int i = 0; i < pack_data_files.size(); i++) {
 
-		PackData &pack_data = pack_data_files.write[i];
+		PackData &pack_data = pack_data_files[i];
 		pack_data.image->lock();
 		for (int j = 0; j < pack_data.chart_pieces.size(); j++) {
 			const EditorAtlasPacker::Chart &chart = charts[pack_data.chart_pieces[j]];
@@ -329,7 +329,7 @@ Error ResourceImporterTextureAtlas::import_group_file(const String &p_group_file
 	idx = 0;
 	for (const Map<String, Map<StringName, Variant> >::Element *E = p_source_file_options.front(); E; E = E->next(), idx++) {
 
-		PackData &pack_data = pack_data_files.write[idx];
+		PackData &pack_data = pack_data_files[idx];
 
 		Ref<Texture> texture;
 
