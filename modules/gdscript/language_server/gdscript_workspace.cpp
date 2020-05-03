@@ -172,7 +172,7 @@ Array GDScriptWorkspace::symbol(const Dictionary &p_params) {
 	Array arr;
 	if (!query.empty()) {
 		for (Map<String, ExtendGDScriptParser *>::Element *E = scripts.front(); E; E = E->next()) {
-			Vector<lsp::DocumentedSymbolInformation> script_symbols;
+			std::vector<lsp::DocumentedSymbolInformation> script_symbols;
 			E->get()->get_symbols().symbol_tree_as_list(E->key(), script_symbols);
 			for (int i = 0; i < script_symbols.size(); ++i) {
 				if (query.is_subsequence_ofi(script_symbols[i].name)) {
@@ -217,10 +217,11 @@ Error GDScriptWorkspace::initialize() {
 			class_symbol.children.push_back(symbol);
 		}
 
-		Vector<DocData::PropertyDoc> properties;
-		properties.append_array(class_data.properties);
+		std::vector<DocData::PropertyDoc> properties;
+
+		std_h::appendArray(properties, class_data.properties);
 		const int theme_prop_start_idx = properties.size();
-		properties.append_array(class_data.theme_properties);
+		std_h::appendArray(properties, class_data.theme_properties);
 
 		for (int i = 0; i < class_data.properties.size(); i++) {
 			const DocData::PropertyDoc &data = class_data.properties[i];
@@ -238,10 +239,10 @@ Error GDScriptWorkspace::initialize() {
 			class_symbol.children.push_back(symbol);
 		}
 
-		Vector<DocData::MethodDoc> methods_signals;
-		methods_signals.append_array(class_data.methods);
+		std::vector<DocData::MethodDoc> methods_signals;
+		std_h::appendArray(methods_signals, class_data.methods);
 		const int signal_start_idx = methods_signals.size();
-		methods_signals.append_array(class_data.signals);
+		std_h::appendArray(methods_signals, class_data.signals);
 
 		for (int i = 0; i < methods_signals.size(); i++) {
 			const DocData::MethodDoc &data = methods_signals[i];
@@ -365,7 +366,7 @@ void GDScriptWorkspace::publish_diagnostics(const String &p_path) {
 	Array errors;
 	const Map<String, ExtendGDScriptParser *>::Element *ele = parse_results.find(p_path);
 	if (ele) {
-		const Vector<lsp::Diagnostic> &list = ele->get()->get_diagnostics();
+		const std::vector<lsp::Diagnostic> &list = ele->get()->get_diagnostics();
 		errors.resize(list.size());
 		for (int i = 0; i < list.size(); ++i) {
 			errors[i] = list[i].to_json();
@@ -386,7 +387,7 @@ void GDScriptWorkspace::_get_owners(EditorFileSystemDirectory *efsd, String p_pa
 
 	for (int i = 0; i < efsd->get_file_count(); i++) {
 
-		Vector<String> deps = efsd->get_file_deps(i);
+		std::vector<String> deps = efsd->get_file_deps(i);
 		bool found = false;
 		for (int j = 0; j < deps.size(); j++) {
 			if (deps[j] == p_path) {
@@ -444,7 +445,7 @@ const lsp::DocumentSymbol *GDScriptWorkspace::resolve_symbol(const lsp::TextDocu
 	if (const ExtendGDScriptParser *parser = get_parse_result(path)) {
 
 		String symbol_identifier = p_symbol_name;
-		Vector<String> identifier_parts = symbol_identifier.split("(");
+		std::vector<String> identifier_parts = symbol_identifier.split("(");
 		if (identifier_parts.size()) {
 			symbol_identifier = identifier_parts[0];
 		}
