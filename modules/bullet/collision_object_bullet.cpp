@@ -39,6 +39,8 @@
 
 #include <btBulletCollisionCommon.h>
 
+#include <helper/std_h.h>
+
 /**
 	@author AndreaCatania
 */
@@ -183,7 +185,7 @@ void CollisionObjectBullet::notify_new_overlap(AreaBullet *p_area) {
 }
 
 void CollisionObjectBullet::on_exit_area(AreaBullet *p_area) {
-	areasOverlapped.erase(p_area);
+	std_h::erase(areasOverlapped, p_area);
 }
 
 void CollisionObjectBullet::set_godot_object_flags(int flags) {
@@ -278,7 +280,7 @@ void RigidCollisionObjectBullet::remove_shape_full(ShapeBullet *p_shape) {
 	for (int i = shapes.size() - 1; 0 <= i; --i) {
 		if (p_shape == shapes[i].shape) {
 			internal_shape_destroy(i);
-			shapes.remove(i);
+			shapes.erase(shapes.begin() + i);
 		}
 	}
 	reload_shapes();
@@ -287,7 +289,7 @@ void RigidCollisionObjectBullet::remove_shape_full(ShapeBullet *p_shape) {
 void RigidCollisionObjectBullet::remove_shape_full(int p_index) {
 	ERR_FAIL_INDEX(p_index, get_shape_count());
 	internal_shape_destroy(p_index);
-	shapes.remove(p_index);
+	shapes.erase(shapes.begin() + p_index);
 	reload_shapes();
 }
 
