@@ -42,7 +42,7 @@ class SpatialVelocityTracker : public Reference {
 	};
 
 	bool physics_step;
-	Vector<PositionHistory> position_history;
+	std::vector<PositionHistory> position_history;
 	int position_history_len;
 
 protected:
