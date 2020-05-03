@@ -1038,7 +1038,7 @@ void ProjectSettingsEditor::_copy_to_platform_about_to_show() {
 		}
 
 		String custom = EditorExport::get_singleton()->get_export_preset(i)->get_custom_features();
-		Vector<String> custom_list = custom.split(",");
+		std::vector<String> custom_list = custom.split(",");
 		for (int j = 0; j < custom_list.size(); j++) {
 			String f = custom_list[j].strip_edges();
 			if (f != String()) {
@@ -1311,7 +1311,7 @@ void ProjectSettingsEditor::_translation_res_option_changed() {
 	String path = ed->get_metadata(1);
 	int which = ed->get_range(1);
 
-	Vector<String> langs = TranslationServer::get_all_locales();
+	std::vector<String> langs = TranslationServer::get_all_locales();
 
 	ERR_FAIL_INDEX(which, langs.size());
 
@@ -1506,8 +1506,8 @@ void ProjectSettingsEditor::_update_translations() {
 		}
 	}
 
-	Vector<String> langs = TranslationServer::get_all_locales();
-	Vector<String> names = TranslationServer::get_all_locale_names();
+	std::vector<String> langs = TranslationServer::get_all_locales();
+	std::vector<String> names = TranslationServer::get_all_locale_names();
 
 	//update filter tab
 	Array l_filter_all;
@@ -1612,11 +1612,11 @@ void ProjectSettingsEditor::_update_translations() {
 		Dictionary remaps = ProjectSettings::get_singleton()->get("locale/translation_remaps");
 		List<Variant> rk;
 		remaps.get_key_list(&rk);
-		Vector<String> keys;
+		std::vector<String> keys;
 		for (List<Variant>::Element *E = rk.front(); E; E = E->next()) {
 			keys.push_back(E->get());
 		}
-		keys.sort();
+		std::sort(keys.begin(), keys.end());
 
 		for (int i = 0; i < keys.size(); i++) {
 
@@ -2011,7 +2011,7 @@ ProjectSettingsEditor::ProjectSettingsEditor(EditorData *p_data) {
 	translations->set_name(TTR("Localization"));
 	tab_container->add_child(translations);
 	//remap for properly select language in popup
-	translation_locales_idxs_remap = Vector<int>();
+	translation_locales_idxs_remap = std::vector<int>();
 	translation_locales_list_created = false;
 
 	{
