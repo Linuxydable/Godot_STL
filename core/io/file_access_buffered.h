@@ -62,7 +62,7 @@ protected:
 
 	mutable struct Cache {
 
-		Vector<uint8_t> buffer;
+		std::vector<uint8_t> buffer;
 		int offset;
 	} cache;
 
