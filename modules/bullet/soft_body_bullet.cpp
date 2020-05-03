@@ -354,7 +354,7 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 					indices_table.push_back(std::vector<int>());
 				}
 
-				indices_table.write[vertex_id].push_back(vs_vertex_index);
+				indices_table[vertex_id].push_back(vs_vertex_index);
 				vs_indices_to_physics_table.push_back(vertex_id);
 			}
 		}
@@ -369,9 +369,9 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 			PoolVector<Vector3>::Read p_vertices_read = p_vertices.read();
 
 			for (int i = 0; i < indices_map_size; ++i) {
-				bt_vertices.write[3 * i + 0] = p_vertices_read[indices_table[i][0]].x;
-				bt_vertices.write[3 * i + 1] = p_vertices_read[indices_table[i][0]].y;
-				bt_vertices.write[3 * i + 2] = p_vertices_read[indices_table[i][0]].z;
+				bt_vertices[3 * i + 0] = p_vertices_read[indices_table[i][0]].x;
+				bt_vertices[3 * i + 1] = p_vertices_read[indices_table[i][0]].y;
+				bt_vertices[3 * i + 2] = p_vertices_read[indices_table[i][0]].z;
 			}
 		}
 
@@ -385,9 +385,9 @@ void SoftBodyBullet::set_trimesh_body_shape(PoolVector<int> p_indices, PoolVecto
 			PoolVector<int>::Read p_indices_read = p_indices.read();
 
 			for (int i = 0; i < triangles_size; ++i) {
-				bt_triangles.write[3 * i + 0] = vs_indices_to_physics_table[p_indices_read[3 * i + 2]];
-				bt_triangles.write[3 * i + 1] = vs_indices_to_physics_table[p_indices_read[3 * i + 1]];
-				bt_triangles.write[3 * i + 2] = vs_indices_to_physics_table[p_indices_read[3 * i + 0]];
+				bt_triangles[3 * i + 0] = vs_indices_to_physics_table[p_indices_read[3 * i + 2]];
+				bt_triangles[3 * i + 1] = vs_indices_to_physics_table[p_indices_read[3 * i + 1]];
+				bt_triangles[3 * i + 2] = vs_indices_to_physics_table[p_indices_read[3 * i + 0]];
 			}
 		}
 
@@ -461,7 +461,7 @@ void SoftBodyBullet::pin_node(int p_node_index) {
 void SoftBodyBullet::unpin_node(int p_node_index) {
 	const int id = search_node_pinned(p_node_index);
 	if (-1 != id) {
-		pinned_nodes.remove(id);
+		pinned_nodes.erase(pinned_nodes.begin() + id);
 	}
 }
 
