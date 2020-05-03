@@ -114,7 +114,7 @@ private:
 	LineEdit *file_list_search_box;
 
 	String searched_string;
-	Vector<String> uncollapsed_paths_before_search;
+	std::vector<String> uncollapsed_paths_before_search;
 
 	TextureRect *search_icon;
 	HBoxContainer *path_hb;
@@ -159,10 +159,10 @@ private:
 	};
 	FileOrFolder to_rename;
 	FileOrFolder to_duplicate;
-	Vector<FileOrFolder> to_move;
+	std::vector<FileOrFolder> to_move;
 	String to_move_path;
 
-	Vector<String> history;
+	std::vector<String> history;
 	int history_pos;
 	int history_max_size;
 
@@ -177,9 +177,9 @@ private:
 	bool import_dock_needs_update;
 
 	Ref<Texture> _get_tree_item_icon(EditorFileSystemDirectory *p_dir, int p_idx);
-	bool _create_tree(TreeItem *p_parent, EditorFileSystemDirectory *p_dir, Vector<String> &uncollapsed_paths, bool p_select_in_favorites, bool p_unfold_path = false);
-	Vector<String> _compute_uncollapsed_paths();
-	void _update_tree(const Vector<String> &p_uncollapsed_paths = Vector<String>(), bool p_uncollapse_root = false, bool p_select_in_favorites = false, bool p_unfold_path = false);
+	bool _create_tree(TreeItem *p_parent, EditorFileSystemDirectory *p_dir, std::vector<String> &uncollapsed_paths, bool p_select_in_favorites, bool p_unfold_path = false);
+	std::vector<String> _compute_uncollapsed_paths();
+	void _update_tree(const std::vector<String> &p_uncollapsed_paths = std::vector<String>(), bool p_uncollapse_root = false, bool p_select_in_favorites = false, bool p_unfold_path = false);
 	void _navigate_to_path(const String &p_path, bool p_select_in_favorites = false);
 
 	void _file_list_gui_input(Ref<InputEvent> p_event);
@@ -200,8 +200,8 @@ private:
 
 	void _update_import_dock();
 
-	void _get_all_items_in_dir(EditorFileSystemDirectory *efsd, Vector<String> &files, Vector<String> &folders) const;
-	void _find_remaps(EditorFileSystemDirectory *efsd, const Map<String, String> &renames, Vector<String> &to_remaps) const;
+	void _get_all_items_in_dir(EditorFileSystemDirectory *efsd, std::vector<String> &files, std::vector<String> &folders) const;
+	void _find_remaps(EditorFileSystemDirectory *efsd, const Map<String, String> &renames, std::vector<String> &to_remaps) const;
 	void _try_move_item(const FileOrFolder &p_item, const String &p_new_path, Map<String, String> &p_file_renames, Map<String, String> &p_folder_renames);
 	void _try_duplicate_item(const FileOrFolder &p_item, const String &p_new_path) const;
 	void _update_dependencies_after_move(const Map<String, String> &p_renames) const;
@@ -226,7 +226,7 @@ private:
 
 	void _tree_rmb_option(int p_option);
 	void _file_list_rmb_option(int p_option);
-	void _file_option(int p_option, const Vector<String> &p_selected);
+	void _file_option(int p_option, const std::vector<String> &p_selected);
 
 	void _fw_history();
 	void _bw_history();
@@ -240,7 +240,7 @@ private:
 
 	void _search_changed(const String &p_text, const Control *p_from);
 
-	void _file_and_folders_fill_popup(PopupMenu *p_popup, Vector<String> p_paths, bool p_display_path_dependent_options = true);
+	void _file_and_folders_fill_popup(PopupMenu *p_popup, std::vector<String> p_paths, bool p_display_path_dependent_options = true);
 	void _tree_rmb_select(const Vector2 &p_pos);
 	void _tree_rmb_empty(const Vector2 &p_pos);
 	void _file_list_rmb_select(int p_item, const Vector2 &p_pos);
@@ -251,7 +251,7 @@ private:
 		String name;
 		String path;
 		StringName type;
-		Vector<String> sources;
+		std::vector<String> sources;
 		bool import_broken;
 
 		bool operator<(const FileInfo &fi) const {
@@ -274,12 +274,12 @@ private:
 
 	void _update_display_mode(bool p_force = false);
 
-	Vector<String> _tree_get_selected(bool remove_self_inclusion = true);
+	std::vector<String> _tree_get_selected(bool remove_self_inclusion = true);
 
 	bool _is_file_type_disabled_by_feature_profile(const StringName &p_class);
 
 	void _feature_profile_changed();
-	Vector<String> _remove_self_included_paths(Vector<String> selected_strings);
+	std::vector<String> _remove_self_included_paths(std::vector<String> selected_strings);
 
 protected:
 	void _notification(int p_what);
