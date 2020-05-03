@@ -54,6 +54,8 @@
 
 #include <assert.h>
 
+#include <helper/std_h.h>
+
 /**
 	@author AndreaCatania
 */
@@ -455,7 +457,8 @@ void SpaceBullet::add_area(AreaBullet *p_area) {
 }
 
 void SpaceBullet::remove_area(AreaBullet *p_area) {
-	areas.erase(p_area);
+	std_h::erase(areas, p_area);
+
 	dynamicsWorld->removeCollisionObject(p_area->get_bt_ghost());
 }
 
@@ -676,7 +679,7 @@ void SpaceBullet::check_ghost_overlaps() {
 
 		/// 1. Reset all states
 		for (i = area->overlappingObjects.size() - 1; 0 <= i; --i) {
-			AreaBullet::OverlappingObjectData &otherObj = area->overlappingObjects.write[i];
+			AreaBullet::OverlappingObjectData &otherObj = area->overlappingObjects[i];
 			// This check prevent the overwrite of ENTER state
 			// if this function is called more times before dispatchCallbacks
 			if (otherObj.state != AreaBullet::OVERLAP_STATE_ENTER) {
