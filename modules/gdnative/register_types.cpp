@@ -84,7 +84,7 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 		for (List<String>::Element *E = entry_keys.front(); E; E = E->next()) {
 			String key = E->get();
 
-			Vector<String> tags = key.split(".");
+			std::vector<String> tags = key.split(".");
 
 			bool skip = false;
 			for (int i = 0; i < tags.size(); i++) {
@@ -117,7 +117,7 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 		for (List<String>::Element *E = dependency_keys.front(); E; E = E->next()) {
 			String key = E->get();
 
-			Vector<String> tags = key.split(".");
+			std::vector<String> tags = key.split(".");
 
 			bool skip = false;
 			for (int i = 0; i < tags.size(); i++) {
@@ -133,7 +133,7 @@ void GDNativeExportPlugin::_export_file(const String &p_path, const String &p_ty
 				continue;
 			}
 
-			Vector<String> dependency_paths = config->get_value("dependencies", key);
+			std::vector<String> dependency_paths = config->get_value("dependencies", key);
 			for (int i = 0; i < dependency_paths.size(); i++) {
 				if (!dependency_paths[i].begins_with("res://")) {
 					print_line("Skipping export of out-of-project library " + dependency_paths[i]);
@@ -214,7 +214,7 @@ static godot_variant cb_standard_varcall(void *p_procedure_handle, godot_array *
 
 GDNativeCallRegistry *GDNativeCallRegistry::singleton;
 
-Vector<Ref<GDNative> > singleton_gdnatives;
+std::vector<Ref<GDNative> > singleton_gdnatives;
 
 Ref<GDNativeLibraryResourceLoader> resource_loader_gdnlib;
 Ref<GDNativeLibraryResourceSaver> resource_saver_gdnlib;
@@ -298,7 +298,7 @@ void unregister_gdnative_types() {
 			continue;
 		}
 
-		singleton_gdnatives.write[i]->terminate();
+		singleton_gdnatives[i]->terminate();
 	}
 	singleton_gdnatives.clear();
 

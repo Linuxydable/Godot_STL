@@ -131,7 +131,7 @@ Array GDScriptTextDocument::documentSymbol(const Dictionary &p_params) {
 	String path = GDScriptLanguageProtocol::get_singleton()->get_workspace()->get_file_path(uri);
 	Array arr;
 	if (const Map<String, ExtendGDScriptParser *>::Element *parser = GDScriptLanguageProtocol::get_singleton()->get_workspace()->scripts.find(path)) {
-		Vector<lsp::DocumentedSymbolInformation> list;
+		std::vector<lsp::DocumentedSymbolInformation> list;
 		parser->get()->get_symbols().symbol_tree_as_list(uri, list);
 		for (int i = 0; i < list.size(); i++) {
 			arr.push_back(list[i].to_json());
@@ -237,7 +237,7 @@ Dictionary GDScriptTextDocument::resolve(const Dictionary &p_params) {
 
 		String query = data;
 
-		Vector<String> param_symbols = query.split(SYMBOL_SEPERATOR, false);
+		std::vector<String> param_symbols = query.split(SYMBOL_SEPERATOR, false);
 
 		if (param_symbols.size() >= 2) {
 

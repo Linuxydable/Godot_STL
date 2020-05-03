@@ -378,7 +378,7 @@ bool GridMapEditor::do_input_action(Camera *p_camera, const Point2 &p_point, boo
 	Vector3 from = camera->project_ray_origin(p_point);
 	Vector3 normal = camera->project_ray_normal(p_point);
 	Transform local_xform = node->get_global_transform().affine_inverse();
-	Vector<Plane> planes = camera->get_frustum();
+	std::vector<Plane> planes = camera->get_frustum();
 	from = local_xform.xform(from);
 	normal = local_xform.basis.xform(normal).normalized();
 
@@ -905,7 +905,7 @@ void GridMapEditor::update_palette() {
 	search_box->set_editable(true);
 	info_message->hide();
 
-	Vector<int> ids;
+	std::vector<int> ids;
 	ids = mesh_library->get_item_list();
 
 	List<_CGMEItemSort> il;
@@ -1027,8 +1027,8 @@ void GridMapEditor::_draw_grids(const Vector3 &cell_size) {
 		edit_floor[i] = edited_floor[i];
 	}
 
-	Vector<Vector3> grid_points[3];
-	Vector<Color> grid_colors[3];
+	std::vector<Vector3> grid_points[3];
+	std::vector<Color> grid_colors[3];
 
 	for (int i = 0; i < 3; i++) {
 

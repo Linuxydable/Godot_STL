@@ -47,7 +47,7 @@ class GDNative;
 class GDNativeLibrary : public Resource {
 	GDCLASS(GDNativeLibrary, Resource);
 
-	static Map<String, Vector<Ref<GDNative> > > loaded_libraries;
+	static Map<String, std::vector<Ref<GDNative> > > loaded_libraries;
 
 	friend class GDNativeLibraryResourceLoader;
 	friend class GDNative;
@@ -55,7 +55,7 @@ class GDNativeLibrary : public Resource {
 	Ref<ConfigFile> config_file;
 
 	String current_library_path;
-	Vector<String> current_dependencies;
+	std::vector<String> current_dependencies;
 
 	bool singleton;
 	bool load_once;
@@ -79,7 +79,7 @@ public:
 	_FORCE_INLINE_ String get_current_library_path() const {
 		return current_library_path;
 	}
-	_FORCE_INLINE_ Vector<String> get_current_dependencies() const {
+	_FORCE_INLINE_ std::vector<String> get_current_dependencies() const {
 		return current_dependencies;
 	}
 
@@ -133,7 +133,7 @@ struct GDNativeCallRegistry {
 
 	void register_native_call_type(StringName p_call_type, native_call_cb p_callback);
 
-	Vector<StringName> get_native_call_types();
+	std::vector<StringName> get_native_call_types();
 };
 
 class GDNative : public Reference {

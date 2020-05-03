@@ -2422,9 +2422,9 @@ void VisualScriptEditor::set_edited_resource(const RES &p_res) {
 	_update_members();
 }
 
-Vector<String> VisualScriptEditor::get_functions() {
+std::vector<String> VisualScriptEditor::get_functions() {
 
-	return Vector<String>();
+	return std::vector<String>();
 }
 
 void VisualScriptEditor::reload_text() {
@@ -3319,7 +3319,7 @@ VisualScriptNode::TypeGuess VisualScriptEditor::_guess_output_type(int p_port_ac
 		return tg;
 	}
 
-	Vector<VisualScriptNode::TypeGuess> in_guesses;
+	std::vector<VisualScriptNode::TypeGuess> in_guesses;
 
 	for (int i = 0; i < node->get_input_value_port_count(); i++) {
 		PropertyInfo pi = node->get_input_value_port_info(i);
@@ -3353,7 +3353,7 @@ VisualScriptNode::TypeGuess VisualScriptEditor::_guess_output_type(int p_port_ac
 		in_guesses.push_back(g);
 	}
 
-	return node->guess_output_type(in_guesses.ptrw(), p_port_action_output);
+	return node->guess_output_type(in_guesses.data(), p_port_action_output);
 }
 
 void VisualScriptEditor::_port_action_menu(int p_option, const StringName &func) {

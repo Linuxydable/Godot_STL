@@ -70,7 +70,7 @@ private:
 	Set<String> selected_files;
 	bool runnable;
 
-	Vector<String> patches;
+	std::vector<String> patches;
 
 	friend class EditorExport;
 	friend class EditorExportPlatform;
@@ -95,7 +95,7 @@ public:
 
 	bool has(const StringName &p_property) const { return values.has(p_property); }
 
-	Vector<String> get_files_to_export() const;
+	std::vector<String> get_files_to_export() const;
 
 	void add_export_file(const String &p_path);
 	void remove_export_file(const String &p_path);
@@ -120,7 +120,7 @@ public:
 	void set_patch(int p_index, const String &p_path);
 	String get_patch(int p_index);
 	void remove_patch(int p_idx);
-	Vector<String> get_patches() const;
+	std::vector<String> get_patches() const;
 
 	void set_custom_features(const String &p_custom_features);
 	String get_custom_features() const;
@@ -141,9 +141,9 @@ public:
 
 struct SharedObject {
 	String path;
-	Vector<String> tags;
+	std::vector<String> tags;
 
-	SharedObject(const String &p_path, const Vector<String> &p_tags) :
+	SharedObject(const String &p_path, const std::vector<String> &p_tags) :
 			path(p_path),
 			tags(p_tags) {
 	}
@@ -156,7 +156,7 @@ class EditorExportPlatform : public Reference {
 	GDCLASS(EditorExportPlatform, Reference);
 
 public:
-	typedef Error (*EditorExportSaveFunction)(void *p_userdata, const String &p_path, const Vector<uint8_t> &p_data, int p_file, int p_total);
+	typedef Error (*EditorExportSaveFunction)(void *p_userdata, const String &p_path, const std::vector<uint8_t> &p_data, int p_file, int p_total);
 	typedef Error (*EditorExportSaveSharedObject)(void *p_userdata, const SharedObject &p_so);
 
 private:
@@ -164,7 +164,7 @@ private:
 
 		uint64_t ofs;
 		uint64_t size;
-		Vector<uint8_t> md5;
+		std::vector<uint8_t> md5;
 		CharString path_utf8;
 
 		bool operator<(const SavedData &p_data) const {
@@ -175,9 +175,9 @@ private:
 	struct PackData {
 
 		FileAccess *f;
-		Vector<SavedData> file_ofs;
+		std::vector<SavedData> file_ofs;
 		EditorProgress *ep;
-		Vector<SharedObject> *so_files;
+		std::vector<SharedObject> *so_files;
 	};
 
 	struct ZipData {
@@ -194,11 +194,11 @@ private:
 	void _export_find_resources(EditorFileSystemDirectory *p_dir, Set<String> &p_paths);
 	void _export_find_dependencies(const String &p_path, Set<String> &p_paths);
 
-	void gen_debug_flags(Vector<String> &r_flags, int p_flags);
-	static Error _save_pack_file(void *p_userdata, const String &p_path, const Vector<uint8_t> &p_data, int p_file, int p_total);
-	static Error _save_zip_file(void *p_userdata, const String &p_path, const Vector<uint8_t> &p_data, int p_file, int p_total);
+	void gen_debug_flags(std::vector<String> &r_flags, int p_flags);
+	static Error _save_pack_file(void *p_userdata, const String &p_path, const std::vector<uint8_t> &p_data, int p_file, int p_total);
+	static Error _save_zip_file(void *p_userdata, const String &p_path, const std::vector<uint8_t> &p_data, int p_file, int p_total);
 
-	void _edit_files_with_filter(DirAccess *da, const Vector<String> &p_filters, Set<String> &r_list, bool exclude);
+	void _edit_files_with_filter(DirAccess *da, const std::vector<String> &p_filters, Set<String> &r_list, bool exclude);
 	void _edit_filter_list(Set<String> &r_list, const String &p_filter, bool exclude);
 
 	static Error _add_shared_object(void *p_userdata, const SharedObject &p_so);
@@ -213,7 +213,7 @@ protected:
 
 	bool exists_export_template(String template_file_name, String *err) const;
 	String find_export_template(String template_file_name, String *err = NULL) const;
-	void gen_export_flags(Vector<String> &r_flags, int p_flags);
+	void gen_export_flags(std::vector<String> &r_flags, int p_flags);
 
 public:
 	virtual void get_preset_features(const Ref<EditorExportPreset> &p_preset, List<String> *r_features) = 0;
@@ -240,7 +240,7 @@ public:
 
 	Error export_project_files(const Ref<EditorExportPreset> &p_preset, EditorExportSaveFunction p_func, void *p_udata, EditorExportSaveSharedObject p_so_func = NULL);
 
-	Error save_pack(const Ref<EditorExportPreset> &p_preset, const String &p_path, Vector<SharedObject> *p_so_files = NULL, bool p_embed = false, int64_t *r_embedded_start = NULL, int64_t *r_embedded_size = NULL);
+	Error save_pack(const Ref<EditorExportPreset> &p_preset, const String &p_path, std::vector<SharedObject> *p_so_files = NULL, bool p_embed = false, int64_t *r_embedded_start = NULL, int64_t *r_embedded_size = NULL);
 	Error save_zip(const Ref<EditorExportPreset> &p_preset, const String &p_path);
 
 	virtual bool poll_export() { return false; }
@@ -281,20 +281,20 @@ class EditorExportPlugin : public Reference {
 
 	Ref<EditorExportPreset> export_preset;
 
-	Vector<SharedObject> shared_objects;
+	std::vector<SharedObject> shared_objects;
 	struct ExtraFile {
 		String path;
-		Vector<uint8_t> data;
+		std::vector<uint8_t> data;
 		bool remap;
 	};
-	Vector<ExtraFile> extra_files;
+	std::vector<ExtraFile> extra_files;
 	bool skipped;
 
-	Vector<String> ios_frameworks;
-	Vector<String> ios_project_static_libs;
+	std::vector<String> ios_frameworks;
+	std::vector<String> ios_project_static_libs;
 	String ios_plist_content;
 	String ios_linker_flags;
-	Vector<String> ios_bundle_files;
+	std::vector<String> ios_bundle_files;
 	String ios_cpp_code;
 
 	_FORCE_INLINE_ void _clear() {
@@ -319,8 +319,8 @@ protected:
 	void set_export_preset(const Ref<EditorExportPreset> &p_preset);
 	Ref<EditorExportPreset> get_export_preset() const;
 
-	void add_file(const String &p_path, const Vector<uint8_t> &p_file, bool p_remap);
-	void add_shared_object(const String &p_path, const Vector<String> &tags);
+	void add_file(const String &p_path, const std::vector<uint8_t> &p_file, bool p_remap);
+	void add_shared_object(const String &p_path, const std::vector<String> &tags);
 
 	void add_ios_framework(const String &p_path);
 	void add_ios_project_static_lib(const String &p_path);
@@ -337,11 +337,11 @@ protected:
 	static void _bind_methods();
 
 public:
-	Vector<String> get_ios_frameworks() const;
-	Vector<String> get_ios_project_static_libs() const;
+	std::vector<String> get_ios_frameworks() const;
+	std::vector<String> get_ios_project_static_libs() const;
 	String get_ios_plist_content() const;
 	String get_ios_linker_flags() const;
-	Vector<String> get_ios_bundle_files() const;
+	std::vector<String> get_ios_bundle_files() const;
 	String get_ios_cpp_code() const;
 
 	EditorExportPlugin();
@@ -350,9 +350,9 @@ public:
 class EditorExport : public Node {
 	GDCLASS(EditorExport, Node);
 
-	Vector<Ref<EditorExportPlatform> > export_platforms;
-	Vector<Ref<EditorExportPreset> > export_presets;
-	Vector<Ref<EditorExportPlugin> > export_plugins;
+	std::vector<Ref<EditorExportPlatform> > export_platforms;
+	std::vector<Ref<EditorExportPreset> > export_presets;
+	std::vector<Ref<EditorExportPlugin> > export_plugins;
 
 	Timer *save_timer;
 	bool block_save;
@@ -382,7 +382,7 @@ public:
 
 	void add_export_plugin(const Ref<EditorExportPlugin> &p_plugin);
 	void remove_export_plugin(const Ref<EditorExportPlugin> &p_plugin);
-	Vector<Ref<EditorExportPlugin> > get_export_plugins();
+	std::vector<Ref<EditorExportPlugin> > get_export_plugins();
 
 	void load_config();
 

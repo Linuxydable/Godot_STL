@@ -479,7 +479,7 @@ bool GridMap::_octant_update(const OctantKey &p_key) {
 			}
 		}
 
-		Vector<MeshLibrary::ShapeData> shapes = mesh_library->get_item_shapes(c.item);
+		std::vector<MeshLibrary::ShapeData> shapes = mesh_library->get_item_shapes(c.item);
 		// add the item's shape at given xform to octant's static_body
 		for (int i = 0; i < shapes.size(); i++) {
 			// add the item's shape
@@ -487,7 +487,7 @@ bool GridMap::_octant_update(const OctantKey &p_key) {
 				continue;
 			PhysicsServer::get_singleton()->body_add_shape(g.static_body, shapes[i].shape->get_rid(), xform * shapes[i].local_transform);
 			if (g.collision_debug.is_valid()) {
-				shapes.write[i].shape->add_vertices_to_array(col_debug, xform * shapes[i].local_transform);
+				shapes[i].shape->add_vertices_to_array(col_debug, xform * shapes[i].local_transform);
 			}
 		}
 

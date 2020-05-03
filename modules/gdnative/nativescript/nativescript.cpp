@@ -1303,8 +1303,8 @@ int NativeScriptLanguage::register_binding_functions(godot_instance_binding_func
 	}
 
 	// set the functions
-	binding_functions.write[idx].first = true;
-	binding_functions.write[idx].second = p_binding_functions;
+	binding_functions[idx].first = true;
+	binding_functions[idx].second = p_binding_functions;
 
 	return idx;
 }
@@ -1319,7 +1319,7 @@ void NativeScriptLanguage::unregister_binding_functions(int p_idx) {
 			binding_functions[p_idx].second.free_instance_binding_data(binding_functions[p_idx].second.data, binding_data[p_idx]);
 	}
 
-	binding_functions.write[p_idx].first = false;
+	binding_functions[p_idx].first = false;
 
 	if (binding_functions[p_idx].second.free_func)
 		binding_functions[p_idx].second.free_func(binding_functions[p_idx].second.data);

@@ -56,11 +56,11 @@ bool VisualScriptExpression::_set(const StringName &p_name, const Variant &p_val
 		int from = inputs.size();
 		inputs.resize(int(p_value));
 		for (int i = from; i < inputs.size(); i++) {
-			inputs.write[i].name = String::chr('a' + i);
+			inputs[i].name = String::chr('a' + i);
 			if (from == 0) {
-				inputs.write[i].type = output_type;
+				inputs[i].type = output_type;
 			} else {
-				inputs.write[i].type = inputs[from - 1].type;
+				inputs[i].type = inputs[from - 1].type;
 			}
 		}
 		expression_dirty = true;
@@ -78,10 +78,10 @@ bool VisualScriptExpression::_set(const StringName &p_name, const Variant &p_val
 
 		if (what == "type") {
 
-			inputs.write[idx].type = Variant::Type(int(p_value));
+			inputs[idx].type = Variant::Type(int(p_value));
 		} else if (what == "name") {
 
-			inputs.write[idx].name = p_value;
+			inputs[idx].name = p_value;
 		} else {
 			return false;
 		}
@@ -654,7 +654,7 @@ const char *VisualScriptExpression::token_name[TK_MAX] = {
 
 VisualScriptExpression::ENode *VisualScriptExpression::_parse_expression() {
 
-	Vector<Expression> expression;
+	std::vector<Expression> expression;
 
 	while (true) {
 		//keep appending stuff to expression
@@ -1154,9 +1154,9 @@ VisualScriptExpression::ENode *VisualScriptExpression::_parse_expression() {
 				op->op = expression[i].op;
 				op->nodes[0] = expression[i + 1].node;
 				op->nodes[1] = NULL;
-				expression.write[i].is_op = false;
-				expression.write[i].node = op;
-				expression.remove(i + 1);
+				expression[i].is_op = false;
+				expression[i].node = op;
+				expression.erase(expression.begin() + i + 1);
 			}
 
 		} else {
@@ -1189,9 +1189,9 @@ VisualScriptExpression::ENode *VisualScriptExpression::_parse_expression() {
 			op->nodes[1] = expression[next_op + 1].node; //next expression goes as right
 
 			//replace all 3 nodes by this operator and make it an expression
-			expression.write[next_op - 1].node = op;
-			expression.remove(next_op);
-			expression.remove(next_op);
+			expression[next_op - 1].node = op;
+			expression.erase(expression.begin() + next_op);
+			expression.erase(expression.begin() + next_op);
 		}
 	}
 
@@ -1360,8 +1360,8 @@ public:
 
 				const VisualScriptExpression::ConstructorNode *constructor = static_cast<const VisualScriptExpression::ConstructorNode *>(p_node);
 
-				Vector<Variant> arr;
-				Vector<const Variant *> argp;
+				std::vector<Variant> arr;
+				std::vector<const Variant *> argp;
 				arr.resize(constructor->arguments.size());
 				argp.resize(constructor->arguments.size());
 
@@ -1371,11 +1371,11 @@ public:
 					bool ret = _execute(p_inputs, constructor->arguments[i], value, r_error_str, ce);
 					if (ret)
 						return true;
-					arr.write[i] = value;
-					argp.write[i] = &arr[i];
+					arr[i] = value;
+					argp[i] = &arr[i];
 				}
 
-				r_ret = Variant::construct(constructor->data_type, (const Variant **)argp.ptr(), argp.size(), ce);
+				r_ret = Variant::construct(constructor->data_type, (const Variant **)argp.data(), argp.size(), ce);
 
 				if (ce.error != Variant::CallError::CALL_OK) {
 					r_error_str = "Invalid arguments to construct '" + Variant::get_type_name(constructor->data_type) + "'.";
@@ -1387,8 +1387,8 @@ public:
 
 				const VisualScriptExpression::BuiltinFuncNode *bifunc = static_cast<const VisualScriptExpression::BuiltinFuncNode *>(p_node);
 
-				Vector<Variant> arr;
-				Vector<const Variant *> argp;
+				std::vector<Variant> arr;
+				std::vector<const Variant *> argp;
 				arr.resize(bifunc->arguments.size());
 				argp.resize(bifunc->arguments.size());
 
@@ -1398,11 +1398,11 @@ public:
 					bool ret = _execute(p_inputs, bifunc->arguments[i], value, r_error_str, ce);
 					if (ret)
 						return true;
-					arr.write[i] = value;
-					argp.write[i] = &arr[i];
+					arr[i] = value;
+					argp[i] = &arr[i];
 				}
 
-				VisualScriptBuiltinFunc::exec_func(bifunc->func, (const Variant **)argp.ptr(), &r_ret, ce, r_error_str);
+				VisualScriptBuiltinFunc::exec_func(bifunc->func, (const Variant **)argp.data(), &r_ret, ce, r_error_str);
 
 				if (ce.error != Variant::CallError::CALL_OK) {
 					r_error_str = "Builtin Call Failed. " + r_error_str;
@@ -1419,8 +1419,8 @@ public:
 				if (ret)
 					return true;
 
-				Vector<Variant> arr;
-				Vector<const Variant *> argp;
+				std::vector<Variant> arr;
+				std::vector<const Variant *> argp;
 				arr.resize(call->arguments.size());
 				argp.resize(call->arguments.size());
 
@@ -1430,11 +1430,11 @@ public:
 					bool ret2 = _execute(p_inputs, call->arguments[i], value, r_error_str, ce);
 					if (ret2)
 						return true;
-					arr.write[i] = value;
-					argp.write[i] = &arr[i];
+					arr[i] = value;
+					argp[i] = &arr[i];
 				}
 
-				r_ret = base.call(call->method, (const Variant **)argp.ptr(), argp.size(), ce);
+				r_ret = base.call(call->method, (const Variant **)argp.data(), argp.size(), ce);
 
 				if (ce.error != Variant::CallError::CALL_OK) {
 					r_error_str = "On call to '" + String(call->method) + "':";

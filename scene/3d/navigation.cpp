@@ -54,9 +54,9 @@ void Navigation::_navmesh_link(int p_id) {
 		Polygon &p = P->get();
 		p.owner = &nm;
 
-		Vector<int> poly = nm.navmesh->get_polygon(i);
+		std::vector<int> poly = nm.navmesh->get_polygon(i);
 		int plen = poly.size();
-		const int *indices = poly.ptr();
+		const int *indices = poly.data();
 		bool valid = true;
 		p.edges.resize(plen);
 
@@ -235,7 +235,7 @@ void Navigation::navmesh_remove(int p_id) {
 	navmesh_map.erase(p_id);
 }
 
-void Navigation::_clip_path(Vector<Vector3> &path, Polygon *from_poly, const Vector3 &p_to_point, Polygon *p_to_poly) {
+void Navigation::_clip_path(std::vector<Vector3> &path, Polygon *from_poly, const Vector3 &p_to_point, Polygon *p_to_poly) {
 
 	Vector3 from = path[path.size() - 1];
 
@@ -269,7 +269,7 @@ void Navigation::_clip_path(Vector<Vector3> &path, Polygon *from_poly, const Vec
 	}
 }
 
-Vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const Vector3 &p_end, bool p_optimize) {
+std::vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const Vector3 &p_end, bool p_optimize) {
 
 	Polygon *begin_poly = NULL;
 	Polygon *end_poly = NULL;
@@ -311,15 +311,15 @@ Vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const Vector
 
 	if (!begin_poly || !end_poly) {
 
-		return Vector<Vector3>(); //no path
+		return std::vector<Vector3>(); //no path
 	}
 
 	if (begin_poly == end_poly) {
 
-		Vector<Vector3> path;
+		std::vector<Vector3> path;
 		path.resize(2);
-		path.write[0] = begin_point;
-		path.write[1] = end_point;
+		path[0] = begin_point;
+		path[1] = end_point;
 		return path;
 	}
 
@@ -431,7 +431,7 @@ Vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const Vector
 
 	if (found_route) {
 
-		Vector<Vector3> path;
+		std::vector<Vector3> path;
 
 		if (p_optimize) {
 			//string pulling
@@ -540,13 +540,13 @@ Vector<Vector3> Navigation::get_simple_path(const Vector3 &p_start, const Vector
 
 			path.push_back(begin_point);
 
-			path.invert();
+			std::reverse(path.begin(), path.end());
 		}
 
 		return path;
 	}
 
-	return Vector<Vector3>();
+	return std::vector<Vector3>();
 }
 
 Vector3 Navigation::get_closest_point_to_segment(const Vector3 &p_from, const Vector3 &p_to, const bool &p_use_collision) {

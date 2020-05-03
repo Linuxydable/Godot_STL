@@ -39,7 +39,7 @@
 struct VideoDecoderGDNative {
 	const godot_videodecoder_interface_gdnative *interface;
 	String plugin_name;
-	Vector<String> supported_extensions;
+	std::vector<String> supported_extensions;
 
 	VideoDecoderGDNative() :
 			interface(NULL),
@@ -64,7 +64,7 @@ private:
 
 class VideoDecoderServer {
 private:
-	Vector<VideoDecoderGDNative *> decoders;
+	std::vector<VideoDecoderGDNative *> decoders;
 	Map<String, int> extensions;
 
 	static VideoDecoderServer *instance;

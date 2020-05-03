@@ -40,6 +40,8 @@
 #include "core/script_language.h"
 #include "gdscript.h"
 
+#include <helper/std_h.h>
+
 template <class T>
 T *GDScriptParser::alloc_node() {
 
@@ -863,13 +865,7 @@ GDScriptParser::Node *GDScriptParser::_parse_expression(Node *p_parent, bool p_s
 			if (!bfn) {
 #ifdef DEBUG_ENABLED
 				if (current_function) {
-					int arg_idx = -1;
-
-					auto it_find = std::find(current_function->arguments.begin(), current_function->arguments.end(), identifier);
-
-					if (it_find != current_function->arguments.end()) {
-						arg_idx = std::distance(current_function->arguments.begin(), it_find);
-					}
+					int arg_idx = std_h::getIndex(current_function->arguments, identifier);
 
 					if (arg_idx != -1) {
 						switch (tokenizer->get_token()) {

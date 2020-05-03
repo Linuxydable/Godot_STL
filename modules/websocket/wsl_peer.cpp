@@ -55,8 +55,8 @@ String WSLPeer::generate_key() {
 
 String WSLPeer::compute_key_response(String p_key) {
 	String key = p_key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"; // Magic UUID as per RFC
-	Vector<uint8_t> sha = key.sha1_buffer();
-	return CryptoCore::b64_encode_str(sha.ptr(), sha.size());
+	std::vector<uint8_t> sha = key.sha1_buffer();
+	return CryptoCore::b64_encode_str(sha.data(), sha.size());
 }
 
 void WSLPeer::_wsl_destroy(struct PeerData **p_data) {

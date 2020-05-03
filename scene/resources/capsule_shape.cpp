@@ -31,12 +31,12 @@
 #include "capsule_shape.h"
 #include "servers/physics_server.h"
 
-Vector<Vector3> CapsuleShape::get_debug_mesh_lines() {
+std::vector<Vector3> CapsuleShape::get_debug_mesh_lines() {
 
 	float radius = get_radius();
 	float height = get_height();
 
-	Vector<Vector3> points;
+	std::vector<Vector3> points;
 
 	Vector3 d(0, 0, height * 0.5);
 	for (int i = 0; i < 360; i++) {

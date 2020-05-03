@@ -31,7 +31,6 @@
 #include "gdnative/vector3.h"
 
 #include "core/variant.h"
-#include "core/vector.h"
 
 #ifdef __cplusplus
 extern "C" {

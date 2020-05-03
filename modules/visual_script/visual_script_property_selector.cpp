@@ -154,7 +154,7 @@ void VisualScriptPropertySelector::_update_search() {
 				if (!(F->get().usage & PROPERTY_USAGE_EDITOR) && !(F->get().usage & PROPERTY_USAGE_SCRIPT_VARIABLE))
 					continue;
 
-				if (type_filter.size() && type_filter.find(F->get().type) == -1)
+				if (type_filter.size() && !std_h::isFind(type_filter, F->get().type))
 					continue;
 
 				// capitalize() also converts underscore to space, we'll match again both possible styles
@@ -335,11 +335,11 @@ void VisualScriptPropertySelector::get_visual_node_names(const String &root_filt
 		if (!E->get().begins_with(root_filter)) {
 			continue;
 		}
-		Vector<String> path = E->get().split("/");
+		std::vector<String> path = E->get().split("/");
 
 		// check if the name has the filter
 		bool in_filter = false;
-		Vector<String> tx_filters = search_box->get_text().split(" ");
+		std::vector<String> tx_filters = search_box->get_text().split(" ");
 		for (int i = 0; i < tx_filters.size(); i++) {
 			if (tx_filters[i] == "") {
 				in_filter = true;
@@ -388,11 +388,11 @@ void VisualScriptPropertySelector::get_visual_node_names(const String &root_filt
 		if (vnode_deconstruct.is_valid()) {
 			type_name = "Deconstruct ";
 		}
-		Vector<String> desc = path[path.size() - 1].replace("(", " ").replace(")", " ").replace(",", " ").split(" ");
+		std::vector<String> desc = path[path.size() - 1].replace("(", " ").replace(")", " ").replace(",", " ").split(" ");
 		for (int i = 0; i < desc.size(); i++) {
-			desc.write[i] = desc[i].capitalize();
+			desc[i] = desc[i].capitalize();
 			if (desc[i].ends_with(",")) {
-				desc.write[i] = desc[i].replace(",", ", ");
+				desc[i] = desc[i].replace(",", ", ");
 			}
 		}
 
@@ -470,7 +470,7 @@ void VisualScriptPropertySelector::_item_selected() {
 	Map<String, DocData::ClassDoc>::Element *T = dd->class_list.find(class_type);
 	if (T) {
 		for (int i = 0; i < T->get().methods.size(); i++) {
-			Vector<String> functions = name.rsplit("/", false, 1);
+			std::vector<String> functions = name.rsplit("/", false, 1);
 			if (T->get().methods[i].name == functions[functions.size() - 1]) {
 				text = T->get().methods[i].description;
 			}
@@ -545,7 +545,7 @@ void VisualScriptPropertySelector::select_method_from_base_type(const String &p_
 	_update_search();
 }
 
-void VisualScriptPropertySelector::set_type_filter(const Vector<Variant::Type> &p_type_filter) {
+void VisualScriptPropertySelector::set_type_filter(const std::vector<Variant::Type> &p_type_filter) {
 	type_filter = p_type_filter;
 }
 

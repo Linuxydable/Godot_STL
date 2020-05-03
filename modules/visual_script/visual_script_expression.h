@@ -47,7 +47,7 @@ class VisualScriptExpression : public VisualScriptNode {
 		Input() { type = Variant::NIL; }
 	};
 
-	Vector<Input> inputs;
+	std::vector<Input> inputs;
 	Variant::Type output_type;
 
 	String expression;
@@ -211,7 +211,7 @@ class VisualScriptExpression : public VisualScriptNode {
 
 	struct ConstructorNode : public ENode {
 		Variant::Type data_type;
-		Vector<ENode *> arguments;
+		std::vector<ENode *> arguments;
 
 		ConstructorNode() {
 			type = TYPE_CONSTRUCTOR;
@@ -221,7 +221,7 @@ class VisualScriptExpression : public VisualScriptNode {
 	struct CallNode : public ENode {
 		ENode *base;
 		StringName method;
-		Vector<ENode *> arguments;
+		std::vector<ENode *> arguments;
 
 		CallNode() {
 			type = TYPE_CALL;
@@ -229,14 +229,14 @@ class VisualScriptExpression : public VisualScriptNode {
 	};
 
 	struct ArrayNode : public ENode {
-		Vector<ENode *> array;
+		std::vector<ENode *> array;
 		ArrayNode() {
 			type = TYPE_ARRAY;
 		}
 	};
 
 	struct DictionaryNode : public ENode {
-		Vector<ENode *> dict;
+		std::vector<ENode *> dict;
 		DictionaryNode() {
 			type = TYPE_DICTIONARY;
 		}
@@ -244,7 +244,7 @@ class VisualScriptExpression : public VisualScriptNode {
 
 	struct BuiltinFuncNode : public ENode {
 		VisualScriptBuiltinFunc::BuiltinFunc func;
-		Vector<ENode *> arguments;
+		std::vector<ENode *> arguments;
 		BuiltinFuncNode() {
 			type = TYPE_BUILTIN_FUNC;
 		}

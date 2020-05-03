@@ -815,7 +815,7 @@ static bool _guess_expression_type(GDScriptCompletionContext &p_context, const G
 								MethodBind *mb = ClassDB::get_method(native_type.native_type, id);
 								if (mb && mb->is_const()) {
 									bool all_is_const = true;
-									Vector<Variant> args;
+									std::vector<Variant> args;
 									GDScriptCompletionContext c2 = p_context;
 									c2.line = op->line;
 									for (int i = 2; all_is_const && i < op->arguments.size(); i++) {
@@ -902,13 +902,13 @@ static bool _guess_expression_type(GDScriptCompletionContext &p_context, const G
 									}
 
 									if (!found && all_is_const && baseptr) {
-										Vector<const Variant *> argptr;
+										std::vector<const Variant *> argptr;
 										for (int i = 0; i < args.size(); i++) {
 											argptr.push_back(&args[i]);
 										}
 
 										Variant::CallError ce;
-										Variant ret = mb->call(baseptr, (const Variant **)argptr.ptr(), argptr.size(), ce);
+										Variant ret = mb->call(baseptr, (const Variant **)argptr.data(), argptr.size(), ce);
 
 										if (ce.error == Variant::CallError::CALL_OK && ret.get_type() != Variant::NIL) {
 											if (ret.get_type() != Variant::OBJECT || ret.operator Object *() != NULL) {
@@ -3016,7 +3016,7 @@ void GDScriptLanguage::auto_indent_code(String &p_code, int p_from_line, int p_t
 
 	String indent = _get_indentation();
 
-	Vector<String> lines = p_code.split("\n");
+	std::vector<String> lines = p_code.split("\n");
 	List<int> indent_stack;
 
 	for (int i = 0; i < lines.size(); i++) {
@@ -3064,7 +3064,7 @@ void GDScriptLanguage::auto_indent_code(String &p_code, int p_from_line, int p_t
 			break;
 		}
 
-		lines.write[i] = l;
+		lines[i] = l;
 	}
 
 	p_code = "";

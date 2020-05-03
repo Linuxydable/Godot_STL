@@ -32,6 +32,8 @@
 
 #include "gdscript.h"
 
+#include <helper/std_h.h>
+
 bool GDScriptCompiler::_is_class_member_property(CodeGen &codegen, const StringName &p_name) {
 
 	if (codegen.function_node && codegen.function_node->_static)
@@ -349,13 +351,7 @@ int GDScriptCompiler::_parse_expression(CodeGen &codegen, const GDScriptParser::
 #ifdef TOOLS_ENABLED
 			if (GDScriptLanguage::get_singleton()->get_named_globals_map().has(identifier)) {
 
-				int idx = -1;
-
-				auto it_find = std::find(codegen.named_globals.begin(), codegen.named_globals.end(), identifier);
-
-				if (it_find != codegen.named_globals.end()) {
-					idx = std::distance(codegen.named_globals.begin(), it_find);
-				}
+				int idx = std_h::getIndex(codegen.named_globals, identifier);
 
 				if (idx == -1) {
 					idx = codegen.named_globals.size();
@@ -1687,7 +1683,7 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 		gdfunc->rpc_mode = p_func->rpc_mode;
 		gdfunc->argument_types.resize(p_func->argument_types.size());
 		for (int i = 0; i < p_func->argument_types.size(); i++) {
-			gdfunc->argument_types.write[i] = _gdtype_from_datatype(p_func->argument_types[i]);
+			gdfunc->argument_types[i] = _gdtype_from_datatype(p_func->argument_types[i]);
 		}
 		gdfunc->return_type = _gdtype_from_datatype(p_func->return_type);
 	} else {
@@ -1706,11 +1702,11 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 	if (codegen.constant_map.size()) {
 		gdfunc->_constant_count = codegen.constant_map.size();
 		gdfunc->constants.resize(codegen.constant_map.size());
-		gdfunc->_constants_ptr = gdfunc->constants.ptrw();
+		gdfunc->_constants_ptr = gdfunc->constants.data();
 		const Variant *K = NULL;
 		while ((K = codegen.constant_map.next(K))) {
 			int idx = codegen.constant_map[*K];
-			gdfunc->constants.write[idx] = *K;
+			gdfunc->constants[idx] = *K;
 		}
 	} else {
 
@@ -1724,7 +1720,7 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 		gdfunc->_global_names_ptr = &gdfunc->global_names[0];
 		for (Map<StringName, int>::Element *E = codegen.name_map.front(); E; E = E->next()) {
 
-			gdfunc->global_names.write[E->get()] = E->key();
+			gdfunc->global_names[E->get()] = E->key();
 		}
 		gdfunc->_global_names_count = gdfunc->global_names.size();
 
@@ -1737,9 +1733,9 @@ Error GDScriptCompiler::_parse_function(GDScript *p_script, const GDScriptParser
 	// Named globals
 	if (codegen.named_globals.size()) {
 		gdfunc->named_globals.resize(codegen.named_globals.size());
-		gdfunc->_named_globals_ptr = gdfunc->named_globals.ptr();
+		gdfunc->_named_globals_ptr = gdfunc->named_globals.data();
 		for (int i = 0; i < codegen.named_globals.size(); i++) {
-			gdfunc->named_globals.write[i] = codegen.named_globals[i];
+			gdfunc->named_globals[i] = codegen.named_globals[i];
 		}
 		gdfunc->_named_globals_count = gdfunc->named_globals.size();
 	}

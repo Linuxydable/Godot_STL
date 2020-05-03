@@ -306,8 +306,8 @@ private:
 	bool on_floor;
 	bool on_ceiling;
 	bool on_wall;
-	Vector<Collision> colliders;
-	Vector<Ref<KinematicCollision> > slide_colliders;
+	std::vector<Collision> colliders;
+	std::vector<Ref<KinematicCollision> > slide_colliders;
 	Ref<KinematicCollision> motion_cache;
 
 	_FORCE_INLINE_ bool _ignores_mode(PhysicsServer::BodyMode) const;

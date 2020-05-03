@@ -143,7 +143,7 @@ void GDAPI godot_nativescript_register_signal(void *p_gdnative_handle, const cha
 	ERR_FAIL_COND_MSG(!E, "Attempted to register method on non-existent class.");
 
 	List<PropertyInfo> args;
-	Vector<Variant> default_args;
+	std::vector<Variant> default_args;
 
 	for (int i = 0; i < p_signal->num_args; i++) {
 		PropertyInfo info;

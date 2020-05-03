@@ -411,7 +411,7 @@ void EditorResourcePreview::add_preview_generator(const Ref<EditorResourcePrevie
 
 void EditorResourcePreview::remove_preview_generator(const Ref<EditorResourcePreviewGenerator> &p_generator) {
 
-	preview_generators.erase(p_generator);
+	std_h::erase(preview_generators, p_generator);
 }
 
 EditorResourcePreview *EditorResourcePreview::get_singleton() {

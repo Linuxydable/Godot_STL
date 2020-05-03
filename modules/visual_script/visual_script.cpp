@@ -36,6 +36,8 @@
 #include "scene/main/node.h"
 #include "visual_script_nodes.h"
 
+#include <helper/std_h.h>
+
 //used by editor, this is not really saved
 void VisualScriptNode::set_breakpoint(bool p_breakpoint) {
 	breakpoint = p_breakpoint;
@@ -733,7 +735,7 @@ void VisualScript::add_custom_signal(const StringName &p_name) {
 	ERR_FAIL_COND(!String(p_name).is_valid_identifier());
 	ERR_FAIL_COND(custom_signals.has(p_name));
 
-	custom_signals[p_name] = Vector<Argument>();
+	custom_signals[p_name] = std::vector<Argument>();
 }
 
 bool VisualScript::has_custom_signal(const StringName &p_name) const {
@@ -750,14 +752,14 @@ void VisualScript::custom_signal_add_argument(const StringName &p_func, Variant:
 	if (p_index < 0)
 		custom_signals[p_func].push_back(arg);
 	else
-		custom_signals[p_func].insert(0, arg);
+		custom_signals[p_func].insert(custom_signals[p_func].begin(), arg);
 }
 void VisualScript::custom_signal_set_argument_type(const StringName &p_func, int p_argidx, Variant::Type p_type) {
 
 	ERR_FAIL_COND(instances.size());
 	ERR_FAIL_COND(!custom_signals.has(p_func));
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
-	custom_signals[p_func].write[p_argidx].type = p_type;
+	custom_signals[p_func][p_argidx].type = p_type;
 }
 Variant::Type VisualScript::custom_signal_get_argument_type(const StringName &p_func, int p_argidx) const {
 
@@ -769,7 +771,7 @@ void VisualScript::custom_signal_set_argument_name(const StringName &p_func, int
 	ERR_FAIL_COND(instances.size());
 	ERR_FAIL_COND(!custom_signals.has(p_func));
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
-	custom_signals[p_func].write[p_argidx].name = p_name;
+	custom_signals[p_func][p_argidx].name = p_name;
 }
 String VisualScript::custom_signal_get_argument_name(const StringName &p_func, int p_argidx) const {
 
@@ -782,7 +784,7 @@ void VisualScript::custom_signal_remove_argument(const StringName &p_func, int p
 	ERR_FAIL_COND(instances.size());
 	ERR_FAIL_COND(!custom_signals.has(p_func));
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
-	custom_signals[p_func].remove(p_argidx);
+	custom_signals[p_func].erase(custom_signals[p_func].begin() + p_argidx);
 }
 
 int VisualScript::custom_signal_get_argument_count(const StringName &p_func) const {
@@ -797,7 +799,7 @@ void VisualScript::custom_signal_swap_argument(const StringName &p_func, int p_a
 	ERR_FAIL_INDEX(p_argidx, custom_signals[p_func].size());
 	ERR_FAIL_INDEX(p_with_argidx, custom_signals[p_func].size());
 
-	SWAP(custom_signals[p_func].write[p_argidx], custom_signals[p_func].write[p_with_argidx]);
+	SWAP(custom_signals[p_func][p_argidx], custom_signals[p_func][p_with_argidx]);
 }
 void VisualScript::remove_custom_signal(const StringName &p_name) {
 
@@ -825,7 +827,7 @@ void VisualScript::rename_custom_signal(const StringName &p_name, const StringNa
 
 void VisualScript::get_custom_signal_list(List<StringName> *r_custom_signals) const {
 
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 		r_custom_signals->push_back(E->key());
 	}
 
@@ -981,7 +983,7 @@ bool VisualScript::has_script_signal(const StringName &p_signal) const {
 
 void VisualScript::get_script_signal_list(List<MethodInfo> *r_signals) const {
 
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 
 		MethodInfo mi;
 		mi.name = E->key();
@@ -1224,7 +1226,7 @@ Dictionary VisualScript::_get_data() const {
 	d["variables"] = vars;
 
 	Array sigs;
-	for (const Map<StringName, Vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
+	for (const Map<StringName, std::vector<Argument> >::Element *E = custom_signals.front(); E; E = E->next()) {
 
 		Dictionary cs;
 		cs["name"] = E->key();
@@ -1492,7 +1494,7 @@ void VisualScriptInstance::_dependency_step(VisualScriptNodeInstance *node, int 
 	if (!node->dependencies.empty()) {
 
 		int dc = node->dependencies.size();
-		VisualScriptNodeInstance **deps = node->dependencies.ptrw();
+		VisualScriptNodeInstance **deps = node->dependencies.data();
 
 		for (int i = 0; i < dc; i++) {
 
@@ -1584,7 +1586,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 			if (!node->dependencies.empty()) {
 
 				int dc = node->dependencies.size();
-				VisualScriptNodeInstance **deps = node->dependencies.ptrw();
+				VisualScriptNodeInstance **deps = node->dependencies.data();
 
 				for (int i = 0; i < dc; i++) {
 
@@ -1684,7 +1686,7 @@ Variant VisualScriptInstance::_call_internal(const StringName &p_method, void *p
 				state->flow_stack_pos = flow_stack_pos;
 				state->stack.resize(p_stack_size);
 				state->pass = p_pass;
-				copymem(state->stack.ptrw(), p_stack, p_stack_size);
+				copymem(state->stack.data(), p_stack, p_stack_size);
 				//step 2, run away, return directly
 				r_error.error = Variant::CallError::CALL_OK;
 
@@ -2229,7 +2231,7 @@ void VisualScriptInstance::create(const Ref<VisualScript> &p_script, Object *p_o
 				from->output_ports[dc.from_port] = stack_pos;
 			}
 
-			if (from->get_sequence_output_count() == 0 && to->dependencies.find(from) == -1) {
+			if (from->get_sequence_output_count() == 0 && !std_h::isFind(to->dependencies, from)) {
 				//if the node we are reading from has no output sequence, we must call step() before reading from it.
 				if (from->pass_idx == -1) {
 					from->pass_idx = function.pass_stack_size;
@@ -2354,18 +2356,18 @@ Variant VisualScriptFunctionState::_signal_callback(const Variant **p_args, int 
 
 	r_error.error = Variant::CallError::CALL_OK;
 
-	Variant *working_mem = ((Variant *)stack.ptr()) + working_mem_index;
+	Variant *working_mem = ((Variant *)stack.data()) + working_mem_index;
 
 	*working_mem = args; //arguments go to working mem.
 
-	Variant ret = instance->_call_internal(function, stack.ptrw(), stack.size(), node, flow_stack_pos, pass, true, r_error);
+	Variant ret = instance->_call_internal(function, stack.data(), stack.size(), node, flow_stack_pos, pass, true, r_error);
 	function = StringName(); //invalidate
 	return ret;
 }
 
 void VisualScriptFunctionState::connect_to_signal(Object *p_obj, const String &p_signal, Array p_binds) {
 
-	Vector<Variant> binds;
+	std::vector<Variant> binds;
 	for (int i = 0; i < p_binds.size(); i++) {
 		binds.push_back(p_binds[i]);
 	}
@@ -2391,11 +2393,11 @@ Variant VisualScriptFunctionState::resume(Array p_args) {
 	Variant::CallError r_error;
 	r_error.error = Variant::CallError::CALL_OK;
 
-	Variant *working_mem = ((Variant *)stack.ptr()) + working_mem_index;
+	Variant *working_mem = ((Variant *)stack.data()) + working_mem_index;
 
 	*working_mem = p_args; //arguments go to working mem.
 
-	Variant ret = instance->_call_internal(function, stack.ptrw(), stack.size(), node, flow_stack_pos, pass, true, r_error);
+	Variant ret = instance->_call_internal(function, stack.data(), stack.size(), node, flow_stack_pos, pass, true, r_error);
 	function = StringName(); //invalidate
 	return ret;
 }
@@ -2414,7 +2416,7 @@ VisualScriptFunctionState::VisualScriptFunctionState() {
 VisualScriptFunctionState::~VisualScriptFunctionState() {
 
 	if (function != StringName()) {
-		Variant *s = ((Variant *)stack.ptr());
+		Variant *s = ((Variant *)stack.data());
 		for (int i = 0; i < variant_stack_size; i++) {
 			s[i].~Variant();
 		}

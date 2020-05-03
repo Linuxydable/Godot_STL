@@ -266,7 +266,7 @@ List<ClassAPI> generate_c_api_classes() {
 					signal.argument_types.push_back(type);
 				}
 
-				Vector<Variant> default_arguments = method_info.default_arguments;
+				std::vector<Variant> default_arguments = method_info.default_arguments;
 
 				int default_start = signal.argument_names.size() - default_arguments.size();
 
