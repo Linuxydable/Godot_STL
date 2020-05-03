@@ -67,7 +67,7 @@ void EditorPluginSettings::update_plugins() {
 
 	String d = da->get_next();
 
-	Vector<String> plugins;
+	std::vector<String> plugins;
 
 	while (d != String()) {
 
@@ -85,7 +85,7 @@ void EditorPluginSettings::update_plugins() {
 	da->list_dir_end();
 	memdelete(da);
 
-	plugins.sort();
+	std::sort(plugins.begin(), plugins.end());
 
 	for (int i = 0; i < plugins.size(); i++) {
 
