@@ -184,7 +184,7 @@ Error WSLClient::connect_to_host(String p_host, String p_path, uint16_t p_port, 
 	_host = p_host;
 	// Strip edges from protocols.
 	_protocols.resize(p_protocols.size());
-	String *pw = _protocols.ptrw();
+	String *pw = _protocols.data();
 	for (int i = 0; i < p_protocols.size(); i++) {
 		pw[i] = p_protocols[i].strip_edges();
 	}
