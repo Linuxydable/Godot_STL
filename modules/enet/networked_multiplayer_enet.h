@@ -100,8 +100,8 @@ private:
 	uint32_t _gen_unique_id() const;
 	void _pop_current_packet();
 
-	Vector<uint8_t> src_compressor_mem;
-	Vector<uint8_t> dst_compressor_mem;
+	std::vector<uint8_t> src_compressor_mem;
+	std::vector<uint8_t> dst_compressor_mem;
 
 	ENetCompressor enet_compressor;
 	static size_t enet_compress(void *context, const ENetBuffer *inBuffers, size_t inBufferCount, size_t inLimit, enet_uint8 *outData, size_t outLimit);

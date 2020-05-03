@@ -687,7 +687,7 @@ size_t NetworkedMultiplayerENet::enet_compress(void *context, const ENetBuffer *
 	while (total) {
 		for (size_t i = 0; i < inBufferCount; i++) {
 			int to_copy = MIN(total, int(inBuffers[i].dataLength));
-			copymem(&enet->src_compressor_mem.write[ofs], inBuffers[i].data, to_copy);
+			copymem(&enet->src_compressor_mem[ofs], inBuffers[i].data, to_copy);
 			ofs += to_copy;
 			total -= to_copy;
 		}
@@ -714,7 +714,7 @@ size_t NetworkedMultiplayerENet::enet_compress(void *context, const ENetBuffer *
 	if (enet->dst_compressor_mem.size() < req_size) {
 		enet->dst_compressor_mem.resize(req_size);
 	}
-	int ret = Compression::compress(enet->dst_compressor_mem.ptrw(), enet->src_compressor_mem.ptr(), ofs, mode);
+	int ret = Compression::compress(enet->dst_compressor_mem.data(), enet->src_compressor_mem.data(), ofs, mode);
 
 	if (ret < 0)
 		return 0;
@@ -722,7 +722,7 @@ size_t NetworkedMultiplayerENet::enet_compress(void *context, const ENetBuffer *
 	if (ret > int(outLimit))
 		return 0; // Do not bother
 
-	copymem(outData, enet->dst_compressor_mem.ptr(), ret);
+	copymem(outData, enet->dst_compressor_mem.data(), ret);
 
 	return ret;
 }
