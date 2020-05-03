@@ -310,7 +310,7 @@ void CSGShape::_update_shape() {
 			vec_map.set(v, add);
 		}
 
-		face_count.write[idx]++;
+		face_count[idx]++;
 	}
 
 	std::vector<ShapeUpdateSurface> surfaces;
@@ -407,7 +407,7 @@ void CSGShape::_update_shape() {
 				}
 			}
 
-			surfaces.write[idx].last_added += 3;
+			surfaces[idx].last_added += 3;
 		}
 	}
 
@@ -429,15 +429,15 @@ void CSGShape::_update_shape() {
 
 			SMikkTSpaceContext msc;
 			msc.m_pInterface = &mkif;
-			msc.m_pUserData = &surfaces.write[i];
+			msc.m_pUserData = &surfaces[i];
 			have_tangents = genTangSpaceDefault(&msc);
 		}
 
 		// unset write access
-		surfaces.write[i].verticesw.release();
-		surfaces.write[i].normalsw.release();
-		surfaces.write[i].uvsw.release();
-		surfaces.write[i].tansw.release();
+		surfaces[i].verticesw.release();
+		surfaces[i].normalsw.release();
+		surfaces[i].uvsw.release();
+		surfaces[i].tansw.release();
 
 		if (surfaces[i].last_added == 0)
 			continue;
