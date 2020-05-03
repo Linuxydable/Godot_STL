@@ -90,7 +90,7 @@ bool AbstractPolygon2DEditor::_is_empty() const {
 
 	for (int i = 0; i < n; i++) {
 
-		Vector<Vector2> vertices = _get_polygon(i);
+		std::vector<Vector2> vertices = _get_polygon(i);
 
 		if (vertices.size() != 0)
 			return false;
@@ -336,7 +336,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 					if (insert.valid()) {
 
-						Vector<Vector2> vertices = _get_polygon(insert.polygon);
+						std::vector<Vector2> vertices = _get_polygon(insert.polygon);
 
 						if (vertices.size() < (_is_line() ? 2 : 3)) {
 
@@ -348,10 +348,10 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 							return true;
 						} else {
 
-							Vector<Vector2> vertices2 = _get_polygon(insert.polygon);
+							std::vector<Vector2> vertices2 = _get_polygon(insert.polygon);
 							pre_move_edit = vertices2;
 							edited_point = PosVertex(insert.polygon, insert.vertex + 1, xform.affine_inverse().xform(insert.pos));
-							vertices2.insert(edited_point.vertex, edited_point.pos);
+							vertices2.insert(vertices2.begin() + edited_point.vertex, edited_point.pos);
 							selected_point = edited_point;
 							edge_point = PosVertex();
 
@@ -384,9 +384,9 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 						//apply
 
-						Vector<Vector2> vertices = _get_polygon(edited_point.polygon);
+						std::vector<Vector2> vertices = _get_polygon(edited_point.polygon);
 						ERR_FAIL_INDEX_V(edited_point.vertex, vertices.size(), false);
-						vertices.write[edited_point.vertex] = edited_point.pos - _get_offset(edited_point.polygon);
+						vertices[edited_point.vertex] = edited_point.pos - _get_offset(edited_point.polygon);
 
 						undo_redo->create_action(TTR("Edit Polygon"));
 						_action_set_polygon(edited_point.polygon, pre_move_edit, vertices);
@@ -427,7 +427,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 				if (_is_line()) {
 
 					// for lines, we don't have a wip mode, and we can undo each single add point.
-					Vector<Vector2> vertices = _get_polygon(0);
+					std::vector<Vector2> vertices = _get_polygon(0);
 					vertices.push_back(cpoint);
 					undo_redo->create_action(TTR("Insert Point"));
 					_action_set_polygon(0, vertices);
@@ -483,7 +483,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 			//Move the point in a single axis. Should only work when editing a polygon and while holding shift.
 			if (mode == MODE_EDIT && mm->get_shift()) {
-				Vector2 old_point = pre_move_edit.get(selected_point.vertex);
+				Vector2 old_point = pre_move_edit[selected_point.vertex];
 				if (ABS(cpoint.x - old_point.x) > ABS(cpoint.y - old_point.y)) {
 					cpoint.y = old_point.y;
 				} else {
@@ -495,9 +495,9 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 			if (!wip_active) {
 
-				Vector<Vector2> vertices = _get_polygon(edited_point.polygon);
+				std::vector<Vector2> vertices = _get_polygon(edited_point.polygon);
 				ERR_FAIL_INDEX_V(edited_point.vertex, vertices.size(), false);
-				vertices.write[edited_point.vertex] = cpoint - _get_offset(edited_point.polygon);
+				vertices[edited_point.vertex] = cpoint - _get_offset(edited_point.polygon);
 				_set_polygon(edited_point.polygon, vertices);
 			}
 
@@ -539,7 +539,7 @@ bool AbstractPolygon2DEditor::forward_gui_input(const Ref<InputEvent> &p_event) 
 
 				if (wip.size() > selected_point.vertex) {
 
-					wip.remove(selected_point.vertex);
+					wip.erase(wip.begin() + selected_point.vertex);
 					_wip_changed();
 					selected_point = wip.size() - 1;
 					canvas_item_editor->update_viewport();
