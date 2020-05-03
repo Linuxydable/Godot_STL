@@ -30,6 +30,8 @@
 
 #include "editor_node.h"
 
+#include "helper/std_h.h"
+
 #include "core/bind/core_bind.h"
 #include "core/class_db.h"
 #include "core/io/config_file.h"
@@ -371,7 +373,7 @@ void EditorNode::_notification(int p_what) {
 
 			{
 				_initializing_addons = true;
-				Vector<String> addons;
+				std::vector<String> addons;
 				if (ProjectSettings::get_singleton()->has_setting("editor_plugins/enabled")) {
 					addons = ProjectSettings::get_singleton()->get("editor_plugins/enabled");
 				}
@@ -640,7 +642,7 @@ void EditorNode::_fs_changed() {
 	}
 }
 
-void EditorNode::_resources_reimported(const Vector<String> &p_resources) {
+void EditorNode::_resources_reimported(const std::vector<String> &p_resources) {
 
 	List<String> scenes; //will load later
 	int current_tab = scene_tabs->get_current_tab();
@@ -739,7 +741,7 @@ Error EditorNode::load_resource(const String &p_resource, bool p_ignore_broken_d
 	if (!p_ignore_broken_deps && dependency_errors.has(p_resource)) {
 
 		//current_option = -1;
-		Vector<String> errors;
+		std::vector<String> errors;
 		for (Set<String>::Element *E = dependency_errors[p_resource].front(); E; E = E->next()) {
 
 			errors.push_back(E->get());
@@ -1343,12 +1345,12 @@ void EditorNode::save_all_scenes() {
 	_save_all_scenes();
 }
 
-void EditorNode::save_scene_list(Vector<String> p_scene_filenames) {
+void EditorNode::save_scene_list(std::vector<String> p_scene_filenames) {
 
 	for (int i = 0; i < editor_data.get_edited_scene_count(); i++) {
 		Node *scene = editor_data.get_edited_scene_root(i);
 
-		if (scene && (p_scene_filenames.find(scene->get_filename()) >= 0)) {
+		if (scene && std_h::isFind(p_scene_filenames, scene->get_filename())) {
 			_save_scene(scene->get_filename(), i);
 		}
 	}
@@ -1650,7 +1652,7 @@ bool EditorNode::_is_class_editor_disabled_by_feature_profile(const StringName &
 
 void EditorNode::edit_item(Object *p_object) {
 
-	Vector<EditorPlugin *> sub_plugins;
+	std::vector<EditorPlugin *> sub_plugins;
 
 	if (p_object) {
 		if (_is_class_editor_disabled_by_feature_profile(p_object->get_class())) {
@@ -1728,7 +1730,7 @@ void EditorNode::_display_top_editors(bool p_display) {
 	editor_plugins_over->make_visible(p_display);
 }
 
-void EditorNode::_set_top_editors(Vector<EditorPlugin *> p_editor_plugins_over) {
+void EditorNode::_set_top_editors(std::vector<EditorPlugin *> p_editor_plugins_over) {
 	editor_plugins_over->set_plugins_list(p_editor_plugins_over);
 }
 
@@ -1923,7 +1925,7 @@ void EditorNode::_edit_current() {
 			}
 		}
 
-		Vector<EditorPlugin *> sub_plugins;
+		std::vector<EditorPlugin *> sub_plugins;
 
 		if (!_is_class_editor_disabled_by_feature_profile(current_obj->get_class())) {
 			sub_plugins = editor_data.get_subeditors(current_obj);
@@ -2979,19 +2981,21 @@ void EditorNode::remove_editor_plugin(EditorPlugin *p_editor, bool p_config_chan
 				}
 
 				memdelete(singleton->main_editor_buttons[i]);
-				singleton->main_editor_buttons.remove(i);
+				singleton->main_editor_buttons.erase(singleton->main_editor_buttons.begin() + i);
 
 				break;
 			}
 		}
 
-		singleton->editor_table.erase(p_editor);
+		std_h::erase(singleton->editor_table, p_editor);
 	}
 	p_editor->make_visible(false);
 	p_editor->clear();
 	if (p_config_changed)
 		p_editor->disable_plugin();
-	singleton->editor_plugins_over->get_plugins_list().erase(p_editor);
+
+	std_h::erase(singleton->editor_plugins_over->get_plugins_list(), p_editor);
+
 	singleton->remove_child(p_editor);
 	singleton->editor_data.remove_editor_plugin(p_editor);
 	singleton->get_editor_plugins_force_input_forwarding()->remove_plugin(p_editor);
@@ -3002,7 +3006,7 @@ void EditorNode::_update_addon_config() {
 	if (_initializing_addons)
 		return;
 
-	Vector<String> enabled_addons;
+	std::vector<String> enabled_addons;
 
 	for (Map<String, EditorPlugin *>::Element *E = plugin_addons.front(); E; E = E->next()) {
 		enabled_addons.push_back(E->key());
@@ -3381,7 +3385,7 @@ Error EditorNode::load_scene(const String &p_scene, bool p_ignore_broken_deps, b
 	if (!p_ignore_broken_deps && dependency_errors.has(lpath)) {
 
 		current_option = -1;
-		Vector<String> errors;
+		std::vector<String> errors;
 		for (Set<String>::Element *E = dependency_errors[lpath].front(); E; E = E->next()) {
 
 			errors.push_back(E->get());
@@ -3490,7 +3494,7 @@ void EditorNode::request_instance_scene(const String &p_path) {
 	scene_tree_dock->instance(p_path);
 }
 
-void EditorNode::request_instance_scenes(const Vector<String> &p_files) {
+void EditorNode::request_instance_scenes(const std::vector<String> &p_files) {
 
 	scene_tree_dock->instance_scenes(p_files);
 }
@@ -3518,7 +3522,7 @@ void EditorNode::_inherit_request(String p_file) {
 	_dialog_action(p_file);
 }
 
-void EditorNode::_instance_request(const Vector<String> &p_files) {
+void EditorNode::_instance_request(const std::vector<String> &p_files) {
 
 	request_instance_scenes(p_files);
 }
@@ -3586,7 +3590,7 @@ void EditorNode::_update_recent_scenes() {
 
 void EditorNode::_quick_opened() {
 
-	Vector<String> files = quick_open->get_selected_files();
+	std::vector<String> files = quick_open->get_selected_files();
 
 	for (int i = 0; i < files.size(); i++) {
 		String res_path = files[i];
@@ -3708,7 +3712,7 @@ Ref<Script> EditorNode::get_object_custom_type_base(const Object *p_object) cons
 		// should probably be deprecated in 4.x
 		StringName base = script->get_instance_base_type();
 		if (base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base)) {
-			const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
+			const std::vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
 
 			Ref<Script> base_script = script;
 			while (base_script.is_valid()) {
@@ -3743,7 +3747,7 @@ StringName EditorNode::get_object_custom_type_name(const Object *p_object) const
 			// should probably be deprecated in 4.x
 			StringName base = base_script->get_instance_base_type();
 			if (base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base)) {
-				const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
+				const std::vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
 				for (int i = 0; i < types.size(); ++i) {
 					if (types[i].script == base_script) {
 						return types[i].name;
@@ -3792,7 +3796,7 @@ Ref<Texture> EditorNode::get_object_icon(const Object *p_object, const String &p
 			// should probably be deprecated in 4.x
 			StringName base = base_script->get_instance_base_type();
 			if (base != StringName() && EditorNode::get_editor_data().get_custom_types().has(base)) {
-				const Vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
+				const std::vector<EditorData::CustomType> &types = EditorNode::get_editor_data().get_custom_types()[base];
 				for (int i = 0; i < types.size(); ++i) {
 					if (types[i].script == base_script && types[i].icon.is_valid()) {
 						return types[i].icon;
@@ -3849,9 +3853,9 @@ Ref<Texture> EditorNode::get_class_icon(const String &p_class, const String &p_f
 		return icon;
 	}
 
-	const Map<String, Vector<EditorData::CustomType> > &p_map = EditorNode::get_editor_data().get_custom_types();
-	for (const Map<String, Vector<EditorData::CustomType> >::Element *E = p_map.front(); E; E = E->next()) {
-		const Vector<EditorData::CustomType> &ct = E->value();
+	const Map<String, std::vector<EditorData::CustomType> > &p_map = EditorNode::get_editor_data().get_custom_types();
+	for (const Map<String, std::vector<EditorData::CustomType> >::Element *E = p_map.front(); E; E = E->next()) {
+		const std::vector<EditorData::CustomType> &ct = E->value();
 		for (int i = 0; i < ct.size(); ++i) {
 			if (ct[i].name == p_class) {
 				if (ct[i].icon.is_valid()) {
@@ -3967,7 +3971,7 @@ void EditorNode::_editor_file_dialog_unregister(EditorFileDialog *p_dialog) {
 	singleton->editor_file_dialogs.erase(p_dialog);
 }
 
-Vector<EditorNodeInitCallback> EditorNode::_init_callbacks;
+std::vector<EditorNodeInitCallback> EditorNode::_init_callbacks;
 
 Error EditorNode::export_preset(const String &p_preset, const String &p_path, bool p_debug, bool p_pack_only) {
 
@@ -4383,7 +4387,7 @@ void EditorNode::_load_docks_from_config(Ref<ConfigFile> p_layout, const String 
 		if (!p_layout->has_section_key(p_section, "dock_" + itos(i + 1)))
 			continue;
 
-		Vector<String> names = String(p_layout->get_value(p_section, "dock_" + itos(i + 1))).split(",");
+		std::vector<String> names = String(p_layout->get_value(p_section, "dock_" + itos(i + 1))).split(",");
 
 		for (int j = 0; j < names.size(); j++) {
 
@@ -4827,7 +4831,7 @@ void EditorNode::raise_bottom_panel_item(Control *p_item) {
 
 		if (bottom_panel_items[i].control == p_item) {
 			bottom_panel_items[i].button->raise();
-			SWAP(bottom_panel_items.write[i], bottom_panel_items.write[bottom_panel_items.size() - 1]);
+			SWAP(bottom_panel_items[i], bottom_panel_items[bottom_panel_items.size() - 1]);
 			break;
 		}
 	}
@@ -4849,7 +4853,7 @@ void EditorNode::remove_bottom_panel_item(Control *p_item) {
 			bottom_panel_vb->remove_child(bottom_panel_items[i].control);
 			bottom_panel_hb_editors->remove_child(bottom_panel_items[i].button);
 			memdelete(bottom_panel_items[i].button);
-			bottom_panel_items.remove(i);
+			bottom_panel_items.erase(bottom_panel_items.begin() + i);
 			break;
 		}
 	}
@@ -5013,7 +5017,7 @@ Variant EditorNode::drag_resource(const Ref<Resource> &p_res, Control *p_from) {
 	return drag_data;
 }
 
-Variant EditorNode::drag_files_and_dirs(const Vector<String> &p_paths, Control *p_from) {
+Variant EditorNode::drag_files_and_dirs(const std::vector<String> &p_paths, Control *p_from) {
 	bool has_folder = false;
 	bool has_file = false;
 	for (int i = 0; i < p_paths.size(); i++) {
@@ -5121,7 +5125,7 @@ void EditorNode::_global_menu_action(const Variant &p_id, const Variant &p_meta)
 	}
 }
 
-void EditorNode::_dropped_files(const Vector<String> &p_files, int p_screen) {
+void EditorNode::_dropped_files(const std::vector<String> &p_files, int p_screen) {
 
 	String to_path = ProjectSettings::get_singleton()->globalize_path(get_filesystem_dock()->get_selected_path());
 
@@ -5130,10 +5134,10 @@ void EditorNode::_dropped_files(const Vector<String> &p_files, int p_screen) {
 	EditorFileSystem::get_singleton()->scan_changes();
 }
 
-void EditorNode::_add_dropped_files_recursive(const Vector<String> &p_files, String to_path) {
+void EditorNode::_add_dropped_files_recursive(const std::vector<String> &p_files, String to_path) {
 
 	DirAccessRef dir = DirAccess::create(DirAccess::ACCESS_FILESYSTEM);
-	Vector<String> just_copy = String("ttf,otf").split(",");
+	std::vector<String> just_copy = String("ttf,otf").split(",");
 
 	for (int i = 0; i < p_files.size(); i++) {
 
@@ -5142,7 +5146,7 @@ void EditorNode::_add_dropped_files_recursive(const Vector<String> &p_files, Str
 
 		if (dir->dir_exists(from)) {
 
-			Vector<String> sub_files;
+			std::vector<String> sub_files;
 
 			DirAccessRef sub_dir = DirAccess::open(from);
 			sub_dir->list_dir_begin();
@@ -5166,7 +5170,7 @@ void EditorNode::_add_dropped_files_recursive(const Vector<String> &p_files, Str
 			continue;
 		}
 
-		if (!ResourceFormatImporter::get_singleton()->can_be_imported(from) && (just_copy.find(from.get_extension().to_lower()) == -1)) {
+		if (!ResourceFormatImporter::get_singleton()->can_be_imported(from) && !std_h::isFind(just_copy, from.get_extension().to_lower())) {
 			continue;
 		}
 		dir->copy(from, to);
@@ -5313,12 +5317,12 @@ void EditorNode::add_resource_conversion_plugin(const Ref<EditorResourceConversi
 }
 
 void EditorNode::remove_resource_conversion_plugin(const Ref<EditorResourceConversionPlugin> &p_plugin) {
-	resource_conversion_plugins.erase(p_plugin);
+	std_h::erase(resource_conversion_plugins, p_plugin);
 }
 
-Vector<Ref<EditorResourceConversionPlugin> > EditorNode::find_resource_conversion_plugin(const Ref<Resource> &p_for_resource) {
+std::vector<Ref<EditorResourceConversionPlugin> > EditorNode::find_resource_conversion_plugin(const Ref<Resource> &p_for_resource) {
 
-	Vector<Ref<EditorResourceConversionPlugin> > ret;
+	std::vector<Ref<EditorResourceConversionPlugin> > ret;
 
 	for (int i = 0; i < resource_conversion_plugins.size(); i++) {
 		if (resource_conversion_plugins[i].is_valid() && resource_conversion_plugins[i]->handles(p_for_resource)) {
@@ -6940,7 +6944,7 @@ void EditorPluginList::add_plugin(EditorPlugin *p_plugin) {
 }
 
 void EditorPluginList::remove_plugin(EditorPlugin *p_plugin) {
-	plugins_list.erase(p_plugin);
+	std_h::erase(plugins_list, p_plugin);
 }
 
 bool EditorPluginList::empty() {
