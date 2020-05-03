@@ -32,12 +32,13 @@
 #define VSET_H
 
 #include "core/typedefs.h"
-#include "core/vector.h"
+
+#include <vector>
 
 template <class T>
 class VSet {
 
-	Vector<T> _data;
+	std::vector<T> _data;
 
 	_FORCE_INLINE_ int _find(const T &p_val, bool &r_exact) const {
 
@@ -106,7 +107,7 @@ public:
 		int pos = _find(p_val, exact);
 		if (exact)
 			return;
-		_data.insert(pos, p_val);
+		_data.insert(_data.begin() + pos, p_val);
 	}
 
 	bool has(const T &p_val) const {
@@ -119,7 +120,7 @@ public:
 		int pos = _find_exact(p_val);
 		if (pos < 0)
 			return;
-		_data.remove(pos);
+		_data.erase(_data.begin() + pos);
 	}
 
 	int find(const T &p_val) const {

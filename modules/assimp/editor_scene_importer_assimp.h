@@ -34,7 +34,6 @@
 #ifdef TOOLS_ENABLED
 #include "core/bind/core_bind.h"
 #include "core/io/resource_importer.h"
-#include "core/vector.h"
 #include "editor/import/resource_importer_scene.h"
 #include "editor/project_settings_editor.h"
 #include "scene/3d/mesh_instance.h"
@@ -88,7 +87,7 @@ private:
 		float weight;
 	};
 
-	Ref<Mesh> _generate_mesh_from_surface_indices(ImportState &state, const Vector<int> &p_surface_indices,
+	Ref<Mesh> _generate_mesh_from_surface_indices(ImportState &state, const std::vector<int> &p_surface_indices,
 			const aiNode *assimp_node, Ref<Skin> &skin,
 			Skeleton *&skeleton_assigned);
 
@@ -115,11 +114,11 @@ private:
 	Spatial *_generate_scene(const String &p_path, aiScene *scene, const uint32_t p_flags, int p_bake_fps, const int32_t p_max_bone_weights);
 
 	template <class T>
-	T _interpolate_track(const Vector<float> &p_times, const Vector<T> &p_values, float p_time, AssetImportAnimation::Interpolation p_interp);
-	void _register_project_setting_import(const String generic, const String import_setting_string, const Vector<String> &exts, List<String> *r_extensions, const bool p_enabled) const;
+	T _interpolate_track(const std::vector<float> &p_times, const std::vector<T> &p_values, float p_time, AssetImportAnimation::Interpolation p_interp);
+	void _register_project_setting_import(const String generic, const String import_setting_string, const std::vector<String> &exts, List<String> *r_extensions, const bool p_enabled) const;
 
 	struct ImportFormat {
-		Vector<String> extensions;
+		std::vector<String> extensions;
 		bool is_default;
 	};
 

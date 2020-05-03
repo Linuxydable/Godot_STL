@@ -835,7 +835,7 @@ void EditorAssetLibrary::_update_image_queue() {
 		if (!E->get().active && current_images < max_images) {
 
 			String cache_filename_base = EditorSettings::get_singleton()->get_cache_dir().plus_file("assetimage_" + E->get().image_url.md5_text());
-			Vector<String> headers;
+			std::vector<String> headers;
 
 			if (FileAccess::exists(cache_filename_base + ".etag") && FileAccess::exists(cache_filename_base + ".data")) {
 				FileAccess *file = FileAccess::open(cache_filename_base + ".etag", FileAccess::READ);

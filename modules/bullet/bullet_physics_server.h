@@ -51,7 +51,7 @@ class BulletPhysicsServer : public PhysicsServer {
 
 	bool active;
 	char active_spaces_count;
-	Vector<SpaceBullet *> active_spaces;
+	std::vector<SpaceBullet *> active_spaces;
 
 	mutable RID_Owner<SpaceBullet> space_owner;
 	mutable RID_Owner<ShapeBullet> shape_owner;
@@ -114,7 +114,7 @@ public:
 	virtual PhysicsDirectSpaceState *space_get_direct_state(RID p_space);
 
 	virtual void space_set_debug_contacts(RID p_space, int p_max_contacts);
-	virtual Vector<Vector3> space_get_contacts(RID p_space) const;
+	virtual std::vector<Vector3> space_get_contacts(RID p_space) const;
 	virtual int space_get_contact_count(RID p_space) const;
 
 	/* AREA API */

@@ -45,6 +45,8 @@
 
 #include <assert.h>
 
+#include <helper/std_h.h>
+
 /**
 	@author AndreaCatania
 */
@@ -191,7 +193,7 @@ void BulletPhysicsServer::space_set_active(RID p_space, bool p_active) {
 		active_spaces.push_back(space);
 	} else {
 		--active_spaces_count;
-		active_spaces.erase(space);
+		std_h::erase(active_spaces, space);
 	}
 }
 
@@ -199,7 +201,7 @@ bool BulletPhysicsServer::space_is_active(RID p_space) const {
 	SpaceBullet *space = space_owner.get(p_space);
 	ERR_FAIL_COND_V(!space, false);
 
-	return -1 != active_spaces.find(space);
+	return std_h::isFind(active_spaces, space);
 }
 
 void BulletPhysicsServer::space_set_param(RID p_space, SpaceParameter p_param, real_t p_value) {
@@ -228,9 +230,9 @@ void BulletPhysicsServer::space_set_debug_contacts(RID p_space, int p_max_contac
 	space->set_debug_contacts(p_max_contacts);
 }
 
-Vector<Vector3> BulletPhysicsServer::space_get_contacts(RID p_space) const {
+std::vector<Vector3> BulletPhysicsServer::space_get_contacts(RID p_space) const {
 	SpaceBullet *space = space_owner.get(p_space);
-	ERR_FAIL_COND_V(!space, Vector<Vector3>());
+	ERR_FAIL_COND_V(!space, std::vector<Vector3>());
 
 	return space->get_debug_contacts();
 }

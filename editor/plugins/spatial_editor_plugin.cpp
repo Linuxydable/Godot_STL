@@ -111,7 +111,7 @@ void ViewportRotationControl::_draw() {
 		draw_circle(center, radius, Color(0.5, 0.5, 0.5, 0.25));
 	}
 
-	Vector<Axis2D> axis_to_draw;
+	std::vector<Axis2D> axis_to_draw;
 	_get_sorted_axis(axis_to_draw);
 	for (int i = 0; i < axis_to_draw.size(); ++i) {
 		_draw_axis(axis_to_draw[i]);
@@ -145,7 +145,7 @@ void ViewportRotationControl::_draw_axis(const Axis2D &p_axis) {
 	}
 }
 
-void ViewportRotationControl::_get_sorted_axis(Vector<Axis2D> &r_axis) {
+void ViewportRotationControl::_get_sorted_axis(std::vector<Axis2D> &r_axis) {
 	Vector2i center = get_size() / 2.0;
 	float radius = get_size().x / 2.0;
 
@@ -218,7 +218,7 @@ void ViewportRotationControl::_update_focus() {
 		focused_axis = -1;
 	}
 
-	Vector<Axis2D> axes;
+	std::vector<Axis2D> axes;
 	_get_sorted_axis(axes);
 
 	for (int i = 0; i < axes.size(); i++) {
@@ -491,7 +491,7 @@ ObjectID SpatialEditorViewport::_select_ray(const Point2 &p_pos, bool p_append, 
 	Vector3 pos = _get_ray_pos(p_pos);
 	Vector2 shrinked_pos = p_pos / viewport_container->get_stretch_shrink();
 
-	Vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_ray(pos, ray, get_tree()->get_root()->get_world()->get_scenario());
+	std::vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_ray(pos, ray, get_tree()->get_root()->get_world()->get_scenario());
 	Set<Ref<EditorSpatialGizmo> > found_gizmos;
 
 	Node *edited_scene = get_tree()->get_edited_scene_root();
@@ -553,12 +553,12 @@ ObjectID SpatialEditorViewport::_select_ray(const Point2 &p_pos, bool p_append, 
 	return closest;
 }
 
-void SpatialEditorViewport::_find_items_at_pos(const Point2 &p_pos, bool &r_includes_current, Vector<_RayResult> &results, bool p_alt_select) {
+void SpatialEditorViewport::_find_items_at_pos(const Point2 &p_pos, bool &r_includes_current, std::vector<_RayResult> &results, bool p_alt_select) {
 
 	Vector3 ray = _get_ray(p_pos);
 	Vector3 pos = _get_ray_pos(p_pos);
 
-	Vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_ray(pos, ray, get_tree()->get_root()->get_world()->get_scenario());
+	std::vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_ray(pos, ray, get_tree()->get_root()->get_world()->get_scenario());
 	Set<Ref<EditorSpatialGizmo> > found_gizmos;
 
 	r_includes_current = false;
@@ -654,7 +654,7 @@ void SpatialEditorViewport::_select_region() {
 				z_offset)
 	};
 
-	Vector<Plane> frustum;
+	std::vector<Plane> frustum;
 
 	Vector3 cam_pos = _get_camera_position();
 
@@ -677,8 +677,8 @@ void SpatialEditorViewport::_select_region() {
 	far.d += get_zfar();
 	frustum.push_back(far);
 
-	Vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_convex(frustum, get_tree()->get_root()->get_world()->get_scenario());
-	Vector<Node *> selected;
+	std::vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_convex(frustum, get_tree()->get_root()->get_world()->get_scenario());
+	std::vector<Node *> selected;
 
 	Node *edited_scene = get_tree()->get_edited_scene_root();
 
@@ -706,7 +706,7 @@ void SpatialEditorViewport::_select_region() {
 			item = sel;
 		}
 
-		if (selected.find(item) != -1) continue;
+		if (std_h::isFind(selected, item)) continue;
 
 		if (_is_node_locked(item)) continue;
 
@@ -3447,7 +3447,7 @@ Vector3 SpatialEditorViewport::_get_instance_position(const Point2 &p_pos) const
 	Vector3 world_ray = _get_ray(p_pos);
 	Vector3 world_pos = _get_ray_pos(p_pos);
 
-	Vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_ray(world_pos, world_ray, get_tree()->get_root()->get_world()->get_scenario());
+	std::vector<ObjectID> instances = VisualServer::get_singleton()->instances_cull_ray(world_pos, world_ray, get_tree()->get_root()->get_world()->get_scenario());
 	Set<Ref<EditorSpatialGizmo> > found_gizmos;
 
 	float closest_dist = MAX_DISTANCE;
@@ -3530,7 +3530,7 @@ AABB SpatialEditorViewport::_calculate_spatial_bounds(const Spatial *p_parent, b
 	return bounds;
 }
 
-void SpatialEditorViewport::_create_preview(const Vector<String> &files) const {
+void SpatialEditorViewport::_create_preview(const std::vector<String> &files) const {
 	for (int i = 0; i < files.size(); i++) {
 		String path = files[i];
 		RES res = ResourceLoader::load(path);
@@ -3646,7 +3646,7 @@ bool SpatialEditorViewport::_create_instance(Node *parent, String &path, const P
 void SpatialEditorViewport::_perform_drop_data() {
 	_remove_preview();
 
-	Vector<String> error_files;
+	std::vector<String> error_files;
 
 	editor_data->get_undo_redo().create_action(TTR("Create Node"));
 
@@ -3686,7 +3686,7 @@ bool SpatialEditorViewport::can_drop_data_fw(const Point2 &p_point, const Varian
 	if (!preview_node->is_inside_tree()) {
 		Dictionary d = p_data;
 		if (d.has("type") && (String(d["type"]) == "files")) {
-			Vector<String> files = d["files"];
+			std::vector<String> files = d["files"];
 
 			List<String> scene_extensions;
 			ResourceLoader::get_recognized_extensions_for_type("PackedScene", &scene_extensions);
@@ -5029,8 +5029,8 @@ void SpatialEditor::_init_indicators() {
 		indicator_mat->set_flag(SpatialMaterial::FLAG_ALBEDO_FROM_VERTEX_COLOR, true);
 		indicator_mat->set_flag(SpatialMaterial::FLAG_SRGB_VERTEX_COLOR, true);
 
-		Vector<Color> origin_colors;
-		Vector<Vector3> origin_points;
+		std::vector<Color> origin_colors;
+		std::vector<Vector3> origin_points;
 
 		for (int i = 0; i < 3; i++) {
 			Vector3 axis;
@@ -5941,7 +5941,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu = memnew(HBoxContainer);
 	vbc->add_child(hbc_menu);
 
-	Vector<Variant> button_binds;
+	std::vector<Variant> button_binds;
 	button_binds.resize(1);
 	String sct;
 
@@ -5950,7 +5950,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	tool_button[TOOL_MODE_SELECT]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_SELECT]->set_flat(true);
 	tool_button[TOOL_MODE_SELECT]->set_pressed(true);
-	button_binds.write[0] = MENU_TOOL_SELECT;
+	button_binds[0] = MENU_TOOL_SELECT;
 	tool_button[TOOL_MODE_SELECT]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_SELECT]->set_shortcut(ED_SHORTCUT("spatial_editor/tool_select", TTR("Select Mode"), KEY_Q));
 	tool_button[TOOL_MODE_SELECT]->set_tooltip(keycode_get_string(KEY_MASK_CMD) + TTR("Drag: Rotate\nAlt+Drag: Move\nAlt+RMB: Depth list selection"));
@@ -5969,7 +5969,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_ROTATE]);
 	tool_button[TOOL_MODE_ROTATE]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_ROTATE]->set_flat(true);
-	button_binds.write[0] = MENU_TOOL_ROTATE;
+	button_binds[0] = MENU_TOOL_ROTATE;
 	tool_button[TOOL_MODE_ROTATE]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_ROTATE]->set_shortcut(ED_SHORTCUT("spatial_editor/tool_rotate", TTR("Rotate Mode"), KEY_E));
 
@@ -5977,7 +5977,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_SCALE]);
 	tool_button[TOOL_MODE_SCALE]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_SCALE]->set_flat(true);
-	button_binds.write[0] = MENU_TOOL_SCALE;
+	button_binds[0] = MENU_TOOL_SCALE;
 	tool_button[TOOL_MODE_SCALE]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_SCALE]->set_shortcut(ED_SHORTCUT("spatial_editor/tool_scale", TTR("Scale Mode"), KEY_R));
 
@@ -5987,31 +5987,31 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_LIST_SELECT]);
 	tool_button[TOOL_MODE_LIST_SELECT]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_LIST_SELECT]->set_flat(true);
-	button_binds.write[0] = MENU_TOOL_LIST_SELECT;
+	button_binds[0] = MENU_TOOL_LIST_SELECT;
 	tool_button[TOOL_MODE_LIST_SELECT]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_LIST_SELECT]->set_tooltip(TTR("Show a list of all objects at the position clicked\n(same as Alt+RMB in select mode)."));
 
 	tool_button[TOOL_LOCK_SELECTED] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_LOCK_SELECTED]);
-	button_binds.write[0] = MENU_LOCK_SELECTED;
+	button_binds[0] = MENU_LOCK_SELECTED;
 	tool_button[TOOL_LOCK_SELECTED]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_LOCK_SELECTED]->set_tooltip(TTR("Lock the selected object in place (can't be moved)."));
 
 	tool_button[TOOL_UNLOCK_SELECTED] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_UNLOCK_SELECTED]);
-	button_binds.write[0] = MENU_UNLOCK_SELECTED;
+	button_binds[0] = MENU_UNLOCK_SELECTED;
 	tool_button[TOOL_UNLOCK_SELECTED]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_UNLOCK_SELECTED]->set_tooltip(TTR("Unlock the selected object (can be moved)."));
 
 	tool_button[TOOL_GROUP_SELECTED] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_GROUP_SELECTED]);
-	button_binds.write[0] = MENU_GROUP_SELECTED;
+	button_binds[0] = MENU_GROUP_SELECTED;
 	tool_button[TOOL_GROUP_SELECTED]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_GROUP_SELECTED]->set_tooltip(TTR("Makes sure the object's children are not selectable."));
 
 	tool_button[TOOL_UNGROUP_SELECTED] = memnew(ToolButton);
 	hbc_menu->add_child(tool_button[TOOL_UNGROUP_SELECTED]);
-	button_binds.write[0] = MENU_UNGROUP_SELECTED;
+	button_binds[0] = MENU_UNGROUP_SELECTED;
 	tool_button[TOOL_UNGROUP_SELECTED]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_UNGROUP_SELECTED]->set_tooltip(TTR("Restores the object's children's ability to be selected."));
 
@@ -6021,7 +6021,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_option_button[TOOL_OPT_LOCAL_COORDS]);
 	tool_option_button[TOOL_OPT_LOCAL_COORDS]->set_toggle_mode(true);
 	tool_option_button[TOOL_OPT_LOCAL_COORDS]->set_flat(true);
-	button_binds.write[0] = MENU_TOOL_LOCAL_COORDS;
+	button_binds[0] = MENU_TOOL_LOCAL_COORDS;
 	tool_option_button[TOOL_OPT_LOCAL_COORDS]->connect("toggled", this, "_menu_item_toggled", button_binds);
 	tool_option_button[TOOL_OPT_LOCAL_COORDS]->set_shortcut(ED_SHORTCUT("spatial_editor/local_coords", TTR("Use Local Space"), KEY_T));
 
@@ -6029,7 +6029,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_option_button[TOOL_OPT_USE_SNAP]);
 	tool_option_button[TOOL_OPT_USE_SNAP]->set_toggle_mode(true);
 	tool_option_button[TOOL_OPT_USE_SNAP]->set_flat(true);
-	button_binds.write[0] = MENU_TOOL_USE_SNAP;
+	button_binds[0] = MENU_TOOL_USE_SNAP;
 	tool_option_button[TOOL_OPT_USE_SNAP]->connect("toggled", this, "_menu_item_toggled", button_binds);
 	tool_option_button[TOOL_OPT_USE_SNAP]->set_shortcut(ED_SHORTCUT("spatial_editor/snap", TTR("Use Snap"), KEY_Y));
 
@@ -6040,7 +6040,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	tool_option_button[TOOL_OPT_OVERRIDE_CAMERA]->set_toggle_mode(true);
 	tool_option_button[TOOL_OPT_OVERRIDE_CAMERA]->set_flat(true);
 	tool_option_button[TOOL_OPT_OVERRIDE_CAMERA]->set_disabled(true);
-	button_binds.write[0] = MENU_TOOL_OVERRIDE_CAMERA;
+	button_binds[0] = MENU_TOOL_OVERRIDE_CAMERA;
 	tool_option_button[TOOL_OPT_OVERRIDE_CAMERA]->connect("toggled", this, "_menu_item_toggled", button_binds);
 	_update_camera_override_button(false);
 
@@ -6423,7 +6423,7 @@ void EditorSpatialGizmoPlugin::create_material(const String &p_name, const Color
 
 	Color instanced_color = EDITOR_DEF("editors/3d_gizmos/gizmo_colors/instanced", Color(0.7, 0.7, 0.7, 0.6));
 
-	Vector<Ref<SpatialMaterial> > mats;
+	std::vector<Ref<SpatialMaterial> > mats;
 
 	for (int i = 0; i < 4; i++) {
 		bool selected = i % 2 == 1;
@@ -6465,7 +6465,7 @@ void EditorSpatialGizmoPlugin::create_icon_material(const String &p_name, const 
 
 	Color instanced_color = EDITOR_DEF("editors/3d_gizmos/gizmo_colors/instanced", Color(0.7, 0.7, 0.7, 0.6));
 
-	Vector<Ref<SpatialMaterial> > icons;
+	std::vector<Ref<SpatialMaterial> > icons;
 
 	for (int i = 0; i < 4; i++) {
 		bool selected = i % 2 == 1;
@@ -6520,12 +6520,12 @@ void EditorSpatialGizmoPlugin::create_handle_material(const String &p_name, bool
 		handle_material->set_on_top_of_alpha();
 	}
 
-	materials[p_name] = Vector<Ref<SpatialMaterial> >();
+	materials[p_name] = std::vector<Ref<SpatialMaterial> >();
 	materials[p_name].push_back(handle_material);
 }
 
 void EditorSpatialGizmoPlugin::add_material(const String &p_name, Ref<SpatialMaterial> p_material) {
-	materials[p_name] = Vector<Ref<SpatialMaterial> >();
+	materials[p_name] = std::vector<Ref<SpatialMaterial> >();
 	materials[p_name].push_back(p_material);
 }
 

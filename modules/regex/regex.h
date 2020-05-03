@@ -36,7 +36,6 @@
 #include "core/map.h"
 #include "core/reference.h"
 #include "core/ustring.h"
-#include "core/vector.h"
 
 class RegExMatch : public Reference {
 
@@ -48,7 +47,7 @@ class RegExMatch : public Reference {
 	};
 
 	String subject;
-	Vector<Range> data;
+	std::vector<Range> data;
 	Map<String, int> names;
 
 	friend class RegEx;

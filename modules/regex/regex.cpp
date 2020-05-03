@@ -364,7 +364,7 @@ String RegEx::sub(const String &p_subject, const String &p_replacement, bool p_a
 	const int safety_zone = 1;
 
 	PCRE2_SIZE olength = p_subject.length() + 1; // space for output string and one terminating \0 character
-	Vector<CharType> output;
+	std::vector<CharType> output;
 	output.resize(olength + safety_zone);
 
 	uint32_t flags = PCRE2_SUBSTITUTE_OVERFLOW_LENGTH;

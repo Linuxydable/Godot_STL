@@ -84,7 +84,7 @@ Error HTTPRequest::_parse_url(const String &p_url) {
 	return OK;
 }
 
-Error HTTPRequest::request(const String &p_url, const Vector<String> &p_custom_headers, bool p_ssl_validate_domain, HTTPClient::Method p_method, const String &p_request_data) {
+Error HTTPRequest::request(const String &p_url, const std::vector<String> &p_custom_headers, bool p_ssl_validate_domain, HTTPClient::Method p_method, const String &p_request_data) {
 
 	ERR_FAIL_COND_V(!is_inside_tree(), ERR_UNCONFIGURED);
 	ERR_FAIL_COND_V_MSG(requesting, ERR_BUSY, "HTTPRequest is processing a request. Wait for completion or cancel it before attempting a new one.");

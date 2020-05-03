@@ -338,7 +338,7 @@ void CSGShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 	PoolVector<Vector3> faces = cs->get_brush_faces();
 
-	Vector<Vector3> lines;
+	std::vector<Vector3> lines;
 	lines.resize(faces.size() * 2);
 	{
 		PoolVector<Vector3>::Read r = faces.read();
@@ -347,8 +347,8 @@ void CSGShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 			int f = i / 6;
 			for (int j = 0; j < 3; j++) {
 				int j_n = (j + 1) % 3;
-				lines.write[i + j * 2 + 0] = r[f * 3 + j];
-				lines.write[i + j * 2 + 1] = r[f * 3 + j_n];
+				lines[i + j * 2 + 0] = r[f * 3 + j];
+				lines[i + j * 2 + 1] = r[f * 3 + j_n];
 			}
 		}
 	}
@@ -384,7 +384,7 @@ void CSGShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 		CSGSphere *s = Object::cast_to<CSGSphere>(cs);
 
 		float r = s->get_radius();
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(r, 0, 0));
 		p_gizmo->add_handles(handles, handles_material);
 	}
@@ -392,7 +392,7 @@ void CSGShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	if (Object::cast_to<CSGBox>(cs)) {
 		CSGBox *s = Object::cast_to<CSGBox>(cs);
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(s->get_width() * 0.5, 0, 0));
 		handles.push_back(Vector3(0, s->get_height() * 0.5, 0));
 		handles.push_back(Vector3(0, 0, s->get_depth() * 0.5));
@@ -402,7 +402,7 @@ void CSGShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	if (Object::cast_to<CSGCylinder>(cs)) {
 		CSGCylinder *s = Object::cast_to<CSGCylinder>(cs);
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(s->get_radius(), 0, 0));
 		handles.push_back(Vector3(0, s->get_height() * 0.5, 0));
 		p_gizmo->add_handles(handles, handles_material);
@@ -411,7 +411,7 @@ void CSGShapeSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 	if (Object::cast_to<CSGTorus>(cs)) {
 		CSGTorus *s = Object::cast_to<CSGTorus>(cs);
 
-		Vector<Vector3> handles;
+		std::vector<Vector3> handles;
 		handles.push_back(Vector3(s->get_inner_radius(), 0, 0));
 		handles.push_back(Vector3(s->get_outer_radius(), 0, 0));
 		p_gizmo->add_handles(handles, handles_material);

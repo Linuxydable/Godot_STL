@@ -58,9 +58,9 @@ String EditorQuickOpen::get_selected() const {
 	return "res://" + ti->get_text(0);
 }
 
-Vector<String> EditorQuickOpen::get_selected_files() const {
+std::vector<String> EditorQuickOpen::get_selected_files() const {
 
-	Vector<String> files;
+	std::vector<String> files;
 
 	TreeItem *item = search_options->get_next_selected(search_options->get_root());
 	while (item) {
@@ -128,7 +128,7 @@ float EditorQuickOpen::_path_cmp(String search, String path) const {
 	return path.to_lower().similarity(search.to_lower());
 }
 
-void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<String, Ref<Texture> > > &list) {
+void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, std::vector<Pair<String, Ref<Texture> > > &list) {
 
 	if (!add_directories) {
 		for (int i = 0; i < efsd->get_subdir_count(); i++) {
@@ -190,18 +190,18 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, Vector<Pair<Str
 	}
 }
 
-Vector<Pair<String, Ref<Texture> > > EditorQuickOpen::_sort_fs(Vector<Pair<String, Ref<Texture> > > &list) {
+std::vector<Pair<String, Ref<Texture> > > EditorQuickOpen::_sort_fs(std::vector<Pair<String, Ref<Texture> > > &list) {
 
 	String search_text = search_box->get_text();
-	Vector<Pair<String, Ref<Texture> > > sorted_list;
+	std::vector<Pair<String, Ref<Texture> > > sorted_list;
 
 	if (search_text == String() || list.size() == 0)
 		return list;
 
-	Vector<float> scores;
+	std::vector<float> scores;
 	scores.resize(list.size());
 	for (int i = 0; i < list.size(); i++)
-		scores.write[i] = _path_cmp(search_text, list[i].first);
+		scores[i] = _path_cmp(search_text, list[i].first);
 
 	while (list.size() > 0) {
 
@@ -217,8 +217,8 @@ Vector<Pair<String, Ref<Texture> > > EditorQuickOpen::_sort_fs(Vector<Pair<Strin
 		}
 
 		sorted_list.push_back(list[best_idx]);
-		list.remove(best_idx);
-		scores.remove(best_idx);
+		list.erase(list.begin() + best_idx);
+		scores.erase(scores.begin() + best_idx);
 	}
 
 	return sorted_list;
@@ -229,7 +229,7 @@ void EditorQuickOpen::_update_search() {
 	search_options->clear();
 	TreeItem *root = search_options->create_item();
 	EditorFileSystemDirectory *efsd = EditorFileSystem::get_singleton()->get_filesystem();
-	Vector<Pair<String, Ref<Texture> > > list;
+	std::vector<Pair<String, Ref<Texture> > > list;
 
 	_parse_fs(efsd, list);
 	list = _sort_fs(list);

@@ -173,7 +173,7 @@ public:
 	struct KinematicUtilities {
 		RigidBodyBullet *owner;
 		btScalar safe_margin;
-		Vector<KinematicShape> shapes;
+		std::vector<KinematicShape> shapes;
 
 		KinematicUtilities(RigidBodyBullet *p_owner);
 		~KinematicUtilities();
@@ -204,18 +204,18 @@ private:
 	bool omit_forces_integration;
 	bool can_integrate_forces;
 
-	Vector<CollisionData> collisions;
-	Vector<RigidBodyBullet *> collision_traces_1;
-	Vector<RigidBodyBullet *> collision_traces_2;
-	Vector<RigidBodyBullet *> *prev_collision_traces;
-	Vector<RigidBodyBullet *> *curr_collision_traces;
+	std::vector<CollisionData> collisions;
+	std::vector<RigidBodyBullet *> collision_traces_1;
+	std::vector<RigidBodyBullet *> collision_traces_2;
+	std::vector<RigidBodyBullet *> *prev_collision_traces;
+	std::vector<RigidBodyBullet *> *curr_collision_traces;
 
 	// these parameters are used to avoid vector resize
 	int maxCollisionsDetection;
 	int collisionsCount;
 	int prev_collision_count;
 
-	Vector<AreaBullet *> areasWhereIam;
+	std::vector<AreaBullet *> areasWhereIam;
 	// these parameters are used to avoid vector resize
 	int maxAreasWhereIam;
 	int areaWhereIamCount;

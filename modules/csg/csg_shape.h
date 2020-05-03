@@ -359,7 +359,7 @@ public:
 private:
 	virtual CSGBrush *_build_brush();
 
-	Vector<Vector2> polygon;
+	std::vector<Vector2> polygon;
 	Ref<Material> material;
 
 	Mode mode;
@@ -392,8 +392,8 @@ protected:
 	void _notification(int p_what);
 
 public:
-	void set_polygon(const Vector<Vector2> &p_polygon);
-	Vector<Vector2> get_polygon() const;
+	void set_polygon(const std::vector<Vector2> &p_polygon);
+	std::vector<Vector2> get_polygon() const;
 
 	void set_mode(Mode p_mode);
 	Mode get_mode() const;

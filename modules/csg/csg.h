@@ -41,7 +41,6 @@
 #include "core/oa_hash_map.h"
 #include "core/pool_vector.h"
 #include "core/reference.h"
-#include "core/vector.h"
 #include "scene/resources/material.h"
 
 struct CSGBrush {
@@ -55,8 +54,8 @@ struct CSGBrush {
 		int material;
 	};
 
-	Vector<Face> faces;
-	Vector<Ref<Material> > materials;
+	std::vector<Face> faces;
+	std::vector<Ref<Material> > materials;
 
 	inline void _regen_face_aabbs();
 
@@ -141,8 +140,8 @@ struct CSGBrushOperation {
 			}
 		};
 
-		Vector<Vector3> points;
-		Vector<Face> faces;
+		std::vector<Vector3> points;
+		std::vector<Face> faces;
 		Map<Ref<Material>, int> materials;
 		Map<Vector3, int> vertex_map;
 		OAHashMap<VertexKey, int, VertexKeyHash> snap_cache;
@@ -167,8 +166,8 @@ struct CSGBrushOperation {
 			int vertex_idx[3];
 		};
 
-		Vector<Vertex2D> vertices;
-		Vector<Face2D> faces;
+		std::vector<Vertex2D> vertices;
+		std::vector<Face2D> faces;
 		Plane plane;
 		Transform to_2D;
 		Transform to_3D;
@@ -176,9 +175,9 @@ struct CSGBrushOperation {
 
 		inline int _get_point_idx(const Vector2 &p_point);
 		inline int _add_vertex(const Vertex2D &p_vertex);
-		inline void _add_vertex_idx_sorted(Vector<int> &r_vertex_indices, int p_new_vertex_index);
-		inline void _merge_faces(const Vector<int> &p_segment_indices);
-		inline void _find_edge_intersections(const Vector2 p_segment_points[2], Vector<int> &r_segment_indices);
+		inline void _add_vertex_idx_sorted(std::vector<int> &r_vertex_indices, int p_new_vertex_index);
+		inline void _merge_faces(const std::vector<int> &p_segment_indices);
+		inline void _find_edge_intersections(const Vector2 p_segment_points[2], std::vector<int> &r_segment_indices);
 		inline int _insert_point(const Vector2 &p_point);
 
 		void insert(const CSGBrush &p_brush, int p_brush_face);

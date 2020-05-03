@@ -244,7 +244,7 @@ public:
 	  * Find hardcoded textures from assimp which could be in many different directories
 	  */
 	static void find_texture_path(const String &p_path, _Directory &dir, String &path, bool &found, String extension) {
-		Vector<String> paths;
+		std::vector<String> paths;
 		paths.push_back(path.get_basename() + extension);
 		paths.push_back(path + extension);
 		paths.push_back(path);
@@ -293,7 +293,7 @@ public:
 		List<String> exts;
 		ImageLoader::get_recognized_extensions(&exts);
 
-		Vector<String> split_path = r_path.get_basename().split("*");
+		std::vector<String> split_path = r_path.get_basename().split("*");
 		if (split_path.size() == 2) {
 			r_found = true;
 			return;
@@ -345,7 +345,7 @@ public:
 			return match->get();
 		}
 
-		Vector<String> split_path = p_path.get_basename().split("*");
+		std::vector<String> split_path = p_path.get_basename().split("*");
 		if (split_path.size() == 2) {
 			size_t texture_idx = split_path[1].to_int();
 			ERR_FAIL_COND_V(texture_idx >= p_scene->mNumTextures, Ref<Image>());

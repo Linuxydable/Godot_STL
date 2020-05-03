@@ -59,7 +59,7 @@ class SoftBodyBullet : public CollisionObjectBullet {
 
 private:
 	btSoftBody *bt_soft_body;
-	Vector<Vector<int> > indices_table;
+	std::vector<std::vector<int> > indices_table;
 	btSoftBody::Material *mat0; // This is just a copy of pointer managed by btSoftBody
 	bool isScratched;
 
@@ -74,7 +74,7 @@ private:
 	real_t pose_matching_coefficient; // [0,1]
 	real_t damping_coefficient; // [0,1]
 	real_t drag_coefficient; // [0,1]
-	Vector<int> pinned_nodes;
+	std::vector<int> pinned_nodes;
 
 	// Other property to add
 	//btScalar				kVC;			// Volume conversation coefficient [0,+inf]
