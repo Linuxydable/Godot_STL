@@ -496,11 +496,11 @@ MainLoop *test() {
 	FileAccess *fa = FileAccess::open(test, FileAccess::READ);
 	ERR_FAIL_COND_V_MSG(!fa, NULL, "Could not open file: " + test);
 
-	Vector<uint8_t> buf;
+	std::vector<uint8_t> buf;
 	int flen = fa->get_len();
 	buf.resize(fa->get_len() + 1);
-	fa->get_buffer(buf.ptrw(), flen);
-	buf.write[flen] = 0;
+	fa->get_buffer(buf.data(), flen);
+	buf[flen] = 0;
 
 	String code;
 	code.parse_utf8((const char *)&buf[0]);
@@ -514,13 +514,13 @@ MainLoop *test() {
 
 	{
 
-		Vector<int> hashes;
+		std::vector<int> hashes;
 		List<StringName> tl;
 		ClassDB::get_class_list(&tl);
 
 		for (List<StringName>::Element *E = tl.front(); E; E = E->next()) {
 
-			Vector<uint8_t> m5b = E->get().operator String().md5_buffer();
+			std::vector<uint8_t> m5b = E->get().operator String().md5_buffer();
 			hashes.push_back(hashes.size());
 		}
 
