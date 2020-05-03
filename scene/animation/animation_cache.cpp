@@ -43,7 +43,7 @@ void AnimationCache::_node_exit_tree(Node *p_node) {
 		if (path_cache[i].node != p_node)
 			continue;
 
-		path_cache.write[i].valid = false; //invalidate path cache
+		path_cache[i].valid = false; //invalidate path cache
 	}
 }
 
@@ -129,7 +129,7 @@ void AnimationCache::_update_cache() {
 			if (np.get_subname_count() > 0) {
 
 				RES res2;
-				Vector<StringName> leftover_subpath;
+				std::vector<StringName> leftover_subpath;
 
 				// We don't want to cache the last resource unless it is a method call
 				bool is_method = animation->track_get_type(i) == Animation::TYPE_METHOD;
@@ -189,7 +189,7 @@ void AnimationCache::set_track_transform(int p_idx, const Transform &p_transform
 
 	ERR_FAIL_COND(!cache_valid);
 	ERR_FAIL_INDEX(p_idx, path_cache.size());
-	Path &p = path_cache.write[p_idx];
+	Path &p = path_cache[p_idx];
 	if (!p.valid)
 		return;
 
@@ -210,7 +210,7 @@ void AnimationCache::set_track_value(int p_idx, const Variant &p_value) {
 
 	ERR_FAIL_COND(!cache_valid);
 	ERR_FAIL_INDEX(p_idx, path_cache.size());
-	Path &p = path_cache.write[p_idx];
+	Path &p = path_cache[p_idx];
 	if (!p.valid)
 		return;
 
@@ -225,7 +225,7 @@ void AnimationCache::call_track(int p_idx, const StringName &p_method, const Var
 
 	ERR_FAIL_COND(!cache_valid);
 	ERR_FAIL_INDEX(p_idx, path_cache.size());
-	Path &p = path_cache.write[p_idx];
+	Path &p = path_cache[p_idx];
 	if (!p.valid)
 		return;
 
@@ -281,7 +281,7 @@ void AnimationCache::set_all(float p_time, float p_delta) {
 
 				for (List<int>::Element *E = indices.front(); E; E = E->next()) {
 
-					Vector<Variant> args = animation->method_track_get_params(i, E->get());
+					std::vector<Variant> args = animation->method_track_get_params(i, E->get());
 					StringName name = animation->method_track_get_name(i, E->get());
 					Variant::CallError err;
 
@@ -290,11 +290,11 @@ void AnimationCache::set_all(float p_time, float p_delta) {
 						call_track(i, name, NULL, 0, err);
 					} else {
 
-						Vector<const Variant *> argptrs;
+						std::vector<const Variant *> argptrs;
 						argptrs.resize(args.size());
 						for (int j = 0; j < args.size(); j++) {
 
-							argptrs.write[j] = &args.write[j];
+							argptrs[j] = &args[j];
 						}
 
 						call_track(i, name, (const Variant **)&argptrs[0], args.size(), err);

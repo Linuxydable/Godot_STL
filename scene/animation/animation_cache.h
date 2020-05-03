@@ -47,7 +47,7 @@ class AnimationCache : public Object {
 		Spatial *spatial;
 
 		int bone_idx;
-		Vector<StringName> subpath;
+		std::vector<StringName> subpath;
 		bool valid;
 		Path() {
 			object = NULL;
@@ -60,7 +60,7 @@ class AnimationCache : public Object {
 	};
 
 	Set<Node *> connected_nodes;
-	Vector<Path> path_cache;
+	std::vector<Path> path_cache;
 
 	Node *root;
 	Ref<Animation> animation;
