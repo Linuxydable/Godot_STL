@@ -110,7 +110,7 @@ Ref<StreamPeer> HTTPClient::get_connection() const {
 	return connection;
 }
 
-Error HTTPClient::request_raw(Method p_method, const String &p_url, const Vector<String> &p_headers, const PoolVector<uint8_t> &p_body) {
+Error HTTPClient::request_raw(Method p_method, const String &p_url, const std::vector<String> &p_headers, const PoolVector<uint8_t> &p_body) {
 
 	ERR_FAIL_INDEX_V(p_method, METHOD_MAX, ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V(!p_url.begins_with("/"), ERR_INVALID_PARAMETER);
@@ -178,7 +178,7 @@ Error HTTPClient::request_raw(Method p_method, const String &p_url, const Vector
 	return OK;
 }
 
-Error HTTPClient::request(Method p_method, const String &p_url, const Vector<String> &p_headers, const String &p_body) {
+Error HTTPClient::request(Method p_method, const String &p_url, const std::vector<String> &p_headers, const String &p_body) {
 
 	ERR_FAIL_INDEX_V(p_method, METHOD_MAX, ERR_INVALID_PARAMETER);
 	ERR_FAIL_COND_V(!p_url.begins_with("/"), ERR_INVALID_PARAMETER);
@@ -427,8 +427,8 @@ Error HTTPClient::poll() {
 					// End of response, parse.
 					response_str.push_back(0);
 					String response;
-					response.parse_utf8((const char *)response_str.ptr());
-					Vector<String> responses = response.split("\n");
+					response.parse_utf8((const char *)response_str.data());
+					std::vector<String> responses = response.split("\n");
 					body_size = -1;
 					chunked = false;
 					body_left = 0;
@@ -607,7 +607,7 @@ PoolByteArray HTTPClient::read_response_body_chunk() {
 			} else {
 
 				int rec = 0;
-				err = _get_http_data(&chunk.write[chunk.size() - chunk_left], chunk_left, rec);
+				err = _get_http_data(&chunk[chunk.size() - chunk_left], chunk_left, rec);
 				if (rec == 0) {
 					break;
 				}
@@ -623,7 +623,7 @@ PoolByteArray HTTPClient::read_response_body_chunk() {
 
 					ret.resize(chunk.size() - 2);
 					PoolByteArray::Write w = ret.write();
-					copymem(w.ptr(), chunk.ptr(), chunk.size() - 2);
+					copymem(w.ptr(), chunk.data(), chunk.size() - 2);
 					chunk.clear();
 				}
 
