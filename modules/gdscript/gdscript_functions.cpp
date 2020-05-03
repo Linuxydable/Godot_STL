@@ -40,6 +40,8 @@
 #include "core/variant_parser.h"
 #include "gdscript.h"
 
+#include <algorithm>
+
 const char *GDScriptFunctions::get_func_name(Function p_func) {
 
 	ERR_FAIL_INDEX_V(p_func, FUNC_MAX, "");
@@ -1102,14 +1104,14 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 					}
 
 					GDScript *p = base.ptr();
-					Vector<StringName> sname;
+					std::vector<StringName> sname;
 
 					while (p->_owner) {
 
 						sname.push_back(p->name);
 						p = p->_owner;
 					}
-					sname.invert();
+					std::reverse(sname.begin(), sname.end());
 
 					if (!p->path.is_resource_file()) {
 						r_error.error = Variant::CallError::CALL_ERROR_INVALID_ARGUMENT;
@@ -1122,7 +1124,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 						return;
 					}
 
-					NodePath cp(sname, Vector<StringName>(), false);
+					NodePath cp(sname, std::vector<StringName>(), false);
 
 					Dictionary d;
 					d["@subpath"] = cp;
@@ -1212,7 +1214,7 @@ void GDScriptFunctions::call(Function p_func, const Variant **p_args, int p_arg_
 
 			for (Map<StringName, GDScript::MemberInfo>::Element *E = gd_ref->member_indices.front(); E; E = E->next()) {
 				if (d.has(E->key())) {
-					ins->members.write[E->get().index] = d[E->key()];
+					ins->members[E->get().index] = d[E->key()];
 				}
 			}
 
