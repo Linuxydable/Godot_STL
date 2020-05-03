@@ -353,7 +353,7 @@ int RichTextLabel::_process_line(ItemFrame *p_frame, const Vector2 &p_ofs, int &
 				ItemFade *fade = NULL;
 				int it_char_start = p_char_count;
 
-				Vector<ItemFX *> fx_stack = Vector<ItemFX *>();
+				std::vector<ItemFX *> fx_stack = std::vector<ItemFX *>();
 				_fetch_item_fx_stack(text, fx_stack);
 				bool custom_fx_ok = true;
 
@@ -1461,7 +1461,7 @@ bool RichTextLabel::_find_by_type(Item *p_item, ItemType p_type) {
 	return false;
 }
 
-void RichTextLabel::_fetch_item_fx_stack(Item *p_item, Vector<ItemFX *> &r_stack) {
+void RichTextLabel::_fetch_item_fx_stack(Item *p_item, std::vector<ItemFX *> &r_stack) {
 	Item *item = p_item;
 	while (item) {
 		if (item->type == ITEM_CUSTOMFX || item->type == ITEM_SHAKE || item->type == ITEM_WAVE || item->type == ITEM_TORNADO || item->type == ITEM_RAINBOW) {
@@ -2078,7 +2078,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 		}
 
 		String tag = p_bbcode.substr(brk_pos + 1, brk_end - brk_pos - 1);
-		Vector<String> split_tag_block = tag.split(" ", false);
+		std::vector<String> split_tag_block = tag.split(" ", false);
 		String bbcode = !split_tag_block.empty() ? split_tag_block[0] : "";
 		if (tag.begins_with("/") && tag_stack.size()) {
 
@@ -2426,7 +2426,7 @@ Error RichTextLabel::append_bbcode(const String &p_bbcode) {
 			tag_stack.push_front("rainbow");
 			set_process_internal(true);
 		} else {
-			Vector<String> &expr = split_tag_block;
+			std::vector<String> &expr = split_tag_block;
 			if (expr.size() < 1) {
 				add_text("[");
 				pos = brk_pos + 1;
@@ -2654,7 +2654,7 @@ float RichTextLabel::get_percent_visible() const {
 	return percent_visible;
 }
 
-void RichTextLabel::set_effects(const Vector<Variant> &effects) {
+void RichTextLabel::set_effects(const std::vector<Variant> &effects) {
 	custom_effects.clear();
 	for (int i = 0; i < effects.size(); i++) {
 		Ref<RichTextEffect> effect = Ref<RichTextEffect>(effects[i]);
@@ -2664,8 +2664,8 @@ void RichTextLabel::set_effects(const Vector<Variant> &effects) {
 	parse_bbcode(bbcode);
 }
 
-Vector<Variant> RichTextLabel::get_effects() {
-	Vector<Variant> r;
+std::vector<Variant> RichTextLabel::get_effects() {
+	std::vector<Variant> r;
 	for (int i = 0; i < custom_effects.size(); i++) {
 		r.push_back(custom_effects[i].get_ref_ptr());
 	}
@@ -2867,19 +2867,19 @@ Ref<RichTextEffect> RichTextLabel::_get_custom_effect_by_code(String p_bbcode_id
 	return Ref<RichTextEffect>();
 }
 
-Dictionary RichTextLabel::parse_expressions_for_values(Vector<String> p_expressions) {
+Dictionary RichTextLabel::parse_expressions_for_values(std::vector<String> p_expressions) {
 	Dictionary d = Dictionary();
 	for (int i = 0; i < p_expressions.size(); i++) {
 		String expression = p_expressions[i];
 
 		Array a = Array();
-		Vector<String> parts = expression.split("=", true);
+		std::vector<String> parts = expression.split("=", true);
 		String key = parts[0];
 		if (parts.size() != 2) {
 			return d;
 		}
 
-		Vector<String> values = parts[1].split(",", false);
+		std::vector<String> values = parts[1].split(",", false);
 
 		RegEx color;
 		color.compile("^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
