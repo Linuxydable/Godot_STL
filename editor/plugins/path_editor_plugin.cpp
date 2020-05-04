@@ -235,7 +235,7 @@ void PathSpatialGizmo::redraw() {
 	int v3s = v3a.size();
 	if (v3s == 0)
 		return;
-	Vector<Vector3> v3p;
+	std::vector<Vector3> v3p;
 	PoolVector<Vector3>::Read r = v3a.read();
 
 	// BUG: the following won't work when v3s, avoid drawing as a temporary workaround.
@@ -254,8 +254,8 @@ void PathSpatialGizmo::redraw() {
 
 	if (PathEditorPlugin::singleton->get_edited_path() == path) {
 		v3p.clear();
-		Vector<Vector3> handles;
-		Vector<Vector3> sec_handles;
+		std::vector<Vector3> handles;
+		std::vector<Vector3> sec_handles;
 
 		for (int i = 0; i < c->get_point_count(); i++) {
 
