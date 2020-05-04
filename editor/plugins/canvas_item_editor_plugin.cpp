@@ -568,7 +568,7 @@ Rect2 CanvasItemEditor::_get_encompassing_rect(const Node *p_node) {
 	return rect;
 }
 
-void CanvasItemEditor::_find_canvas_items_at_pos(const Point2 &p_pos, Node *p_node, Vector<_SelectResult> &r_items, const Transform2D &p_parent_xform, const Transform2D &p_canvas_xform) {
+void CanvasItemEditor::_find_canvas_items_at_pos(const Point2 &p_pos, Node *p_node, std::vector<_SelectResult> &r_items, const Transform2D &p_parent_xform, const Transform2D &p_canvas_xform) {
 	if (!p_node)
 		return;
 	if (Object::cast_to<Viewport>(p_node))
@@ -605,7 +605,7 @@ void CanvasItemEditor::_find_canvas_items_at_pos(const Point2 &p_pos, Node *p_no
 	}
 }
 
-void CanvasItemEditor::_get_canvas_items_at_pos(const Point2 &p_pos, Vector<_SelectResult> &r_items) {
+void CanvasItemEditor::_get_canvas_items_at_pos(const Point2 &p_pos, std::vector<_SelectResult> &r_items) {
 
 	Node *scene = editor->get_edited_scene();
 
@@ -641,21 +641,21 @@ void CanvasItemEditor::_get_canvas_items_at_pos(const Point2 &p_pos, Vector<_Sel
 
 		//Remove the item if invalid
 		if (!canvas_item || duplicate || (canvas_item != scene && canvas_item->get_owner() != scene && !scene->is_editable_instance(canvas_item->get_owner())) || _is_node_locked(canvas_item)) {
-			r_items.remove(i);
+			r_items.erase(r_items.begin() + i);
 			i--;
 		} else {
-			r_items.write[i].item = canvas_item;
+			r_items[i].item = canvas_item;
 		}
 	}
 }
 
-void CanvasItemEditor::_get_bones_at_pos(const Point2 &p_pos, Vector<_SelectResult> &r_items) {
+void CanvasItemEditor::_get_bones_at_pos(const Point2 &p_pos, std::vector<_SelectResult> &r_items) {
 	Point2 screen_pos = transform.xform(p_pos);
 
 	for (Map<BoneKey, BoneList>::Element *E = bone_list.front(); E; E = E->next()) {
 		Node2D *from_node = Object::cast_to<Node2D>(ObjectDB::get_instance(E->key().from));
 
-		Vector<Vector2> bone_shape;
+		std::vector<Vector2> bone_shape;
 		if (!_get_bone_shape(&bone_shape, NULL, E))
 			continue;
 
@@ -682,7 +682,7 @@ void CanvasItemEditor::_get_bones_at_pos(const Point2 &p_pos, Vector<_SelectResu
 	}
 }
 
-bool CanvasItemEditor::_get_bone_shape(Vector<Vector2> *shape, Vector<Vector2> *outline_shape, Map<BoneKey, BoneList>::Element *bone) {
+bool CanvasItemEditor::_get_bone_shape(std::vector<Vector2> *shape, std::vector<Vector2> *outline_shape, Map<BoneKey, BoneList>::Element *bone) {
 	int bone_width = EditorSettings::get_singleton()->get("editors/2d/bone_width");
 	int bone_outline_width = EditorSettings::get_singleton()->get("editors/2d/bone_outline_size");
 
@@ -1997,7 +1997,7 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 		if (m.is_valid()) {
 
 			// Save the ik chain for reapplying before IK solve
-			Vector<List<Dictionary> > all_bones_ik_states;
+			std::vector<List<Dictionary> > all_bones_ik_states;
 			for (List<CanvasItem *>::Element *E = drag_selection.front(); E; E = E->next()) {
 				List<Dictionary> bones_ik_states;
 				_save_canvas_item_ik_chain(E->get(), NULL, &bones_ik_states);
@@ -2091,7 +2091,7 @@ bool CanvasItemEditor::_gui_input_move(const Ref<InputEvent> &p_event) {
 		if (drag_selection.size() > 0) {
 
 			// Save the ik chain for reapplying before IK solve
-			Vector<List<Dictionary> > all_bones_ik_states;
+			std::vector<List<Dictionary> > all_bones_ik_states;
 			for (List<CanvasItem *>::Element *E = drag_selection.front(); E; E = E->next()) {
 				List<Dictionary> bones_ik_states;
 				_save_canvas_item_ik_chain(E->get(), NULL, &bones_ik_states);
@@ -2205,7 +2205,7 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 				return true;
 			} else if (!selection_results.empty()) {
 				// Sorts items according the their z-index
-				selection_results.sort();
+				std::sort(selection_results.begin(), selection_results.end());
 
 				NodePath root_path = get_tree()->get_edited_scene_root()->get_path();
 				StringName root_name = root_path.get_name(root_path.get_name_count() - 1);
@@ -2241,13 +2241,13 @@ bool CanvasItemEditor::_gui_input_select(const Ref<InputEvent> &p_event) {
 			CanvasItem *canvas_item = NULL;
 
 			// Retrieve the bones
-			Vector<_SelectResult> selection = Vector<_SelectResult>();
+			std::vector<_SelectResult> selection = std::vector<_SelectResult>();
 			_get_bones_at_pos(click, selection);
 			if (!selection.empty()) {
 				canvas_item = selection[0].item;
 			} else {
 				// Retrieve the canvas items
-				selection = Vector<_SelectResult>();
+				selection = std::vector<_SelectResult>();
 				_get_canvas_items_at_pos(click, selection);
 				if (!selection.empty()) {
 					canvas_item = selection[0].item;
@@ -2381,12 +2381,13 @@ bool CanvasItemEditor::_gui_input_hover(const Ref<InputEvent> &p_event) {
 		Point2 click = transform.affine_inverse().xform(m->get_position());
 
 		// Checks if the hovered items changed, update the viewport if so
-		Vector<_SelectResult> hovering_results_items;
+		std::vector<_SelectResult> hovering_results_items;
 		_get_canvas_items_at_pos(click, hovering_results_items);
-		hovering_results_items.sort();
+
+		std::sort(hovering_results_items.begin(), hovering_results_items.end());
 
 		// Compute the nodes names and icon position
-		Vector<_HoverResult> hovering_results_tmp;
+		std::vector<_HoverResult> hovering_results_tmp;
 		for (int i = 0; i < hovering_results_items.size(); i++) {
 			CanvasItem *canvas_item = hovering_results_items[i].item;
 
@@ -3310,7 +3311,7 @@ void CanvasItemEditor::_draw_selection() {
 void CanvasItemEditor::_draw_straight_line(Point2 p_from, Point2 p_to, Color p_color) {
 	// Draw a line going through the whole screen from a vector
 	RID ci = viewport->get_canvas_item();
-	Vector<Point2> points;
+	std::vector<Point2> points;
 	Point2 from = transform.xform(p_from);
 	Point2 to = transform.xform(p_to);
 	Size2 viewport_size = viewport->get_size();
@@ -3389,8 +3390,8 @@ void CanvasItemEditor::_draw_bones() {
 
 		for (Map<BoneKey, BoneList>::Element *E = bone_list.front(); E; E = E->next()) {
 
-			Vector<Vector2> bone_shape;
-			Vector<Vector2> bone_shape_outline;
+			std::vector<Vector2> bone_shape;
+			std::vector<Vector2> bone_shape_outline;
 			if (!_get_bone_shape(&bone_shape, &bone_shape_outline, E))
 				continue;
 
@@ -3398,7 +3399,7 @@ void CanvasItemEditor::_draw_bones() {
 			if (!from_node->is_visible_in_tree())
 				continue;
 
-			Vector<Color> colors;
+			std::vector<Color> colors;
 			if (from_node->has_meta("_edit_ik_")) {
 				colors.push_back(bone_ik_color);
 				colors.push_back(bone_ik_color);
@@ -3411,7 +3412,7 @@ void CanvasItemEditor::_draw_bones() {
 				colors.push_back(bone_color2);
 			}
 
-			Vector<Color> outline_colors;
+			std::vector<Color> outline_colors;
 
 			if (editor_selection->is_selected(from_node)) {
 				outline_colors.push_back(bone_selected_color);
@@ -3430,7 +3431,7 @@ void CanvasItemEditor::_draw_bones() {
 			}
 
 			VisualServer::get_singleton()->canvas_item_add_polygon(ci, bone_shape_outline, outline_colors);
-			VisualServer::get_singleton()->canvas_item_add_primitive(ci, bone_shape, colors, Vector<Vector2>(), RID());
+			VisualServer::get_singleton()->canvas_item_add_primitive(ci, bone_shape, colors, std::vector<Vector2>(), RID());
 		}
 	}
 }
@@ -5802,7 +5803,7 @@ void CanvasItemEditorViewport::_on_change_type_closed() {
 	_remove_preview();
 }
 
-void CanvasItemEditorViewport::_create_preview(const Vector<String> &files) const {
+void CanvasItemEditorViewport::_create_preview(const std::vector<String> &files) const {
 	bool add_preview = false;
 	for (int i = 0; i < files.size(); i++) {
 		String path = files[i];
@@ -5977,7 +5978,7 @@ void CanvasItemEditorViewport::_perform_drop_data() {
 		return;
 	}
 
-	Vector<String> error_files;
+	std::vector<String> error_files;
 
 	editor_data->get_undo_redo().create_action(TTR("Create Node"));
 
@@ -6042,7 +6043,7 @@ bool CanvasItemEditorViewport::can_drop_data(const Point2 &p_point, const Varian
 	Dictionary d = p_data;
 	if (d.has("type")) {
 		if (String(d["type"]) == "files") {
-			Vector<String> files = d["files"];
+			std::vector<String> files = d["files"];
 			bool can_instance = false;
 			for (int i = 0; i < files.size(); i++) { // check if dragged files contain resource or scene can be created at least once
 				RES res = ResourceLoader::load(files[i]);
