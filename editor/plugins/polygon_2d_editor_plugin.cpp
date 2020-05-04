@@ -517,7 +517,7 @@ void Polygon2DEditor::_uv_input(const Ref<InputEvent> &p_input) {
 							undo_redo->add_undo_method(node, "set_polygon", uv_create_poly_prev);
 							undo_redo->add_do_method(node, "set_internal_vertex_count", 0);
 							undo_redo->add_undo_method(node, "set_internal_vertex_count", uv_create_prev_internal_vertices);
-							undo_redo->add_do_method(node, "set_vertex_colors", Vector<Color>());
+							undo_redo->add_do_method(node, "set_vertex_colors", std::vector<Color>());
 							undo_redo->add_undo_method(node, "set_vertex_colors", uv_create_colors_prev);
 							undo_redo->add_do_method(node, "clear_bones");
 							undo_redo->add_undo_method(node, "_set_bones", uv_create_bones_prev);
@@ -699,7 +699,7 @@ void Polygon2DEditor::_uv_input(const Ref<InputEvent> &p_input) {
 							}
 
 							polygon_create.clear();
-						} else if (polygon_create.find(closest) == -1) {
+						} else if (!std_h::isFind(polygon_create, closest)) {
 							//add temporarily if not exists
 							polygon_create.push_back(closest);
 						}
@@ -713,13 +713,13 @@ void Polygon2DEditor::_uv_input(const Ref<InputEvent> &p_input) {
 					int erase_index = -1;
 					for (int i = polygons.size() - 1; i >= 0; i--) {
 						PoolVector<int> points = polygons[i];
-						Vector<Vector2> polys;
+						std::vector<Vector2> polys;
 						polys.resize(points.size());
 						for (int j = 0; j < polys.size(); j++) {
 							int idx = points[j];
 							if (idx < 0 || idx >= points_prev.size())
 								continue;
-							polys.write[j] = mtx.xform(points_prev[idx]);
+							polys[j] = mtx.xform(points_prev[idx]);
 						}
 
 						if (Geometry::is_point_in_polygon(Vector2(mb->get_position().x, mb->get_position().y), polys)) {
@@ -1057,7 +1057,7 @@ void Polygon2DEditor::_uv_draw() {
 		poly_line_color.a *= 0.25;
 	}
 	Color polygon_line_color = Color(0.5, 0.5, 0.9);
-	Vector<Color> polygon_fill_color;
+	std::vector<Color> polygon_fill_color;
 	{
 		Color pf = polygon_line_color;
 		pf.a *= 0.5;
@@ -1095,7 +1095,7 @@ void Polygon2DEditor::_uv_draw() {
 	for (int i = 0; i < polygons.size(); i++) {
 
 		PoolVector<int> points = polygons[i];
-		Vector<Vector2> polypoints;
+		std::vector<Vector2> polypoints;
 		for (int j = 0; j < points.size(); j++) {
 			int next = (j + 1) % points.size();
 
