@@ -97,9 +97,9 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 	Size2i s = Size2(img->get_width(), img->get_height());
 	ERR_FAIL_COND(s.width == 0 || s.height == 0);
 
-	Vector<Point2> valid_positions;
-	Vector<Point2> valid_normals;
-	Vector<uint8_t> valid_colors;
+	std::vector<Point2> valid_positions;
+	std::vector<Point2> valid_normals;
+	std::vector<uint8_t> valid_colors;
 
 	valid_positions.resize(s.width * s.height);
 
@@ -131,12 +131,12 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 					if (emode == EMISSION_MODE_SOLID) {
 
 						if (capture_colors) {
-							valid_colors.write[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
-							valid_colors.write[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
-							valid_colors.write[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
-							valid_colors.write[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
+							valid_colors[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
+							valid_colors[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
+							valid_colors[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
+							valid_colors[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
 						}
-						valid_positions.write[vpc++] = Point2(i, j);
+						valid_positions[vpc++] = Point2(i, j);
 
 					} else {
 
@@ -155,7 +155,7 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 						}
 
 						if (on_border) {
-							valid_positions.write[vpc] = Point2(i, j);
+							valid_positions[vpc] = Point2(i, j);
 
 							if (emode == EMISSION_MODE_BORDER_DIRECTED) {
 								Vector2 normal;
@@ -172,14 +172,14 @@ void CPUParticles2DEditorPlugin::_generate_emission_mask() {
 								}
 
 								normal.normalize();
-								valid_normals.write[vpc] = normal;
+								valid_normals[vpc] = normal;
 							}
 
 							if (capture_colors) {
-								valid_colors.write[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
-								valid_colors.write[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
-								valid_colors.write[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
-								valid_colors.write[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
+								valid_colors[vpc * 4 + 0] = r[(j * s.width + i) * 4 + 0];
+								valid_colors[vpc * 4 + 1] = r[(j * s.width + i) * 4 + 1];
+								valid_colors[vpc * 4 + 2] = r[(j * s.width + i) * 4 + 2];
+								valid_colors[vpc * 4 + 3] = r[(j * s.width + i) * 4 + 3];
 							}
 
 							vpc++;
