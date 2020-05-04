@@ -213,7 +213,7 @@ class ItemListEditor : public HBoxContainer {
 
 	int selected_idx;
 
-	Vector<ItemListPlugin *> item_plugins;
+	std::vector<ItemListPlugin *> item_plugins;
 
 	void _edit_items();
 
