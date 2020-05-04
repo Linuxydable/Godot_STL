@@ -129,7 +129,7 @@ public:
 	virtual bool is_unsaved();
 	virtual Variant get_edit_state();
 	virtual void set_edit_state(const Variant &p_state);
-	virtual Vector<String> get_functions();
+	virtual std::vector<String> get_functions();
 	virtual void get_breakpoints(List<int> *p_breakpoints);
 	virtual void goto_line(int p_line, bool p_with_error = false);
 	void goto_line_selection(int p_line, int p_begin, int p_end);
