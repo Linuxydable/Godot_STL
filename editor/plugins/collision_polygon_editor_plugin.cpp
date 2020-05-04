@@ -141,7 +141,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 		//Let the snap happen when the point is being moved, instead.
 		//cpoint = CanvasItemEditor::get_singleton()->snap_point(cpoint);
 
-		Vector<Vector2> poly = node->call("get_polygon");
+		std::vector<Vector2> poly = node->call("get_polygon");
 
 		//first check if a point is to be added (segment split)
 		real_t grab_threshold = EDITOR_GET("editors/poly_editor/point_grab_radius");
@@ -229,7 +229,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 							if (closest_idx >= 0) {
 
 								pre_move_edit = poly;
-								poly.insert(closest_idx + 1, cpoint);
+								poly.insert(poly.begin() + closest_idx + 1, cpoint);
 								edited_point = closest_idx + 1;
 								edited_point_pos = cpoint;
 								node->call("set_polygon", poly);
@@ -276,7 +276,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 							//apply
 
 							ERR_FAIL_INDEX_V(edited_point, poly.size(), false);
-							poly.write[edited_point] = edited_point_pos;
+							poly[edited_point] = edited_point_pos;
 							undo_redo->create_action(TTR("Edit Poly"));
 							undo_redo->add_do_method(node, "set_polygon", poly);
 							undo_redo->add_undo_method(node, "set_polygon", pre_move_edit);
@@ -310,7 +310,7 @@ bool Polygon3DEditor::forward_spatial_gui_input(Camera *p_camera, const Ref<Inpu
 
 						undo_redo->create_action(TTR("Edit Poly (Remove Point)"));
 						undo_redo->add_undo_method(node, "set_polygon", poly);
-						poly.remove(closest_idx);
+						poly.erase(poly.begin() + closest_idx);
 						undo_redo->add_do_method(node, "set_polygon", poly);
 						undo_redo->add_do_method(this, "_polygon_draw");
 						undo_redo->add_undo_method(this, "_polygon_draw");
@@ -373,7 +373,7 @@ void Polygon3DEditor::_polygon_draw() {
 	if (!node)
 		return;
 
-	Vector<Vector2> poly;
+	std::vector<Vector2> poly;
 
 	if (wip_active)
 		poly = wip;
@@ -497,7 +497,7 @@ void Polygon3DEditor::edit(Node *p_collision_polygon) {
 
 		node = Object::cast_to<Spatial>(p_collision_polygon);
 		//Enable the pencil tool if the polygon is empty
-		if (Vector<Vector2>(node->call("get_polygon")).size() == 0) {
+		if (std::vector<Vector2>(node->call("get_polygon")).size() == 0) {
 			_menu_option(MODE_CREATE);
 		}
 		wip.clear();
