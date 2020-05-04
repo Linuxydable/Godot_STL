@@ -5,8 +5,8 @@
 #define STD_H
 
 namespace std_h {
-	template <typename T>
-	static bool isFind(const std::vector<T> &v, const T &value) {
+template <class _InIt, class _Ty>
+static bool isFind(const std::vector<_InIt> &v, const _Ty &value) {
 		auto it_find = std::find(v.begin(), v.end(), value);
 
 		if (it_find != v.end()) {
