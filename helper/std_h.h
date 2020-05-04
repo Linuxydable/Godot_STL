@@ -16,8 +16,8 @@ static bool isFind(const std::vector<_InIt> &v, const _Ty &value) {
 		return false;
 	}
 
-	template <typename T>
-	static bool erase(std::vector<T>& v, const T& value) {
+	template <class _InIt, class _Ty>
+	static bool erase(std::vector<_InIt> &v, const _Ty &value) {
 		auto it_find = std::find(v.begin(), v.end(), value);
 
 		if (it_find != v.end()) {
@@ -28,8 +28,8 @@ static bool isFind(const std::vector<_InIt> &v, const _Ty &value) {
 	}
 
 	// need_update : bad code to help recode, need to be erased in futur
-	template <typename T>
-	static int getIndex(const std::vector<T>& v, const T& value) {
+	template <class _InIt, class _Ty>
+	static int getIndex(const std::vector<_InIt> &v, const _Ty &value) {
 		auto it_find = std::find(v.begin(), v.end(), value);
 
 		if (it_find != v.end()) {
