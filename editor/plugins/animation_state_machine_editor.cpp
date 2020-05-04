@@ -589,7 +589,7 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 	bool playing = false;
 	StringName current;
 	StringName blend_from;
-	Vector<StringName> travel_path;
+	std::vector<StringName> travel_path;
 
 	if (playback.is_valid()) {
 		playing = playback->is_playing();
@@ -766,7 +766,7 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 		Ref<StyleBox> sb = name == selected_node ? style_selected : style;
 		int strsize = font->get_string_size(name).width;
 
-		NodeRect &nr = node_rects.write[i];
+		NodeRect &nr = node_rects[i];
 
 		Vector2 offset = nr.node.position;
 		int h = nr.node.size.height;
@@ -776,7 +776,7 @@ void AnimationNodeStateMachineEditor::_state_machine_draw() {
 		//now scroll it to draw
 		state_machine_draw->draw_style_box(sb, nr.node);
 
-		if (playing && (blend_from == name || current == name || travel_path.find(name) != -1)) {
+		if (playing && (blend_from == name || current == name || std_h::isFind(travel_path, name))) {
 			state_machine_draw->draw_style_box(playing_overlay, nr.node);
 		}
 
@@ -1008,7 +1008,7 @@ void AnimationNodeStateMachineEditor::_notification(int p_what) {
 		}
 
 		bool same_travel_path = true;
-		Vector<StringName> tp;
+		std::vector<StringName> tp;
 		bool is_playing = false;
 		StringName current_node;
 		StringName blend_from_node;
