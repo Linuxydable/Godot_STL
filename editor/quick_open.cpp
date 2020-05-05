@@ -161,7 +161,7 @@ void EditorQuickOpen::_parse_fs(EditorFileSystemDirectory *efsd, std::vector<Pai
 					}
 
 					pos = this_sim >= other_sim ? pos - 1 : pos;
-					list.insert(pos, pair);
+					list.insert(list.begin() + pos, pair);
 
 				} else {
 					list.push_back(pair);
