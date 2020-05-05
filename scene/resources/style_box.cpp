@@ -590,7 +590,7 @@ inline void set_inner_corner_radius(const Rect2 style_rect, const Rect2 inner_re
 	inner_corner_radius[3] = MAX(corner_radius[3] - rad, 0);
 }
 
-inline void draw_ring(Vector<Vector2> &verts, Vector<int> &indices, Vector<Color> &colors, const Rect2 &style_rect, const int corner_radius[4],
+inline void draw_ring(std::vector<Vector2> &verts, std::vector<int> &indices, std::vector<Color> &colors, const Rect2 &style_rect, const int corner_radius[4],
 		const Rect2 &ring_rect, const Rect2 &inner_rect, const Color &inner_color, const Color &outer_color, const int corner_detail, const bool fill_center = false) {
 
 	int vert_offset = verts.size();
@@ -604,7 +604,7 @@ inline void draw_ring(Vector<Vector2> &verts, Vector<int> &indices, Vector<Color
 	set_inner_corner_radius(style_rect, ring_rect, corner_radius, ring_corner_radius);
 
 	//corner radius center points
-	Vector<Point2> outer_points;
+	std::vector<Point2> outer_points;
 	outer_points.push_back(ring_rect.position + Vector2(ring_corner_radius[0], ring_corner_radius[0])); //tl
 	outer_points.push_back(Point2(ring_rect.position.x + ring_rect.size.x - ring_corner_radius[1], ring_rect.position.y + ring_corner_radius[1])); //tr
 	outer_points.push_back(ring_rect.position + ring_rect.size - Vector2(ring_corner_radius[2], ring_corner_radius[2])); //br
@@ -613,7 +613,7 @@ inline void draw_ring(Vector<Vector2> &verts, Vector<int> &indices, Vector<Color
 	int inner_corner_radius[4];
 	set_inner_corner_radius(style_rect, inner_rect, corner_radius, inner_corner_radius);
 
-	Vector<Point2> inner_points;
+	std::vector<Point2> inner_points;
 	inner_points.push_back(inner_rect.position + Vector2(inner_corner_radius[0], inner_corner_radius[0])); //tl
 	inner_points.push_back(Point2(inner_rect.position.x + inner_rect.size.x - inner_corner_radius[1], inner_rect.position.y + inner_corner_radius[1])); //tr
 	inner_points.push_back(inner_rect.position + inner_rect.size - Vector2(inner_corner_radius[2], inner_corner_radius[2])); //br
@@ -752,10 +752,10 @@ void StyleBoxFlat::draw(RID p_canvas_item, const Rect2 &p_rect) const {
 		}
 	}
 
-	Vector<Point2> verts;
-	Vector<int> indices;
-	Vector<Color> colors;
-	Vector<Point2> uvs;
+	std::vector<Point2> verts;
+	std::vector<int> indices;
+	std::vector<Color> colors;
+	std::vector<Point2> uvs;
 
 	//DRAW SHADOW
 	if (draw_shadow) {
@@ -847,8 +847,8 @@ void StyleBoxFlat::draw(RID p_canvas_item, const Rect2 &p_rect) const {
 	Rect2 uv_rect = style_rect.grow(aa_on ? aa_size_grow : 0);
 	uvs.resize(verts.size());
 	for (int i = 0; i < verts.size(); i++) {
-		uvs.write[i].x = (verts[i].x - uv_rect.position.x) / uv_rect.size.width;
-		uvs.write[i].y = (verts[i].y - uv_rect.position.y) / uv_rect.size.height;
+		uvs[i].x = (verts[i].x - uv_rect.position.x) / uv_rect.size.width;
+		uvs[i].y = (verts[i].y - uv_rect.position.y) / uv_rect.size.height;
 	}
 
 	//DRAWING
