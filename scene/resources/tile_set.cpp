@@ -753,7 +753,7 @@ void TileSet::tile_set_shape(int p_id, int p_shape_id, const Ref<Shape2D> &p_sha
 
 	if (p_shape_id >= tile_map[p_id].shapes_data.size())
 		tile_map[p_id].shapes_data.resize(p_shape_id + 1);
-	tile_map[p_id].shapes_data.write[p_shape_id].shape = p_shape;
+	tile_map[p_id].shapes_data[p_shape_id].shape = p_shape;
 	_decompose_convex_shape(p_shape);
 	emit_changed();
 }
@@ -776,7 +776,7 @@ void TileSet::tile_set_shape_transform(int p_id, int p_shape_id, const Transform
 
 	if (p_shape_id >= tile_map[p_id].shapes_data.size())
 		tile_map[p_id].shapes_data.resize(p_shape_id + 1);
-	tile_map[p_id].shapes_data.write[p_shape_id].shape_transform = p_offset;
+	tile_map[p_id].shapes_data[p_shape_id].shape_transform = p_offset;
 	emit_changed();
 }
 
@@ -808,7 +808,7 @@ void TileSet::tile_set_shape_one_way(int p_id, int p_shape_id, const bool p_one_
 
 	if (p_shape_id >= tile_map[p_id].shapes_data.size())
 		tile_map[p_id].shapes_data.resize(p_shape_id + 1);
-	tile_map[p_id].shapes_data.write[p_shape_id].one_way_collision = p_one_way;
+	tile_map[p_id].shapes_data[p_shape_id].one_way_collision = p_one_way;
 	emit_changed();
 }
 
@@ -830,7 +830,7 @@ void TileSet::tile_set_shape_one_way_margin(int p_id, int p_shape_id, float p_ma
 
 	if (p_shape_id >= tile_map[p_id].shapes_data.size())
 		tile_map[p_id].shapes_data.resize(p_shape_id + 1);
-	tile_map[p_id].shapes_data.write[p_shape_id].one_way_collision_margin = p_margin;
+	tile_map[p_id].shapes_data[p_shape_id].one_way_collision_margin = p_margin;
 	emit_changed();
 }
 
@@ -951,7 +951,7 @@ Vector2 TileSet::tile_get_occluder_offset(int p_id) const {
 	return tile_map[p_id].occluder_offset;
 }
 
-void TileSet::tile_set_shapes(int p_id, const Vector<ShapeData> &p_shapes) {
+void TileSet::tile_set_shapes(int p_id, const std::vector<ShapeData> &p_shapes) {
 
 	ERR_FAIL_COND(!tile_map.has(p_id));
 	tile_map[p_id].shapes_data = p_shapes;
@@ -961,9 +961,9 @@ void TileSet::tile_set_shapes(int p_id, const Vector<ShapeData> &p_shapes) {
 	emit_changed();
 }
 
-Vector<TileSet::ShapeData> TileSet::tile_get_shapes(int p_id) const {
+std::vector<TileSet::ShapeData> TileSet::tile_get_shapes(int p_id) const {
 
-	ERR_FAIL_COND_V(!tile_map.has(p_id), Vector<ShapeData>());
+	ERR_FAIL_COND_V(!tile_map.has(p_id), std::vector<ShapeData>());
 
 	return tile_map[p_id].shapes_data;
 }
@@ -984,7 +984,7 @@ void TileSet::tile_set_z_index(int p_id, int p_z_index) {
 void TileSet::_tile_set_shapes(int p_id, const Array &p_shapes) {
 
 	ERR_FAIL_COND(!tile_map.has(p_id));
-	Vector<ShapeData> shapes_data;
+	std::vector<ShapeData> shapes_data;
 	Transform2D default_transform = tile_get_shape_transform(p_id, 0);
 	bool default_one_way = tile_get_shape_one_way(p_id, 0);
 	Vector2 default_autotile_coord = Vector2();
@@ -1046,7 +1046,7 @@ Array TileSet::_tile_get_shapes(int p_id) const {
 	ERR_FAIL_COND_V(!tile_map.has(p_id), Array());
 	Array arr;
 
-	Vector<ShapeData> data = tile_map[p_id].shapes_data;
+	std::vector<ShapeData> data = tile_map[p_id].shapes_data;
 	for (int i = 0; i < data.size(); i++) {
 		Dictionary shape_data;
 		shape_data["shape"] = data[i].shape;
@@ -1077,7 +1077,7 @@ void TileSet::_decompose_convex_shape(Ref<Shape2D> p_shape) {
 	Ref<ConvexPolygonShape2D> convex = p_shape;
 	if (!convex.is_valid())
 		return;
-	Vector<Vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(convex->get_points());
+	std::vector<std::vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(convex->get_points());
 	if (decomp.size() > 1) {
 		Array sub_shapes;
 		for (int i = 0; i < decomp.size(); i++) {
