@@ -122,7 +122,8 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 	if (mb.is_valid() && mb->get_button_index() == 2 && mb->is_pressed()) {
 		grabbed = _get_point_from_pos(mb->get_position().x);
 		if (grabbed != -1) {
-			std_h::erase(points, grabbed);
+			points.erase(points.begin() + grabbed);
+
 			grabbed = -1;
 			grabbing = false;
 			update();
