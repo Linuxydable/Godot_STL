@@ -126,7 +126,7 @@ private:
 
 	int _cull_aabb_for_body(Body2DSW *p_body, const Rect2 &p_aabb);
 
-	Vector<Vector2> contact_debug;
+	std::vector<Vector2> contact_debug;
 	int contact_debug_count;
 
 	friend class Physics2DDirectSpaceStateSW;
@@ -192,9 +192,9 @@ public:
 	void set_debug_contacts(int p_amount) { contact_debug.resize(p_amount); }
 	_FORCE_INLINE_ bool is_debugging_contacts() const { return !contact_debug.empty(); }
 	_FORCE_INLINE_ void add_debug_contact(const Vector2 &p_contact) {
-		if (contact_debug_count < contact_debug.size()) contact_debug.write[contact_debug_count++] = p_contact;
+		if (contact_debug_count < contact_debug.size()) contact_debug[contact_debug_count++] = p_contact;
 	}
-	_FORCE_INLINE_ Vector<Vector2> get_debug_contacts() { return contact_debug; }
+	_FORCE_INLINE_ std::vector<Vector2> get_debug_contacts() { return contact_debug; }
 	_FORCE_INLINE_ int get_debug_contact_count() { return contact_debug_count; }
 
 	Physics2DDirectSpaceStateSW *get_direct_state();
