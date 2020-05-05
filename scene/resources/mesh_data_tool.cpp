@@ -118,7 +118,7 @@ Error MeshDataTool::create_from_surface(const Ref<ArrayMesh> &p_mesh, int p_surf
 			v.bones.push_back(bo[i * 4 + 3]);
 		}
 
-		vertices.write[i] = v;
+		vertices[i] = v;
 	}
 
 	PoolVector<int> indices;
@@ -141,7 +141,7 @@ Error MeshDataTool::create_from_surface(const Ref<ArrayMesh> &p_mesh, int p_surf
 
 	for (int i = 0; i < icount; i += 3) {
 
-		Vertex *v[3] = { &vertices.write[r[i + 0]], &vertices.write[r[i + 1]], &vertices.write[r[i + 2]] };
+		Vertex *v[3] = { &vertices[r[i + 0]], &vertices[r[i + 1]], &vertices[r[i + 2]] };
 
 		int fidx = faces.size();
 		Face face;
@@ -169,7 +169,7 @@ Error MeshDataTool::create_from_surface(const Ref<ArrayMesh> &p_mesh, int p_surf
 				v[(j + 1) % 3]->edges.push_back(face.edges[j]);
 			}
 
-			edges.write[face.edges[j]].faces.push_back(fidx);
+			edges[face.edges[j]].faces.push_back(fidx);
 			v[j]->faces.push_back(fidx);
 		}
 
@@ -343,7 +343,7 @@ Vector3 MeshDataTool::get_vertex(int p_idx) const {
 void MeshDataTool::set_vertex(int p_idx, const Vector3 &p_vertex) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].vertex = p_vertex;
+	vertices[p_idx].vertex = p_vertex;
 }
 
 Vector3 MeshDataTool::get_vertex_normal(int p_idx) const {
@@ -354,7 +354,7 @@ Vector3 MeshDataTool::get_vertex_normal(int p_idx) const {
 void MeshDataTool::set_vertex_normal(int p_idx, const Vector3 &p_normal) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].normal = p_normal;
+	vertices[p_idx].normal = p_normal;
 	format |= Mesh::ARRAY_FORMAT_NORMAL;
 }
 
@@ -366,7 +366,7 @@ Plane MeshDataTool::get_vertex_tangent(int p_idx) const {
 void MeshDataTool::set_vertex_tangent(int p_idx, const Plane &p_tangent) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].tangent = p_tangent;
+	vertices[p_idx].tangent = p_tangent;
 	format |= Mesh::ARRAY_FORMAT_TANGENT;
 }
 
@@ -378,7 +378,7 @@ Vector2 MeshDataTool::get_vertex_uv(int p_idx) const {
 void MeshDataTool::set_vertex_uv(int p_idx, const Vector2 &p_uv) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].uv = p_uv;
+	vertices[p_idx].uv = p_uv;
 	format |= Mesh::ARRAY_FORMAT_TEX_UV;
 }
 
@@ -390,7 +390,7 @@ Vector2 MeshDataTool::get_vertex_uv2(int p_idx) const {
 void MeshDataTool::set_vertex_uv2(int p_idx, const Vector2 &p_uv2) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].uv2 = p_uv2;
+	vertices[p_idx].uv2 = p_uv2;
 	format |= Mesh::ARRAY_FORMAT_TEX_UV2;
 }
 
@@ -402,30 +402,30 @@ Color MeshDataTool::get_vertex_color(int p_idx) const {
 void MeshDataTool::set_vertex_color(int p_idx, const Color &p_color) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].color = p_color;
+	vertices[p_idx].color = p_color;
 	format |= Mesh::ARRAY_FORMAT_COLOR;
 }
 
-Vector<int> MeshDataTool::get_vertex_bones(int p_idx) const {
+std::vector<int> MeshDataTool::get_vertex_bones(int p_idx) const {
 
-	ERR_FAIL_INDEX_V(p_idx, vertices.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_idx, vertices.size(), std::vector<int>());
 	return vertices[p_idx].bones;
 }
-void MeshDataTool::set_vertex_bones(int p_idx, const Vector<int> &p_bones) {
+void MeshDataTool::set_vertex_bones(int p_idx, const std::vector<int> &p_bones) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].bones = p_bones;
+	vertices[p_idx].bones = p_bones;
 	format |= Mesh::ARRAY_FORMAT_BONES;
 }
 
-Vector<float> MeshDataTool::get_vertex_weights(int p_idx) const {
+std::vector<float> MeshDataTool::get_vertex_weights(int p_idx) const {
 
-	ERR_FAIL_INDEX_V(p_idx, vertices.size(), Vector<float>());
+	ERR_FAIL_INDEX_V(p_idx, vertices.size(), std::vector<float>());
 	return vertices[p_idx].weights;
 }
-void MeshDataTool::set_vertex_weights(int p_idx, const Vector<float> &p_weights) {
+void MeshDataTool::set_vertex_weights(int p_idx, const std::vector<float> &p_weights) {
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].weights = p_weights;
+	vertices[p_idx].weights = p_weights;
 	format |= Mesh::ARRAY_FORMAT_WEIGHTS;
 }
 
@@ -438,17 +438,17 @@ Variant MeshDataTool::get_vertex_meta(int p_idx) const {
 void MeshDataTool::set_vertex_meta(int p_idx, const Variant &p_meta) {
 
 	ERR_FAIL_INDEX(p_idx, vertices.size());
-	vertices.write[p_idx].meta = p_meta;
+	vertices[p_idx].meta = p_meta;
 }
 
-Vector<int> MeshDataTool::get_vertex_edges(int p_idx) const {
+std::vector<int> MeshDataTool::get_vertex_edges(int p_idx) const {
 
-	ERR_FAIL_INDEX_V(p_idx, vertices.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_idx, vertices.size(), std::vector<int>());
 	return vertices[p_idx].edges;
 }
-Vector<int> MeshDataTool::get_vertex_faces(int p_idx) const {
+std::vector<int> MeshDataTool::get_vertex_faces(int p_idx) const {
 
-	ERR_FAIL_INDEX_V(p_idx, vertices.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_idx, vertices.size(), std::vector<int>());
 	return vertices[p_idx].faces;
 }
 
@@ -458,9 +458,9 @@ int MeshDataTool::get_edge_vertex(int p_edge, int p_vertex) const {
 	ERR_FAIL_INDEX_V(p_vertex, 2, -1);
 	return edges[p_edge].vertex[p_vertex];
 }
-Vector<int> MeshDataTool::get_edge_faces(int p_edge) const {
+std::vector<int> MeshDataTool::get_edge_faces(int p_edge) const {
 
-	ERR_FAIL_INDEX_V(p_edge, edges.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_edge, edges.size(), std::vector<int>());
 	return edges[p_edge].faces;
 }
 Variant MeshDataTool::get_edge_meta(int p_idx) const {
@@ -471,7 +471,7 @@ Variant MeshDataTool::get_edge_meta(int p_idx) const {
 void MeshDataTool::set_edge_meta(int p_idx, const Variant &p_meta) {
 
 	ERR_FAIL_INDEX(p_idx, edges.size());
-	edges.write[p_idx].meta = p_meta;
+	edges[p_idx].meta = p_meta;
 }
 
 int MeshDataTool::get_face_vertex(int p_face, int p_vertex) const {
@@ -494,7 +494,7 @@ Variant MeshDataTool::get_face_meta(int p_face) const {
 void MeshDataTool::set_face_meta(int p_face, const Variant &p_meta) {
 
 	ERR_FAIL_INDEX(p_face, faces.size());
-	faces.write[p_face].meta = p_meta;
+	faces[p_face].meta = p_meta;
 }
 
 Vector3 MeshDataTool::get_face_normal(int p_face) const {
