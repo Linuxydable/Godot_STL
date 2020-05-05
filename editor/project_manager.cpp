@@ -1119,7 +1119,7 @@ void ProjectList::_notification(int p_what) {
 
 		// Load icons as a coroutine to speed up launch when you have hundreds of projects
 		if (_icon_load_index < _projects.size()) {
-			Item &item = _projects.write[_icon_load_index];
+			Item &item = _projects[_icon_load_index];
 			if (item.control->icon_needs_reload) {
 				load_project_icon(_icon_load_index);
 			}
@@ -1132,7 +1132,7 @@ void ProjectList::_notification(int p_what) {
 }
 
 void ProjectList::load_project_icon(int p_index) {
-	Item &item = _projects.write[p_index];
+	Item &item = _projects[p_index];
 
 	Ref<Texture> default_icon = get_icon("DefaultProjectIcon", "EditorIcons");
 	Ref<Texture> icon;
@@ -1211,7 +1211,7 @@ void ProjectList::load_projects() {
 
 	// Clear whole list
 	for (int i = 0; i < _projects.size(); ++i) {
-		Item &project = _projects.write[i];
+		Item &project = _projects[i];
 		CRASH_COND(project.control == NULL);
 		memdelete(project.control); // Why not queue_free()?
 	}
@@ -1294,7 +1294,7 @@ void ProjectList::create_project_item_control(int p_index) {
 	// Will be added last in the list, so make sure indexes match
 	ERR_FAIL_COND(p_index != _scroll_children->get_child_count());
 
-	Item &item = _projects.write[p_index];
+	Item &item = _projects[p_index];
 	ERR_FAIL_COND(item.control != NULL); // Already created
 
 	Ref<Texture> favorite_icon = get_icon("Favorites", "EditorIcons");
@@ -1419,7 +1419,7 @@ void ProjectList::sort_projects() {
 	}
 
 	for (int i = 0; i < _projects.size(); ++i) {
-		Item &item = _projects.write[i];
+		Item &item = _projects[i];
 		item.control->get_parent()->move_child(item.control, i);
 	}
 
@@ -1738,7 +1738,7 @@ void ProjectList::_favorite_pressed(Node *p_hb) {
 	ProjectListItemControl *control = Object::cast_to<ProjectListItemControl>(p_hb);
 
 	int index = control->get_index();
-	Item item = _projects.write[index]; // Take copy
+	Item item = _projects[index]; // Take copy
 
 	item.favorite = !item.favorite;
 
@@ -1749,7 +1749,7 @@ void ProjectList::_favorite_pressed(Node *p_hb) {
 	}
 	EditorSettings::get_singleton()->save();
 
-	_projects.write[index] = item;
+	_projects[index] = item;
 
 	control->set_is_favorite(item.favorite);
 
