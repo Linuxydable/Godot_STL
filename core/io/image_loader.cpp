@@ -30,9 +30,11 @@
 
 #include "image_loader.h"
 
-#include "core/print_string.h"
-
 #include <algorithm>
+
+#include "helper/std_h.h"
+
+#include "core/print_string.h"
 
 bool ImageFormatLoader::recognize(const String &p_extension) const {
 
@@ -113,11 +115,7 @@ void ImageLoader::add_image_format_loader(ImageFormatLoader *p_loader) {
 }
 
 void ImageLoader::remove_image_format_loader(ImageFormatLoader *p_loader) {
-
-	if (auto it_find = std::find(loader.begin(), loader.end(), p_loader); it_find != loader.end()) {
-
-		loader.erase(it_find);
-	}
+	std_h::erase(loader, p_loader);
 }
 
 const std::vector<ImageFormatLoader *> &ImageLoader::get_image_format_loaders() {
