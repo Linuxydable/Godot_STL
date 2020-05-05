@@ -31,6 +31,11 @@
 #ifndef RINGBUFFER_H
 #define RINGBUFFER_H
 
+#include <vector>
+
+#include "error_list.h"
+#include "error_macros.h"
+
 template <typename T>
 class RingBuffer {
 
