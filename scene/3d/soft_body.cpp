@@ -29,6 +29,9 @@
 /*************************************************************************/
 
 #include "soft_body.h"
+
+#include "helper/std_h.h"
+
 #include "core/list.h"
 #include "core/object.h"
 #include "core/os/os.h"
@@ -477,8 +480,9 @@ void SoftBody::become_mesh_owner() {
 	if (!mesh_owner) {
 		mesh_owner = true;
 
-		Vector<Ref<Material> > copy_materials;
-		copy_materials.append_array(materials);
+		std::vector<Ref<Material> > copy_materials;
+
+		std_h::appendArray(copy_materials, materials);
 
 		ERR_FAIL_COND(!mesh->get_surface_count());
 
