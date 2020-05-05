@@ -30,6 +30,8 @@
 
 #include "spatial_editor_plugin.h"
 
+#include "helper/std_h.h"
+
 #include "core/math/camera_matrix.h"
 #include "core/os/input.h"
 #include "core/os/keyboard.h"
@@ -178,7 +180,7 @@ void ViewportRotationControl::_get_sorted_axis(std::vector<Axis2D> &r_axis) {
 		}
 	}
 
-	r_axis.sort_custom<Axis2DCompare>();
+	std::sort(r_axis.begin(), r_axis.end(), Axis2DCompare);
 }
 
 void ViewportRotationControl::_gui_input(Ref<InputEvent> p_event) {
@@ -606,7 +608,7 @@ void SpatialEditorViewport::_find_items_at_pos(const Point2 &p_pos, bool &r_incl
 	if (results.empty())
 		return;
 
-	results.sort();
+	std::sort(results.begin(), results.end());
 }
 
 Vector3 SpatialEditorViewport::_get_screen_to_space(const Vector3 &p_vector3) {
@@ -1024,7 +1026,7 @@ void SpatialEditorViewport::_list_select(Ref<InputEventMouseButton> b) {
 		Spatial *item = selection_results[i].item;
 		if (item != scene && item->get_owner() != scene && !scene->is_editable_instance(item->get_owner())) {
 			//invalid result
-			selection_results.remove(i);
+			selection_results.erase(selection_results.begin() + i);
 			i--;
 		}
 	}
@@ -4598,13 +4600,13 @@ void SpatialEditor::set_state(const Dictionary &p_state) {
 			if (!gizmo_plugins_by_name[j]->can_be_hidden()) continue;
 			int state = EditorSpatialGizmoPlugin::VISIBLE;
 			for (int i = 0; i < keys.size(); i++) {
-				if (gizmo_plugins_by_name.write[j]->get_name() == keys[i]) {
+				if (gizmo_plugins_by_name[j]->get_name() == keys[i]) {
 					state = gizmos_status[keys[i]];
 					break;
 				}
 			}
 
-			gizmo_plugins_by_name.write[j]->set_state(state);
+			gizmo_plugins_by_name[j]->set_state(state);
 		}
 		_update_gizmos_menu();
 	}
@@ -4747,7 +4749,7 @@ void SpatialEditor::_menu_gizmo_toggled(int p_option) {
 			break;
 	}
 
-	gizmo_plugins_by_name.write[p_option]->set_state(state);
+	gizmo_plugins_by_name[p_option]->set_state(state);
 
 	update_all_gizmos();
 }
@@ -5775,7 +5777,7 @@ void SpatialEditor::_request_gizmo(Object *p_obj) {
 		Ref<EditorSpatialGizmo> seg;
 
 		for (int i = 0; i < gizmo_plugins_by_priority.size(); ++i) {
-			seg = gizmo_plugins_by_priority.write[i]->get_gizmo(sp);
+			seg = gizmo_plugins_by_priority[i]->get_gizmo(sp);
 
 			if (seg.is_valid()) {
 				sp->set_gizmo(seg);
@@ -5961,7 +5963,7 @@ SpatialEditor::SpatialEditor(EditorNode *p_editor) {
 	hbc_menu->add_child(tool_button[TOOL_MODE_MOVE]);
 	tool_button[TOOL_MODE_MOVE]->set_toggle_mode(true);
 	tool_button[TOOL_MODE_MOVE]->set_flat(true);
-	button_binds.write[0] = MENU_TOOL_MOVE;
+	button_binds[0] = MENU_TOOL_MOVE;
 	tool_button[TOOL_MODE_MOVE]->connect("pressed", this, "_menu_item_pressed", button_binds);
 	tool_button[TOOL_MODE_MOVE]->set_shortcut(ED_SHORTCUT("spatial_editor/tool_move", TTR("Move Mode"), KEY_W));
 
@@ -6377,31 +6379,33 @@ struct _GizmoPluginPriorityComparator {
 		}
 		return p_a->get_priority() > p_b->get_priority();
 	}
-};
+} _GizmoPluginPriorityComparator;
 
 struct _GizmoPluginNameComparator {
 
 	bool operator()(const Ref<EditorSpatialGizmoPlugin> &p_a, const Ref<EditorSpatialGizmoPlugin> &p_b) const {
 		return p_a->get_name() < p_b->get_name();
 	}
-};
+} _GizmoPluginNameComparator;
 
 void SpatialEditor::add_gizmo_plugin(Ref<EditorSpatialGizmoPlugin> p_plugin) {
 	ERR_FAIL_NULL(p_plugin.ptr());
 
 	gizmo_plugins_by_priority.push_back(p_plugin);
-	gizmo_plugins_by_priority.sort_custom<_GizmoPluginPriorityComparator>();
+
+	std::sort(gizmo_plugins_by_priority.begin(), gizmo_plugins_by_priority.end(), _GizmoPluginPriorityComparator);
 
 	gizmo_plugins_by_name.push_back(p_plugin);
-	gizmo_plugins_by_name.sort_custom<_GizmoPluginNameComparator>();
+
+	std::sort(gizmo_plugins_by_name.begin(), gizmo_plugins_by_name.end(), _GizmoPluginNameComparator);
 
 	_update_gizmos_menu();
 	SpatialEditor::get_singleton()->update_all_gizmos();
 }
 
 void SpatialEditor::remove_gizmo_plugin(Ref<EditorSpatialGizmoPlugin> p_plugin) {
-	gizmo_plugins_by_priority.erase(p_plugin);
-	gizmo_plugins_by_name.erase(p_plugin);
+	std_h::erase(gizmo_plugins_by_priority, p_plugin);
+	std_h::erase(gizmo_plugins_by_name, p_plugin);
 	_update_gizmos_menu();
 }
 

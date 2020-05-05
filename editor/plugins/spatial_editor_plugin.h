@@ -153,7 +153,7 @@ class ViewportRotationControl : public Control {
 		_FORCE_INLINE_ bool operator()(const Axis2D &l, const Axis2D &r) const {
 			return l.z_axis < r.z_axis;
 		}
-	};
+	} Axis2DCompare;
 
 	SpatialEditorViewport *viewport = nullptr;
 	std::vector<Color> axis_colors;
