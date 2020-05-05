@@ -39,6 +39,7 @@
 #include "core/os/memory.h"
 
 #include <string.h>
+#include <vector>
 
 template <class T>
 class RasterizerArrayGLES2 {
@@ -164,7 +165,7 @@ public:
 	void push_back(const T &val) {
 		while (true) {
 			if (_size < max_size()) {
-				_list.set(_size, val);
+				_list[_size] = val;
 				_size++;
 				return;
 			}

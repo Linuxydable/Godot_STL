@@ -77,7 +77,7 @@ private:
 	int highlight_arrow;
 	bool buttons_visible;
 	bool missing_right;
-	Vector<Tab> tabs;
+	std::vector<Tab> tabs;
 	int current;
 	int _get_top_margin() const;
 	TabAlign tab_align;

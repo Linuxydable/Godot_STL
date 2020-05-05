@@ -224,7 +224,7 @@ void Tabs::_notification(int p_what) {
 
 		case NOTIFICATION_TRANSLATION_CHANGED: {
 			for (int i = 0; i < tabs.size(); ++i) {
-				tabs.write[i].xl_text = tr(tabs[i].text);
+				tabs[i].xl_text = tr(tabs[i].text);
 			}
 			minimum_size_changed();
 			update();
@@ -253,7 +253,7 @@ void Tabs::_notification(int p_what) {
 
 			for (int i = 0; i < tabs.size(); i++) {
 
-				tabs.write[i].ofs_cache = mw;
+				tabs[i].ofs_cache = mw;
 				mw += get_tab_width(i);
 			}
 
@@ -281,7 +281,7 @@ void Tabs::_notification(int p_what) {
 				if (i < offset)
 					continue;
 
-				tabs.write[i].ofs_cache = w;
+				tabs[i].ofs_cache = w;
 
 				int lsize = tabs[i].size_cache;
 
@@ -346,7 +346,7 @@ void Tabs::_notification(int p_what) {
 
 					rb->draw(ci, Point2i(w + style->get_margin(MARGIN_LEFT), rb_rect.position.y + style->get_margin(MARGIN_TOP)));
 					w += rb->get_width();
-					tabs.write[i].rb_rect = rb_rect;
+					tabs[i].rb_rect = rb_rect;
 				}
 
 				if (cb_displaypolicy == CLOSE_BUTTON_SHOW_ALWAYS || (cb_displaypolicy == CLOSE_BUTTON_SHOW_ACTIVE_ONLY && i == current)) {
@@ -370,7 +370,7 @@ void Tabs::_notification(int p_what) {
 
 					cb->draw(ci, Point2i(w + style->get_margin(MARGIN_LEFT), cb_rect.position.y + style->get_margin(MARGIN_TOP)));
 					w += cb->get_width();
-					tabs.write[i].cb_rect = cb_rect;
+					tabs[i].cb_rect = cb_rect;
 				}
 
 				w += sb->get_margin(MARGIN_RIGHT);
@@ -437,8 +437,8 @@ bool Tabs::get_offset_buttons_visible() const {
 void Tabs::set_tab_title(int p_tab, const String &p_title) {
 
 	ERR_FAIL_INDEX(p_tab, tabs.size());
-	tabs.write[p_tab].text = p_title;
-	tabs.write[p_tab].xl_text = tr(p_title);
+	tabs[p_tab].text = p_title;
+	tabs[p_tab].xl_text = tr(p_title);
 	update();
 	minimum_size_changed();
 }
@@ -452,7 +452,7 @@ String Tabs::get_tab_title(int p_tab) const {
 void Tabs::set_tab_icon(int p_tab, const Ref<Texture> &p_icon) {
 
 	ERR_FAIL_INDEX(p_tab, tabs.size());
-	tabs.write[p_tab].icon = p_icon;
+	tabs[p_tab].icon = p_icon;
 	update();
 	minimum_size_changed();
 }
@@ -466,7 +466,7 @@ Ref<Texture> Tabs::get_tab_icon(int p_tab) const {
 void Tabs::set_tab_disabled(int p_tab, bool p_disabled) {
 
 	ERR_FAIL_INDEX(p_tab, tabs.size());
-	tabs.write[p_tab].disabled = p_disabled;
+	tabs[p_tab].disabled = p_disabled;
 	update();
 }
 bool Tabs::get_tab_disabled(int p_tab) const {
@@ -478,7 +478,7 @@ bool Tabs::get_tab_disabled(int p_tab) const {
 void Tabs::set_tab_right_button(int p_tab, const Ref<Texture> &p_right_button) {
 
 	ERR_FAIL_INDEX(p_tab, tabs.size());
-	tabs.write[p_tab].right_button = p_right_button;
+	tabs[p_tab].right_button = p_right_button;
 	_update_cache();
 	update();
 	minimum_size_changed();
@@ -545,9 +545,9 @@ void Tabs::_update_cache() {
 	int size_fixed = 0;
 	int count_resize = 0;
 	for (int i = 0; i < tabs.size(); i++) {
-		tabs.write[i].ofs_cache = mw;
-		tabs.write[i].size_cache = get_tab_width(i);
-		tabs.write[i].size_text = Math::ceil(font->get_string_size(tabs[i].xl_text).width);
+		tabs[i].ofs_cache = mw;
+		tabs[i].size_cache = get_tab_width(i);
+		tabs[i].size_text = Math::ceil(font->get_string_size(tabs[i].xl_text).width);
 		mw += tabs[i].size_cache;
 		if (tabs[i].size_cache <= min_width || i == current) {
 			size_fixed += tabs[i].size_cache;
@@ -588,9 +588,9 @@ void Tabs::_update_cache() {
 				lsize = m_width;
 			}
 		}
-		tabs.write[i].ofs_cache = w;
-		tabs.write[i].size_cache = lsize;
-		tabs.write[i].size_text = slen;
+		tabs[i].ofs_cache = w;
+		tabs[i].size_cache = lsize;
+		tabs[i].size_text = slen;
 		w += lsize;
 	}
 }

@@ -195,12 +195,12 @@ void EditorExportPreset::add_patch(const String &p_path, int p_at_pos) {
 	if (p_at_pos < 0)
 		patches.push_back(p_path);
 	else
-		patches.insert(p_at_pos, p_path);
+		patches.insert(patches.begin() + p_at_pos, p_path);
 	EditorExport::singleton->save_presets();
 }
 
 void EditorExportPreset::remove_patch(int p_idx) {
-	patches.remove(p_idx);
+	patches.erase(patches.begin() + p_idx);
 	EditorExport::singleton->save_presets();
 }
 
@@ -335,7 +335,7 @@ Error EditorExportPlatform::_save_pack_file(void *p_userdata, const String &p_pa
 		CryptoCore::md5(p_data.data(), p_data.size(), hash);
 		sd.md5.resize(16);
 		for (int i = 0; i < 16; i++) {
-			sd.md5.write[i] = hash[i];
+			sd.md5[i] = hash[i];
 		}
 	}
 
@@ -945,7 +945,7 @@ Error EditorExportPlatform::save_pack(const Ref<EditorExportPreset> &p_preset, c
 		return err;
 	}
 
-	pd.file_ofs.sort(); //do sort, so we can do binary search later
+	std::sort(pd.file_ofs.begin(), pd.file_ofs.end()); //do sort, so we can do binary search later
 
 	FileAccess *f;
 	int64_t embed_pos = 0;
@@ -1021,7 +1021,7 @@ Error EditorExportPlatform::save_pack(const Ref<EditorExportPreset> &p_preset, c
 
 		f->store_64(pd.file_ofs[i].ofs + header_padding + header_size);
 		f->store_64(pd.file_ofs[i].size); // pay attention here, this is where file is
-		f->store_buffer(pd.file_ofs[i].md5.ptr(), 16); //also save md5 for file
+		f->store_buffer(pd.file_ofs[i].md5.data(), 16); //also save md5 for file
 	}
 
 	for (int i = 0; i < header_padding; i++) {
@@ -1248,7 +1248,7 @@ void EditorExport::add_export_preset(const Ref<EditorExportPreset> &p_preset, in
 	if (p_at_pos < 0)
 		export_presets.push_back(p_preset);
 	else
-		export_presets.insert(p_at_pos, p_preset);
+		export_presets.insert(export_presets.begin() + p_at_pos, p_preset);
 }
 
 String EditorExportPlatform::test_etc2() const {
@@ -1288,20 +1288,20 @@ Ref<EditorExportPreset> EditorExport::get_export_preset(int p_idx) {
 
 void EditorExport::remove_export_preset(int p_idx) {
 
-	export_presets.remove(p_idx);
+	export_presets.erase(export_presets.begin() + p_idx);
 	save_presets();
 }
 
 void EditorExport::add_export_plugin(const Ref<EditorExportPlugin> &p_plugin) {
 
-	if (export_plugins.find(p_plugin) == -1) {
+	if (!std_h::isFind(export_plugins, p_plugin)) {
 		export_plugins.push_back(p_plugin);
 	}
 }
 
 void EditorExport::remove_export_plugin(const Ref<EditorExportPlugin> &p_plugin) {
 
-	export_plugins.erase(p_plugin);
+	std_h::erase(export_plugins, p_plugin);
 }
 
 std::vector<Ref<EditorExportPlugin> > EditorExport::get_export_plugins() {
@@ -1339,7 +1339,7 @@ void EditorExport::load_config() {
 
 		for (int i = 0; i < export_platforms.size(); i++) {
 			if (export_platforms[i]->get_name() == platform) {
-				preset = export_platforms.write[i]->create_preset();
+				preset = export_platforms[i]->create_preset();
 				break;
 			}
 		}
@@ -1420,7 +1420,7 @@ bool EditorExport::poll_export_platforms() {
 
 	bool changed = false;
 	for (int i = 0; i < export_platforms.size(); i++) {
-		if (export_platforms.write[i]->poll_export()) {
+		if (export_platforms[i]->poll_export()) {
 			changed = true;
 		}
 	}

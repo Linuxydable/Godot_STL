@@ -48,8 +48,8 @@ public:
 private:
 	Ref<AudioStreamPlayback> stream_playback;
 	Ref<AudioStream> stream;
-	Vector<AudioFrame> mix_buffer;
-	Vector<AudioFrame> fadeout_buffer;
+	std::vector<AudioFrame> mix_buffer;
+	std::vector<AudioFrame> fadeout_buffer;
 	bool use_fadeout;
 
 	volatile float setseek;

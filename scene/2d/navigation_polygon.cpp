@@ -128,7 +128,7 @@ Array NavigationPolygon::_get_outlines() const {
 	return ret;
 }
 
-void NavigationPolygon::add_polygon(const Vector<int> &p_polygon) {
+void NavigationPolygon::add_polygon(const std::vector<int> &p_polygon) {
 
 	Polygon polygon;
 	polygon.indices = p_polygon;
@@ -145,9 +145,9 @@ int NavigationPolygon::get_polygon_count() const {
 
 	return polygons.size();
 }
-Vector<int> NavigationPolygon::get_polygon(int p_idx) {
+std::vector<int> NavigationPolygon::get_polygon(int p_idx) {
 
-	ERR_FAIL_INDEX_V(p_idx, polygons.size(), Vector<int>());
+	ERR_FAIL_INDEX_V(p_idx, polygons.size(), std::vector<int>());
 	return polygons[p_idx].indices;
 }
 void NavigationPolygon::clear_polygons() {
@@ -426,22 +426,22 @@ void NavigationPolygonInstance::_notification(int p_what) {
 				} else {
 					color = get_tree()->get_debug_navigation_disabled_color();
 				}
-				Vector<Color> colors;
-				Vector<Vector2> vertices;
+				std::vector<Color> colors;
+				std::vector<Vector2> vertices;
 				vertices.resize(vsize);
 				colors.resize(vsize);
 				{
 					PoolVector<Vector2>::Read vr = verts.read();
 					for (int i = 0; i < vsize; i++) {
-						vertices.write[i] = vr[i];
-						colors.write[i] = color;
+						vertices[i] = vr[i];
+						colors[i] = color;
 					}
 				}
 
-				Vector<int> indices;
+				std::vector<int> indices;
 
 				for (int i = 0; i < navpoly->get_polygon_count(); i++) {
-					Vector<int> polygon = navpoly->get_polygon(i);
+					std::vector<int> polygon = navpoly->get_polygon(i);
 
 					for (int j = 2; j < polygon.size(); j++) {
 

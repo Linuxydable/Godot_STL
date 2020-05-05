@@ -237,7 +237,7 @@ bool RasterizerSceneGLES3::_shadow_atlas_find_shadow(ShadowAtlas *shadow_atlas, 
 
 		//look for an empty space
 		int sc = shadow_atlas->quadrants[qidx].shadows.size();
-		ShadowAtlas::Quadrant::Shadow *sarr = shadow_atlas->quadrants[qidx].shadows.ptrw();
+		ShadowAtlas::Quadrant::Shadow *sarr = shadow_atlas->quadrants[qidx].shadows.data();
 
 		int found_free_idx = -1; //found a free one
 		int found_used_idx = -1; //found existing one, must steal it
@@ -337,7 +337,7 @@ bool RasterizerSceneGLES3::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 		bool should_redraw = shadow_atlas->quadrants[q].shadows[s].version != p_light_version;
 
 		if (!should_realloc) {
-			shadow_atlas->quadrants[q].shadows.write[s].version = p_light_version;
+			shadow_atlas->quadrants[q].shadows[s].version = p_light_version;
 			//already existing, see if it should redraw or it's just OK
 			return should_redraw;
 		}
@@ -347,7 +347,7 @@ bool RasterizerSceneGLES3::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 		//find a better place
 		if (_shadow_atlas_find_shadow(shadow_atlas, valid_quadrants, valid_quadrant_count, shadow_atlas->quadrants[q].subdivision, tick, new_quadrant, new_shadow)) {
 			//found a better place!
-			ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows.write[new_shadow];
+			ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows[new_shadow];
 			if (sh->owner.is_valid()) {
 				//is taken, but is invalid, erasing it
 				shadow_atlas->shadow_owners.erase(sh->owner);
@@ -356,8 +356,8 @@ bool RasterizerSceneGLES3::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 			}
 
 			//erase previous
-			shadow_atlas->quadrants[q].shadows.write[s].version = 0;
-			shadow_atlas->quadrants[q].shadows.write[s].owner = RID();
+			shadow_atlas->quadrants[q].shadows[s].version = 0;
+			shadow_atlas->quadrants[q].shadows[s].owner = RID();
 
 			sh->owner = p_light_intance;
 			sh->alloc_tick = tick;
@@ -377,7 +377,7 @@ bool RasterizerSceneGLES3::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 
 		//already existing, see if it should redraw or it's just OK
 
-		shadow_atlas->quadrants[q].shadows.write[s].version = p_light_version;
+		shadow_atlas->quadrants[q].shadows[s].version = p_light_version;
 
 		return should_redraw;
 	}
@@ -387,7 +387,7 @@ bool RasterizerSceneGLES3::shadow_atlas_update_light(RID p_atlas, RID p_light_in
 	//find a better place
 	if (_shadow_atlas_find_shadow(shadow_atlas, valid_quadrants, valid_quadrant_count, -1, tick, new_quadrant, new_shadow)) {
 		//found a better place!
-		ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows.write[new_shadow];
+		ShadowAtlas::Quadrant::Shadow *sh = &shadow_atlas->quadrants[new_quadrant].shadows[new_shadow];
 		if (sh->owner.is_valid()) {
 			//is taken, but is invalid, erasing it
 			shadow_atlas->shadow_owners.erase(sh->owner);
@@ -484,7 +484,7 @@ void RasterizerSceneGLES3::reflection_atlas_set_size(RID p_ref_atlas, int p_size
 		//erase probes reference to this
 		if (reflection_atlas->reflections[i].owner.is_valid()) {
 			ReflectionProbeInstance *reflection_probe_instance = reflection_probe_instance_owner.getornull(reflection_atlas->reflections[i].owner);
-			reflection_atlas->reflections.write[i].owner = RID();
+			reflection_atlas->reflections[i].owner = RID();
 
 			ERR_CONTINUE(!reflection_probe_instance);
 			reflection_probe_instance->reflection_atlas_index = -1;
@@ -556,7 +556,7 @@ void RasterizerSceneGLES3::reflection_atlas_set_subdivision(RID p_ref_atlas, int
 			//erase probes reference to this
 			if (reflection_atlas->reflections[i].owner.is_valid()) {
 				ReflectionProbeInstance *reflection_probe_instance = reflection_probe_instance_owner.getornull(reflection_atlas->reflections[i].owner);
-				reflection_atlas->reflections.write[i].owner = RID();
+				reflection_atlas->reflections[i].owner = RID();
 
 				ERR_CONTINUE(!reflection_probe_instance);
 				reflection_probe_instance->reflection_atlas_index = -1;
@@ -611,7 +611,7 @@ void RasterizerSceneGLES3::reflection_probe_release_atlas_index(RID p_instance) 
 
 	ERR_FAIL_COND(reflection_atlas->reflections[rpi->reflection_atlas_index].owner != rpi->self);
 
-	reflection_atlas->reflections.write[rpi->reflection_atlas_index].owner = RID();
+	reflection_atlas->reflections[rpi->reflection_atlas_index].owner = RID();
 
 	rpi->reflection_atlas_index = -1;
 	rpi->atlas = RID();
@@ -683,8 +683,8 @@ bool RasterizerSceneGLES3::reflection_probe_instance_begin_render(RID p_instance
 		victim_rpi->reflection_atlas_index = -1;
 	}
 
-	reflection_atlas->reflections.write[best_free].owner = p_instance;
-	reflection_atlas->reflections.write[best_free].last_frame = storage->frame.count;
+	reflection_atlas->reflections[best_free].owner = p_instance;
+	reflection_atlas->reflections[best_free].last_frame = storage->frame.count;
 
 	rpi->reflection_atlas_index = best_free;
 	rpi->atlas = p_reflection_atlas;
@@ -1157,9 +1157,9 @@ bool RasterizerSceneGLES3::_setup_material(RasterizerStorageGLES3::Material *p_m
 	}
 
 	int tc = p_material->textures.size();
-	RID *textures = p_material->textures.ptrw();
-	ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = p_material->shader->texture_hints.ptrw();
-	const ShaderLanguage::DataType *texture_types = p_material->shader->texture_types.ptr();
+	RID *textures = p_material->textures.data();
+	ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = p_material->shader->texture_hints.data();
+	const ShaderLanguage::DataType *texture_types = p_material->shader->texture_types.data();
 
 	state.current_main_tex = 0;
 
@@ -1637,7 +1637,7 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 				if (!c.normals.empty()) {
 
 					glEnableVertexAttribArray(VS::ARRAY_NORMAL);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.normals.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.normals.data());
 					glVertexAttribPointer(VS::ARRAY_NORMAL, 3, GL_FLOAT, false, sizeof(Vector3), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Vector3) * vertices;
 
@@ -1649,7 +1649,7 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 				if (!c.tangents.empty()) {
 
 					glEnableVertexAttribArray(VS::ARRAY_TANGENT);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Plane) * vertices, c.tangents.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Plane) * vertices, c.tangents.data());
 					glVertexAttribPointer(VS::ARRAY_TANGENT, 4, GL_FLOAT, false, sizeof(Plane), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Plane) * vertices;
 
@@ -1661,7 +1661,7 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 				if (!c.colors.empty()) {
 
 					glEnableVertexAttribArray(VS::ARRAY_COLOR);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Color) * vertices, c.colors.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Color) * vertices, c.colors.data());
 					glVertexAttribPointer(VS::ARRAY_COLOR, 4, GL_FLOAT, false, sizeof(Color), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Color) * vertices;
 
@@ -1674,7 +1674,7 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 				if (!c.uvs.empty()) {
 
 					glEnableVertexAttribArray(VS::ARRAY_TEX_UV);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uvs.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uvs.data());
 					glVertexAttribPointer(VS::ARRAY_TEX_UV, 2, GL_FLOAT, false, sizeof(Vector2), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Vector2) * vertices;
 
@@ -1686,7 +1686,7 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 				if (!c.uvs2.empty()) {
 
 					glEnableVertexAttribArray(VS::ARRAY_TEX_UV2);
-					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uvs2.ptr());
+					glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector2) * vertices, c.uvs2.data());
 					glVertexAttribPointer(VS::ARRAY_TEX_UV2, 2, GL_FLOAT, false, sizeof(Vector2), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 					buf_ofs += sizeof(Vector2) * vertices;
 
@@ -1696,7 +1696,7 @@ void RasterizerSceneGLES3::_render_geometry(RenderList::Element *e) {
 				}
 
 				glEnableVertexAttribArray(VS::ARRAY_VERTEX);
-				glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.vertices.ptr());
+				glBufferSubData(GL_ARRAY_BUFFER, buf_ofs, sizeof(Vector3) * vertices, c.vertices.data());
 				glVertexAttribPointer(VS::ARRAY_VERTEX, 3, GL_FLOAT, false, sizeof(Vector3), CAST_INT_TO_UCHAR_PTR(buf_ofs));
 				glDrawArrays(gl_primitive[c.primitive], 0, c.vertices.size());
 			}
@@ -4924,7 +4924,7 @@ bool RasterizerSceneGLES3::free(RID p_rid) {
 			uint32_t q = (key >> ShadowAtlas::QUADRANT_SHIFT) & 0x3;
 			uint32_t s = key & ShadowAtlas::SHADOW_INDEX_MASK;
 
-			shadow_atlas->quadrants[q].shadows.write[s].owner = RID();
+			shadow_atlas->quadrants[q].shadows[s].owner = RID();
 			shadow_atlas->shadow_owners.erase(p_rid);
 		}
 

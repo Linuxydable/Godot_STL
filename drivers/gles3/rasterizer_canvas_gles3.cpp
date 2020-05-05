@@ -624,7 +624,7 @@ static const GLenum gl_primitive[] = {
 void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *current_clip, bool &reclip) {
 
 	int cc = p_item->commands.size();
-	Item::Command **commands = p_item->commands.ptrw();
+	Item::Command **commands = p_item->commands.data();
 
 	for (int i = 0; i < cc; i++) {
 
@@ -696,13 +696,13 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 
 				if (pline->triangles.size()) {
 
-					_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.ptr(), NULL, pline->triangle_colors.ptr(), pline->triangle_colors.size() == 1);
+					_draw_generic(GL_TRIANGLE_STRIP, pline->triangles.size(), pline->triangles.data(), NULL, pline->triangle_colors.data(), pline->triangle_colors.size() == 1);
 #ifdef GLES_OVER_GL
 					glEnable(GL_LINE_SMOOTH);
 					if (pline->multiline) {
 						//needs to be different
 					} else {
-						_draw_generic(GL_LINE_LOOP, pline->lines.size(), pline->lines.ptr(), NULL, pline->line_colors.ptr(), pline->line_colors.size() == 1);
+						_draw_generic(GL_LINE_LOOP, pline->lines.size(), pline->lines.data(), NULL, pline->line_colors.data(), pline->line_colors.size() == 1);
 					}
 					glDisable(GL_LINE_SMOOTH);
 #endif
@@ -720,14 +720,14 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 
 						while (todo) {
 							int to_draw = MIN(max_per_call, todo);
-							_draw_generic(GL_LINES, to_draw * 2, &pline->lines.ptr()[offset], NULL, pline->line_colors.size() == 1 ? pline->line_colors.ptr() : &pline->line_colors.ptr()[offset], pline->line_colors.size() == 1);
+							_draw_generic(GL_LINES, to_draw * 2, &pline->lines[offset], NULL, pline->line_colors.size() == 1 ? pline->line_colors.data() : &pline->line_colors[offset], pline->line_colors.size() == 1);
 							todo -= to_draw;
 							offset += to_draw * 2;
 						}
 
 					} else {
 
-						_draw_generic(GL_LINE_STRIP, pline->lines.size(), pline->lines.ptr(), NULL, pline->line_colors.ptr(), pline->line_colors.size() == 1);
+						_draw_generic(GL_LINE_STRIP, pline->lines.size(), pline->lines.data(), NULL, pline->line_colors.data(), pline->line_colors.size() == 1);
 					}
 
 #ifdef GLES_OVER_GL
@@ -882,7 +882,7 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 					glVertexAttrib4f(VS::ARRAY_COLOR, 1, 1, 1, 1);
 				}
 
-				_draw_gui_primitive(primitive->points.size(), primitive->points.ptr(), primitive->colors.ptr(), primitive->uvs.ptr());
+				_draw_gui_primitive(primitive->points.size(), primitive->points.data(), primitive->colors.data(), primitive->uvs.data());
 
 			} break;
 			case Item::Command::TYPE_POLYGON: {
@@ -897,14 +897,14 @@ void RasterizerCanvasGLES3::_canvas_item_render_commands(Item *p_item, Item *cur
 					state.canvas_shader.set_uniform(CanvasShaderGLES3::COLOR_TEXPIXEL_SIZE, texpixel_size);
 				}
 
-				_draw_polygon(polygon->indices.ptr(), polygon->count, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1, polygon->bones.ptr(), polygon->weights.ptr());
+				_draw_polygon(polygon->indices.data(), polygon->count, polygon->points.size(), polygon->points.data(), polygon->uvs.data(), polygon->colors.data(), polygon->colors.size() == 1, polygon->bones.data(), polygon->weights.data());
 #ifdef GLES_OVER_GL
 				if (polygon->antialiased) {
 					glEnable(GL_LINE_SMOOTH);
 					if (polygon->antialiasing_use_indices) {
-						_draw_generic_indices(GL_LINE_STRIP, polygon->indices.ptr(), polygon->count, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1);
+						_draw_generic_indices(GL_LINE_STRIP, polygon->indices.data(), polygon->count, polygon->points.size(), polygon->points.data(), polygon->uvs.data(), polygon->colors.data(), polygon->colors.size() == 1);
 					} else {
-						_draw_generic(GL_LINE_LOOP, polygon->points.size(), polygon->points.ptr(), polygon->uvs.ptr(), polygon->colors.ptr(), polygon->colors.size() == 1);
+						_draw_generic(GL_LINE_LOOP, polygon->points.size(), polygon->points.data(), polygon->uvs.data(), polygon->colors.data(), polygon->colors.size() == 1);
 					}
 					glDisable(GL_LINE_SMOOTH);
 				}
@@ -1471,8 +1471,8 @@ void RasterizerCanvasGLES3::canvas_render_items(Item *p_item_list, int p_z, cons
 				}
 
 				int tc = material_ptr->textures.size();
-				RID *textures = material_ptr->textures.ptrw();
-				ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.ptrw();
+				RID *textures = material_ptr->textures.data();
+				ShaderLanguage::ShaderNode::Uniform::Hint *texture_hints = shader_ptr->texture_hints.data();
 
 				for (int i = 0; i < tc; i++) {
 

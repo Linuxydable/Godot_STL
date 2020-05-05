@@ -255,7 +255,7 @@ private:
 		bool import_broken;
 
 		bool operator<(const FileInfo &fi) const {
-			return NaturalNoCaseComparator()(name, fi.name);
+			return NaturalNoCaseComparator(name, fi.name);
 		}
 	};
 

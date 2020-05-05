@@ -875,7 +875,7 @@ void AnimationTreePlayer::_process_animation(float p_delta) {
 						for (List<int>::Element *F = indices.front(); F; F = F->next()) {
 
 							StringName method = a->method_track_get_name(tr.local_track, F->get());
-							Vector<Variant> args = a->method_track_get_params(tr.local_track, F->get());
+							std::vector<Variant> args = a->method_track_get_params(tr.local_track, F->get());
 							args.resize(VARIANT_ARG_MAX);
 							tr.track->object->call(method, args[0], args[1], args[2], args[3], args[4]);
 						}
@@ -1495,7 +1495,7 @@ AnimationTreePlayer::Track *AnimationTreePlayer::_find_track(const NodePath &p_p
 	ERR_FAIL_COND_V(!parent, NULL);
 
 	RES resource;
-	Vector<StringName> leftover_path;
+	std::vector<StringName> leftover_path;
 	Node *child = parent->get_node_and_resource(p_path, resource, leftover_path);
 	if (!child) {
 		String err = "Animation track references unknown Node: '" + String(p_path) + "'.";
