@@ -80,8 +80,8 @@ uint32_t SurfaceTool::VertexHasher::hash(const Vertex &p_vtx) {
 	h = hash_djb2_buffer((const uint8_t *)&p_vtx.uv, sizeof(real_t) * 2, h);
 	h = hash_djb2_buffer((const uint8_t *)&p_vtx.uv2, sizeof(real_t) * 2, h);
 	h = hash_djb2_buffer((const uint8_t *)&p_vtx.color, sizeof(real_t) * 4, h);
-	h = hash_djb2_buffer((const uint8_t *)p_vtx.bones.ptr(), p_vtx.bones.size() * sizeof(int), h);
-	h = hash_djb2_buffer((const uint8_t *)p_vtx.weights.ptr(), p_vtx.weights.size() * sizeof(float), h);
+	h = hash_djb2_buffer((const uint8_t *)p_vtx.bones.data(), p_vtx.bones.size() * sizeof(int), h);
+	h = hash_djb2_buffer((const uint8_t *)p_vtx.weights.data(), p_vtx.weights.size() * sizeof(float), h);
 	return h;
 }
 
@@ -122,7 +122,7 @@ void SurfaceTool::add_vertex(const Vector3 &p_vertex) {
 			}
 		} else if (vtx.weights.size() > expected_vertices) {
 			//more than required, sort, cap and normalize.
-			Vector<WeightSort> weights;
+			std::vector<WeightSort> weights;
 			for (int i = 0; i < vtx.weights.size(); i++) {
 				WeightSort ws;
 				ws.index = vtx.bones[i];
@@ -131,7 +131,8 @@ void SurfaceTool::add_vertex(const Vector3 &p_vertex) {
 			}
 
 			//sort
-			weights.sort();
+			std::sort(weights.begin(), weights.end());
+
 			//cap
 			weights.resize(expected_vertices);
 			//renormalize
@@ -145,11 +146,11 @@ void SurfaceTool::add_vertex(const Vector3 &p_vertex) {
 
 			for (int i = 0; i < expected_vertices; i++) {
 				if (total > 0) {
-					vtx.weights.write[i] = weights[i].weight / total;
+					vtx.weights[i] = weights[i].weight / total;
 				} else {
-					vtx.weights.write[i] = 0;
+					vtx.weights[i] = 0;
 				}
-				vtx.bones.write[i] = weights[i].index;
+				vtx.bones[i] = weights[i].index;
 			}
 		}
 	}
