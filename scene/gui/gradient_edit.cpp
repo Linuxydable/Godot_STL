@@ -101,7 +101,7 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 
 	if (k.is_valid() && k->is_pressed() && k->get_scancode() == KEY_DELETE && grabbed != -1) {
 
-		std_h::erase(points, grabbed);
+		points.erase(points.begin() + grabbed);
 
 		grabbed = -1;
 		grabbing = false;
