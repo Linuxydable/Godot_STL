@@ -82,7 +82,7 @@ bool Polygon2D::_edit_use_rect() const {
 
 bool Polygon2D::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
 
-	Vector<Vector2> polygon2d = Variant(polygon);
+	std::vector<Vector2> polygon2d = Variant(polygon);
 	if (internal_vertices > 0) {
 		polygon2d.resize(polygon2d.size() - internal_vertices);
 	}
@@ -130,10 +130,10 @@ void Polygon2D::_notification(int p_what) {
 				current_skeleton_id = new_skeleton_id;
 			}
 
-			Vector<Vector2> points;
-			Vector<Vector2> uvs;
-			Vector<int> bones;
-			Vector<float> weights;
+			std::vector<Vector2> points;
+			std::vector<Vector2> uvs;
+			std::vector<int> bones;
+			std::vector<float> weights;
 
 			int len = polygon.size();
 			if ((invert || polygons.size() == 0) && internal_vertices > 0) {
@@ -150,7 +150,7 @@ void Polygon2D::_notification(int p_what) {
 
 				PoolVector<Vector2>::Read polyr = polygon.read();
 				for (int i = 0; i < len; i++) {
-					points.write[i] = polyr[i] + offset;
+					points[i] = polyr[i] + offset;
 				}
 			}
 
@@ -190,18 +190,18 @@ void Polygon2D::_notification(int p_what) {
 					SWAP(ep[1], ep[4]);
 					SWAP(ep[2], ep[3]);
 					SWAP(ep[5], ep[0]);
-					SWAP(ep[6], points.write[highest_idx]);
+					SWAP(ep[6], points[highest_idx]);
 				}
 
 				points.resize(points.size() + 7);
 				for (int i = points.size() - 1; i >= highest_idx + 7; i--) {
 
-					points.write[i] = points[i - 7];
+					points[i] = points[i - 7];
 				}
 
 				for (int i = 0; i < 7; i++) {
 
-					points.write[highest_idx + i + 1] = ep[i];
+					points[highest_idx + i + 1] = ep[i];
 				}
 
 				len = points.size();
@@ -220,12 +220,12 @@ void Polygon2D::_notification(int p_what) {
 					PoolVector<Vector2>::Read uvr = uv.read();
 
 					for (int i = 0; i < len; i++) {
-						uvs.write[i] = texmat.xform(uvr[i]) / tex_size;
+						uvs[i] = texmat.xform(uvr[i]) / tex_size;
 					}
 
 				} else {
 					for (int i = 0; i < len; i++) {
-						uvs.write[i] = texmat.xform(points[i]) / tex_size;
+						uvs[i] = texmat.xform(points[i]) / tex_size;
 					}
 				}
 			}
@@ -236,8 +236,8 @@ void Polygon2D::_notification(int p_what) {
 				bones.resize(vc * 4);
 				weights.resize(vc * 4);
 
-				int *bonesw = bones.ptrw();
-				float *weightsw = weights.ptrw();
+				int *bonesw = bones.data();
+				float *weightsw = weights.data();
 
 				for (int i = 0; i < vc * 4; i++) {
 					bonesw[i] = 0;
@@ -293,28 +293,28 @@ void Polygon2D::_notification(int p_what) {
 				}
 			}
 
-			Vector<Color> colors;
+			std::vector<Color> colors;
 			if (vertex_colors.size() == points.size()) {
 				colors.resize(len);
 				PoolVector<Color>::Read color_r = vertex_colors.read();
 				for (int i = 0; i < len; i++) {
-					colors.write[i] = color_r[i];
+					colors[i] = color_r[i];
 				}
 			} else {
 				colors.push_back(color);
 			}
 
-			//			Vector<int> indices = Geometry::triangulate_polygon(points);
+			//			std::vector<int> indices = Geometry::triangulate_polygon(points);
 			//			VS::get_singleton()->canvas_item_add_triangle_array(get_canvas_item(), indices, points, colors, uvs, texture.is_valid() ? texture->get_rid() : RID());
 
 			if (invert || polygons.size() == 0) {
-				Vector<int> indices = Geometry::triangulate_polygon(points);
+				std::vector<int> indices = Geometry::triangulate_polygon(points);
 				if (indices.size()) {
 					VS::get_singleton()->canvas_item_add_triangle_array(get_canvas_item(), indices, points, colors, uvs, bones, weights, texture.is_valid() ? texture->get_rid() : RID(), -1, RID(), antialiased);
 				}
 			} else {
 				//draw individual polygons
-				Vector<int> total_indices;
+				std::vector<int> total_indices;
 				for (int i = 0; i < polygons.size(); i++) {
 					PoolVector<int> src_indices = polygons[i];
 					int ic = src_indices.size();
@@ -322,21 +322,21 @@ void Polygon2D::_notification(int p_what) {
 						continue;
 					PoolVector<int>::Read r = src_indices.read();
 
-					Vector<Vector2> tmp_points;
+					std::vector<Vector2> tmp_points;
 					tmp_points.resize(ic);
 
 					for (int j = 0; j < ic; j++) {
 						int idx = r[j];
 						ERR_CONTINUE(idx < 0 || idx >= points.size());
-						tmp_points.write[j] = points[r[j]];
+						tmp_points[j] = points[r[j]];
 					}
-					Vector<int> indices = Geometry::triangulate_polygon(tmp_points);
+					std::vector<int> indices = Geometry::triangulate_polygon(tmp_points);
 					int ic2 = indices.size();
-					const int *r2 = indices.ptr();
+					const int *r2 = indices.data();
 
 					int bic = total_indices.size();
 					total_indices.resize(bic + ic2);
-					int *w2 = total_indices.ptrw();
+					int *w2 = total_indices.data();
 
 					for (int j = 0; j < ic2; j++) {
 						w2[j + bic] = r[r2[j]];
