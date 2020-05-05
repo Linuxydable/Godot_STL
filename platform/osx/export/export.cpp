@@ -53,8 +53,8 @@ class EditorExportPlatformOSX : public EditorExportPlatform {
 
 	Ref<ImageTexture> logo;
 
-	void _fix_plist(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &plist, const String &p_binary);
-	void _make_icon(const Ref<Image> &p_icon, Vector<uint8_t> &p_data);
+	void _fix_plist(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &plist, const String &p_binary);
+	void _make_icon(const Ref<Image> &p_icon, std::vector<uint8_t> &p_data);
 
 	Error _code_sign(const Ref<EditorExportPreset> &p_preset, const String &p_path);
 	Error _create_dmg(const String &p_dmg_path, const String &p_pkg_name, const String &p_app_path_name);
@@ -147,11 +147,11 @@ void EditorExportPlatformOSX::get_export_options(List<ExportOption> *r_options) 
 	r_options->push_back(ExportOption(PropertyInfo(Variant::BOOL, "texture_format/etc2"), false));
 }
 
-void _rgba8_to_packbits_encode(int p_ch, int p_size, PoolVector<uint8_t> &p_source, Vector<uint8_t> &p_dest) {
+void _rgba8_to_packbits_encode(int p_ch, int p_size, PoolVector<uint8_t> &p_source, std::vector<uint8_t> &p_dest) {
 
 	int src_len = p_size * p_size;
 
-	Vector<uint8_t> result;
+	std::vector<uint8_t> result;
 	result.resize(src_len * 1.25); //temp vector for rle encoded data, make it 25% larger for worst case scenario
 	int res_size = 0;
 
@@ -166,8 +166,8 @@ void _rgba8_to_packbits_encode(int p_ch, int p_size, PoolVector<uint8_t> &p_sour
 
 			if ((p_source.read()[(i + 1) * 4 + p_ch] == cur) && (p_source.read()[(i + 2) * 4 + p_ch] == cur)) {
 				if (buf_size > 0) {
-					result.write[res_size++] = (uint8_t)(buf_size - 1);
-					copymem(&result.write[res_size], &buf, buf_size);
+					result[res_size++] = (uint8_t)(buf_size - 1);
+					copymem(&result[res_size], &buf, buf_size);
 					res_size += buf_size;
 					buf_size = 0;
 				}
@@ -179,29 +179,29 @@ void _rgba8_to_packbits_encode(int p_ch, int p_size, PoolVector<uint8_t> &p_sour
 					if (p_source.read()[(i + j) * 4 + p_ch] != cur) {
 						hit_lim = false;
 						i = i + j - 1;
-						result.write[res_size++] = (uint8_t)(j - 3 + 0x80);
-						result.write[res_size++] = cur;
+						result[res_size++] = (uint8_t)(j - 3 + 0x80);
+						result[res_size++] = cur;
 						break;
 					}
 				}
 				if (hit_lim) {
-					result.write[res_size++] = (uint8_t)(lim - 3 + 0x80);
-					result.write[res_size++] = cur;
+					result[res_size++] = (uint8_t)(lim - 3 + 0x80);
+					result[res_size++] = cur;
 					i = i + lim;
 				}
 			} else {
 				buf[buf_size++] = cur;
 				if (buf_size == 128) {
-					result.write[res_size++] = (uint8_t)(buf_size - 1);
-					copymem(&result.write[res_size], &buf, buf_size);
+					result[res_size++] = (uint8_t)(buf_size - 1);
+					copymem(&result[res_size], &buf, buf_size);
 					res_size += buf_size;
 					buf_size = 0;
 				}
 			}
 		} else {
 			buf[buf_size++] = cur;
-			result.write[res_size++] = (uint8_t)(buf_size - 1);
-			copymem(&result.write[res_size], &buf, buf_size);
+			result[res_size++] = (uint8_t)(buf_size - 1);
+			copymem(&result[res_size], &buf, buf_size);
 			res_size += buf_size;
 			buf_size = 0;
 		}
@@ -211,20 +211,20 @@ void _rgba8_to_packbits_encode(int p_ch, int p_size, PoolVector<uint8_t> &p_sour
 
 	int ofs = p_dest.size();
 	p_dest.resize(p_dest.size() + res_size);
-	copymem(&p_dest.write[ofs], result.ptr(), res_size);
+	copymem(&p_dest[ofs], result.data(), res_size);
 }
 
-void EditorExportPlatformOSX::_make_icon(const Ref<Image> &p_icon, Vector<uint8_t> &p_data) {
+void EditorExportPlatformOSX::_make_icon(const Ref<Image> &p_icon, std::vector<uint8_t> &p_data) {
 
 	Ref<ImageTexture> it = memnew(ImageTexture);
 
-	Vector<uint8_t> data;
+	std::vector<uint8_t> data;
 
 	data.resize(8);
-	data.write[0] = 'i';
-	data.write[1] = 'c';
-	data.write[2] = 'n';
-	data.write[3] = 's';
+	data[0] = 'i';
+	data[1] = 'c';
+	data[2] = 'n';
+	data[3] = 's';
 
 	struct MacOSIconInfo {
 		const char *name;
@@ -267,12 +267,12 @@ void EditorExportPlatformOSX::_make_icon(const Ref<Image> &p_icon, Vector<uint8_
 			int ofs = data.size();
 			uint32_t len = f->get_len();
 			data.resize(data.size() + len + 8);
-			f->get_buffer(&data.write[ofs + 8], len);
+			f->get_buffer(&data[ofs + 8], len);
 			memdelete(f);
 			len += 8;
 			len = BSWAP32(len);
-			copymem(&data.write[ofs], icon_infos[i].name, 4);
-			encode_uint32(len, &data.write[ofs + 4]);
+			copymem(&data[ofs], icon_infos[i].name, 4);
+			encode_uint32(len, &data[ofs + 4]);
 
 			// Clean up generated file.
 			DirAccess::remove_file_or_error(path);
@@ -291,8 +291,8 @@ void EditorExportPlatformOSX::_make_icon(const Ref<Image> &p_icon, Vector<uint8_
 
 				int len = data.size() - ofs;
 				len = BSWAP32(len);
-				copymem(&data.write[ofs], icon_infos[i].name, 4);
-				encode_uint32(len, &data.write[ofs + 4]);
+				copymem(&data[ofs], icon_infos[i].name, 4);
+				encode_uint32(len, &data[ofs + 4]);
 			}
 
 			//encode 8bit mask uncompressed icon
@@ -302,29 +302,29 @@ void EditorExportPlatformOSX::_make_icon(const Ref<Image> &p_icon, Vector<uint8_
 				data.resize(data.size() + len + 8);
 
 				for (int j = 0; j < len; j++) {
-					data.write[ofs + 8 + j] = src_data.read()[j * 4 + 3];
+					data[ofs + 8 + j] = src_data.read()[j * 4 + 3];
 				}
 				len += 8;
 				len = BSWAP32(len);
-				copymem(&data.write[ofs], icon_infos[i].mask_name, 4);
-				encode_uint32(len, &data.write[ofs + 4]);
+				copymem(&data[ofs], icon_infos[i].mask_name, 4);
+				encode_uint32(len, &data[ofs + 4]);
 			}
 		}
 	}
 
 	uint32_t total_len = data.size();
 	total_len = BSWAP32(total_len);
-	encode_uint32(total_len, &data.write[4]);
+	encode_uint32(total_len, &data[4]);
 
 	p_data = data;
 }
 
-void EditorExportPlatformOSX::_fix_plist(const Ref<EditorExportPreset> &p_preset, Vector<uint8_t> &plist, const String &p_binary) {
+void EditorExportPlatformOSX::_fix_plist(const Ref<EditorExportPreset> &p_preset, std::vector<uint8_t> &plist, const String &p_binary) {
 
 	String str;
 	String strnew;
-	str.parse_utf8((const char *)plist.ptr(), plist.size());
-	Vector<String> lines = str.split("\n");
+	str.parse_utf8((const char *)plist.data(), plist.size());
+	std::vector<String> lines = str.split("\n");
 	for (int i = 0; i < lines.size(); i++) {
 		if (lines[i].find("$binary") != -1) {
 			strnew += lines[i].replace("$binary", p_binary) + "\n";
@@ -358,7 +358,7 @@ void EditorExportPlatformOSX::_fix_plist(const Ref<EditorExportPreset> &p_preset
 	CharString cs = strnew.utf8();
 	plist.resize(cs.size() - 1);
 	for (int i = 0; i < cs.size() - 1; i++) {
-		plist.write[i] = cs[i];
+		plist[i] = cs[i];
 	}
 }
 
@@ -559,12 +559,12 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 
 		String file = fname;
 
-		Vector<uint8_t> data;
+		std::vector<uint8_t> data;
 		data.resize(info.uncompressed_size);
 
 		//read
 		unzOpenCurrentFile(src_pkg_zip);
-		unzReadCurrentFile(src_pkg_zip, data.ptrw(), data.size());
+		unzReadCurrentFile(src_pkg_zip, data.data(), data.size());
 		unzCloseCurrentFile(src_pkg_zip);
 
 		//write
@@ -598,7 +598,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 					FileAccess *icon = FileAccess::open(iconpath, FileAccess::READ);
 					if (icon) {
 						data.resize(icon->get_len());
-						icon->get_buffer(&data.write[0], icon->get_len());
+						icon->get_buffer(&data[0], icon->get_len());
 						icon->close();
 						memdelete(icon);
 					}
@@ -643,7 +643,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 					// write the file, need to add chmod
 					FileAccess *f = FileAccess::open(file, FileAccess::WRITE);
 					if (f) {
-						f->store_buffer(data.ptr(), data.size());
+						f->store_buffer(data.data(), data.size());
 						f->close();
 						if (is_execute) {
 							// Chmod with 0755 if the file is executable
@@ -680,7 +680,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 						Z_DEFLATED,
 						Z_DEFAULT_COMPRESSION);
 
-				zipWriteInFileInZip(dst_pkg_zip, data.ptr(), data.size());
+				zipWriteInFileInZip(dst_pkg_zip, data.data(), data.size());
 				zipCloseFileInZip(dst_pkg_zip);
 			}
 		}
@@ -703,7 +703,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 
 		if (export_format == "dmg") {
 			String pack_path = tmp_app_path_name + "/Contents/Resources/" + pkg_name + ".pck";
-			Vector<SharedObject> shared_objects;
+			std::vector<SharedObject> shared_objects;
 			err = save_pack(p_preset, pack_path, &shared_objects);
 
 			// see if we can code sign our new package
@@ -748,7 +748,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 
 			String pack_path = EditorSettings::get_singleton()->get_cache_dir().plus_file(pkg_name + ".pck");
 
-			Vector<SharedObject> shared_objects;
+			std::vector<SharedObject> shared_objects;
 			err = save_pack(p_preset, pack_path, &shared_objects);
 
 			if (err == OK) {
@@ -786,7 +786,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 			if (err == OK) {
 				//add shared objects
 				for (int i = 0; i < shared_objects.size(); i++) {
-					Vector<uint8_t> file = FileAccess::get_file_as_array(shared_objects[i].path);
+					std::vector<uint8_t> file = FileAccess::get_file_as_array(shared_objects[i].path);
 					ERR_CONTINUE(file.empty());
 
 					zipOpenNewFileInZip(dst_pkg_zip,
@@ -800,7 +800,7 @@ Error EditorExportPlatformOSX::export_project(const Ref<EditorExportPreset> &p_p
 							Z_DEFLATED,
 							Z_DEFAULT_COMPRESSION);
 
-					zipWriteInFileInZip(dst_pkg_zip, file.ptr(), file.size());
+					zipWriteInFileInZip(dst_pkg_zip, file.data(), file.size());
 					zipCloseFileInZip(dst_pkg_zip);
 				}
 			}
