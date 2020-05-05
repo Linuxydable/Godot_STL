@@ -382,9 +382,9 @@ String ShaderCompilerGLES3::_dump_node_code(SL::Node *p_node, int p_level, Gener
 				if (SL::is_sampler_type(E->get().type)) {
 					r_gen_code.vertex_global += ucode;
 					r_gen_code.fragment_global += ucode;
-					r_gen_code.texture_uniforms.write[E->get().texture_order] = _mkid(E->key());
-					r_gen_code.texture_hints.write[E->get().texture_order] = E->get().hint;
-					r_gen_code.texture_types.write[E->get().texture_order] = E->get().type;
+					r_gen_code.texture_uniforms[E->get().texture_order] = _mkid(E->key());
+					r_gen_code.texture_hints[E->get().texture_order] = E->get().hint;
+					r_gen_code.texture_types[E->get().texture_order] = E->get().type;
 				} else {
 					if (!uses_uniforms) {
 
