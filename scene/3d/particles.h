@@ -69,7 +69,7 @@ private:
 
 	DrawOrder draw_order;
 
-	Vector<Ref<Mesh> > draw_passes;
+	std::vector<Ref<Mesh> > draw_passes;
 
 protected:
 	static void _bind_methods();
