@@ -206,9 +206,9 @@ private:
 	void _on_priority_changed(float val);
 	void _on_z_index_changed(float val);
 	void _on_grid_snap_toggled(bool p_val);
-	Vector<Vector2> _get_collision_shape_points(const Ref<Shape2D> &p_shape);
-	Vector<Vector2> _get_edited_shape_points();
-	void _set_edited_shape_points(const Vector<Vector2> &points);
+	std::vector<Vector2> _get_collision_shape_points(const Ref<Shape2D> &p_shape);
+	std::vector<Vector2> _get_edited_shape_points();
+	void _set_edited_shape_points(const std::vector<Vector2> &points);
 	void _update_tile_data();
 	void _update_toggle_shape_button();
 	void _select_next_tile();
@@ -233,7 +233,7 @@ private:
 	void _zoom_reset();
 
 	void draw_highlight_current_tile();
-	void draw_highlight_subtile(Vector2 coord, const Vector<Vector2> &other_highlighted = Vector<Vector2>());
+	void draw_highlight_subtile(Vector2 coord, const std::vector<Vector2> &other_highlighted = std::vector<Vector2>());
 	void draw_tile_subdivision(int p_id, Color p_color) const;
 	void draw_edited_region_subdivision() const;
 	void draw_grid_snap();

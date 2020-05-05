@@ -100,7 +100,7 @@ void TileSetEditor::_import_node(Node *p_node, Ref<TileSet> p_library) {
 			phys_offset += -s / 2;
 		}
 
-		Vector<TileSet::ShapeData> collisions;
+		std::vector<TileSet::ShapeData> collisions;
 		Ref<NavigationPolygon> nav_poly;
 		Ref<OccluderPolygon2D> occluder;
 		bool found_collisions = false;
@@ -205,7 +205,7 @@ bool TileSetEditor::can_drop_data_fw(const Point2 &p_point, const Variant &p_dat
 
 	if (String(d["type"]) == "files") {
 
-		Vector<String> files = d["files"];
+		std::vector<String> files = d["files"];
 
 		if (files.size() == 0)
 			return false;
@@ -1040,7 +1040,7 @@ void TileSetEditor::_on_workspace_draw() {
 			case EDITMODE_PRIORITY: {
 				spin_priority->set_value(tileset->autotile_get_subtile_priority(get_current_tile(), edited_shape_coord));
 				uint32_t mask = tileset->autotile_get_bitmask(get_current_tile(), edited_shape_coord);
-				Vector<Vector2> queue_others;
+				std::vector<Vector2> queue_others;
 				int total = 0;
 				for (Map<Vector2, uint32_t>::Element *E = tileset->autotile_get_bitmask_map(get_current_tile()).front(); E; E = E->next()) {
 					if (E->value() == mask) {
@@ -1598,7 +1598,7 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 									if (dragging_point >= 0) {
 										dragging_point = -1;
 
-										Vector<Vector2> points;
+										std::vector<Vector2> points;
 
 										for (int i = 0; i < current_shape.size(); i++) {
 											Vector2 p = current_shape[i];
@@ -1640,7 +1640,7 @@ void TileSetEditor::_on_workspace_input(const Ref<InputEvent> &p_ie) {
 										dragging_point = -1;
 
 										PoolVector<Vector2> polygon;
-										Vector<int> indices;
+										std::vector<int> indices;
 										polygon.resize(current_shape.size());
 										PoolVector<Vector2>::Write w = polygon.write();
 
@@ -1867,7 +1867,7 @@ void TileSetEditor::_on_tool_clicked(int p_tool) {
 				} break;
 				case EDITMODE_COLLISION: {
 					if (!edited_collision_shape.is_null()) {
-						// Necessary to get the version that returns a Array instead of a Vector.
+						// Necessary to get the version that returns a Array instead of a std::vector.
 						Array sd = tileset->call("tile_get_shapes", get_current_tile());
 						for (int i = 0; i < sd.size(); i++) {
 							if (sd[i].get("shape") == edited_collision_shape) {
@@ -1956,27 +1956,27 @@ void TileSetEditor::_on_grid_snap_toggled(bool p_val) {
 	workspace->update();
 }
 
-Vector<Vector2> TileSetEditor::_get_collision_shape_points(const Ref<Shape2D> &p_shape) {
+std::vector<Vector2> TileSetEditor::_get_collision_shape_points(const Ref<Shape2D> &p_shape) {
 	Ref<ConvexPolygonShape2D> convex = p_shape;
 	Ref<ConcavePolygonShape2D> concave = p_shape;
 	if (convex.is_valid()) {
 		return convex->get_points();
 	} else if (concave.is_valid()) {
-		Vector<Vector2> points;
+		std::vector<Vector2> points;
 		for (int i = 0; i < concave->get_segments().size(); i += 2) {
 			points.push_back(concave->get_segments()[i]);
 		}
 		return points;
 	} else {
-		return Vector<Vector2>();
+		return std::vector<Vector2>();
 	}
 }
 
-Vector<Vector2> TileSetEditor::_get_edited_shape_points() {
+std::vector<Vector2> TileSetEditor::_get_edited_shape_points() {
 	return _get_collision_shape_points(edited_collision_shape);
 }
 
-void TileSetEditor::_set_edited_shape_points(const Vector<Vector2> &points) {
+void TileSetEditor::_set_edited_shape_points(const std::vector<Vector2> &points) {
 	Ref<ConvexPolygonShape2D> convex = edited_collision_shape;
 	Ref<ConcavePolygonShape2D> concave = edited_collision_shape;
 	if (convex.is_valid()) {
@@ -2000,7 +2000,7 @@ void TileSetEditor::_update_tile_data() {
 	if (get_current_tile() < 0)
 		return;
 
-	Vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(get_current_tile());
+	std::vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(get_current_tile());
 	if (tileset->tile_get_tile_mode(get_current_tile()) == TileSet::SINGLE_TILE) {
 		SubtileData data;
 		for (int i = 0; i < sd.size(); i++) {
@@ -2364,7 +2364,7 @@ void TileSetEditor::_undo_tile_removal(int p_id) {
 	undo_redo->add_undo_method(tileset.ptr(), "tile_set_z_index", p_id, tileset->tile_get_z_index(p_id));
 	undo_redo->add_undo_method(tileset.ptr(), "tile_set_texture", p_id, tileset->tile_get_texture(p_id));
 	undo_redo->add_undo_method(tileset.ptr(), "tile_set_region", p_id, tileset->tile_get_region(p_id));
-	// Necessary to get the version that returns a Array instead of a Vector.
+	// Necessary to get the version that returns a Array instead of a std::vector.
 	undo_redo->add_undo_method(tileset.ptr(), "tile_set_shapes", p_id, tileset->call("tile_get_shapes", p_id));
 	if (tileset->tile_get_tile_mode(p_id) == TileSet::SINGLE_TILE) {
 		undo_redo->add_undo_method(tileset.ptr(), "tile_set_light_occluder", p_id, tileset->tile_get_light_occluder(p_id));
@@ -2447,7 +2447,7 @@ void TileSetEditor::draw_highlight_current_tile() {
 	}
 }
 
-void TileSetEditor::draw_highlight_subtile(Vector2 coord, const Vector<Vector2> &other_highlighted) {
+void TileSetEditor::draw_highlight_subtile(Vector2 coord, const std::vector<Vector2> &other_highlighted) {
 
 	Color shadow_color = Color(0.3, 0.3, 0.3, 0.3);
 	Vector2 size = tileset->autotile_get_size(get_current_tile());
@@ -2605,7 +2605,7 @@ void TileSetEditor::draw_polygon_shapes() {
 
 	switch (edit_mode) {
 		case EDITMODE_COLLISION: {
-			Vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(t_id);
+			std::vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(t_id);
 			for (int i = 0; i < sd.size(); i++) {
 				Vector2 coord = Vector2(0, 0);
 				Vector2 anchor = Vector2(0, 0);
@@ -2643,8 +2643,8 @@ void TileSetEditor::draw_polygon_shapes() {
 							c_border = Color(0.9, 0.45, 0.075);
 						}
 					}
-					Vector<Vector2> polygon;
-					Vector<Color> colors;
+					std::vector<Vector2> polygon;
+					std::vector<Color> colors;
 					if (!creating_shape && shape == edited_collision_shape && current_shape.size() > 2) {
 						for (int j = 0; j < current_shape.size(); j++) {
 							polygon.push_back(current_shape[j]);
@@ -2683,8 +2683,8 @@ void TileSetEditor::draw_polygon_shapes() {
 					Color c_bg = Color(0, 1, 1, 0.5);
 					Color c_border = Color(0, 1, 1);
 
-					Vector<Vector2> polygon;
-					Vector<Color> colors;
+					std::vector<Vector2> polygon;
+					std::vector<Color> colors;
 					Vector2 anchor = WORKSPACE_MARGIN;
 					anchor += tileset->tile_get_region(get_current_tile()).position;
 					if (!creating_shape && shape == edited_occlusion_shape && current_shape.size() > 2) {
@@ -2734,8 +2734,8 @@ void TileSetEditor::draw_polygon_shapes() {
 							c_bg = Color(0.9, 0.7, 0.07, 0.5);
 							c_border = Color(0.9, 0.7, 0.07, 1);
 						}
-						Vector<Vector2> polygon;
-						Vector<Color> colors;
+						std::vector<Vector2> polygon;
+						std::vector<Color> colors;
 						if (!creating_shape && shape == edited_occlusion_shape && current_shape.size() > 2) {
 							for (int j = 0; j < current_shape.size(); j++) {
 								polygon.push_back(current_shape[j]);
@@ -2772,8 +2772,8 @@ void TileSetEditor::draw_polygon_shapes() {
 					Color c_bg = Color(0, 1, 1, 0.5);
 					Color c_border = Color(0, 1, 1);
 
-					Vector<Vector2> polygon;
-					Vector<Color> colors;
+					std::vector<Vector2> polygon;
+					std::vector<Color> colors;
 					Vector2 anchor = WORKSPACE_MARGIN;
 					anchor += tileset->tile_get_region(get_current_tile()).position;
 					if (!creating_shape && shape == edited_navigation_shape && current_shape.size() > 2) {
@@ -2822,8 +2822,8 @@ void TileSetEditor::draw_polygon_shapes() {
 							c_bg = Color(0.9, 0.7, 0.07, 0.5);
 							c_border = Color(0.9, 0.7, 0.07, 1);
 						}
-						Vector<Vector2> polygon;
-						Vector<Color> colors;
+						std::vector<Vector2> polygon;
+						std::vector<Color> colors;
 						if (!creating_shape && shape == edited_navigation_shape && current_shape.size() > 2) {
 							for (int j = 0; j < current_shape.size(); j++) {
 								polygon.push_back(current_shape[j]);
@@ -2874,7 +2874,7 @@ void TileSetEditor::close_shape(const Vector2 &shape_anchor) {
 		if (current_shape.size() >= 3) {
 			Ref<ConvexPolygonShape2D> shape = memnew(ConvexPolygonShape2D);
 
-			Vector<Vector2> points;
+			std::vector<Vector2> points;
 			float p_total = 0;
 
 			for (int i = 0; i < current_shape.size(); i++) {
@@ -2887,12 +2887,12 @@ void TileSetEditor::close_shape(const Vector2 &shape_anchor) {
 			}
 
 			if (p_total < 0)
-				points.invert();
+				std::reverse(points.begin(), points.end());
 
 			shape->set_points(points);
 
 			undo_redo->create_action(TTR("Create Collision Polygon"));
-			// Necessary to get the version that returns a Array instead of a Vector.
+			// Necessary to get the version that returns a Array instead of a std::vector.
 			Array sd = tileset->call("tile_get_shapes", get_current_tile());
 			undo_redo->add_undo_method(tileset.ptr(), "tile_set_shapes", get_current_tile(), sd.duplicate());
 			for (int i = 0; i < sd.size(); i++) {
@@ -2944,7 +2944,7 @@ void TileSetEditor::close_shape(const Vector2 &shape_anchor) {
 		Ref<NavigationPolygon> shape = memnew(NavigationPolygon);
 
 		PoolVector<Vector2> polygon;
-		Vector<int> indices;
+		std::vector<int> indices;
 		polygon.resize(current_shape.size());
 		PoolVector<Vector2>::Write w = polygon.write();
 
@@ -3014,7 +3014,7 @@ void TileSetEditor::select_coord(const Vector2 &coord) {
 			}
 		}
 	} else {
-		Vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(get_current_tile());
+		std::vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(get_current_tile());
 		bool found_collision_shape = false;
 		for (int i = 0; i < sd.size(); i++) {
 			if (sd[i].autotile_coord == coord) {
@@ -3126,7 +3126,7 @@ void TileSetEditor::update_texture_list() {
 
 	List<int> ids;
 	tileset->get_tile_list(&ids);
-	Vector<int> ids_to_remove;
+	std::vector<int> ids_to_remove;
 	for (List<int>::Element *E = ids.front(); E; E = E->next()) {
 		// Clear tiles referencing gone textures (user has been already given the chance to fix broken deps)
 		if (!tileset->tile_get_texture(E->get()).is_valid()) {
@@ -3388,7 +3388,7 @@ bool TilesetEditorContext::_set(const StringName &p_name, const Variant &p_value
 		tileset->set_script(p_value);
 		return true;
 	} else if (name == "selected_collision_one_way") {
-		Vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
+		std::vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
 		for (int index = 0; index < sd.size(); index++) {
 			if (sd[index].shape == tileset_editor->edited_collision_shape) {
 				tileset->tile_set_shape_one_way(tileset_editor->get_current_tile(), index, p_value);
@@ -3397,7 +3397,7 @@ bool TilesetEditorContext::_set(const StringName &p_name, const Variant &p_value
 		}
 		return false;
 	} else if (name == "selected_collision_one_way_margin") {
-		Vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
+		std::vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
 		for (int index = 0; index < sd.size(); index++) {
 			if (sd[index].shape == tileset_editor->edited_collision_shape) {
 				tileset->tile_set_shape_one_way_margin(tileset_editor->get_current_tile(), index, p_value);
@@ -3448,7 +3448,7 @@ bool TilesetEditorContext::_get(const StringName &p_name, Variant &r_ret) const 
 		r_ret = tileset_editor->edited_collision_shape;
 		v = true;
 	} else if (name == "selected_collision_one_way") {
-		Vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
+		std::vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
 		for (int index = 0; index < sd.size(); index++) {
 			if (sd[index].shape == tileset_editor->edited_collision_shape) {
 				r_ret = sd[index].one_way_collision;
@@ -3457,7 +3457,7 @@ bool TilesetEditorContext::_get(const StringName &p_name, Variant &r_ret) const 
 			}
 		}
 	} else if (name == "selected_collision_one_way_margin") {
-		Vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
+		std::vector<TileSet::ShapeData> sd = tileset->tile_get_shapes(tileset_editor->get_current_tile());
 		for (int index = 0; index < sd.size(); index++) {
 			if (sd[index].shape == tileset_editor->edited_collision_shape) {
 				r_ret = sd[index].one_way_collision_margin;
