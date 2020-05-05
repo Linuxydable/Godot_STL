@@ -832,7 +832,7 @@ Variant Object::callv(const StringName &p_method, const Array &p_args) {
 	return ret;
 }
 
-Variant Object::call(const StringName &p_name, VARIANT_ARG_LIST) {
+Variant Object::call(const StringName &p_name, VARIANT_ARG_DECLARE) {
 
 	VARIANT_ARGPTRS;
 
@@ -849,7 +849,7 @@ Variant Object::call(const StringName &p_name, VARIANT_ARG_LIST) {
 	return ret;
 }
 
-void Object::call_multilevel(const StringName &p_name, VARIANT_ARG_LIST) {
+void Object::call_multilevel(const StringName &p_name, VARIANT_ARG_DECLARE) {
 
 	VARIANT_ARGPTRS;
 
