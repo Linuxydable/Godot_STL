@@ -497,7 +497,9 @@ void Polygon3DEditor::edit(Node *p_collision_polygon) {
 
 		node = Object::cast_to<Spatial>(p_collision_polygon);
 		//Enable the pencil tool if the polygon is empty
-		if (std::vector<Vector2>(node->call("get_polygon")).size() == 0) {
+		std::vector<Vector2> v = node->call("get_polygon");
+
+		if (v.size() == 0) {
 			_menu_option(MODE_CREATE);
 		}
 		wip.clear();
