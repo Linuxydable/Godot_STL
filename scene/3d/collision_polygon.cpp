@@ -44,7 +44,7 @@ void CollisionPolygon::_build_polygon() {
 	if (polygon.size() == 0)
 		return;
 
-	Vector<Vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(polygon);
+	std::vector<std::vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(polygon);
 	if (decomp.size() == 0)
 		return;
 
@@ -117,7 +117,7 @@ void CollisionPolygon::_notification(int p_what) {
 	}
 }
 
-void CollisionPolygon::set_polygon(const Vector<Point2> &p_polygon) {
+void CollisionPolygon::set_polygon(const std::vector<Point2> &p_polygon) {
 
 	polygon = p_polygon;
 	if (parent) {
@@ -127,7 +127,7 @@ void CollisionPolygon::set_polygon(const Vector<Point2> &p_polygon) {
 	update_gizmo();
 }
 
-Vector<Point2> CollisionPolygon::get_polygon() const {
+std::vector<Point2> CollisionPolygon::get_polygon() const {
 
 	return polygon;
 }
