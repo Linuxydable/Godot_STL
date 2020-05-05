@@ -537,7 +537,7 @@ PoolVector<float> Polygon2D::get_bone_weights(int p_index) const {
 void Polygon2D::erase_bone(int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, bone_weights.size());
-	bone_weights.remove(p_idx);
+	bone_weights.erase(bone_weights.begin() + p_idx);
 }
 
 void Polygon2D::clear_bones() {
@@ -546,12 +546,12 @@ void Polygon2D::clear_bones() {
 
 void Polygon2D::set_bone_weights(int p_index, const PoolVector<float> &p_weights) {
 	ERR_FAIL_INDEX(p_index, bone_weights.size());
-	bone_weights.write[p_index].weights = p_weights;
+	bone_weights[p_index].weights = p_weights;
 	update();
 }
 void Polygon2D::set_bone_path(int p_index, const NodePath &p_path) {
 	ERR_FAIL_INDEX(p_index, bone_weights.size());
-	bone_weights.write[p_index].path = p_path;
+	bone_weights[p_index].path = p_path;
 	update();
 }
 
