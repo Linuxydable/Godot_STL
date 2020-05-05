@@ -87,13 +87,13 @@ private:
 		bool call_deferred;
 		real_t elapsed;
 		ObjectID id;
-		Vector<StringName> key;
+		std::vector<StringName> key;
 		StringName concatenated_key;
 		Variant initial_val;
 		Variant delta_val;
 		Variant final_val;
 		ObjectID target_id;
-		Vector<StringName> target_key;
+		std::vector<StringName> target_key;
 		real_t duration;
 		TransitionType trans_type;
 		EaseType ease_type;

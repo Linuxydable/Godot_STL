@@ -711,7 +711,7 @@ void Tween::_tween_process(float p_delta) {
 		else if (prev_delaying) {
 			// We can apply the tween's value to the data and emit that the tween has started
 			_apply_tween_value(data, data.initial_val);
-			emit_signal("tween_started", object, NodePath(Vector<StringName>(), data.key, false));
+			emit_signal("tween_started", object, NodePath(std::vector<StringName>(), data.key, false));
 		}
 
 		// Are we at the end of the tween?
@@ -767,7 +767,7 @@ void Tween::_tween_process(float p_delta) {
 			_apply_tween_value(data, result);
 
 			// Emit that the tween has taken a step
-			emit_signal("tween_step", object, NodePath(Vector<StringName>(), data.key, false), data.elapsed, result);
+			emit_signal("tween_step", object, NodePath(std::vector<StringName>(), data.key, false), data.elapsed, result);
 		}
 
 		// Is the tween now finished?
@@ -778,7 +778,7 @@ void Tween::_tween_process(float p_delta) {
 
 			// Mark the tween as completed and emit the signal
 			data.elapsed = 0;
-			emit_signal("tween_completed", object, NodePath(Vector<StringName>(), data.key, false));
+			emit_signal("tween_completed", object, NodePath(std::vector<StringName>(), data.key, false));
 
 			// If we are not repeating the tween, remove it
 			if (!repeat)
