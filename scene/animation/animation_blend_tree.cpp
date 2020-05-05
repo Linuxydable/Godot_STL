@@ -922,7 +922,8 @@ void AnimationNodeBlendTree::get_child_nodes(List<ChildNode> *r_child_nodes) {
 		ns.push_back(E->key());
 	}
 
-	std::sort(ns.begin(), ns.end(), StringName::alphCompare);
+	// need_update : StringName::AlphCompare{} => StringName::AlphCompare, but for now it's used by List.find<>
+	std::sort(ns.begin(), ns.end(), StringName::AlphCompare{});
 
 	for (int i = 0; i < ns.size(); i++) {
 		ChildNode cn;
@@ -957,7 +958,7 @@ void AnimationNodeBlendTree::remove_node(const StringName &p_name) {
 	for (Map<StringName, Node>::Element *E = nodes.front(); E; E = E->next()) {
 		for (int i = 0; i < E->get().connections.size(); i++) {
 			if (E->get().connections[i] == p_name) {
-				E->get().connections.write[i] = StringName();
+				E->get().connections[i] = StringName();
 			}
 		}
 	}
@@ -983,7 +984,7 @@ void AnimationNodeBlendTree::rename_node(const StringName &p_name, const StringN
 
 		for (int i = 0; i < E->get().connections.size(); i++) {
 			if (E->get().connections[i] == p_name) {
-				E->get().connections.write[i] = p_new_name;
+				E->get().connections[i] = p_new_name;
 			}
 		}
 	}
@@ -1010,7 +1011,7 @@ void AnimationNodeBlendTree::connect_node(const StringName &p_input_node, int p_
 		}
 	}
 
-	nodes[p_input_node].connections.write[p_input_index] = p_output_node;
+	nodes[p_input_node].connections[p_input_index] = p_output_node;
 
 	emit_changed();
 }
@@ -1022,7 +1023,7 @@ void AnimationNodeBlendTree::disconnect_node(const StringName &p_node, int p_inp
 	Ref<AnimationNode> input = nodes[p_node].node;
 	ERR_FAIL_INDEX(p_input_index, nodes[p_node].connections.size());
 
-	nodes[p_node].connections.write[p_input_index] = StringName();
+	nodes[p_node].connections[p_input_index] = StringName();
 }
 
 AnimationNodeBlendTree::ConnectionError AnimationNodeBlendTree::can_connect_node(const StringName &p_input_node, int p_input_index, const StringName &p_output_node) const {
