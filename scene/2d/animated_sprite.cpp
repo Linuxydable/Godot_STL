@@ -33,6 +33,8 @@
 #include "core/os/os.h"
 #include "scene/scene_string_names.h"
 
+#include <helper/std_h.h>
+
 #define NORMAL_SUFFIX "_normal"
 
 #ifdef TOOLS_ENABLED
@@ -107,7 +109,7 @@ void SpriteFrames::add_frame(const StringName &p_anim, const Ref<Texture> &p_fra
 	ERR_FAIL_COND_MSG(!E, "Animation '" + String(p_anim) + "' doesn't exist.");
 
 	if (p_at_pos >= 0 && p_at_pos < E->get().frames.size())
-		E->get().frames.insert(p_at_pos, p_frame);
+		E->get().frames.insert(E->get().frames.begin() + p_at_pos, p_frame);
 	else
 		E->get().frames.push_back(p_frame);
 
@@ -126,7 +128,7 @@ void SpriteFrames::remove_frame(const StringName &p_anim, int p_idx) {
 	Map<StringName, Anim>::Element *E = animations.find(p_anim);
 	ERR_FAIL_COND_MSG(!E, "Animation '" + String(p_anim) + "' doesn't exist.");
 
-	E->get().frames.remove(p_idx);
+	E->get().frames.erase(E->get().frames.begin() + p_idx);
 	emit_changed();
 }
 void SpriteFrames::clear(const StringName &p_anim) {
@@ -235,7 +237,7 @@ void SpriteFrames::_set_frames(const Array &p_frames) {
 
 	E->get().frames.resize(p_frames.size());
 	for (int i = 0; i < E->get().frames.size(); i++)
-		E->get().frames.write[i] = p_frames[i];
+		E->get().frames[i] = p_frames[i];
 }
 Array SpriteFrames::_get_frames() const {
 
@@ -649,7 +651,7 @@ void AnimatedSprite::_reset_timeout() {
 void AnimatedSprite::set_animation(const StringName &p_animation) {
 
 	ERR_FAIL_COND_MSG(frames == NULL, vformat("There is no animation with name '%s'.", p_animation));
-	ERR_FAIL_COND_MSG(frames->get_animation_names().find(p_animation) == -1, vformat("There is no animation with name '%s'.", p_animation));
+	ERR_FAIL_COND_MSG(!std_h::isFind(frames->get_animation_names(), p_animation), vformat("There is no animation with name '%s'.", p_animation));
 
 	if (animation == p_animation)
 		return;
