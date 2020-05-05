@@ -812,8 +812,8 @@ int Animation::_insert_pos(float p_time, T& p_keys) {
 
 }
 */
-template <class T, class V>
-int Animation::_insert(float p_time, T &p_keys, const V &p_value) {
+template <class V>
+int Animation::_insert(float p_time, std::vector<V> &p_keys, const V &p_value) {
 
 	int idx = p_keys.size();
 
@@ -822,13 +822,13 @@ int Animation::_insert(float p_time, T &p_keys, const V &p_value) {
 		// Condition for replacement.
 		if (idx > 0 && Math::is_equal_approx(p_keys[idx - 1].time, p_time)) {
 
-			p_keys.write[idx - 1] = p_value;
+			p_keys[idx - 1] = p_value;
 			return idx - 1;
 
 			// Condition for insert.
 		} else if (idx == 0 || p_keys[idx - 1].time < p_time) {
 
-			p_keys.insert(idx, p_value);
+			p_keys.insert(p_keys.begin() + idx, p_value);
 			return idx;
 		}
 

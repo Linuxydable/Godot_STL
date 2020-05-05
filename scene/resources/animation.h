@@ -196,8 +196,8 @@ private:
 	template <class T>
 	void _clear(T &p_keys);
 
-	template <class T, class V>
-	int _insert(float p_time, T &p_keys, const V &p_value);
+	template <class V>
+	int _insert(float p_time, std::vector<V> &p_keys, const V &p_value);
 
 	template <class K>
 	inline int _find(const std::vector<K> &p_keys, float p_time) const;
