@@ -680,8 +680,8 @@ void GraphEdit::_draw_cos_line(CanvasItem *p_where, const Vector2 &p_from, const
 
 	int lines = 0;
 
-	Vector<Point2> points;
-	Vector<Color> colors;
+	std::vector<Point2> points;
+	std::vector<Color> colors;
 	points.push_back(p_from);
 	colors.push_back(p_color);
 	_bake_segment2d(points, colors, 0, 1, p_from, c1, p_to, c2, 0, 3, 9, 3, p_color, p_to_color, lines);
