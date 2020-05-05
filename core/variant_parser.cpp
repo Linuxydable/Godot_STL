@@ -444,46 +444,6 @@ Error VariantParser::_parse_enginecfg(Stream *p_stream, std::vector<String> &str
 	}
 }
 
-template <class T>
-Error VariantParser::_parse_construct(Stream *p_stream, std::vector<VariantParser::T> &r_construct, int &line, String &r_err_str) {
-
-	Token token;
-	get_token(p_stream, token, line, r_err_str);
-	if (token.type != TK_PARENTHESIS_OPEN) {
-		r_err_str = "Expected '(' in constructor";
-		return ERR_PARSE_ERROR;
-	}
-
-	bool first = true;
-	while (true) {
-
-		if (!first) {
-			get_token(p_stream, token, line, r_err_str);
-			if (token.type == TK_COMMA) {
-				//do none
-			} else if (token.type == TK_PARENTHESIS_CLOSE) {
-				break;
-			} else {
-				r_err_str = "Expected ',' or ')' in constructor";
-				return ERR_PARSE_ERROR;
-			}
-		}
-		get_token(p_stream, token, line, r_err_str);
-
-		if (first && token.type == TK_PARENTHESIS_CLOSE) {
-			break;
-		} else if (token.type != TK_NUMBER) {
-			r_err_str = "Expected float in constructor";
-			return ERR_PARSE_ERROR;
-		}
-
-		r_construct.push_back(token.value);
-		first = false;
-	}
-
-	return OK;
-}
-
 Error VariantParser::parse_value(Token &token, Variant &value, Stream *p_stream, int &line, String &r_err_str, ResourceParser *p_res_parser) {
 
 	/*	{

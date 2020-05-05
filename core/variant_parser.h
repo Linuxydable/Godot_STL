@@ -127,7 +127,44 @@ private:
 	static const char *tk_name[TK_MAX];
 
 	template <class T>
-	static Error _parse_construct(Stream *p_stream, std::vector<T> &r_construct, int &line, String &r_err_str);
+	static Error _parse_construct(Stream* p_stream, std::vector<T>& r_construct, int& line, String& r_err_str) {
+		Token token;
+		get_token(p_stream, token, line, r_err_str);
+		if (token.type != TK_PARENTHESIS_OPEN) {
+			r_err_str = "Expected '(' in constructor";
+			return ERR_PARSE_ERROR;
+		}
+
+		bool first = true;
+		while (true) {
+
+			if (!first) {
+				get_token(p_stream, token, line, r_err_str);
+				if (token.type == TK_COMMA) {
+					//do none
+				} else if (token.type == TK_PARENTHESIS_CLOSE) {
+					break;
+				} else {
+					r_err_str = "Expected ',' or ')' in constructor";
+					return ERR_PARSE_ERROR;
+				}
+			}
+			get_token(p_stream, token, line, r_err_str);
+
+			if (first && token.type == TK_PARENTHESIS_CLOSE) {
+				break;
+			} else if (token.type != TK_NUMBER) {
+				r_err_str = "Expected float in constructor";
+				return ERR_PARSE_ERROR;
+			}
+
+			r_construct.push_back(token.value);
+			first = false;
+		}
+
+		return OK;
+	}
+
 	static Error _parse_enginecfg(Stream *p_stream, std::vector<String> &strings, int &line, String &r_err_str);
 	static Error _parse_dictionary(Dictionary &object, Stream *p_stream, int &line, String &r_err_str, ResourceParser *p_res_parser = NULL);
 	static Error _parse_array(Array &array, Stream *p_stream, int &line, String &r_err_str, ResourceParser *p_res_parser = NULL);
