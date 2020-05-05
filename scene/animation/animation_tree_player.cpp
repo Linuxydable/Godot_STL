@@ -1157,7 +1157,7 @@ void AnimationTreePlayer::transition_node_set_input_auto_advance(const StringNam
 	GET_NODE(NODE_TRANSITION, TransitionNode);
 	ERR_FAIL_INDEX(p_input, n->input_data.size());
 
-	n->input_data.write[p_input].auto_advance = p_auto_advance;
+	n->input_data[p_input].auto_advance = p_auto_advance;
 }
 void AnimationTreePlayer::transition_node_set_xfade_time(const StringName &p_node, float p_time) {
 
@@ -1319,8 +1319,8 @@ void AnimationTreePlayer::transition_node_delete_input(const StringName &p_node,
 	if (n->inputs.size() <= 1)
 		return;
 
-	n->inputs.remove(p_input);
-	n->input_data.remove(p_input);
+	n->inputs.erase(n->inputs.begin() + p_input);
+	n->input_data.erase(n->input_data.begin() + p_input);
 	last_error = _cycle_test(out_name);
 }
 
@@ -1368,7 +1368,7 @@ void AnimationTreePlayer::remove_node(const StringName &p_node) {
 		for (int i = 0; i < nb->inputs.size(); i++) {
 
 			if (nb->inputs[i].node == p_node)
-				nb->inputs.write[i].node = StringName();
+				nb->inputs[i].node = StringName();
 		}
 	}
 
@@ -1429,11 +1429,11 @@ Error AnimationTreePlayer::connect_nodes(const StringName &p_src_node, const Str
 		for (int i = 0; i < nb->inputs.size(); i++) {
 
 			if (nb->inputs[i].node == p_src_node)
-				nb->inputs.write[i].node = StringName();
+				nb->inputs[i].node = StringName();
 		}
 	}
 
-	dst->inputs.write[p_dst_input].node = p_src_node;
+	dst->inputs[p_dst_input].node = p_src_node;
 
 	_clear_cycle_test();
 
@@ -1466,7 +1466,7 @@ void AnimationTreePlayer::disconnect_nodes(const StringName &p_node, int p_input
 
 	NodeBase *dst = node_map[p_node];
 	ERR_FAIL_INDEX(p_input, dst->inputs.size());
-	dst->inputs.write[p_input].node = StringName();
+	dst->inputs[p_input].node = StringName();
 	last_error = CONNECT_INCOMPLETE;
 	dirty_caches = true;
 }
@@ -1706,7 +1706,7 @@ Error AnimationTreePlayer::node_rename(const StringName &p_node, const StringNam
 		for (int i = 0; i < nb->inputs.size(); i++) {
 
 			if (nb->inputs[i].node == p_node) {
-				nb->inputs.write[i].node = p_new_name;
+				nb->inputs[i].node = p_new_name;
 			}
 		}
 	}
