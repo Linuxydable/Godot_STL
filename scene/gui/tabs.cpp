@@ -631,7 +631,7 @@ void Tabs::clear_tabs() {
 void Tabs::remove_tab(int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, tabs.size());
-	tabs.remove(p_idx);
+	tabs.erase(tabs.begin() + p_idx);
 	if (current >= p_idx)
 		current--;
 	_update_cache();
@@ -739,7 +739,7 @@ void Tabs::drop_data(const Point2 &p_point, const Variant &p_data) {
 				Tab moving_tab = from_tabs->tabs[tab_from_id];
 				if (hover_now < 0)
 					hover_now = get_tab_count();
-				tabs.insert(hover_now, moving_tab);
+				tabs.insert(tabs.begin() + hover_now, moving_tab);
 				from_tabs->remove_tab(tab_from_id);
 				set_current_tab(hover_now);
 				emit_signal("tab_changed", hover_now);
@@ -788,8 +788,8 @@ void Tabs::move_tab(int from, int to) {
 	ERR_FAIL_INDEX(to, tabs.size());
 
 	Tab tab_from = tabs[from];
-	tabs.remove(from);
-	tabs.insert(to, tab_from);
+	tabs.erase(tabs.begin() + from);
+	tabs.insert(tabs.begin() + to, tab_from);
 
 	_update_cache();
 	update();
