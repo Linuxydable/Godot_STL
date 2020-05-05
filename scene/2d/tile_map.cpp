@@ -552,7 +552,7 @@ void TileMap::update_dirty_quadrants() {
 				tex->draw_rect_region(canvas_item, rect, r, modulate, c.transpose, normal_map, clip_uv);
 			}
 
-			Vector<TileSet::ShapeData> shapes = tile_set->tile_get_shapes(c.id);
+			std::vector<TileSet::ShapeData> shapes = tile_set->tile_get_shapes(c.id);
 
 			for (int j = 0; j < shapes.size(); j++) {
 				Ref<Shape2D> shape = shapes[j].shape;
@@ -629,22 +629,22 @@ void TileMap::update_dirty_quadrants() {
 							int vsize = navigation_polygon_vertices.size();
 
 							if (vsize > 2) {
-								Vector<Color> colors;
-								Vector<Vector2> vertices;
+								std::vector<Color> colors;
+								std::vector<Vector2> vertices;
 								vertices.resize(vsize);
 								colors.resize(vsize);
 								{
 									PoolVector<Vector2>::Read vr = navigation_polygon_vertices.read();
 									for (int j = 0; j < vsize; j++) {
-										vertices.write[j] = vr[j];
-										colors.write[j] = debug_navigation_color;
+										vertices[j] = vr[j];
+										colors[j] = debug_navigation_color;
 									}
 								}
 
-								Vector<int> indices;
+								std::vector<int> indices;
 
 								for (int j = 0; j < navpoly->get_polygon_count(); j++) {
-									Vector<int> polygon = navpoly->get_polygon(j);
+									std::vector<int> polygon = navpoly->get_polygon(j);
 
 									for (int k = 2; k < polygon.size(); k++) {
 
