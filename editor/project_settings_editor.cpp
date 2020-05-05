@@ -1596,7 +1596,7 @@ void ProjectSettingsEditor::_update_translations() {
 					if (langnames.length() > 0)
 						langnames += ",";
 					langnames += names[i];
-					translation_locales_idxs_remap.write[l_idx] = i;
+					translation_locales_idxs_remap[l_idx] = i;
 					l_idx++;
 				}
 			}
@@ -1648,11 +1648,11 @@ void ProjectSettingsEditor::_update_translations() {
 					t2->set_text(1, langnames);
 					t2->set_editable(1, true);
 					t2->set_metadata(1, path);
-					int idx = langs.find(locale);
+					int idx = std_h::getIndex(langs, locale);
 					if (idx < 0)
 						idx = 0;
 
-					int f_idx = translation_locales_idxs_remap.find(idx);
+					int f_idx = std_h::getIndex(translation_locales_idxs_remap, idx);
 					if (f_idx != -1 && fl_idx_count > 0 && filter_mode == SHOW_ONLY_SELECTED_LOCALES) {
 
 						t2->set_range(1, f_idx);
