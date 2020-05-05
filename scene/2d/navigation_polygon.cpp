@@ -93,7 +93,7 @@ void NavigationPolygon::_set_polygons(const Array &p_array) {
 
 	polygons.resize(p_array.size());
 	for (int i = 0; i < p_array.size(); i++) {
-		polygons.write[i].indices = p_array[i];
+		polygons[i].indices = p_array[i];
 	}
 }
 
@@ -112,7 +112,7 @@ void NavigationPolygon::_set_outlines(const Array &p_array) {
 
 	outlines.resize(p_array.size());
 	for (int i = 0; i < p_array.size(); i++) {
-		outlines.write[i] = p_array[i];
+		outlines[i] = p_array[i];
 	}
 	rect_cache_dirty = true;
 }
@@ -137,7 +137,7 @@ void NavigationPolygon::add_polygon(const std::vector<int> &p_polygon) {
 
 void NavigationPolygon::add_outline_at_index(const PoolVector<Vector2> &p_outline, int p_index) {
 
-	outlines.insert(p_index, p_outline);
+	outlines.insert(outlines.begin() + p_index, p_outline);
 	rect_cache_dirty = true;
 }
 
@@ -168,14 +168,14 @@ int NavigationPolygon::get_outline_count() const {
 
 void NavigationPolygon::set_outline(int p_idx, const PoolVector<Vector2> &p_outline) {
 	ERR_FAIL_INDEX(p_idx, outlines.size());
-	outlines.write[p_idx] = p_outline;
+	outlines[p_idx] = p_outline;
 	rect_cache_dirty = true;
 }
 
 void NavigationPolygon::remove_outline(int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, outlines.size());
-	outlines.remove(p_idx);
+	outlines.erase(outlines.begin() + p_idx);
 	rect_cache_dirty = true;
 }
 
