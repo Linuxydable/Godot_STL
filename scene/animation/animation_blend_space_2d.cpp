@@ -69,7 +69,7 @@ void AnimationNodeBlendSpace2D::add_blend_point(const Ref<AnimationRootNode> &p_
 		for (int i = 0; i < triangles.size(); i++) {
 			for (int j = 0; j < 3; j++) {
 				if (triangles[i].points[j] >= p_at_index) {
-					triangles.write[i].points[j]++;
+					triangles[i].points[j]++;
 				}
 			}
 		}
@@ -123,11 +123,11 @@ void AnimationNodeBlendSpace2D::remove_blend_point(int p_point) {
 				erase = true;
 				break;
 			} else if (triangles[i].points[j] > p_point) {
-				triangles.write[i].points[j]--;
+				triangles[i].points[j]--;
 			}
 		}
 		if (erase) {
-			triangles.remove(i);
+			triangles.erase(triangles.begin() + i);
 
 			i--;
 		}
@@ -204,7 +204,7 @@ void AnimationNodeBlendSpace2D::add_triangle(int p_x, int p_y, int p_z, int p_at
 	if (p_at_index == -1 || p_at_index == triangles.size()) {
 		triangles.push_back(t);
 	} else {
-		triangles.insert(p_at_index, t);
+		triangles.insert(triangles.begin() + p_at_index, t);
 	}
 }
 int AnimationNodeBlendSpace2D::get_triangle_point(int p_triangle, int p_point) {
@@ -218,7 +218,7 @@ int AnimationNodeBlendSpace2D::get_triangle_point(int p_triangle, int p_point) {
 void AnimationNodeBlendSpace2D::remove_triangle(int p_triangle) {
 	ERR_FAIL_INDEX(p_triangle, triangles.size());
 
-	triangles.remove(p_triangle);
+	triangles.erase(triangles.begin() + p_triangle);
 }
 
 int AnimationNodeBlendSpace2D::get_triangle_count() const {
