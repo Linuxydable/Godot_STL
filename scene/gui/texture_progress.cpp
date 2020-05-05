@@ -30,6 +30,8 @@
 
 #include "texture_progress.h"
 
+#include "helper/std_h.h"
+
 #include "core/engine.h"
 
 void TextureProgress::set_under_texture(const Ref<Texture> &p_texture) {
@@ -371,18 +373,18 @@ void TextureProgress::_notification(int p_what) {
 									if (corners[i] > from && corners[i] < to)
 										pts.append(corners[i]);
 								pts.sort();
-								Vector<Point2> uvs;
-								Vector<Point2> points;
+								std::vector<Point2> uvs;
+								std::vector<Point2> points;
 								uvs.push_back(get_relative_center());
 								points.push_back(Point2(s.x * get_relative_center().x, s.y * get_relative_center().y));
 								for (int i = 0; i < pts.size(); i++) {
 									Point2 uv = unit_val_to_uv(pts[i]);
-									if (uvs.find(uv) >= 0)
+									if (std_h::isFind(uvs, uv))
 										continue;
 									uvs.push_back(uv);
 									points.push_back(Point2(uv.x * s.x, uv.y * s.y));
 								}
-								Vector<Color> colors;
+								std::vector<Color> colors;
 								colors.push_back(tint_progress);
 								draw_polygon(points, colors, uvs, progress);
 							}
