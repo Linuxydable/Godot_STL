@@ -50,7 +50,7 @@ void CollisionPolygon2D::_build_polygon() {
 
 		//here comes the sun, lalalala
 		//decompose concave into multiple convex polygons and add them
-		Vector<Vector<Vector2> > decomp = _decompose_in_convex();
+		std::vector<std::vector<Vector2> > decomp = _decompose_in_convex();
 		for (int i = 0; i < decomp.size(); i++) {
 			Ref<ConvexPolygonShape2D> convex = memnew(ConvexPolygonShape2D);
 			convex->set_points(decomp[i]);
@@ -77,8 +77,8 @@ void CollisionPolygon2D::_build_polygon() {
 	}
 }
 
-Vector<Vector<Vector2> > CollisionPolygon2D::_decompose_in_convex() {
-	Vector<Vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(polygon);
+std::vector<std::vector<Vector2> > CollisionPolygon2D::_decompose_in_convex() {
+	std::vector<std::vector<Vector2> > decomp = Geometry::decompose_polygon_in_convex(polygon);
 	return decomp;
 }
 
@@ -149,7 +149,7 @@ void CollisionPolygon2D::_notification(int p_what) {
 #define DEBUG_DECOMPOSE
 #if defined(TOOLS_ENABLED) && defined(DEBUG_DECOMPOSE)
 
-			Vector<Vector<Vector2> > decomp = _decompose_in_convex();
+			std::vector<std::vector<Vector2> > decomp = _decompose_in_convex();
 
 			Color c(0.4, 0.9, 0.1);
 			for (int i = 0; i < decomp.size(); i++) {
@@ -166,22 +166,22 @@ void CollisionPolygon2D::_notification(int p_what) {
 				dcol.a = 1.0;
 				Vector2 line_to(0, 20);
 				draw_line(Vector2(), line_to, dcol, 3);
-				Vector<Vector2> pts;
+				std::vector<Vector2> pts;
 				float tsize = 8;
 				pts.push_back(line_to + (Vector2(0, tsize)));
 				pts.push_back(line_to + (Vector2(Math_SQRT12 * tsize, 0)));
 				pts.push_back(line_to + (Vector2(-Math_SQRT12 * tsize, 0)));
-				Vector<Color> cols;
+				std::vector<Color> cols;
 				for (int i = 0; i < 3; i++)
 					cols.push_back(dcol);
 
-				draw_primitive(pts, cols, Vector<Vector2>()); //small arrow
+				draw_primitive(pts, cols, std::vector<Vector2>()); //small arrow
 			}
 		} break;
 	}
 }
 
-void CollisionPolygon2D::set_polygon(const Vector<Point2> &p_polygon) {
+void CollisionPolygon2D::set_polygon(const std::vector<Point2> &p_polygon) {
 
 	polygon = p_polygon;
 
@@ -208,7 +208,7 @@ void CollisionPolygon2D::set_polygon(const Vector<Point2> &p_polygon) {
 	update_configuration_warning();
 }
 
-Vector<Point2> CollisionPolygon2D::get_polygon() const {
+std::vector<Point2> CollisionPolygon2D::get_polygon() const {
 
 	return polygon;
 }
