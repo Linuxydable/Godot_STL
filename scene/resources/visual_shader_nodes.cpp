@@ -75,8 +75,8 @@ float VisualShaderNodeScalarConstant::get_constant() const {
 	return constant;
 }
 
-Vector<StringName> VisualShaderNodeScalarConstant::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeScalarConstant::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("constant");
 	return props;
 }
@@ -136,8 +136,8 @@ bool VisualShaderNodeBooleanConstant::get_constant() const {
 	return constant;
 }
 
-Vector<StringName> VisualShaderNodeBooleanConstant::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeBooleanConstant::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("constant");
 	return props;
 }
@@ -204,8 +204,8 @@ Color VisualShaderNodeColorConstant::get_constant() const {
 	return constant;
 }
 
-Vector<StringName> VisualShaderNodeColorConstant::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeColorConstant::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("constant");
 	return props;
 }
@@ -222,10 +222,10 @@ VisualShaderNodeColorConstant::VisualShaderNodeColorConstant() {
 	constant = Color(1, 1, 1, 1);
 }
 
-////////////// Vector
+////////////// std::vector
 
 String VisualShaderNodeVec3Constant::get_caption() const {
-	return "Vector";
+	return "std::vector";
 }
 
 int VisualShaderNodeVec3Constant::get_input_port_count() const {
@@ -267,8 +267,8 @@ Vector3 VisualShaderNodeVec3Constant::get_constant() const {
 	return constant;
 }
 
-Vector<StringName> VisualShaderNodeVec3Constant::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeVec3Constant::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("constant");
 	return props;
 }
@@ -337,8 +337,8 @@ Transform VisualShaderNodeTransformConstant::get_constant() const {
 	return constant;
 }
 
-Vector<StringName> VisualShaderNodeTransformConstant::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeTransformConstant::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("constant");
 	return props;
 }
@@ -421,11 +421,11 @@ static String make_unique_id(VisualShader::Type p_type, int p_id, const String &
 	return p_name + "_" + String(typepf[p_type]) + "_" + itos(p_id);
 }
 
-Vector<VisualShader::DefaultTextureParam> VisualShaderNodeTexture::get_default_texture_parameters(VisualShader::Type p_type, int p_id) const {
+std::vector<VisualShader::DefaultTextureParam> VisualShaderNodeTexture::get_default_texture_parameters(VisualShader::Type p_type, int p_id) const {
 	VisualShader::DefaultTextureParam dtp;
 	dtp.name = make_unique_id(p_type, p_id, "tex");
 	dtp.param = texture;
-	Vector<VisualShader::DefaultTextureParam> ret;
+	std::vector<VisualShader::DefaultTextureParam> ret;
 	ret.push_back(dtp);
 	return ret;
 }
@@ -669,8 +669,8 @@ VisualShaderNodeTexture::TextureType VisualShaderNodeTexture::get_texture_type()
 	return texture_type;
 }
 
-Vector<StringName> VisualShaderNodeTexture::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeTexture::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("source");
 	if (source == SOURCE_TEXTURE) {
 		props.push_back("texture");
@@ -794,11 +794,11 @@ String VisualShaderNodeCubeMap::get_output_port_name(int p_port) const {
 	return p_port == 0 ? "rgb" : "alpha";
 }
 
-Vector<VisualShader::DefaultTextureParam> VisualShaderNodeCubeMap::get_default_texture_parameters(VisualShader::Type p_type, int p_id) const {
+std::vector<VisualShader::DefaultTextureParam> VisualShaderNodeCubeMap::get_default_texture_parameters(VisualShader::Type p_type, int p_id) const {
 	VisualShader::DefaultTextureParam dtp;
 	dtp.name = make_unique_id(p_type, p_id, "cube");
 	dtp.param = cube_map;
-	Vector<VisualShader::DefaultTextureParam> ret;
+	std::vector<VisualShader::DefaultTextureParam> ret;
 	ret.push_back(dtp);
 	return ret;
 }
@@ -897,8 +897,8 @@ VisualShaderNodeCubeMap::TextureType VisualShaderNodeCubeMap::get_texture_type()
 	return texture_type;
 }
 
-Vector<StringName> VisualShaderNodeCubeMap::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeCubeMap::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("source");
 	if (source == SOURCE_TEXTURE) {
 		props.push_back("cube_map");
@@ -997,8 +997,8 @@ VisualShaderNodeScalarOp::Operator VisualShaderNodeScalarOp::get_operator() cons
 	return op;
 }
 
-Vector<StringName> VisualShaderNodeScalarOp::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeScalarOp::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("operator");
 	return props;
 }
@@ -1028,7 +1028,7 @@ VisualShaderNodeScalarOp::VisualShaderNodeScalarOp() {
 	set_input_port_default_value(1, 0.0);
 }
 
-////////////// Vector Op
+////////////// std::vector Op
 
 String VisualShaderNodeVectorOp::get_caption() const {
 	return "VectorOp";
@@ -1091,8 +1091,8 @@ VisualShaderNodeVectorOp::Operator VisualShaderNodeVectorOp::get_operator() cons
 	return op;
 }
 
-Vector<StringName> VisualShaderNodeVectorOp::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeVectorOp::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("operator");
 	return props;
 }
@@ -1275,8 +1275,8 @@ VisualShaderNodeColorOp::Operator VisualShaderNodeColorOp::get_operator() const 
 	return op;
 }
 
-Vector<StringName> VisualShaderNodeColorOp::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeColorOp::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("operator");
 	return props;
 }
@@ -1359,8 +1359,8 @@ VisualShaderNodeTransformMult::Operator VisualShaderNodeTransformMult::get_opera
 	return op;
 }
 
-Vector<StringName> VisualShaderNodeTransformMult::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeTransformMult::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("operator");
 	return props;
 }
@@ -1437,8 +1437,8 @@ VisualShaderNodeTransformVecMult::Operator VisualShaderNodeTransformVecMult::get
 	return op;
 }
 
-Vector<StringName> VisualShaderNodeTransformVecMult::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeTransformVecMult::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("operator");
 	return props;
 }
@@ -1543,8 +1543,8 @@ VisualShaderNodeScalarFunc::Function VisualShaderNodeScalarFunc::get_function() 
 	return func;
 }
 
-Vector<StringName> VisualShaderNodeScalarFunc::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeScalarFunc::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("function");
 	return props;
 }
@@ -1595,7 +1595,7 @@ VisualShaderNodeScalarFunc::VisualShaderNodeScalarFunc() {
 	set_input_port_default_value(0, 0.0);
 }
 
-////////////// Vector Func
+////////////// std::vector Func
 
 String VisualShaderNodeVectorFunc::get_caption() const {
 	return "VectorFunc";
@@ -1710,8 +1710,8 @@ VisualShaderNodeVectorFunc::Function VisualShaderNodeVectorFunc::get_function() 
 	return func;
 }
 
-Vector<StringName> VisualShaderNodeVectorFunc::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeVectorFunc::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("function");
 	return props;
 }
@@ -1834,8 +1834,8 @@ VisualShaderNodeColorFunc::Function VisualShaderNodeColorFunc::get_function() co
 	return func;
 }
 
-Vector<StringName> VisualShaderNodeColorFunc::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeColorFunc::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("function");
 	return props;
 }
@@ -1910,8 +1910,8 @@ VisualShaderNodeTransformFunc::Function VisualShaderNodeTransformFunc::get_funct
 	return func;
 }
 
-Vector<StringName> VisualShaderNodeTransformFunc::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeTransformFunc::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("function");
 	return props;
 }
@@ -1971,7 +1971,7 @@ VisualShaderNodeDotProduct::VisualShaderNodeDotProduct() {
 	set_input_port_default_value(1, Vector3());
 }
 
-////////////// Vector Len
+////////////// std::vector Len
 
 String VisualShaderNodeVectorLen::get_caption() const {
 	return "VectorLen";
@@ -2101,8 +2101,8 @@ VisualShaderNodeScalarDerivativeFunc::Function VisualShaderNodeScalarDerivativeF
 	return func;
 }
 
-Vector<StringName> VisualShaderNodeScalarDerivativeFunc::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeScalarDerivativeFunc::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("function");
 	return props;
 }
@@ -2124,7 +2124,7 @@ VisualShaderNodeScalarDerivativeFunc::VisualShaderNodeScalarDerivativeFunc() {
 	set_input_port_default_value(0, 0.0);
 }
 
-////////////// Vector Derivative Function
+////////////// std::vector Derivative Function
 
 String VisualShaderNodeVectorDerivativeFunc::get_caption() const {
 	return "VectorDerivativeFunc";
@@ -2178,8 +2178,8 @@ VisualShaderNodeVectorDerivativeFunc::Function VisualShaderNodeVectorDerivativeF
 	return func;
 }
 
-Vector<StringName> VisualShaderNodeVectorDerivativeFunc::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeVectorDerivativeFunc::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("function");
 	return props;
 }
@@ -2247,7 +2247,7 @@ VisualShaderNodeScalarClamp::VisualShaderNodeScalarClamp() {
 	set_input_port_default_value(2, 1.0);
 }
 
-////////////// Vector Clamp
+////////////// std::vector Clamp
 
 String VisualShaderNodeVectorClamp::get_caption() const {
 	return "VectorClamp";
@@ -2388,7 +2388,7 @@ VisualShaderNodeOuterProduct::VisualShaderNodeOuterProduct() {
 	set_input_port_default_value(1, Vector3(0.0, 0.0, 0.0));
 }
 
-////////////// Vector-Scalar Step
+////////////// std::vector-Scalar Step
 
 String VisualShaderNodeVectorScalarStep::get_caption() const {
 	return "VectorScalarStep";
@@ -2480,7 +2480,7 @@ VisualShaderNodeScalarSmoothStep::VisualShaderNodeScalarSmoothStep() {
 	set_input_port_default_value(2, 0.0);
 }
 
-////////////// Vector SmoothStep
+////////////// std::vector SmoothStep
 
 String VisualShaderNodeVectorSmoothStep::get_caption() const {
 	return "VectorSmoothStep";
@@ -2526,7 +2526,7 @@ VisualShaderNodeVectorSmoothStep::VisualShaderNodeVectorSmoothStep() {
 	set_input_port_default_value(2, Vector3(0.0, 0.0, 0.0));
 }
 
-////////////// Vector-Scalar SmoothStep
+////////////// std::vector-Scalar SmoothStep
 
 String VisualShaderNodeVectorScalarSmoothStep::get_caption() const {
 	return "VectorScalarSmoothStep";
@@ -2621,7 +2621,7 @@ VisualShaderNodeVectorDistance::VisualShaderNodeVectorDistance() {
 	set_input_port_default_value(1, Vector3(0.0, 0.0, 0.0));
 }
 
-////////////// Refract Vector
+////////////// Refract std::vector
 
 String VisualShaderNodeVectorRefract::get_caption() const {
 	return "Refract";
@@ -2719,7 +2719,7 @@ VisualShaderNodeScalarInterp::VisualShaderNodeScalarInterp() {
 	set_input_port_default_value(2, 0.5);
 }
 
-////////////// Vector Mix
+////////////// std::vector Mix
 
 String VisualShaderNodeVectorInterp::get_caption() const {
 	return "VectorMix";
@@ -2765,7 +2765,7 @@ VisualShaderNodeVectorInterp::VisualShaderNodeVectorInterp() {
 	set_input_port_default_value(2, Vector3(0.5, 0.5, 0.5));
 }
 
-////////////// Vector Mix (by scalar)
+////////////// std::vector Mix (by scalar)
 
 String VisualShaderNodeVectorScalarMix::get_caption() const {
 	return "VectorScalarMix";
@@ -2813,7 +2813,7 @@ VisualShaderNodeVectorScalarMix::VisualShaderNodeVectorScalarMix() {
 	set_input_port_default_value(2, 0.5);
 }
 
-////////////// Vector Compose
+////////////// std::vector Compose
 
 String VisualShaderNodeVectorCompose::get_caption() const {
 	return "VectorCompose";
@@ -2910,7 +2910,7 @@ VisualShaderNodeTransformCompose::VisualShaderNodeTransformCompose() {
 	set_input_port_default_value(3, Vector3());
 }
 
-////////////// Vector Decompose
+////////////// std::vector Decompose
 String VisualShaderNodeVectorDecompose::get_caption() const {
 	return "VectorDecompose";
 }
@@ -3134,7 +3134,7 @@ String VisualShaderNodeColorUniform::generate_code(Shader::Mode p_mode, VisualSh
 VisualShaderNodeColorUniform::VisualShaderNodeColorUniform() {
 }
 
-////////////// Vector Uniform
+////////////// std::vector Uniform
 
 String VisualShaderNodeVec3Uniform::get_caption() const {
 	return "VectorUniform";
@@ -3331,8 +3331,8 @@ VisualShaderNodeTextureUniform::ColorDefault VisualShaderNodeTextureUniform::get
 	return color_default;
 }
 
-Vector<StringName> VisualShaderNodeTextureUniform::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeTextureUniform::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("texture_type");
 	props.push_back("color_default");
 	return props;
@@ -3841,9 +3841,9 @@ VisualShaderNodeIs::Function VisualShaderNodeIs::get_function() const {
 	return func;
 }
 
-Vector<StringName> VisualShaderNodeIs::get_editable_properties() const {
+std::vector<StringName> VisualShaderNodeIs::get_editable_properties() const {
 
-	Vector<StringName> props;
+	std::vector<StringName> props;
 	props.push_back("function");
 	return props;
 }
@@ -4050,8 +4050,8 @@ VisualShaderNodeCompare::Condition VisualShaderNodeCompare::get_condition() cons
 	return condition;
 }
 
-Vector<StringName> VisualShaderNodeCompare::get_editable_properties() const {
-	Vector<StringName> props;
+std::vector<StringName> VisualShaderNodeCompare::get_editable_properties() const {
+	std::vector<StringName> props;
 	props.push_back("type");
 	props.push_back("function");
 	if (ctype == CTYPE_VECTOR)
@@ -4070,7 +4070,7 @@ void VisualShaderNodeCompare::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("set_condition", "condition"), &VisualShaderNodeCompare::set_condition);
 	ClassDB::bind_method(D_METHOD("get_condition"), &VisualShaderNodeCompare::get_condition);
 
-	ADD_PROPERTY(PropertyInfo(Variant::INT, "type", PROPERTY_HINT_ENUM, "Scalar,Vector,Boolean,Transform"), "set_comparison_type", "get_comparison_type");
+	ADD_PROPERTY(PropertyInfo(Variant::INT, "type", PROPERTY_HINT_ENUM, "Scalar,std::vector,Boolean,Transform"), "set_comparison_type", "get_comparison_type");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "function", PROPERTY_HINT_ENUM, "a == b,a != b,a > b,a >= b,a < b,a <= b"), "set_function", "get_function");
 	ADD_PROPERTY(PropertyInfo(Variant::INT, "condition", PROPERTY_HINT_ENUM, "All,Any"), "set_condition", "get_condition");
 

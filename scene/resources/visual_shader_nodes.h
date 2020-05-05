@@ -60,7 +60,7 @@ public:
 	void set_constant(float p_value);
 	float get_constant() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeScalarConstant();
 };
@@ -90,7 +90,7 @@ public:
 	void set_constant(bool p_value);
 	bool get_constant() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeBooleanConstant();
 };
@@ -120,7 +120,7 @@ public:
 	void set_constant(Color p_value);
 	Color get_constant() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeColorConstant();
 };
@@ -150,7 +150,7 @@ public:
 	void set_constant(Vector3 p_value);
 	Vector3 get_constant() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeVec3Constant();
 };
@@ -180,7 +180,7 @@ public:
 	void set_constant(Transform p_value);
 	Transform get_constant() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeTransformConstant();
 };
@@ -229,7 +229,7 @@ public:
 
 	virtual String get_input_port_default_hint(int p_port) const;
 
-	virtual Vector<VisualShader::DefaultTextureParam> get_default_texture_parameters(VisualShader::Type p_type, int p_id) const;
+	virtual std::vector<VisualShader::DefaultTextureParam> get_default_texture_parameters(VisualShader::Type p_type, int p_id) const;
 	virtual String generate_global(Shader::Mode p_mode, VisualShader::Type p_type, int p_id) const;
 	virtual String generate_code(Shader::Mode p_mode, VisualShader::Type p_type, int p_id, const String *p_input_vars, const String *p_output_vars, bool p_for_preview = false) const; //if no output is connected, the output var passed will be empty. if no input is connected and input is NIL, the input var passed will be empty
 
@@ -242,7 +242,7 @@ public:
 	void set_texture_type(TextureType p_type);
 	TextureType get_texture_type() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	virtual String get_warning(Shader::Mode p_mode, VisualShader::Type p_type) const;
 
@@ -289,7 +289,7 @@ public:
 	virtual PortType get_output_port_type(int p_port) const;
 	virtual String get_output_port_name(int p_port) const;
 
-	virtual Vector<VisualShader::DefaultTextureParam> get_default_texture_parameters(VisualShader::Type p_type, int p_id) const;
+	virtual std::vector<VisualShader::DefaultTextureParam> get_default_texture_parameters(VisualShader::Type p_type, int p_id) const;
 	virtual String generate_global(Shader::Mode p_mode, VisualShader::Type p_type, int p_id) const;
 	virtual String generate_code(Shader::Mode p_mode, VisualShader::Type p_type, int p_id, const String *p_input_vars, const String *p_output_vars, bool p_for_preview = false) const; //if no output is connected, the output var passed will be empty. if no input is connected and input is NIL, the input var passed will be empty
 
@@ -302,7 +302,7 @@ public:
 	void set_texture_type(TextureType p_type);
 	TextureType get_texture_type() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeCubeMap();
 };
@@ -352,7 +352,7 @@ public:
 	void set_operator(Operator p_op);
 	Operator get_operator() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeScalarOp();
 };
@@ -399,7 +399,7 @@ public:
 	void set_operator(Operator p_op);
 	Operator get_operator() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeVectorOp();
 };
@@ -445,7 +445,7 @@ public:
 	void set_operator(Operator p_op);
 	Operator get_operator() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeColorOp();
 };
@@ -488,7 +488,7 @@ public:
 	void set_operator(Operator p_op);
 	Operator get_operator() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeTransformMult();
 };
@@ -531,7 +531,7 @@ public:
 	void set_operator(Operator p_op);
 	Operator get_operator() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeTransformVecMult();
 };
@@ -602,7 +602,7 @@ public:
 	void set_function(Function p_func);
 	Function get_function() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeScalarFunc();
 };
@@ -676,7 +676,7 @@ public:
 	void set_function(Function p_func);
 	Function get_function() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeVectorFunc();
 };
@@ -717,7 +717,7 @@ public:
 	void set_function(Function p_func);
 	Function get_function() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeColorFunc();
 };
@@ -758,7 +758,7 @@ public:
 	void set_function(Function p_func);
 	Function get_function() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeTransformFunc();
 };
@@ -913,7 +913,7 @@ public:
 	void set_function(Function p_func);
 	Function get_function() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeScalarDerivativeFunc();
 };
@@ -953,7 +953,7 @@ public:
 	void set_function(Function p_func);
 	Function get_function() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeVectorDerivativeFunc();
 };
@@ -1445,7 +1445,7 @@ public:
 	virtual String generate_global(Shader::Mode p_mode, VisualShader::Type p_type, int p_id) const;
 	virtual String generate_code(Shader::Mode p_mode, VisualShader::Type p_type, int p_id, const String *p_input_vars, const String *p_output_vars, bool p_for_preview = false) const; //if no output is connected, the output var passed will be empty. if no input is connected and input is NIL, the input var passed will be empty
 
-	Vector<StringName> get_editable_properties() const;
+	std::vector<StringName> get_editable_properties() const;
 
 	void set_texture_type(TextureType p_type);
 	TextureType get_texture_type() const;
@@ -1620,7 +1620,7 @@ public:
 	void set_function(Function p_func);
 	Function get_function() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 
 	VisualShaderNodeIs();
 };
@@ -1686,7 +1686,7 @@ public:
 	void set_condition(Condition p_cond);
 	Condition get_condition() const;
 
-	virtual Vector<StringName> get_editable_properties() const;
+	virtual std::vector<StringName> get_editable_properties() const;
 	virtual String get_warning(Shader::Mode p_mode, VisualShader::Type p_type) const;
 
 	VisualShaderNodeCompare();
