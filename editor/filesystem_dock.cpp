@@ -1484,7 +1484,8 @@ std::vector<String> FileSystemDock::_tree_get_selected(bool remove_self_inclusio
 std::vector<String> FileSystemDock::_remove_self_included_paths(std::vector<String> selected_strings) {
 	// Remove paths or files that are included into another.
 	if (selected_strings.size() > 1) {
-		std::sort(selected_strings.begin(), selected_strings.end(), NaturalNoCaseComparator);
+		// need_update : NaturalNoCaseComparator{} => NaturalNoCaseComparator
+		std::sort(selected_strings.begin(), selected_strings.end(), NaturalNoCaseComparator{});
 
 		String last_path = "";
 		for (int i = 0; i < selected_strings.size(); i++) {
