@@ -2439,7 +2439,7 @@ void Node::_replace_connections_target(Node *p_new_target) {
 	}
 }
 
-std::vector<Variant> Node::make_binds(VARIANT_ARG_DECLARE) {
+std::vector<Variant> Node::make_binds(VARIANT_ARG_LIST) {
 
 	std::vector<Variant> ret;
 
