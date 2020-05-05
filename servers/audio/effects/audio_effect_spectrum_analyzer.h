@@ -48,8 +48,8 @@ private:
 	friend class AudioEffectSpectrumAnalyzer;
 	Ref<AudioEffectSpectrumAnalyzer> base;
 
-	Vector<Vector<AudioFrame> > fft_history;
-	Vector<float> temporal_fft;
+	std::vector<std::vector<AudioFrame> > fft_history;
+	std::vector<float> temporal_fft;
 	int temporal_fft_pos;
 	int fft_size;
 	int fft_count;
