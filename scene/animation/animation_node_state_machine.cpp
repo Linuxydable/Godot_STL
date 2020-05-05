@@ -168,7 +168,7 @@ StringName AnimationNodeStateMachinePlayback::get_current_node() const {
 StringName AnimationNodeStateMachinePlayback::get_blend_from_node() const {
 	return fading_from;
 }
-Vector<StringName> AnimationNodeStateMachinePlayback::get_travel_path() const {
+std::vector<StringName> AnimationNodeStateMachinePlayback::get_travel_path() const {
 	return path;
 }
 float AnimationNodeStateMachinePlayback::get_current_play_pos() const {
@@ -604,13 +604,13 @@ StringName AnimationNodeStateMachine::get_node_name(const Ref<AnimationNode> &p_
 }
 
 void AnimationNodeStateMachine::get_child_nodes(List<ChildNode> *r_child_nodes) {
-	Vector<StringName> nodes;
+	std::vector<StringName> nodes;
 
 	for (Map<StringName, State>::Element *E = states.front(); E; E = E->next()) {
 		nodes.push_back(E->key());
 	}
 
-	nodes.sort_custom<StringName::AlphCompare>();
+	std::sort(nodes.begin(), nodes.end(), StringName::alphCompare);
 
 	for (int i = 0; i < nodes.size(); i++) {
 		ChildNode cn;
