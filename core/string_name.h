@@ -153,7 +153,7 @@ public:
 					return is_str_less(l._data->name.ptr(), r._data->name.ptr());
 			}
 		}
-	} alphCompare;
+	};
 
 	void operator=(const StringName &p_name);
 	StringName(const char *p_name);
