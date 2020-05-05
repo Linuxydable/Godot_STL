@@ -392,7 +392,7 @@ void ScriptCreateDialog::_lang_changed(int l) {
 
 		template_menu->add_item(TTR("Default"));
 
-		ScriptTemplateInfo *templates = template_list.ptrw();
+		ScriptTemplateInfo *templates = template_list.data();
 
 		std::vector<String> origin_names;
 		origin_names.push_back(TTR("Project"));
