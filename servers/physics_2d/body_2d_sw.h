@@ -31,6 +31,8 @@
 #ifndef BODY_2D_SW_H
 #define BODY_2D_SW_H
 
+#include "helper/std_h.h"
+
 #include "area_2d_sw.h"
 #include "collision_object_2d_sw.h"
 #include "core/vset.h"
@@ -99,7 +101,7 @@ class Body2DSW : public CollisionObject2DSW {
 		}
 	};
 
-	Vector<AreaCMP> areas;
+	std::vector<AreaCMP> areas;
 
 	struct Contact {
 
@@ -114,7 +116,7 @@ class Body2DSW : public CollisionObject2DSW {
 		Vector2 collider_velocity_at_pos;
 	};
 
-	Vector<Contact> contacts; //no contacts by default
+	std::vector<Contact> contacts; //no contacts by default
 	int contact_count;
 
 	struct ForceIntegrationCallback {
@@ -138,20 +140,24 @@ public:
 	void set_force_integration_callback(ObjectID p_id, const StringName &p_method, const Variant &p_udata = Variant());
 
 	_FORCE_INLINE_ void add_area(Area2DSW *p_area) {
-		int index = areas.find(AreaCMP(p_area));
+		int index = std_h::getIndex(areas, AreaCMP(p_area));
 		if (index > -1) {
-			areas.write[index].refCount += 1;
+			areas[index].refCount += 1;
 		} else {
-			areas.ordered_insert(AreaCMP(p_area));
+			// need_update : maybe use set
+			//areas.ordered_insert(AreaCMP(p_area));
+			areas.push_back(AreaCMP(p_area));
 		}
+
+		std::sort(areas.begin(), areas.end());
 	}
 
 	_FORCE_INLINE_ void remove_area(Area2DSW *p_area) {
-		int index = areas.find(AreaCMP(p_area));
+		int index =	std_h::getIndex(areas, AreaCMP(p_area));
 		if (index > -1) {
-			areas.write[index].refCount -= 1;
+			areas[index].refCount -= 1;
 			if (areas[index].refCount < 1)
-				areas.remove(index);
+				areas.erase(areas.begin() + index);
 		}
 	}
 
@@ -304,7 +310,7 @@ void Body2DSW::add_contact(const Vector2 &p_local_pos, const Vector2 &p_local_no
 	if (c_max == 0)
 		return;
 
-	Contact *c = contacts.ptrw();
+	Contact *c = contacts.data();
 
 	int idx = -1;
 
