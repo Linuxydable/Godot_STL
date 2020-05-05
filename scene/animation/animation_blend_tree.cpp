@@ -41,7 +41,7 @@ StringName AnimationNodeAnimation::get_animation() const {
 	return animation;
 }
 
-Vector<String> (*AnimationNodeAnimation::get_editable_animation_list)() = NULL;
+std::vector<String> (*AnimationNodeAnimation::get_editable_animation_list)() = NULL;
 
 void AnimationNodeAnimation::get_parameter_list(List<PropertyInfo> *r_list) const {
 	r_list->push_back(PropertyInfo(Variant::REAL, time, PROPERTY_HINT_NONE, "", 0));
@@ -49,7 +49,7 @@ void AnimationNodeAnimation::get_parameter_list(List<PropertyInfo> *r_list) cons
 void AnimationNodeAnimation::_validate_property(PropertyInfo &property) const {
 
 	if (property.name == "animation" && get_editable_animation_list) {
-		Vector<String> names = get_editable_animation_list();
+		std::vector<String> names = get_editable_animation_list();
 		String anims;
 		for (int i = 0; i < names.size(); i++) {
 
@@ -916,13 +916,13 @@ Vector2 AnimationNodeBlendTree::get_node_position(const StringName &p_node) cons
 }
 
 void AnimationNodeBlendTree::get_child_nodes(List<ChildNode> *r_child_nodes) {
-	Vector<StringName> ns;
+	std::vector<StringName> ns;
 
 	for (Map<StringName, Node>::Element *E = nodes.front(); E; E = E->next()) {
 		ns.push_back(E->key());
 	}
 
-	ns.sort_custom<StringName::AlphCompare>();
+	std::sort(ns.begin(), ns.end(), StringName::alphCompare);
 
 	for (int i = 0; i < ns.size(); i++) {
 		ChildNode cn;
@@ -935,9 +935,9 @@ void AnimationNodeBlendTree::get_child_nodes(List<ChildNode> *r_child_nodes) {
 bool AnimationNodeBlendTree::has_node(const StringName &p_name) const {
 	return nodes.has(p_name);
 }
-Vector<StringName> AnimationNodeBlendTree::get_node_connection_array(const StringName &p_name) const {
+std::vector<StringName> AnimationNodeBlendTree::get_node_connection_array(const StringName &p_name) const {
 
-	ERR_FAIL_COND_V(!nodes.has(p_name), Vector<StringName>());
+	ERR_FAIL_COND_V(!nodes.has(p_name), std::vector<StringName>());
 	return nodes[p_name].connections;
 }
 void AnimationNodeBlendTree::remove_node(const StringName &p_name) {
