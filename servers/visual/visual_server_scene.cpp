@@ -626,7 +626,7 @@ void VisualServerScene::instance_set_blend_shape_weight(RID p_instance, int p_sh
 	}
 
 	ERR_FAIL_INDEX(p_shape, instance->blend_values.size());
-	instance->blend_values.write[p_shape] = p_weight;
+	instance->blend_values[p_shape] = p_weight;
 }
 
 void VisualServerScene::instance_set_surface_material(RID p_instance, int p_surface, RID p_material) {
@@ -644,7 +644,7 @@ void VisualServerScene::instance_set_surface_material(RID p_instance, int p_surf
 	if (instance->materials[p_surface].is_valid()) {
 		VSG::storage->material_remove_instance_owner(instance->materials[p_surface], instance);
 	}
-	instance->materials.write[p_surface] = p_material;
+	instance->materials[p_surface] = p_material;
 	instance->base_changed(false, true);
 
 	if (instance->materials[p_surface].is_valid()) {
@@ -1277,7 +1277,7 @@ void VisualServerScene::_update_instance_lightmap_captures(Instance *p_instance)
 	//print_line("update captures for pos: " + p_instance->transform.origin);
 
 	for (int i = 0; i < 12; i++)
-		new (&p_instance->lightmap_capture_data.ptrw()[i]) Color;
+		new (&p_instance->lightmap_capture_data[i]) Color;
 
 	//this could use some sort of blending..
 	for (List<Instance *>::Element *E = geom->lightmap_captures.front(); E; E = E->next()) {
@@ -1297,7 +1297,7 @@ void VisualServerScene::_update_instance_lightmap_captures(Instance *p_instance)
 
 			Vector3 dir = to_cell_xform.basis.xform(cone_traces[i]).normalized();
 			Color capture = _light_capture_voxel_cone_trace(octree_r.ptr(), pos, dir, cone_aperture, cell_subdiv);
-			p_instance->lightmap_capture_data.write[i] += capture;
+			p_instance->lightmap_capture_data[i] += capture;
 		}
 	}
 }
@@ -1977,7 +1977,7 @@ void VisualServerScene::_prepare_scene(const Transform p_cam_transform, const Ca
 
 					InstanceLightData *light = static_cast<InstanceLightData *>(E->get()->base_data);
 
-					ins->light_instances.write[l++] = light->instance;
+					ins->light_instances[l++] = light->instance;
 				}
 
 				geom->lighting_dirty = false;
@@ -1992,7 +1992,7 @@ void VisualServerScene::_prepare_scene(const Transform p_cam_transform, const Ca
 
 					InstanceReflectionProbeData *reflection_probe = static_cast<InstanceReflectionProbeData *>(E->get()->base_data);
 
-					ins->reflection_probe_instances.write[l++] = reflection_probe->instance;
+					ins->reflection_probe_instances[l++] = reflection_probe->instance;
 				}
 
 				geom->reflection_dirty = false;
@@ -2007,7 +2007,7 @@ void VisualServerScene::_prepare_scene(const Transform p_cam_transform, const Ca
 
 					InstanceGIProbeData *gi_probe = static_cast<InstanceGIProbeData *>(E->get()->base_data);
 
-					ins->gi_probe_instances.write[l++] = gi_probe->probe_instance;
+					ins->gi_probe_instances[l++] = gi_probe->probe_instance;
 				}
 
 				geom->gi_probes_dirty = false;
@@ -2362,7 +2362,7 @@ void VisualServerScene::_setup_gi_probe(Instance *p_instance) {
 
 	probe->dynamic.level_cell_lists.resize(header->cell_subdiv);
 
-	_gi_probe_fill_local_data(0, 0, 0, 0, 0, cells, header, ldw.ptr(), probe->dynamic.level_cell_lists.ptrw());
+	_gi_probe_fill_local_data(0, 0, 0, 0, 0, cells, header, ldw.ptr(), probe->dynamic.level_cell_lists.data());
 
 	bool compress = VSG::storage->gi_probe_is_compressed(p_instance->base);
 
@@ -2472,8 +2472,8 @@ void VisualServerScene::_setup_gi_probe(Instance *p_instance) {
 
 		for (int i = 0; i < mipmap_count; i++) {
 			//print_line("S3TC level: " + itos(i) + " blocks: " + itos(comp_blocks[i].size()));
-			probe->dynamic.mipmaps_s3tc.write[i].resize(comp_blocks[i].size());
-			PoolVector<InstanceGIProbeData::CompBlockS3TC>::Write w = probe->dynamic.mipmaps_s3tc.write[i].write();
+			probe->dynamic.mipmaps_s3tc[i].resize(comp_blocks[i].size());
+			PoolVector<InstanceGIProbeData::CompBlockS3TC>::Write w = probe->dynamic.mipmaps_s3tc[i].write();
 			int block_idx = 0;
 
 			for (Map<uint32_t, InstanceGIProbeData::CompBlockS3TC>::Element *E = comp_blocks[i].front(); E; E = E->next()) {
@@ -2889,7 +2889,7 @@ void VisualServerScene::_bake_gi_probe(Instance *p_gi_probe) {
 	const GIProbeDataCell *cells = (const GIProbeDataCell *)&r[16];
 
 	int leaf_count = probe_data->dynamic.level_cell_lists[header->cell_subdiv - 1].size();
-	const uint32_t *leaves = probe_data->dynamic.level_cell_lists[header->cell_subdiv - 1].ptr();
+	const uint32_t *leaves = probe_data->dynamic.level_cell_lists[header->cell_subdiv - 1].data();
 
 	PoolVector<InstanceGIProbeData::LocalData>::Write ldw = probe_data->dynamic.local_data.write();
 
@@ -2939,9 +2939,9 @@ void VisualServerScene::_bake_gi_probe(Instance *p_gi_probe) {
 
 			//print_line("generating mipmap stage: " + itos(stage));
 			int level_cell_count = probe_data->dynamic.level_cell_lists[i].size();
-			const uint32_t *level_cells = probe_data->dynamic.level_cell_lists[i].ptr();
+			const uint32_t *level_cells = probe_data->dynamic.level_cell_lists[i].data();
 
-			PoolVector<uint8_t>::Write lw = probe_data->dynamic.mipmaps_3d.write[stage].write();
+			PoolVector<uint8_t>::Write lw = probe_data->dynamic.mipmaps_3d[stage].write();
 			uint8_t *mipmapw = lw.ptr();
 
 			uint32_t sizes[3] = { header->width >> stage, header->height >> stage, header->depth >> stage };
@@ -2970,7 +2970,7 @@ void VisualServerScene::_bake_gi_probe(Instance *p_gi_probe) {
 
 		for (int mmi = 0; mmi < mipmap_count; mmi++) {
 
-			PoolVector<uint8_t>::Write mmw = probe_data->dynamic.mipmaps_3d.write[mmi].write();
+			PoolVector<uint8_t>::Write mmw = probe_data->dynamic.mipmaps_3d[mmi].write();
 			int block_count = probe_data->dynamic.mipmaps_s3tc[mmi].size();
 			PoolVector<InstanceGIProbeData::CompBlockS3TC>::Read mmr = probe_data->dynamic.mipmaps_s3tc[mmi].read();
 
@@ -3309,7 +3309,7 @@ void VisualServerScene::_update_dirty_instance(Instance *p_instance) {
 			if (new_blend_shape_count != p_instance->blend_values.size()) {
 				p_instance->blend_values.resize(new_blend_shape_count);
 				for (int i = 0; i < new_blend_shape_count; i++) {
-					p_instance->blend_values.write[i] = 0;
+					p_instance->blend_values[i] = 0;
 				}
 			}
 		}
