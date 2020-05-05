@@ -125,7 +125,7 @@ Error DynamicFontAtSize::_load() {
 		// cache font only once for each font->font_path
 		if (_fontdata.has(font->font_path)) {
 
-			font->set_font_ptr(_fontdata[font->font_path].ptr(), _fontdata[font->font_path].size());
+			font->set_font_ptr(_fontdata[font->font_path].data(), _fontdata[font->font_path].size());
 
 		} else {
 
@@ -932,8 +932,8 @@ Ref<DynamicFontData> DynamicFont::get_fallback(int p_idx) const {
 void DynamicFont::remove_fallback(int p_idx) {
 
 	ERR_FAIL_INDEX(p_idx, fallbacks.size());
-	fallbacks.remove(p_idx);
-	fallback_data_at_size.remove(p_idx);
+	fallbacks.erase(fallbacks.begin() + p_idx);
+	fallback_data_at_size.erase(fallback_data_at_size.begin() + p_idx);
 	emit_changed();
 	_change_notify();
 }
