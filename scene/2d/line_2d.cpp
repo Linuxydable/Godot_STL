@@ -278,13 +278,13 @@ void Line2D::_draw() {
 
 	// TODO Is this really needed?
 	// Copy points for faster access
-	Vector<Vector2> points;
+	std::vector<Vector2> points;
 	points.resize(_points.size());
 	int len = points.size();
 	{
 		PoolVector<Vector2>::Read points_read = _points.read();
 		for (int i = 0; i < len; ++i) {
-			points.write[i] = points_read[i];
+			points[i] = points_read[i];
 		}
 	}
 
@@ -316,7 +316,7 @@ void Line2D::_draw() {
 			lb.indices,
 			lb.vertices,
 			lb.colors,
-			lb.uvs, Vector<int>(), Vector<float>(),
+			lb.uvs, std::vector<int>(), std::vector<float>(),
 			texture_rid, -1, RID(),
 			_antialiased, true);
 
