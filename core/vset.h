@@ -31,6 +31,8 @@
 #ifndef VSET_H
 #define VSET_H
 
+#include "error_macros.h"
+
 #include "core/typedefs.h"
 
 #include <vector>
