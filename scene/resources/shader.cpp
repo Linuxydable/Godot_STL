@@ -134,7 +134,7 @@ void Shader::set_custom_defines(const String &p_defines) {
 }
 
 String Shader::get_custom_defines() {
-	Vector<String> custom_defines;
+	std::vector<String> custom_defines;
 	VS::get_singleton()->shader_get_custom_defines(shader, &custom_defines);
 
 	String concatenated_defines;
@@ -206,10 +206,10 @@ RES ResourceFormatLoaderShader::load(const String &p_path, const String &p_origi
 	Ref<Shader> shader;
 	shader.instance();
 
-	Vector<uint8_t> buffer = FileAccess::get_file_as_array(p_path);
+	std::vector<uint8_t> buffer = FileAccess::get_file_as_array(p_path);
 
 	String str;
-	str.parse_utf8((const char *)buffer.ptr(), buffer.size());
+	str.parse_utf8((const char *)buffer.data(), buffer.size());
 
 	shader->set_code(str);
 
