@@ -75,11 +75,11 @@ public:
 	}
 
 	void _send_response() {
-		Vector<String> psa = String((char *)req_buf).split("\r\n");
+		std::vector<String> psa = String((char *)req_buf).split("\r\n");
 		int len = psa.size();
 		ERR_FAIL_COND_MSG(len < 4, "Not enough response headers, got: " + itos(len) + ", expected >= 4.");
 
-		Vector<String> req = psa[0].split(" ", false);
+		std::vector<String> req = psa[0].split(" ", false);
 		ERR_FAIL_COND_MSG(req.size() < 2, "Invalid protocol or status code.");
 
 		// Wrong protocol
@@ -195,7 +195,7 @@ class EditorExportPlatformJavaScript : public EditorExportPlatform {
 	Ref<ImageTexture> stop_icon;
 	int menu_options;
 
-	void _fix_html(Vector<uint8_t> &p_html, const Ref<EditorExportPreset> &p_preset, const String &p_name, bool p_debug);
+	void _fix_html(std::vector<uint8_t> &p_html, const Ref<EditorExportPreset> &p_preset, const String &p_name, bool p_debug);
 
 private:
 	Ref<EditorHTTPServer> server;
@@ -239,11 +239,11 @@ public:
 	~EditorExportPlatformJavaScript();
 };
 
-void EditorExportPlatformJavaScript::_fix_html(Vector<uint8_t> &p_html, const Ref<EditorExportPreset> &p_preset, const String &p_name, bool p_debug) {
+void EditorExportPlatformJavaScript::_fix_html(std::vector<uint8_t> &p_html, const Ref<EditorExportPreset> &p_preset, const String &p_name, bool p_debug) {
 
-	String str_template = String::utf8(reinterpret_cast<const char *>(p_html.ptr()), p_html.size());
+	String str_template = String::utf8(reinterpret_cast<const char *>(p_html.data()), p_html.size());
 	String str_export;
-	Vector<String> lines = str_template.split("\n");
+	std::vector<String> lines = str_template.split("\n");
 
 	for (int i = 0; i < lines.size(); i++) {
 
@@ -258,7 +258,7 @@ void EditorExportPlatformJavaScript::_fix_html(Vector<uint8_t> &p_html, const Re
 	CharString cs = str_export.utf8();
 	p_html.resize(cs.length());
 	for (int i = 0; i < cs.length(); i++) {
-		p_html.write[i] = cs[i];
+		p_html[i] = cs[i];
 	}
 }
 
@@ -414,12 +414,12 @@ Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPrese
 
 		String file = fname;
 
-		Vector<uint8_t> data;
+		std::vector<uint8_t> data;
 		data.resize(info.uncompressed_size);
 
 		//read
 		unzOpenCurrentFile(pkg);
-		unzReadCurrentFile(pkg, data.ptrw(), data.size());
+		unzReadCurrentFile(pkg, data.data(), data.size());
 		unzCloseCurrentFile(pkg);
 
 		//write
@@ -447,7 +447,7 @@ Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPrese
 			unzClose(pkg);
 			return ERR_FILE_CANT_WRITE;
 		}
-		f->store_buffer(data.ptr(), data.size());
+		f->store_buffer(data.data(), data.size());
 		memdelete(f);
 
 	} while (unzGoToNextFile(pkg) == UNZ_OK);
@@ -460,9 +460,9 @@ Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPrese
 			EditorNode::get_singleton()->show_warning(TTR("Could not read custom HTML shell:") + "\n" + custom_html);
 			return ERR_FILE_CANT_READ;
 		}
-		Vector<uint8_t> buf;
+		std::vector<uint8_t> buf;
 		buf.resize(f->get_len());
-		f->get_buffer(buf.ptrw(), buf.size());
+		f->get_buffer(buf.data(), buf.size());
 		memdelete(f);
 		_fix_html(buf, p_preset, p_path.get_file().get_basename(), p_debug);
 
@@ -471,7 +471,7 @@ Error EditorExportPlatformJavaScript::export_project(const Ref<EditorExportPrese
 			EditorNode::get_singleton()->show_warning(TTR("Could not write file:") + "\n" + p_path);
 			return ERR_FILE_CANT_WRITE;
 		}
-		f->store_buffer(buf.ptr(), buf.size());
+		f->store_buffer(buf.data(), buf.size());
 		memdelete(f);
 	}
 
