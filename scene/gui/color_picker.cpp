@@ -414,18 +414,18 @@ void ColorPicker::_hsv_draw(int p_which, Control *c) {
 	if (!c)
 		return;
 	if (p_which == 0) {
-		Vector<Point2> points;
+		std::vector<Point2> points;
 		points.push_back(Vector2());
 		points.push_back(Vector2(c->get_size().x, 0));
 		points.push_back(c->get_size());
 		points.push_back(Vector2(0, c->get_size().y));
-		Vector<Color> colors;
+		std::vector<Color> colors;
 		colors.push_back(Color(1, 1, 1, 1));
 		colors.push_back(Color(1, 1, 1, 1));
 		colors.push_back(Color(0, 0, 0, 1));
 		colors.push_back(Color(0, 0, 0, 1));
 		c->draw_polygon(points, colors);
-		Vector<Color> colors2;
+		std::vector<Color> colors2;
 		Color col = color;
 		col.set_hsv(h, 1, 1);
 		col.a = 0;
