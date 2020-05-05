@@ -143,7 +143,7 @@ void AudioStreamPlayer3D::_mix_audio() {
 	}
 
 	//get data
-	AudioFrame *buffer = mix_buffer.ptrw();
+	AudioFrame *buffer = mix_buffer.data();
 	int buffer_size = mix_buffer.size();
 
 	if (stream_paused_fade_out) {
