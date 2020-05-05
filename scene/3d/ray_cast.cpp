@@ -369,7 +369,7 @@ void RayCast::_update_debug_shape() {
 	Array a;
 	a.resize(Mesh::ARRAY_MAX);
 
-	Vector<Vector3> verts;
+	std::vector<Vector3> verts;
 	verts.push_back(Vector3());
 	verts.push_back(cast_to);
 	a[Mesh::ARRAY_VERTEX] = verts;
