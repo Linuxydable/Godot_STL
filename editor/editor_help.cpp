@@ -741,7 +741,7 @@ void EditorHelp::_update_doc() {
 	if (cd.signals.size()) {
 
 		if (sort_methods) {
-			cd.signals.sort();
+			std::sort(cd.signals.begin(), cd.signals.end());
 		}
 
 		section_line.push_back(Pair<String, int>(TTR("Signals"), class_desc->get_line_count() - 2));
