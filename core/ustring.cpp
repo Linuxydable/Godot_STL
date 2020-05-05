@@ -837,7 +837,7 @@ std::vector<String> String::rsplit(const String &p_splitter, bool p_allow_empty,
 		remaining_len = left_edge;
 	}
 
-	ret.invert();
+	std::reverse(ret.begin(), ret.end());
 	return ret;
 }
 
@@ -3273,16 +3273,16 @@ String String::simplify_path() const {
 
 		String d = dirs[i];
 		if (d == ".") {
-			dirs.remove(i);
+			dirs.erase(dirs.begin() + i);
 			i--;
 		} else if (d == "..") {
 
 			if (i == 0) {
-				dirs.remove(i);
+				dirs.erase(dirs.begin() + i);
 				i--;
 			} else {
-				dirs.remove(i);
-				dirs.remove(i - 1);
+				dirs.erase(dirs.begin() + i);
+				dirs.erase(dirs.begin() + i - 1);
 				i -= 2;
 			}
 		}
