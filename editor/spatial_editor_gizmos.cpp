@@ -382,14 +382,14 @@ void EditorSpatialGizmo::add_handles(const std::vector<Vector3> &p_handles, cons
 		int chs = handles.size();
 		handles.resize(chs + p_handles.size());
 		for (int i = 0; i < p_handles.size(); i++) {
-			handles.write[i + chs] = p_handles[i];
+			handles[i + chs] = p_handles[i];
 		}
 	} else {
 
 		int chs = secondary_handles.size();
 		secondary_handles.resize(chs + p_handles.size());
 		for (int i = 0; i < p_handles.size(); i++) {
-			secondary_handles.write[i + chs] = p_handles[i];
+			secondary_handles[i + chs] = p_handles[i];
 		}
 	}
 }
@@ -448,7 +448,7 @@ bool EditorSpatialGizmo::intersect_frustum(const Camera *p_camera, const std::ve
 		int fc = p_frustum.size();
 
 		int vc = collision_segments.size();
-		const Vector3 *vptr = collision_segments.ptr();
+		const Vector3 *vptr = collision_segments.data();
 		Transform t = spatial_node->get_global_transform();
 
 		bool any_out = false;
@@ -608,7 +608,7 @@ bool EditorSpatialGizmo::intersect_ray(Camera *p_camera, const Point2 &p_point, 
 		Plane camp(p_camera->get_transform().origin, (-p_camera->get_transform().basis.get_axis(2)).normalized());
 
 		int vc = collision_segments.size();
-		const Vector3 *vptr = collision_segments.ptr();
+		const Vector3 *vptr = collision_segments.data();
 		Transform t = spatial_node->get_global_transform();
 		if (billboard_handle) {
 			t.set_look_at(t.origin, t.origin - p_camera->get_transform().basis.get_axis(2), p_camera->get_transform().basis.get_axis(1));
@@ -690,7 +690,7 @@ void EditorSpatialGizmo::create() {
 
 	for (int i = 0; i < instances.size(); i++) {
 
-		instances.write[i].create_instance(spatial_node, hidden);
+		instances[i].create_instance(spatial_node, hidden);
 	}
 
 	transform();
@@ -714,7 +714,7 @@ void EditorSpatialGizmo::free() {
 
 		if (instances[i].instance.is_valid())
 			VS::get_singleton()->free(instances[i].instance);
-		instances.write[i].instance = RID();
+		instances[i].instance = RID();
 	}
 
 	clear();
@@ -1476,7 +1476,7 @@ void CameraSpatialGizmoPlugin::redraw(EditorSpatialGizmo *p_gizmo) {
 
 		Transform local = camera->get_global_transform().affine_inverse();
 		for (int i = 0; i < lines.size(); i++) {
-			lines.write[i] = local.xform(lines[i]);
+			lines[i] = local.xform(lines[i]);
 		}
 
 		p_gizmo->add_lines(lines, material);
