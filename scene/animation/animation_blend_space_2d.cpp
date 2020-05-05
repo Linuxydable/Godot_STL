@@ -282,7 +282,7 @@ void AnimationNodeBlendSpace2D::_add_blend_point(int p_index, const Ref<Animatio
 	}
 }
 
-void AnimationNodeBlendSpace2D::_set_triangles(const Vector<int> &p_triangles) {
+void AnimationNodeBlendSpace2D::_set_triangles(const std::vector<int> &p_triangles) {
 
 	if (auto_triangles)
 		return;
@@ -292,17 +292,17 @@ void AnimationNodeBlendSpace2D::_set_triangles(const Vector<int> &p_triangles) {
 	}
 }
 
-Vector<int> AnimationNodeBlendSpace2D::_get_triangles() const {
+std::vector<int> AnimationNodeBlendSpace2D::_get_triangles() const {
 
-	Vector<int> t;
+	std::vector<int> t;
 	if (auto_triangles && trianges_dirty)
 		return t;
 
 	t.resize(triangles.size() * 3);
 	for (int i = 0; i < triangles.size(); i++) {
-		t.write[i * 3 + 0] = triangles[i].points[0];
-		t.write[i * 3 + 1] = triangles[i].points[1];
-		t.write[i * 3 + 2] = triangles[i].points[2];
+		t[i * 3 + 0] = triangles[i].points[0];
+		t[i * 3 + 1] = triangles[i].points[1];
+		t[i * 3 + 2] = triangles[i].points[2];
 	}
 	return t;
 }
@@ -328,13 +328,13 @@ void AnimationNodeBlendSpace2D::_update_triangles() {
 		return;
 	}
 
-	Vector<Vector2> points;
+	std::vector<Vector2> points;
 	points.resize(blend_points_used);
 	for (int i = 0; i < blend_points_used; i++) {
-		points.write[i] = blend_points[i].position;
+		points[i] = blend_points[i].position;
 	}
 
-	Vector<Delaunay2D::Triangle> triangles = Delaunay2D::triangulate(points);
+	std::vector<Delaunay2D::Triangle> triangles = Delaunay2D::triangulate(points);
 
 	for (int i = 0; i < triangles.size(); i++) {
 		add_triangle(triangles[i].points[0], triangles[i].points[1], triangles[i].points[2]);
