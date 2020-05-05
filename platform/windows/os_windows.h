@@ -218,7 +218,7 @@ class OS_Windows : public OS {
 
 	HCURSOR cursors[CURSOR_MAX] = { NULL };
 	CursorShape cursor_shape;
-	Map<CursorShape, Vector<Variant> > cursors_cache;
+	Map<CursorShape, std::vector<Variant> > cursors_cache;
 
 	InputDefault *input;
 	JoypadWindows *joypad;
