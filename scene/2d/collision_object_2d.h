@@ -51,7 +51,7 @@ class CollisionObject2D : public Node2D {
 			int index;
 		};
 
-		Vector<Shape> shapes;
+		std::vector<Shape> shapes;
 		bool disabled;
 		bool one_way_collision;
 		float one_way_collision_margin;
