@@ -41,8 +41,8 @@ class AudioEffectEQInstance : public AudioEffectInstance {
 	friend class AudioEffectEQ;
 	Ref<AudioEffectEQ> base;
 
-	Vector<EQ::BandProcess> bands[2];
-	Vector<float> gains;
+	std::vector<EQ::BandProcess> bands[2];
+	std::vector<float> gains;
 
 public:
 	virtual void process(const AudioFrame *p_src_frames, AudioFrame *p_dst_frames, int p_frame_count);
@@ -54,9 +54,9 @@ class AudioEffectEQ : public AudioEffect {
 	friend class AudioEffectEQInstance;
 
 	EQ eq;
-	Vector<float> gain;
+	std::vector<float> gain;
 	Map<StringName, int> prop_band_map;
-	Vector<String> band_names;
+	std::vector<String> band_names;
 
 protected:
 	bool _set(const StringName &p_name, const Variant &p_value);
