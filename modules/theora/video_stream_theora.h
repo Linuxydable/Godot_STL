@@ -110,7 +110,7 @@ class VideoStreamPlaybackTheora : public VideoStreamPlayback {
 	};
 
 	RingBuffer<uint8_t> ring_buffer;
-	Vector<uint8_t> read_buffer;
+	std::vector<uint8_t> read_buffer;
 	bool thread_eof;
 	Semaphore *thread_sem;
 	Thread *thread;
