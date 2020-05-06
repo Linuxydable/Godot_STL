@@ -30,8 +30,6 @@
 
 #include "image_loader.h"
 
-#include <algorithm>
-
 #include "helper/std_h.h"
 
 #include "core/print_string.h"
