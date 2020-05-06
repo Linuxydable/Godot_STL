@@ -466,16 +466,18 @@ Dictionary PolygonPathFinder::_get_data() const {
 	PoolVector<Vector2> p;
 	PoolVector<int> ind;
 	Array connections;
-	p.resize(MAX(0, points.size() - 2));
-	connections.resize(MAX(0, points.size() - 2));
+	int size = points.size() - 2;
+	int max = std::max(0, size);
+	p.resize(max);
+	connections.resize(max);
 	ind.resize(edges.size() * 2);
 	PoolVector<float> penalties;
-	penalties.resize(MAX(0, points.size() - 2));
+	penalties.resize(max);
 	{
 		PoolVector<Vector2>::Write wp = p.write();
 		PoolVector<float>::Write pw = penalties.write();
 
-		for (int i = 0; i < points.size() - 2; i++) {
+		for (int i = 0; i < size; i++) {
 			wp[i] = points[i].pos;
 			pw[i] = points[i].penalty;
 			PoolVector<int> c;
