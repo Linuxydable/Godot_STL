@@ -46,6 +46,8 @@
 #include <wchar.h>
 #include <cstdint>
 
+#include <algorithm>
+
 #ifndef NO_USE_STDLIB
 #include <stdio.h>
 #include <stdlib.h>
