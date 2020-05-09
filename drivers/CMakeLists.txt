@@ -1,4 +1,5 @@
 project(godotDriver)
 
-
-add_subdirectory(alsa)
+if(${target} STREQUAL "x11")
+    add_subdirectory(alsa)
+endif()
