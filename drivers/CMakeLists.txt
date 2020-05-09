@@ -17,6 +17,7 @@ endif()
 
 if(${target} STREQUAL "windows")
     add_subdirectory(wasapi)
+    add_subdirectory(windows)
 endif()
 
 if(${target} STREQUAL "server")
