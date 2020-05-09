@@ -15,6 +15,10 @@ if(${target} STREQUAL "iphone")
     add_subdirectory(coreaudio)
 endif()
 
+if(${target} STREQUAL "windows")
+    add_subdirectory(wasapi)
+endif()
+
 if(${target} STREQUAL "server")
     add_subdirectory(dummy)
 else()
