@@ -450,6 +450,13 @@ public:
 			bool uses_screen_texture;
 			bool uses_screen_uv;
 			bool uses_time;
+			bool uses_modulate;
+			bool reads_color;
+
+			// this flag is specifically for batching
+			// some of the logic is thus in rasterizer_storage.cpp
+			// we could alternatively set some bitflags here and test on the fly
+			bool prevent_color_baking;
 
 		} canvas_item;
 
@@ -1292,7 +1299,6 @@ public:
 
 		bool clear_request;
 		Color clear_request_color;
-		int canvas_draw_commands;
 		float time[4];
 		float delta;
 		uint64_t count;

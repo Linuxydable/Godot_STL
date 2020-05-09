@@ -417,6 +417,9 @@
 		<member name="display/mouse_cursor/tooltip_position_offset" type="Vector2" setter="" getter="" default="Vector2( 10, 10 )">
 			Position offset for tooltips, relative to the mouse cursor's hotspot.
 		</member>
+		<member name="display/window/disable_wintab_api" type="bool" setter="" getter="" default="false">
+			Disables WinTab API and always use Windows Ink API for the pen input (Windows only).
+		</member>
 		<member name="display/window/dpi/allow_hidpi" type="bool" setter="" getter="" default="false">
 			If [code]true[/code], allows HiDPI display on Windows and macOS. This setting has no effect on desktop Linux, as DPI-awareness fallbacks are not supported there.
 		</member>
@@ -477,6 +480,8 @@
 		</member>
 		<member name="gui/common/swap_ok_cancel" type="bool" setter="" getter="" default="false">
 			If [code]true[/code], swaps OK and Cancel buttons in dialogs on Windows and UWP to follow interface conventions.
+		</member>
+		<member name="gui/common/text_edit_undo_stack_max_size" type="int" setter="" getter="" default="1024">
 		</member>
 		<member name="gui/theme/custom" type="String" setter="" getter="" default="&quot;&quot;">
 			Path to a custom [Theme] resource file to use for the project ([code]theme[/code] or generic [code]tres[/code]/[code]res[/code] extension).
@@ -996,6 +1001,9 @@
 		<member name="rendering/gles2/debug/diagnose_frame" type="bool" setter="" getter="" default="false">
 			When batching is on, this regularly prints a frame diagnosis log. Note that this will degrade performance.
 		</member>
+		<member name="rendering/gles2/debug/disable_half_float" type="bool" setter="" getter="" default="false">
+			The use of half-float vertex compression may be producing rendering errors on some platforms (especially iOS). These have been seen particularly in particles. Disabling half-float may resolve these problems.
+		</member>
 		<member name="rendering/gles2/debug/flash_batching" type="bool" setter="" getter="" default="false">
 			[b]Experimental[/b] For regression testing against the old renderer. If this is switched on, and [code]use_batching[/code] is set, the renderer will swap alternately between using the old renderer, and the batched renderer, on each frame. This makes it easy to identify visual differences. Performance will be degraded.
 		</member>
@@ -1026,9 +1034,9 @@
 		<member name="rendering/limits/time/time_rollover_secs" type="float" setter="" getter="" default="3600">
 			Shaders have a time variable that constantly increases. At some point, it needs to be rolled back to zero to avoid precision errors on shader animations. This setting specifies when (in seconds).
 		</member>
-		<member name="rendering/quality/2d/gles2_use_nvidia_rect_flicker_workaround" type="bool" setter="" getter="" default="false">
+		<member name="rendering/quality/2d/use_nvidia_rect_flicker_workaround" type="bool" setter="" getter="" default="false">
 			Some NVIDIA GPU drivers have a bug which produces flickering issues for the [code]draw_rect[/code] method, especially as used in [TileMap]. Refer to [url=https://github.com/godotengine/godot/issues/9913]GitHub issue 9913[/url] for details.
-			If [code]true[/code], this option enables a "safe" code path for such NVIDIA GPUs at the cost of performance. This option only impacts the GLES2 rendering backend (so the bug stays if you use GLES3), and only desktop platforms.
+			If [code]true[/code], this option enables a "safe" code path for such NVIDIA GPUs at the cost of performance. This option affects GLES2 and GLES3 rendering, but only on desktop platforms.
 		</member>
 		<member name="rendering/quality/2d/use_pixel_snap" type="bool" setter="" getter="" default="false">
 			If [code]true[/code], forces snapping of polygons to pixels in 2D rendering. May help in some pixel art styles.

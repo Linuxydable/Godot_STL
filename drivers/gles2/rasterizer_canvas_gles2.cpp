@@ -60,6 +60,7 @@ RasterizerCanvasGLES2::BatchData::BatchData() {
 	settings_colored_vertex_format_threshold = 0.0f;
 	settings_batch_buffer_num_verts = 0;
 	scissor_threshold_area = 0.0f;
+	prevent_color_baking = false;
 	diagnose_frame = false;
 	next_diagnose_tick = 10000;
 	diagnose_frame_number = 9999999999; // some high number
@@ -745,7 +746,9 @@ void RasterizerCanvasGLES2::diagnose_batches(Item::Command *const *p_commands) {
 				bdata.frame_string += "R ";
 				bdata.frame_string += itos(batch.first_command) + "-";
 				bdata.frame_string += itos(batch.num_commands);
-				bdata.frame_string += " [" + itos(batch.batch_texture_id) + "]";
+
+				int tex_id = (int)bdata.batch_textures[batch.batch_texture_id].RID_texture.get_id();
+				bdata.frame_string += " [" + itos(batch.batch_texture_id) + " - " + itos(tex_id) + "]";
 
 				bdata.frame_string += " " + batch.color.to_string();
 
@@ -858,7 +861,6 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 								}
 #endif
 							}
-							storage->info.render._2d_draw_call_count++;
 						} break;
 
 						case Item::Command::TYPE_RECT: {
@@ -998,6 +1000,7 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 									state.canvas_shader.set_uniform(CanvasShaderGLES2::SRC_RECT, Color(0, 0, 1, 1));
 
 									glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+									storage->info.render._2d_draw_call_count++;
 								} else {
 
 									bool untile = false;
@@ -1040,6 +1043,7 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 									state.canvas_shader.set_uniform(CanvasShaderGLES2::SRC_RECT, Color(src_rect.position.x, src_rect.position.y, src_rect.size.x, src_rect.size.y));
 
 									glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
+									storage->info.render._2d_draw_call_count++;
 
 									if (untile) {
 										glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -1052,7 +1056,6 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 							}
 
 							state.canvas_shader.set_conditional(CanvasShaderGLES2::USE_FORCE_REPEAT, false);
-							storage->info.render._2d_draw_call_count++;
 
 						} break;
 
@@ -1260,7 +1263,6 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 							_bind_canvas_texture(RID(), RID());
 
 							_draw_polygon(indices, num_points * 3, num_points + 1, points, NULL, &circle->color, true);
-							storage->info.render._2d_draw_call_count++;
 						} break;
 
 						case Item::Command::TYPE_POLYGON: {
@@ -1293,7 +1295,6 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 								glDisable(GL_LINE_SMOOTH);
 							}
 #endif
-							storage->info.render._2d_draw_call_count++;
 						} break;
 						case Item::Command::TYPE_MESH: {
 
@@ -1533,7 +1534,6 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 									glDisable(GL_LINE_SMOOTH);
 #endif
 							}
-							storage->info.render._2d_draw_call_count++;
 						} break;
 
 						case Item::Command::TYPE_PRIMITIVE: {
@@ -1563,7 +1563,6 @@ void RasterizerCanvasGLES2::render_batches(Item::Command *const *p_commands, Ite
 							}
 
 							_draw_gui_primitive(primitive->points.size(), primitive->points.data(), primitive->colors.data(), primitive->uvs.data());
-							storage->info.render._2d_draw_call_count++;
 						} break;
 
 						case Item::Command::TYPE_TRANSFORM: {
@@ -1687,7 +1686,9 @@ void RasterizerCanvasGLES2::flush_render_batches(Item *p_first_item, Item *p_cur
 	bdata.use_colored_vertices = false;
 
 	// only check whether to convert if there are quads (prevent divide by zero)
-	if (bdata.total_quads) {
+	// and we haven't decided to prevent color baking (due to e.g. MODULATE
+	// being used in a shader)
+	if (bdata.total_quads && !bdata.prevent_color_baking) {
 		// minus 1 to prevent single primitives (ratio 1.0) always being converted to colored..
 		// in that case it is slightly cheaper to just have the color as part of the batch
 		float ratio = (float)(bdata.total_color_changes - 1) / (float)bdata.total_quads;
@@ -1748,7 +1749,7 @@ void RasterizerCanvasGLES2::sort_items() {
 		return;
 	}
 
-	for (int s = 0; s < bdata.sort_items.size() - 1; s++) {
+	for (int s = 0; s < bdata.sort_items.size() - 2; s++) {
 		if (sort_items_from(s)) {
 #ifdef DEBUG_ENABLED
 			bdata.stats_items_sorted++;
@@ -1786,8 +1787,11 @@ bool RasterizerCanvasGLES2::sort_items_from(int p_start) {
 		return false;
 	}
 
+	// local cached aabb
+	Rect2 second_AABB = second.item->global_rect_cache;
+
 	// if the start and 2nd items overlap, can do no more
-	if (start.item->global_rect_cache.intersects(second.item->global_rect_cache)) {
+	if (start.item->global_rect_cache.intersects(second_AABB)) {
 		return false;
 	}
 
@@ -1808,17 +1812,26 @@ bool RasterizerCanvasGLES2::sort_items_from(int p_start) {
 			return false;
 		}
 
+		Item *test_item = test_sort_item->item;
+
+		// if the test item overlaps the second item, we can't swap, AT ALL
+		// because swapping an item OVER this one would cause artefacts
+		if (second_AABB.intersects(test_item->global_rect_cache)) {
+			return false;
+		}
+
 		// do they match?
 		if (!_sort_items_match(start, *test_sort_item)) // order is crucial, start first
 		{
 			continue;
 		}
 
-		Item *test_item = test_sort_item->item;
-
 		// we can only swap if there are no AABB overlaps with sandwiched neighbours
 		bool ok = true;
-		for (int sn = 1; sn < test; sn++) {
+
+		// start from 2, no need to check 1 as the second has already been checked against this item
+		// in the intersection test above
+		for (int sn = 2; sn < test; sn++) {
 			BSortItem *sandwich_neighbour = &bdata.sort_items[p_start + sn];
 			if (test_item->global_rect_cache.intersects(sandwich_neighbour->item->global_rect_cache)) {
 				ok = false;
@@ -2251,6 +2264,16 @@ bool RasterizerCanvasGLES2::try_join_item(Item *p_ci, RenderItemState &r_ris, bo
 	int blend_mode = r_ris.shader_cache ? r_ris.shader_cache->canvas_item.blend_mode : RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX;
 	bool unshaded = r_ris.shader_cache && (r_ris.shader_cache->canvas_item.light_mode == RasterizerStorageGLES2::Shader::CanvasItem::LIGHT_MODE_UNSHADED || (blend_mode != RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX && blend_mode != RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_PMALPHA));
 	bool reclip = false;
+
+	// does the shader contain BUILTINs which should break the batching?
+	if (r_ris.shader_cache && !unshaded) {
+		if (r_ris.shader_cache->canvas_item.prevent_color_baking) {
+			// we will do this same test on the shader during the rendering pass in order to set a bool not to bake vertex colors
+			// instead of saving this info as it is cheap to calculate
+			join = false;
+			r_batch_break = true;
+		}
+	}
 
 	// we are precalculating the final_modulate ahead of time because we need this for baking of final modulate into vertex colors
 	// (only in software transform mode)
@@ -2973,6 +2996,14 @@ void RasterizerCanvasGLES2::render_joined_item(const BItemJoined &p_bij, RenderI
 	int blend_mode = r_ris.shader_cache ? r_ris.shader_cache->canvas_item.blend_mode : RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX;
 	bool unshaded = r_ris.shader_cache && (r_ris.shader_cache->canvas_item.light_mode == RasterizerStorageGLES2::Shader::CanvasItem::LIGHT_MODE_UNSHADED || (blend_mode != RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_MIX && blend_mode != RasterizerStorageGLES2::Shader::CanvasItem::BLEND_MODE_PMALPHA));
 	bool reclip = false;
+
+	// does the shader contain BUILTINs which break the batching and should prevent color baking?
+	bdata.prevent_color_baking = false;
+	if (r_ris.shader_cache && !unshaded) {
+		if (r_ris.shader_cache->canvas_item.prevent_color_baking) {
+			bdata.prevent_color_baking = true;
+		}
+	}
 
 	if (r_ris.last_blend_mode != blend_mode) {
 
