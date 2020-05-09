@@ -7,6 +7,7 @@ endif()
 
 if(${target} STREQUAL "osx")
     add_subdirectory(coreaudio)
+    add_subdirectory(coremidi)
 endif()
 
 if(${target} STREQUAL "iphone")
