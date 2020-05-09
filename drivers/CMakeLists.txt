@@ -20,3 +20,5 @@ else()
     add_subdirectory(gles2)
     add_subdirectory(gles3)
 endif()
+
+add_subdirectory(png)

@@ -7,5 +7,6 @@ add_subdirectory(minizip)
 add_subdirectory(zstd)
 add_subdirectory(mbedtls)
 add_subdirectory(glad)
+add_subdirectory(libpng)
 
 remove_definitions(-w)
