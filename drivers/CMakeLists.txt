@@ -13,3 +13,7 @@ endif()
 if(${target} STREQUAL "iphone")
     add_subdirectory(coreaudio)
 endif()
+
+if(${target} STREQUAL "server")
+    add_subdirectory(dummy)
+endif()
