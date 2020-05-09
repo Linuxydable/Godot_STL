@@ -23,3 +23,6 @@ else()
 endif()
 
 add_subdirectory(png)
+
+# TODO : add after define for platform
+# add_subdirectory(unix)
