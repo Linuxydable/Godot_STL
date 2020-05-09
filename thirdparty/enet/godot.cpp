@@ -307,7 +307,7 @@ public:
 					continue;
 				}
 
-				Vector<String> s = E->key().rsplit(":", false, 1);
+				std::vector<String> s = E->key().rsplit(":", false, 1);
 				ERR_CONTINUE(s.size() != 2); // BUG!
 
 				copymem(p_buffer, buffer, r_read);
