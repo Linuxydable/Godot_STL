@@ -16,4 +16,6 @@ endif()
 
 if(${target} STREQUAL "server")
     add_subdirectory(dummy)
+else()
+    add_subdirectory(gles2)
 endif()
