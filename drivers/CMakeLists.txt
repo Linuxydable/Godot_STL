@@ -19,6 +19,7 @@ if(${target} STREQUAL "windows")
     add_subdirectory(wasapi)
     add_subdirectory(windows)
     add_subdirectory(winmidi)
+    add_subdirectory(xaudio2)
 endif()
 
 if(${target} STREQUAL "server")
