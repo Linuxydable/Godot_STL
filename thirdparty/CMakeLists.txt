@@ -8,5 +8,6 @@ add_subdirectory(zstd)
 add_subdirectory(mbedtls)
 add_subdirectory(glad)
 add_subdirectory(libpng)
+add_subdirectory(freetype)
 
 remove_definitions(-w)
