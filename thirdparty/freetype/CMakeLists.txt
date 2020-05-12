@@ -44,6 +44,9 @@ set(c "src/autofit/autofit.c"
 "src/type42/type42.c"
 "src/winfonts/winfnt.c")
 
+file(GLOB sfnt "src/sfnt/*.c")
+list(APPEND c ${sfnt})
+
 if(target STREQUAL "javscript")
     list(APPEND c "src/sfnt/sfnt.c")
 endif()

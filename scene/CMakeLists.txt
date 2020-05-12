@@ -51,3 +51,9 @@ target_compile_options(${PROJECT_NAME} PRIVATE -DFREETYPE_ENABLED)
 
 # godotServers
 target_link_libraries(${PROJECT_NAME} PRIVATE godotServers)
+
+
+# TODO : remove depedence for Regex 
+# can be change with std regex
+# modules_regex
+target_link_libraries(${PROJECT_NAME} PRIVATE module_regex)
