@@ -34,9 +34,6 @@ if(Udev_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE ${UDEV_LIBRARIES})
 endif()
 
-# godotCore
-target_link_libraries(${PROJECT_NAME} PRIVATE godotCore)
-
 # godotMain
 target_link_libraries(${PROJECT_NAME} PRIVATE godotMain)
 
