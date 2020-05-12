@@ -9,5 +9,6 @@ add_subdirectory(mbedtls)
 add_subdirectory(glad)
 add_subdirectory(libpng)
 add_subdirectory(freetype)
+add_subdirectory(pcre2)
 
 remove_definitions(-w)
