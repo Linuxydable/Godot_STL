@@ -47,3 +47,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE "../platform/${target}")
 # TODO : remove 
 # why this existe : if not define cant be compile
 target_compile_options(${PROJECT_NAME} PRIVATE -DFREETYPE_ENABLED)
+
+
+# godotServers
+target_link_libraries(${PROJECT_NAME} PRIVATE godotServers)
