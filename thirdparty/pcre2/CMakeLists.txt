@@ -41,7 +41,7 @@ target_compile_definitions(${PROJECT_NAME}-16 PRIVATE -DPCRE2_STATIC -DHAVE_CONF
 target_compile_definitions(${PROJECT_NAME}-32 PRIVATE -DPCRE2_STATIC -DHAVE_CONFIG_H)
 
 target_compile_definitions(${PROJECT_NAME}-16 PRIVATE -DPCRE2_CODE_UNIT_WIDTH=16)
-target_compile_definitions(${PROJECT_NAME}-32 PRIVATE -DPCRE2_CODE_UNIT_WIDTH=8)
+target_compile_definitions(${PROJECT_NAME}-32 PRIVATE -DPCRE2_CODE_UNIT_WIDTH=32)
 
 if(builtin_pcre2_with_jit)
     target_compile_definitions(${PROJECT_NAME}-16 PRIVATE -DSUPPORT_JIT)
